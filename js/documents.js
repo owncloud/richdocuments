@@ -17,6 +17,7 @@ $.widget('oc.documentGrid', {
 		jQuery.when(this._load())
 			.then(function(){
 				that._render();
+				documentsMain.docsRendered = true;
 			});
 	},
 
@@ -186,6 +187,7 @@ var documentsMain = {
 	loadErrorHint : '',
 	toolbar : '<div id="ocToolbar"><div id="ocToolbarInside"></div><span id="toolbar" class="claro"></span></div>',
 	returnToDir : null, // directory where we started from in the 'Files' app
+	docsRendered: false,
 
 	UI : {
 		/* Editor wrapper HTML */
@@ -207,6 +209,13 @@ var documentsMain = {
 
 			if (documentsMain.loadError) {
 				documentsMain.onEditorShutdown(t('richdocuments', documentsMain.loadErrorMessage + '\n' + documentsMain.loadErrorHint));
+				return;
+			}
+
+			// wait for 3 secs if doc list not rendered
+			if (!documentsMain.docsRendered){
+				setTimeout(function(){ documentsMain.UI.showEditor(title); }, 3000);
+				console.log('Waiting for the document list to load...');
 				return;
 			}
 
