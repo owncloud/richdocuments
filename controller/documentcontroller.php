@@ -172,6 +172,8 @@ class DocumentController extends Controller {
 
 		$fileIds = array();
 		$documents = array();
+		// in practice, urlsrc is the same for all mimetypes
+		$urlsrc = $this->getWopiSrcUrl($discovery_parsed, 'application/vnd.oasis.opendocument.text', 'edit');
 		$lolang = strtolower(str_replace('_', '-', $this->settings->getUserValue($this->uid, 'core', 'lang', 'en')));
 		foreach ($rawDocuments as $key=>$document) {
 			if (is_object($document)){
@@ -181,7 +183,7 @@ class DocumentController extends Controller {
 			}
 			$documents[$key]['icon'] = preg_replace('/\.png$/', '.svg', \OCP\Template::mimetype_icon($document['mimetype']));
 			$documents[$key]['hasPreview'] = \OC::$server->getPreviewManager()->isMimeSupported($document['mimetype']);
-			$documents[$key]['urlsrc'] = $this->getWopiSrcUrl($discovery_parsed, $document['mimetype'], 'edit');
+			$documents[$key]['urlsrc'] = $urlsrc;
 			$documents[$key]['lolang'] = $lolang;
 			$fileIds[] = $document['fileid'];
 		}
