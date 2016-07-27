@@ -12,7 +12,7 @@
 	<category>office</category>
 	<category>integration</category>
 	<dependencies>
-		<owncloud min-version="8.2" max-version="9.0" />
+		<owncloud min-version="8.2" max-version="9.2" />
 	</dependencies>
 	<public>
 		<richdocuments>public.php</richdocuments>
