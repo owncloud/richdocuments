@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <info>
 	<id>richdocuments</id>
-	<name>Collabora Online</name>
+	<name>Office</name>
 	<description>Collabora Online allows you to to work with all kinds of office documents directly in your browser. This application requires Collabora Cloudsuite to be installed on one of your servers, please read the documentation to learn more about that.</description>
 	<summary>Edit office documents directly in your browser.</summary>
 	<licence>AGPL</licence>
