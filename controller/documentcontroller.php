@@ -557,6 +557,7 @@ class DocumentController extends Controller {
 			'BaseFileName' => $info['name'],
 			'Size' => $info['size'],
 			'Version' => $version,
+			'OwnerId' => $res['owner'],
 			'UserId' => $res['editor'],
 			'UserFriendlyName' => $editorName,
 			'UserCanWrite' => $res['canwrite'] ? true : false,
