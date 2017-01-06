@@ -36,6 +36,8 @@ class Storage {
 		'application/vnd.wordperfect',
 		'application/msonenote',
 		'application/msword',
+		'application/rtf',
+		'text/rtf',
 		'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 		'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
 		'application/vnd.ms-word.document.macroEnabled.12',
