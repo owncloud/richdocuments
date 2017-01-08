@@ -1,6 +1,7 @@
 { "translations": {
     "Office" : "Office",
     "Please contact the \"%s\" administrator." : "Por favor contacte al \"%s\" administrador.",
+    "Please ask your administrator to check the Collabora Online server setting. The exact error message was: " : "Por favor pide a tu administrador que revise la configuración del servidor Collabora Online. El mensaje de error exacto fue:",
     "Collabora Online: Malformed URL \"%s\"." : "Collabora Online: URL Malformada \"%s\".",
     "Collabora Online unknown error: " : "Collabora Online error desconocido: ",
     "Collabora Online: Invalid URL \"%s\"." : "Collabora Online: URL no válida \"%s\".",
