@@ -3,6 +3,9 @@ OC.L10N.register(
     {
     "Office" : "Γραφείο",
     "Please contact the \"%s\" administrator." : "Παρακαλώ επικοινωνήστε με τον διαχειριστή \"%s\".",
+    "Collabora Online unknown error: " : "Άγνωστο σφάλμα Collabora Online ",
+    "Collabora Online: Invalid URL \"%s\"." : "Collabora Online: Μη έγκυρο URL \"%s\".",
+    "Please ask your administrator to check the Collabora Online server setting." : "Παρακαλώ ζητήστε από το διαχειριστή να ελέγξει τις ρυθμίσεις διακομιστή Collabora Online",
     "New Document.odt" : "Νέο Έγγραφο.odt",
     "New Spreadsheet.ods" : "Νέο Λογιστικό Φύλλο.ods",
     "New Presentation.odp" : "Νέα Παρουσίιαση.odp",
