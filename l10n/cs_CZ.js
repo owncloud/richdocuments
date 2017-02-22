@@ -31,6 +31,8 @@ OC.L10N.register(
     "Failed to load the document, please contact your administrator." : "Chyba při načítání dokumentu, kontaktujte prosím svého administrátora.",
     "Failed to load documents." : "Nepodařilo se načíst dokumenty.",
     "No documents were found. Upload or create a document to get started!" : "Žádné dokumenty nebyly nalezeny. Začněte nahráním nebo vytvořením prvního dokumentu!",
+    "Download this revision" : "Stáhnout tuto revizi",
+    "Restore this revision" : "Obnovit tuto revizi",
     "Latest revision" : "Poslední revize",
     "More versions..." : "Více verzí...",
     "Just now" : "Právě teď",
