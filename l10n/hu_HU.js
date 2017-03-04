@@ -1,6 +1,7 @@
 OC.L10N.register(
     "richdocuments",
     {
+    "Office" : "Hivatal",
     "Please contact the \"%s\" administrator." : "Kérjük, lépjen kapcsolatba a „%s” rendszergazdával.",
     "Please ask your administrator to check the Collabora Online server setting. The exact error message was: " : "Kérje meg a rendszergazdát, hogy ellenőrizze a Collabora Online kiszolgáló beállítását. A pontos hibaüzenet a következő:",
     "Collabora Online: The protocol specified in \"%s\" is not allowed." : "Collabora Online: A „%s” URL-ben megadott protokoll nem engedélyezett.",
