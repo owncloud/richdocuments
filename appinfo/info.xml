@@ -5,12 +5,15 @@
 	<description>Collabora Online allows you to to work with all kinds of office documents directly in your browser. This application requires Collabora Cloudsuite to be installed on one of your servers, please read the documentation to learn more about that.</description>
 	<summary>Edit office documents directly in your browser.</summary>
 	<licence>AGPL</licence>
-	<version>1.1.17</version>
+	<version>1.1.18</version>
 	<author>Collabora Productivity based on work of Frank Karlitschek, Victor Dubiniuk</author>
 	<bugs>https://github.com/owncloud/richdocuments/issues</bugs>
 	<repository type="git">https://github.com/owncloud/richdocuments.git</repository>
 	<category>office</category>
 	<category>integration</category>
+	<types>
+		<prevent_group_restriction/>
+	</types>
 	<dependencies>
 		<owncloud min-version="8.2" max-version="9.2" />
 	</dependencies>
