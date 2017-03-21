@@ -506,7 +506,7 @@ class DocumentController extends Controller {
 
 		$row = new Db\Wopi();
 		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
-		$token = $row->generateFileToken($fileId, $version, $updatable, $serverHost);
+		$token = $row->generateFileToken($fileId, $version, (int)$updatable, $serverHost);
 
 		// Return the token.
 		return array(
