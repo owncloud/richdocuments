@@ -60,7 +60,7 @@ var odfViewer = {
 			OCA.Files.fileActions.register(
 					mimeReadWrite,
 					'Edit',
-					OC.PERMISSION_UPDATE,
+					OC.PERMISSION_UPDATE | OC.PERMISSION_READ,
 					OC.imagePath('core', 'actions/rename'),
 					odfViewer.onEdit,
 					t('richdocuments', 'Edit')
