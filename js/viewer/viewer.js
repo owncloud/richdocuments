@@ -1,10 +1,7 @@
 /* globals FileList, OCA.Files.fileActions, oc_debug */
 var odfViewer = {
 	isDocuments : false,
-	supportedMimesReadOnly: [
-	],
-
-	supportedMimesReadWrite: [
+	supportedMimes: [
 		'application/vnd.oasis.opendocument.text',
 		'application/vnd.oasis.opendocument.spreadsheet',
 		'application/vnd.oasis.opendocument.graphics',
@@ -41,36 +38,24 @@ var odfViewer = {
 
 	register : function(response){
 		var i,
-			mimeReadOnly,
-			mimeReadWrite;
+		    mime;
 
-		if (response && response.mimes){
-			jQuery.each(response.mimes, function(i, mime){
-				odfViewer.supportedMimesReadOnly.push(mime);
-				odfViewer.supportedMimesReadWrite.push(mime);
-			});
-		}
-		for (i = 0; i < odfViewer.supportedMimesReadOnly.length; ++i) {
-			mimeReadOnly = odfViewer.supportedMimesReadOnly[i];
-			OCA.Files.fileActions.register(mimeReadOnly, 'View', OC.PERMISSION_READ, '', odfViewer.onView);
-			OCA.Files.fileActions.setDefault(mimeReadOnly, 'View');
-		}
-		for (i = 0; i < odfViewer.supportedMimesReadWrite.length; ++i) {
-			mimeReadWrite = odfViewer.supportedMimesReadWrite[i];
+		for (i = 0; i < odfViewer.supportedMimes.length; ++i) {
+			mime = odfViewer.supportedMimes[i];
 			OCA.Files.fileActions.register(
-					mimeReadWrite,
+				    mime,
 					'Edit',
-					OC.PERMISSION_UPDATE,
+					OC.PERMISSION_UPDATE | OC.PERMISSION_READ,
 					OC.imagePath('core', 'actions/rename'),
 					odfViewer.onEdit,
 					t('richdocuments', 'Edit')
 			);
-			OCA.Files.fileActions.setDefault(mimeReadWrite, 'Edit');
+			OCA.Files.fileActions.setDefault(mime, 'Edit');
 		}
 	},
 
 	dispatch : function(filename){
-		if (odfViewer.supportedMimesReadWrite.indexOf(OCA.Files.fileActions.getCurrentMimeType()) !== -1
+		if (odfViewer.supportedMimes.indexOf(OCA.Files.fileActions.getCurrentMimeType()) !== -1
 			&& OCA.Files.fileActions.getCurrentPermissions() & OC.PERMISSION_UPDATE
 		){
 			odfViewer.onEdit(filename);
