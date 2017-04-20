@@ -640,7 +640,6 @@ var documentsMain = {
 			return documentsMain.view(response.id);
 		}
 
-		$('footer,nav').hide();
 		$(documentsMain.toolbar).appendTo('#header');
 
 		if (!response || !response.status || response.status==='error'){
