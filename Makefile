@@ -1,7 +1,7 @@
 VERSION=$(shell grep '<version>' appinfo/info.xml | sed -e 's/^.*<version>\(.*\)<\/version>.*$$/\1/')
 
 .PHONY: dist
-dist: owncloud-collabora-online.spec appinfo/info.xml
+dist: appinfo/info.xml
 	rm -rf owncloud-collabora-online-$(VERSION)
 	mkdir owncloud-collabora-online-$(VERSION)
 	tar cf - *.php \
@@ -34,6 +34,3 @@ app: appinfo/info.xml
                 | ( cd richdocuments && tar xf - )
 	zip -r richdocuments.zip richdocuments
 	rm -rf richdocuments
-
-owncloud-collabora-online.spec: owncloud-collabora-online.spec.in appinfo/info.xml
-	sed -e 's/@PACKAGE_VERSION@/$(VERSION)/g' <owncloud-collabora-online.spec.in >owncloud-collabora-online.spec
