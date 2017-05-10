@@ -601,7 +601,7 @@ class DocumentController extends Controller {
 		if ($version !== '0') {
 			\OCP\JSON::checkAppEnabled('files_versions');
 
-			$filename = '/files_versions/' . $info['name'] . '.v' . $version;
+			$filename = '/files_versions/' . $res['path'] . '.v' . $version;
 		} else {
 			$filename = '/files' . $res['path'];
 		}
