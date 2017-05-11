@@ -84,51 +84,6 @@ class DocumentController extends Controller {
 		return null;
 	}
 
-	/**
-	 * Log the user with given $userid.
-	 * This function should only be used from public controller methods where no
-	 * existing session exists, for example, when loolwsd is directly calling a
-	 * public method with its own access token. After validating the access
-	 * token, and retrieving the correct user with help of access token, it can
-	 * be set as current user with help of this method.
-	 *
-	 * @param string $userid
-	 */
-	private function loginUser($userid) {
-		\OC_Util::tearDownFS();
-
-		$users = \OC::$server->getUserManager()->search($userid, 1, 0);
-		if (count($users) > 0) {
-			$user = array_shift($users);
-			if (strcasecmp($user->getUID(), $userid) === 0) {
-				// clear the existing sessions, if any
-				\OC::$server->getSession()->close();
-
-				// initialize a dummy memory session
-				$session = new \OC\Session\Memory('');
-				// wrap it
-				$cryptoWrapper = \OC::$server->getSessionCryptoWrapper();
-				$session = $cryptoWrapper->wrapSession($session);
-				// set our session
-				\OC::$server->setSession($session);
-
-				\OC::$server->getUserSession()->setUser($user);
-			}
-		}
-
-		\OC_Util::setupFS();
-	}
-
-	/**
-	 * Log out the current user
-	 * This is helpful when we are artifically logged in as someone
-	 */
-	private function logoutUser() {
-		\OC_Util::tearDownFS();
-
-		\OC::$server->getSession()->close();
-	}
-
 	private function responseError($message, $hint = ''){
 		$errors = array('errors' => array(array('error' => $message, 'hint' => $hint)));
 		$response = new TemplateResponse('', 'error', $errors, 'error');
@@ -537,10 +492,10 @@ class DocumentController extends Controller {
 		}
 
 		// Login the user to see his mount locations
-		$this->loginUser($res['owner']);
+		Helper::loginUser($res['owner']);
 		$view = new \OC\Files\View('/' . $res['owner'] . '/files');
 		$info = $view->getFileInfo($res['path']);
-		$this->logoutUser();
+		Helper::logoutUser();
 
 		if (!$info) {
 			http_response_code(404);
@@ -586,29 +541,14 @@ class DocumentController extends Controller {
 		$res = $row->getPathForToken($fileId, $version, $token);
 		$ownerid = $res['owner'];
 
-		// Login the user to see his mount locations
-		$this->loginUser($ownerid);
-		$view = new \OC\Files\View('/' . $res['owner'] . '/files');
-		$info = $view->getFileInfo($res['path']);
-
-		if (!$info) {
-			http_response_code(404);
-			return false;
-		}
-
-		$filename = '';
+		$filepath = '/files' . $res['path'];
 		// If some previous version is requested, fetch it from Files_Version app
 		if ($version !== '0') {
 			\OCP\JSON::checkAppEnabled('files_versions');
-
-			$filename = '/files_versions/' . $res['path'] . '.v' . $version;
-		} else {
-			$filename = '/files' . $res['path'];
+			$filepath = '/files_versions/' . $res['path'] . '.v' . $version;
 		}
 
-		$this->logoutUser();
-
-		return new DownloadResponse($this->request, $ownerid, $filename);
+		return new DownloadResponse($this->request, $ownerid, $filepath);
 	}
 
 	/**
@@ -647,7 +587,7 @@ class DocumentController extends Controller {
 		// session before we can make the user who opened the document
 		// login. This is necessary to make activity app register the
 		// change made to this file under this user's (editorid) name.
-		$this->loginUser($editorid);
+		Helper::loginUser($editorid);
 
 		// Set up the filesystem view for the owner (where the file actually is).
 		$userid = $res['owner'];
@@ -664,7 +604,7 @@ class DocumentController extends Controller {
 
 		$view->file_put_contents($res['path'], $content);
 
-		$this->logoutUser();
+		Helper::logoutUser();
 
 		return array(
 			'status' => 'success'

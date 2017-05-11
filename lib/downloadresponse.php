@@ -11,6 +11,7 @@
 
 namespace OCA\Richdocuments;
 
+use \OCA\Richdocuments\Helper;
 use \OCP\AppFramework\Http;
 use \OCP\IRequest;
 use \OC\Files\View;
@@ -19,7 +20,7 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 	private $request;
 	private $view;
 	private $path;
-	
+
 	/**
 	 * @param IRequest $request
 	 * @param string $user
@@ -29,31 +30,35 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 		$this->request = $request;
 		$this->user = $user;
 		$this->path = $path;
-		
+
 		$this->view = new View('/' . $user);
 		if (!$this->view->file_exists($path)){
 			$this->setStatus(Http::STATUS_NOT_FOUND);
 		}
 	}
-	
+
 	public function render(){
 		if ($this->getStatus() === Http::STATUS_NOT_FOUND){
 			return '';
 		}
+
+		// We need to log the given user in to get the decrypted content, if any
+		Helper::loginUser($this->user);
+
 		$info = $this->view->getFileInfo($this->path);
 		$this->ETag = $info['etag'];
-		
 		$content = $this->view->file_get_contents($this->path);
 		$data = \OCA\Richdocuments\Filter::read($content, $info['mimetype']);
 		$size = strlen($data['content']);
-		
-		
+
+		Helper::logoutUser();
+
 		if (isset($this->request->server['HTTP_RANGE']) && !is_null($this->request->server['HTTP_RANGE'])){
 			$isValidRange = preg_match('/^bytes=\d*-\d*(,\d*-\d*)*$/', $this->request->server['HTTP_RANGE']);
 			if (!$isValidRange){
 				return $this->sendRangeNotSatisfiable($size);
 			}
-			
+
 			$ranges = explode(',', substr($this->request->server['HTTP_RANGE'], 6));
 			foreach ($ranges as $range){
 				$parts = explode('-', $range);
@@ -76,7 +81,7 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 				$buffer = substr($data['content'], $start,  $end - $start);
 				$md5Sum = md5($buffer);
 
-				// send the headers and data 
+				// send the headers and data
 				$this->addHeader('Content-Length',  $end - $start);
 				$this->addHeader('Content-md5', $md5Sum);
 				$this->addHeader('Accept-Ranges', 'bytes');
@@ -87,14 +92,14 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 				return $buffer;
 			}
 		}
-		
+
 		$this->addHeader('Content-Type', $data['mimetype']);
 		$this->addContentDispositionHeader();
 		$this->addHeader('Content-Length',  $size);
 
 		return $data['content'];
 	}
-	
+
 	/**
 	 * Send 416 if we can't satisfy the requested ranges
 	 * @param integer $filesize
@@ -104,7 +109,7 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 		$this->addHeader('Content-Range', 'bytes */' . $filesize); // Required in 416.
 		return '';
 	}
-	
+
 	protected function addContentDispositionHeader(){
 		$encodedName = rawurlencode(basename($this->path));
 		$isIE = preg_match("/MSIE/", $this->request->server["HTTP_USER_AGENT"]);
