@@ -547,6 +547,9 @@ class DocumentController extends Controller {
 			return false;
 		}
 
+		$instanceId = \OCP\Config::getSystemValue('instanceid', '');
+		$instanceId = substr(md5($instanceId), -13); // Don't expose the secret ID.
+
 		$editorName = \OC::$server->getUserManager()->get($res['editor'])->getDisplayName();
 		return array(
 			'BaseFileName' => $info['name'],
@@ -556,8 +559,10 @@ class DocumentController extends Controller {
 			'UserId' => $res['editor'],
 			'UserFriendlyName' => $editorName,
 			'UserCanWrite' => $res['canwrite'] ? true : false,
-			'PostMessageOrigin' => $res['server_host']
+			'PostMessageOrigin' => $res['server_host'],
+			'HostInstanceId' => $instanceId
 		);
+
 	}
 
 	/**
