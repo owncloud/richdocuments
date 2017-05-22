@@ -1062,9 +1062,16 @@ $(document).ready(function() {
 	$('.add-document').on('click', '.add-xlsx', documentsMain.onCreateXLSX);
 	$('.add-document').on('click', '.add-pptx', documentsMain.onCreatePPTX);
 
-	OC.Upload._isReceivedSharedFile = function () {
-		return false;
-	};
+	// Fixes #175
+	if (OC.Uploader) {
+		OC.Uploader._isReceivedSharedFile = function () {
+			return false;
+		};
+	} else if (OC.Upload) {
+		OC.Upload._isReceivedSharedFile = function () {
+			return false;
+		};
+	}
 
 	var file_upload_start = $('#file_upload_start');
 	if (typeof supportAjaxUploadWithProgress !== 'undefined' && supportAjaxUploadWithProgress()) {
