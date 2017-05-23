@@ -1,6 +1,7 @@
 OC.L10N.register(
     "richdocuments",
     {
+    "Office" : "Office",
     "Please contact the \"%s\" administrator." : "Skontaktuj się z administratorem \"%s\".",
     "Please ask your administrator to check the Collabora Online server setting. The exact error message was: " : "Poproś administratora o sprawdzenie ustawień serwera Collabora Online. Dokładny komunikat błędu to:",
     "Collabora Online unknown error: " : "Collabora Online - nieznany błąd: ",
