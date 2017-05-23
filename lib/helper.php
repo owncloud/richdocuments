@@ -16,6 +16,51 @@ class Helper {
 
 	const APP_ID = 'richdocuments';
 
+	/**
+	 * Log the user with given $userid.
+	 * This function should only be used from public controller methods where no
+	 * existing session exists, for example, when loolwsd is directly calling a
+	 * public method with its own access token. After validating the access
+	 * token, and retrieving the correct user with help of access token, it can
+	 * be set as current user with help of this method.
+	 *
+	 * @param string $userid
+	 */
+	public static function loginUser($userid) {
+		\OC_Util::tearDownFS();
+
+		$users = \OC::$server->getUserManager()->search($userid, 1, 0);
+		if (count($users) > 0) {
+			$user = array_shift($users);
+			if (strcasecmp($user->getUID(), $userid) === 0) {
+				// clear the existing sessions, if any
+				\OC::$server->getSession()->close();
+
+				// initialize a dummy memory session
+				$session = new \OC\Session\Memory('');
+				// wrap it
+				$cryptoWrapper = \OC::$server->getSessionCryptoWrapper();
+				$session = $cryptoWrapper->wrapSession($session);
+				// set our session
+				\OC::$server->setSession($session);
+
+				\OC::$server->getUserSession()->setUser($user);
+			}
+		}
+
+		\OC_Util::setupFS();
+	}
+
+	/**
+	 * Log out the current user
+	 * This is helpful when we are artifically logged in as someone
+	 */
+	public static function logoutUser() {
+		\OC_Util::tearDownFS();
+
+		\OC::$server->getSession()->close();
+	}
+
 	public static function getNewFileName($view, $path, $prepend = ' '){
 		$fileNum = 1;
 
