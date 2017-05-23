@@ -1,3 +1,7 @@
+<script>
+	 var instanceId = '<?php p($_['instanceId']) ?>';
+</script>
+
 <?php
 style( 'richdocuments', 'share' );
 style( 'richdocuments', 'style' );

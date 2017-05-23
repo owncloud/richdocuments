@@ -333,12 +333,13 @@ class DocumentController extends Controller {
 		\OC::$server->getNavigationManager()->setActiveEntry( 'richdocuments_index' );
 		$maxUploadFilesize = \OCP\Util::maxUploadFilesize("/");
 		$response = new TemplateResponse('richdocuments', 'documents', [
-			'enable_previews' =>		$this->settings->getSystemValue('enable_previews', true),
-			'uploadMaxFilesize' =>		$maxUploadFilesize,
-			'uploadMaxHumanFilesize' =>	\OCP\Util::humanFileSize($maxUploadFilesize),
-			'allowShareWithLink' =>		$this->settings->getAppValue('core', 'shareapi_allow_links', 'yes'),
-			'wopi_url' =>			$webSocket,
-			'doc_format' =>			$this->appConfig->getAppValue('doc_format')
+			'enable_previews' => $this->settings->getSystemValue('enable_previews', true),
+			'uploadMaxFilesize' => $maxUploadFilesize,
+			'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
+			'allowShareWithLink' => $this->settings->getAppValue('core', 'shareapi_allow_links', 'yes'),
+			'wopi_url' => $webSocket,
+			'doc_format' => $this->appConfig->getAppValue('doc_format'),
+			'instanceId' => $this->settings->getSystemValue('instanceid')
 		]);
 
 		$policy = new ContentSecurityPolicy();
@@ -455,13 +456,7 @@ class DocumentController extends Controller {
 	 * Only for authenticated users!
 	 */
 	public function wopiGetToken($fileId){
-		$arr = explode('_', $fileId, 2);
-		$version = '0';
-		if (count($arr) == 2) {
-			$fileId = $arr[0];
-			$version = $arr[1];
-		}
-
+		list($fileId, , $version) = Helper::parseFileId($fileId);
 		\OC::$server->getLogger()->debug('Generating WOPI Token for file {fileId}, version {version}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'version' => $version ]);
 
 		$view = \OC\Files\Filesystem::getView();
@@ -518,13 +513,7 @@ class DocumentController extends Controller {
 	public function wopiCheckFileInfo($fileId){
 		$token = $this->request->getParam('access_token');
 
-		$arr = explode('_', $fileId, 2);
-		$version = '0';
-		if (count($arr) == 2) {
-			$fileId = $arr[0];
-			$version = $arr[1];
-		}
-
+		list($fileId, , $version) = Helper::parseFileId($fileId);
 		\OC::$server->getLogger()->debug('Getting info about file {fileId}, version {version} by token {token}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'version' => $version, 'token' => $token ]);
 
 		$row = new Db\Wopi();
@@ -570,13 +559,7 @@ class DocumentController extends Controller {
 	public function wopiGetFile($fileId){
 		$token = $this->request->getParam('access_token');
 
-		$arr = explode('_', $fileId, 2);
-		$version = '0';
-		if (count($arr) == 2) {
-			$fileId = $arr[0];
-			$version = $arr[1];
-		}
-
+		list($fileId, , $version) = Helper::parseFileId($fileId);
 		\OC::$server->getLogger()->debug('Getting contents of file {fileId}, version {version} by token {token}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'version' => $version, 'token' => $token ]);
 
 		$row = new Db\Wopi();
@@ -621,13 +604,7 @@ class DocumentController extends Controller {
 	public function wopiPutFile($fileId){
 		$token = $this->request->getParam('access_token');
 
-		$arr = explode('_', $fileId, 2);
-		$version = '0';
-		if (count($arr) == 2) {
-			$fileId = $arr[0];
-			$version = $arr[1];
-		}
-
+		list($fileId, , $version) = Helper::parseFileId($fileId);
 		\OC::$server->getLogger()->debug('Putting contents of file {fileId}, version {version} by token {token}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'version' => $version, 'token' => $token ]);
 
 		$row = new Db\Wopi();
