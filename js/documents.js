@@ -1,5 +1,4 @@
-/*globals $,OC,fileDownloadPath,t,document,odf,alert,require,dojo,runtime,Handlebars */
-
+/*globals $,OC,fileDownloadPath,t,document,odf,alert,require,dojo,runtime,Handlebars,instanceId */
 $.widget('oc.documentGrid', {
 	options : {
 		context : '.documentslist',
@@ -233,6 +232,7 @@ var documentsMain = {
 			documentsMain.UI.mainTitle = $('title').text();
 		},
 
+		// fileId passed here already has the WOPI format, so needs no tweaking
 		showViewer: function(fileId, title){
 			// remove previous viewer, if open, and set a new one
 			if (documentsMain.isViewerMode) {
@@ -285,16 +285,19 @@ var documentsMain = {
 			var formattedTimestamp = OC.Util.formatDate(parseInt(version) * 1000);
 			var fileName = documentsMain.fileName.substring(0, documentsMain.fileName.indexOf('.'));
 			var downloadUrl, restoreUrl;
+			fileId = fileId.replace(/_.*/, '');
+
+			// Tweak the fileId format as {fileId_instanceId_version}. this is what WOPI backend expects the fileId to be in
+			// Ofc, if no version, then just {fileId_instanceId}
 			if (version === 0) {
 				formattedTimestamp = t('richdocuments', 'Latest revision');
 				downloadUrl = OC.generateUrl('apps/files/download'+ documentPath);
-				fileId = fileId.replace(/_.*/, '');
 			} else {
 				downloadUrl = OC.generateUrl('apps/files_versions/download.php?file={file}&revision={revision}',
 				                             {file: documentPath, revision: version});
-				fileId = fileId + '_' + version;
+				fileId = fileId + '_' + instanceId + '_' + version;
 				restoreUrl = OC.generateUrl('apps/files_versions/ajax/rollbackVersion.php?file={file}&revision={revision}',
-				                             {file: documentPath, revision: version});
+				                            {file: documentPath, revision: version});
 			}
 
 			var revHistoryItemTemplate = Handlebars.compile(documentsMain.UI.revHistoryItemTemplate);
@@ -432,7 +435,8 @@ var documentsMain = {
 
 			$('title').text(title + ' - ' + documentsMain.UI.mainTitle);
 
-			$.get(OC.generateUrl('apps/richdocuments/wopi/token/{fileId}', { fileId: documentsMain.fileId }),
+			var wopiFileId = documentsMain.fileId + '_' + instanceId;
+			$.get(OC.generateUrl('apps/richdocuments/wopi/token/{fileId}', { fileId: wopiFileId }),
 				function (result) {
 					if (!result || result.status === 'error') {
 						if (result && result.message){
@@ -443,7 +447,8 @@ var documentsMain = {
 					}
 
 					// WOPISrc - URL that loolwsd will access (ie. pointing to ownCloud)
-					var wopiurl = window.location.protocol + '//' + window.location.host + OC.generateUrl('apps/richdocuments/wopi/files/{file_id}', {file_id: documentsMain.fileId});
+					// Include the unique instanceId in the WOPI URL as part of the fileId
+					var wopiurl = window.location.protocol + '//' + window.location.host + OC.generateUrl('apps/richdocuments/wopi/files/{file_id}', {file_id: wopiFileId});
 					var wopisrc = encodeURIComponent(wopiurl);
 
 					// urlsrc - the URL from discovery xml that we access for the particular
