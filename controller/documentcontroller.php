@@ -16,6 +16,7 @@ use \OCP\IRequest;
 use \OCP\IConfig;
 use \OCP\IL10N;
 use \OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\AppFramework\Http;
 use \OCP\AppFramework\Http\JSONResponse;
 use \OCP\AppFramework\Http\TemplateResponse;
 
@@ -53,6 +54,9 @@ class DocumentController extends Controller {
 	private $cache;
 	private $logger;
 	const ODT_TEMPLATE_PATH = '/assets/odttemplate.odt';
+
+	// Signifies LOOL that document has been changed externally in this storage
+	const LOOL_STATUS_DOC_CHANGED = 1010;
 
 	public function __construct($appName, IRequest $request, IConfig $settings, AppConfig $appConfig, IL10N $l10n, $uid, ICacheFactory $cache, ILogger $logger){
 		parent::__construct($appName, $request);
@@ -545,7 +549,8 @@ class DocumentController extends Controller {
 			'UserId' => $res['editor'],
 			'UserFriendlyName' => $editorName,
 			'UserCanWrite' => $res['canwrite'] ? true : false,
-			'PostMessageOrigin' => $res['server_host']
+			'PostMessageOrigin' => $res['server_host'],
+			'LastModifiedTime' => Helper::toISO8601($info->getMTime())
 		);
 	}
 
@@ -630,6 +635,18 @@ class DocumentController extends Controller {
 		$userid = $res['owner'];
 		$root = '/' . $userid . '/files';
 		$view = new \OC\Files\View($root);
+		$info = $view->getFileInfo($res['path']);
+
+		$wopiHeaderTime = $this->request->getHeader('X-LOOL-WOPI-Timestamp');
+		\OC::$server->getLogger()->debug('WOPI header timestamp provided: {wopiHeaderTime}', ['wopiHeaderTime' => $wopiHeaderTime]);
+		if (!$wopiHeaderTime) {
+			\OC::$server->getLogger()->debug('No header X-LOOL-WOPI-Timestamp present.' .
+			                                 'Continuing to save the file.');
+		} else if ($wopiHeaderTime != Helper::toISO8601($info->getMTime())) {
+			\OC::$server->getLogger()->debug('Document timestamp mismatch ! WOPI client says mtime {headerTime} but storage says {storageTime}', ['headerTime' => $wopiHeaderTime, 'storageTime' => $info->getMtime()]);
+			// Tell WOPI client about this conflict.
+			return new JSONResponse(['LOOLStatusCode' => self::LOOL_STATUS_DOC_CHANGED], Http::STATUS_CONFLICT);
+		}
 
 		// Read the contents of the file from the POST body and store.
 		$content = fopen('php://input', 'r');
@@ -643,8 +660,11 @@ class DocumentController extends Controller {
 
 		$this->logoutUser();
 
+		// query the file info again after modifying and update the WOPI client
+		$info = $view->getFileInfo($res['path']);
 		return array(
-			'status' => 'success'
+			'status' => 'success',
+			'LastModifiedTime' => Helper::toISO8601($info->getMtime())
 		);
 	}
 
