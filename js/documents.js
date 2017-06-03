@@ -285,8 +285,7 @@ var documentsMain = {
 			var formattedTimestamp = OC.Util.formatDate(parseInt(version) * 1000);
 			var fileName = documentsMain.fileName.substring(0, documentsMain.fileName.indexOf('.'));
 			var downloadUrl, restoreUrl;
-			fileId = fileId.replace(/_.*/, '');
-
+			fileId = fileId.replace(/_.*/, '') + '_' + instanceId;
 			// Tweak the fileId format as {fileId_instanceId_version}. this is what WOPI backend expects the fileId to be in
 			// Ofc, if no version, then just {fileId_instanceId}
 			if (version === 0) {
@@ -295,7 +294,7 @@ var documentsMain = {
 			} else {
 				downloadUrl = OC.generateUrl('apps/files_versions/download.php?file={file}&revision={revision}',
 				                             {file: documentPath, revision: version});
-				fileId = fileId + '_' + instanceId + '_' + version;
+				fileId = fileId + '_' + version;
 				restoreUrl = OC.generateUrl('apps/files_versions/ajax/rollbackVersion.php?file={file}&revision={revision}',
 				                            {file: documentPath, revision: version});
 			}
