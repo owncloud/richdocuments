@@ -467,6 +467,16 @@ class DocumentController extends Controller {
 		$path = $view->getPath($fileId);
 		$updatable = (bool)$view->isUpdatable($path);
 
+		$encryptionManager = \OC::$server->getEncryptionManager();
+		if ($encryptionManager->isEnabled()) {
+			// Update the current file to be accessible with system public shared key
+			$owner = $view->getOwner($path);
+			$absPath = '/' . $owner . '/files' .  $path;
+			$accessList = \OC::$server->getEncryptionFilesHelper()->getAccessList($absPath);
+			$accessList['public'] = true;
+			$encryptionManager->getEncryptionModule()->update($absPath, $owner, $accessList);
+		}
+
 		// Check if the editor (user who is accessing) is in editable group
 		// UserCanWrite only if
 		// 1. No edit groups are set or
@@ -562,6 +572,7 @@ class DocumentController extends Controller {
 	 * Expects a valid token in access_token parameter.
 	 */
 	public function wopiGetFile($fileId){
+		\OC_User::setIncognitoMode(true);
 		$token = $this->request->getParam('access_token');
 
 		list($fileId, , $version) = Helper::parseFileId($fileId);
@@ -596,6 +607,10 @@ class DocumentController extends Controller {
 
 		$this->logoutUser();
 
+		/* This is required for reading encrypted files */
+		\OC_Util::tearDownFS();
+		\OC_Util::setupFS($ownerid);
+
 		return new DownloadResponse($this->request, $ownerid, $filename);
 	}
 
@@ -606,7 +621,7 @@ class DocumentController extends Controller {
 	 * Given an access token and a fileId, replaces the files with the request body.
 	 * Expects a valid token in access_token parameter.
 	 */
-	public function wopiPutFile($fileId){
+	public function wopiPutFile($fileId) {
 		$token = $this->request->getParam('access_token');
 
 		list($fileId, , $version) = Helper::parseFileId($fileId);
@@ -652,10 +667,10 @@ class DocumentController extends Controller {
 		$content = fopen('php://input', 'r');
 		\OC::$server->getLogger()->debug('Storing file {fileId} by {editor} owned by {owner}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'editor' => $editorid, 'owner' => $userid ]);
 
+		\OC_User::setIncognitoMode(true);
 		// Setup the FS which is needed to emit hooks (versioning).
 		\OC_Util::tearDownFS();
 		\OC_Util::setupFS($userid);
-
 		$view->file_put_contents($res['path'], $content);
 
 		$this->logoutUser();
