@@ -655,10 +655,10 @@ class DocumentController extends Controller {
 		$wopiHeaderTime = $this->request->getHeader('X-LOOL-WOPI-Timestamp');
 		\OC::$server->getLogger()->debug('WOPI header timestamp provided: {wopiHeaderTime}', ['wopiHeaderTime' => $wopiHeaderTime]);
 		if (!$wopiHeaderTime) {
-			\OC::$server->getLogger()->debug('No header X-LOOL-WOPI-Timestamp present.' .
+			\OC::$server->getLogger()->debug('No header X-LOOL-WOPI-Timestamp present. ' .
 			                                 'Continuing to save the file.');
 		} else if ($wopiHeaderTime != Helper::toISO8601($info->getMTime())) {
-			\OC::$server->getLogger()->debug('Document timestamp mismatch ! WOPI client says mtime {headerTime} but storage says {storageTime}', ['headerTime' => $wopiHeaderTime, 'storageTime' => $info->getMtime()]);
+			\OC::$server->getLogger()->debug('Document timestamp mismatch ! WOPI client says mtime {headerTime} but storage says {storageTime}', ['headerTime' => $wopiHeaderTime, 'storageTime' => Helper::toISO8601($info->getMtime())]);
 			// Tell WOPI client about this conflict.
 			return new JSONResponse(['LOOLStatusCode' => self::LOOL_STATUS_DOC_CHANGED], Http::STATUS_CONFLICT);
 		}
@@ -667,16 +667,19 @@ class DocumentController extends Controller {
 		$content = fopen('php://input', 'r');
 		\OC::$server->getLogger()->debug('Storing file {fileId} by {editor} owned by {owner}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'editor' => $editorid, 'owner' => $userid ]);
 
+		// To be able to make it work when server-side encryption is enabled
 		\OC_User::setIncognitoMode(true);
 		// Setup the FS which is needed to emit hooks (versioning).
 		\OC_Util::tearDownFS();
 		\OC_Util::setupFS($userid);
 		$view->file_put_contents($res['path'], $content);
 
+		// query the file info again after modifying and update the WOPI client.
+		// But before logging out, otherwise we get incorrect mtime
+		$info = $view->getFileInfo($res['path']);
+
 		$this->logoutUser();
 
-		// query the file info again after modifying and update the WOPI client
-		$info = $view->getFileInfo($res['path']);
 		return array(
 			'status' => 'success',
 			'LastModifiedTime' => Helper::toISO8601($info->getMtime())
