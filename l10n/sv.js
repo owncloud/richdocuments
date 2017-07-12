@@ -2,6 +2,7 @@ OC.L10N.register(
     "richdocuments",
     {
     "Office" : "Kontor",
+    "Please contact the \"%s\" administrator." : "Vänligen kontakta administratören \"%s\" .",
     "New Document.odt" : "Nytt Document.odt",
     "New Spreadsheet.ods" : "Ny Spreadsheet.ods",
     "New Presentation.odp" : "Ny Presentation.odp",
