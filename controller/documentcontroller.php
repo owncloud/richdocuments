@@ -638,51 +638,43 @@ class DocumentController extends Controller {
 			);
 		}
 
-		// Log-in as the user to regiser the change under her name.
-		$editorid = $res['editor'];
 		// This call is made from loolwsd, so we need to initialize the
 		// session before we can make the user who opened the document
 		// login. This is necessary to make activity app register the
 		// change made to this file under this user's (editorid) name.
-		$this->loginUser($editorid);
+		$this->loginUser($res['editor']);
 
 		// Set up the filesystem view for the owner (where the file actually is).
-		$userid = $res['owner'];
-		$root = '/' . $userid . '/files';
-		$view = new \OC\Files\View($root);
-		$info = $view->getFileInfo($res['path']);
+		$userFolder = \OC::$server->getRootFolder()->getUserFolder($res['owner']);
+		$file = $userFolder->getById($fileId)[0];
 
 		$wopiHeaderTime = $this->request->getHeader('X-LOOL-WOPI-Timestamp');
 		\OC::$server->getLogger()->debug('WOPI header timestamp provided: {wopiHeaderTime}', ['wopiHeaderTime' => $wopiHeaderTime]);
 		if (!$wopiHeaderTime) {
 			\OC::$server->getLogger()->debug('No header X-LOOL-WOPI-Timestamp present. ' .
 			                                 'Continuing to save the file.');
-		} else if ($wopiHeaderTime != Helper::toISO8601($info->getMTime())) {
-			\OC::$server->getLogger()->debug('Document timestamp mismatch ! WOPI client says mtime {headerTime} but storage says {storageTime}', ['headerTime' => $wopiHeaderTime, 'storageTime' => Helper::toISO8601($info->getMtime())]);
+		} else if ($wopiHeaderTime != Helper::toISO8601($file->getMTime())) {
+			\OC::$server->getLogger()->debug('Document timestamp mismatch ! WOPI client says mtime {headerTime} but storage says {storageTime}', ['headerTime' => $wopiHeaderTime, 'storageTime' => Helper::toISO8601($file->getMtime())]);
 			// Tell WOPI client about this conflict.
 			return new JSONResponse(['LOOLStatusCode' => self::LOOL_STATUS_DOC_CHANGED], Http::STATUS_CONFLICT);
 		}
 
 		// Read the contents of the file from the POST body and store.
 		$content = fopen('php://input', 'r');
-		\OC::$server->getLogger()->debug('Storing file {fileId} by {editor} owned by {owner}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'editor' => $editorid, 'owner' => $userid ]);
+		\OC::$server->getLogger()->debug('Storing file {fileId} by {editor} owned by {owner}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'editor' => $res['editor'], 'owner' => $res['owner']]);
 
 		// To be able to make it work when server-side encryption is enabled
 		\OC_User::setIncognitoMode(true);
 		// Setup the FS which is needed to emit hooks (versioning).
 		\OC_Util::tearDownFS();
-		\OC_Util::setupFS($userid);
-		$view->file_put_contents($res['path'], $content);
-
-		// query the file info again after modifying and update the WOPI client.
-		// But before logging out, otherwise we get incorrect mtime
-		$info = $view->getFileInfo($res['path']);
-
+		\OC_Util::setupFS($res['owner']);
+		$file->putContent($content);
+		$mtime = $file->getMtime();
 		$this->logoutUser();
 
 		return array(
 			'status' => 'success',
-			'LastModifiedTime' => Helper::toISO8601($info->getMtime())
+			'LastModifiedTime' => Helper::toISO8601($mtime)
 		);
 	}
 
