@@ -65,7 +65,7 @@ OC.L10N.register(
     "Password" : "รหัสผ่าน",
     "Choose a password for the public link" : "เลือกรหัสผ่านสำหรับลิงค์สาธารณะ",
     "Allow editing" : "อนุญาตให้แก้ไข",
-    "Email link to person" : "ส่งลิงก์ให้ทางอีเมล",
+    "Email link to person" : "ส่งลิงค์ให้ทางอีเมล",
     "Send" : "ส่ง",
     "Set expiration date" : "กำหนดวันที่หมดอายุ",
     "Expiration" : "การหมดอายุ",
