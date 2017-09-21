@@ -456,6 +456,7 @@ class DocumentController extends Controller {
 
 	/**
 	 * @NoAdminRequired
+	 * @NoCSRFRequired
 	 * Generates and returns an access token for a given fileId.
 	 * Only for authenticated users!
 	 */
@@ -735,6 +736,7 @@ class DocumentController extends Controller {
 
 	/**
 	 * @NoAdminRequired
+	 * @NoCSRFRequired
 	 * Get file information about single document with fileId
 	 */
 	public function get($fileId){
