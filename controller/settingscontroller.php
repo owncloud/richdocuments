@@ -51,8 +51,7 @@ class SettingsController extends Controller{
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
 			'wopi_url' => $this->appConfig->getAppValue('wopi_url'),
 			'test_wopi_url' => $this->appConfig->getAppValue('test_wopi_url'),
-			'test_server_groups' => $this->appConfig->getAppValue('test_server_groups'),
-			'external_apps' => $this->appConfig->getAppValue('external_apps')
+			'test_server_groups' => $this->appConfig->getAppValue('test_server_groups')
 		);
 	}
 
