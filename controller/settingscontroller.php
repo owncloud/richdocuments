@@ -66,9 +66,6 @@ class SettingsController extends Controller{
 		);
 	}
 
-	/**
-	 * @NoCSRFRequired
-	 */
 	public function adminIndex(){
 		return new TemplateResponse(
 			$this->appName,
