@@ -34,6 +34,7 @@ $application->registerRoutes($this, [
 		['name' => 'document#listAll', 'url' => 'ajax/documents/list', 'verb' => 'GET'],
 		['name' => 'document#download', 'url' => 'ajax/download.php', 'verb' => 'GET'],
 		//documents - for WOPI access
+		['name' => 'document#extAppWopiGetData', 'url' => 'wopi/extapp/data/{fileId}', 'verb' => 'POST'],
 		['name' => 'document#wopiGetToken', 'url' => 'wopi/token/{fileId}', 'verb' => 'GET'],
 		['name' => 'document#wopiCheckFileInfo', 'url' => 'wopi/files/{fileId}', 'verb' => 'GET'],
 		['name' => 'document#wopiGetFile', 'url' => 'wopi/files/{fileId}/contents', 'verb' => 'GET'],

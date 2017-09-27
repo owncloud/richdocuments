@@ -66,9 +66,6 @@ class SettingsController extends Controller{
 		);
 	}
 
-	/**
-	 * @NoCSRFRequired
-	 */
 	public function adminIndex(){
 		return new TemplateResponse(
 			$this->appName,
@@ -78,13 +75,14 @@ class SettingsController extends Controller{
 				'edit_groups' => $this->appConfig->getAppValue('edit_groups'),
 				'doc_format' => $this->appConfig->getAppValue('doc_format'),
 				'test_wopi_url' => $this->appConfig->getAppValue('test_wopi_url'),
-				'test_server_groups' => $this->appConfig->getAppValue('test_server_groups')
+				'test_server_groups' => $this->appConfig->getAppValue('test_server_groups'),
+				'external_apps' => $this->appConfig->getAppValue('external_apps')
 			],
 			'blank'
 		);
 	}
 
-	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups){
+	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps){
 		$message = $this->l10n->t('Saved');
 
 		if (!is_null($wopi_url)){
@@ -110,6 +108,10 @@ class SettingsController extends Controller{
 
 		if (!is_null($test_server_groups)){
 			$this->appConfig->setAppValue('test_server_groups', $test_server_groups);
+		}
+
+		if (!is_null($external_apps)){
+			$this->appConfig->setAppValue('external_apps', $external_apps);
 		}
 
 		$richMemCache = \OC::$server->getMemCacheFactory()->create('richdocuments');

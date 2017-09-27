@@ -519,6 +519,40 @@ class DocumentController extends Controller {
 	}
 
 	/**
+	 * @NoCSRFRequired
+	 * @PublicPage
+	 * Generates and returns an access token and urlsrc for a given fileId
+	 * for requests that provide secret token set in app settings
+	 */
+	public function extAppWopiGetData($fileId) {
+		$secretToken = $this->request->getParam('secret_token');
+		$apps = array_filter(explode(',', $this->appConfig->getAppValue('external_apps')));
+		foreach($apps as $app) {
+			if ($app !== '') {
+				if ($secretToken === $app) {
+					$appName = explode(':', $app);
+					\OC::$server->getLogger()->debug('External app "{extApp}" authenticated; issuing access token for fileId {fileId}', [
+						'app' => $this->appName,
+						'extApp' => $appName[0],
+						'fileId' => $fileId
+					]);
+					$retArray = $this->wopiGetToken($fileId);
+					$docs = $this->get($fileId);
+					if ($docs['status'] === 'success' && $docs['documents'] && count($docs['documents']) > 0) {
+						$retArray['urlsrc'] = $docs['documents'][0]['urlsrc'];
+					}
+					return $retArray;
+				}
+			}
+		}
+
+		return array(
+			'status' => 'error',
+			'message' => 'Permission denied'
+		);
+	}
+
+	/**
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @PublicPage
