@@ -89,6 +89,7 @@ OC.L10N.register(
     "URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client." : "A Collabora Online kiszolgáló URL-je (és portja), amely WOPI-ügyfélként lehetővé teszi a szerkesztés funkciót.",
     "Apply" : "Alkalmaz",
     "Groups" : "Csoportok",
+    "Add" : "Hozzáadás",
     "New Document" : "Új dokumentum",
     "New Spreadsheet" : "Új munkafüzet",
     "New Presentation" : "Új bemutató",

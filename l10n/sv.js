@@ -80,6 +80,7 @@ OC.L10N.register(
     "Apply" : "Tillämpa",
     "Groups" : "Grupper",
     "Test server" : "Testserver",
+    "Add" : "Lägg till",
     "New Document" : "Nytt dokument",
     "New Spreadsheet" : "Nytt kalkylblad",
     "New Presentation" : "Ny presentation",

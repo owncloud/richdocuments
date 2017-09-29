@@ -106,6 +106,7 @@ OC.L10N.register(
     "URL (and port) of the Collabora Online test server." : "Collabora Online 테스트 서버의 URL 및 포트입니다.",
     "Enable edit for specific groups" : "지정한 그룹의 편집 활성화",
     "Use OOXML by default for new files" : "새 파일에 OOXML을 기본값으로 사용",
+    "Add" : "추가",
     "New Document" : "새 문서",
     "New Spreadsheet" : "새 스프레드시트",
     "New Presentation" : "새 프레젠테이션",

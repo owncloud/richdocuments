@@ -82,6 +82,7 @@ OC.L10N.register(
     "guest" : "гість",
     "Apply" : "Застосувати",
     "Groups" : "Групи",
+    "Add" : "Додати",
     "New Document" : "Новий документ",
     "New Spreadsheet" : "Нова таблиця",
     "New Presentation" : "Нова презентація",

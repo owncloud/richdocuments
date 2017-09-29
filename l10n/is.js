@@ -106,6 +106,7 @@ OC.L10N.register(
     "URL (and port) of the Collabora Online test server." : "URL-slóð (og gátt) Collabora Online prófunarþjónsins.",
     "Enable edit for specific groups" : "Virkja breytingaham fyrir sérstaka hópa",
     "Use OOXML by default for new files" : "Nota OOXML sjálfgefið fyrir nýjar skrár",
+    "Add" : "Bæta við",
     "New Document" : "Nýtt skjal",
     "New Spreadsheet" : "Nýtt töflureikniblað",
     "New Presentation" : "Ný kynning",

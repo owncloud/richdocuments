@@ -106,6 +106,8 @@ OC.L10N.register(
     "URL (and port) of the Collabora Online test server." : "URL (e porta) do servidor de teste Collabora Online.",
     "Enable edit for specific groups" : "Habilitar edição para grupo específico",
     "Use OOXML by default for new files" : "Use OOXML por padrão para novos arquivos",
+    "Enable access for external apps" : "Habilitar acesso a aplicativos externos",
+    "Add" : "Adicionar",
     "New Document" : "Novo Documento",
     "New Spreadsheet" : "Nova Planilha de Cálculo",
     "New Presentation" : "Nova Apresentação",

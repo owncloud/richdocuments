@@ -83,6 +83,7 @@ OC.L10N.register(
     "Apply" : "Rakenda",
     "Groups" : "Grupid",
     "Test server" : "Testiserver",
+    "Add" : "Lisa",
     "New Document" : "Uus dokument",
     "New Spreadsheet" : "Uus arvutustabel",
     "New Presentation" : "Uus esitlus",

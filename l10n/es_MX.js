@@ -85,6 +85,7 @@ OC.L10N.register(
     "Test server" : "Probar servidor",
     "Enable edit for specific groups" : "Habilitar permisos de edición para grupos especificos",
     "Use OOXML by default for new files" : "Usar OOXML por default para nuevos archivos",
+    "Add" : "Agregar",
     "Upload (max. %s)" : "Subir (max. %s)",
     "Upload" : "Subir archivo",
     "Wrong password. Please retry." : "Contraseña incorrecta. Inténtelo de nuevo.",

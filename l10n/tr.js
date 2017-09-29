@@ -94,6 +94,7 @@ OC.L10N.register(
     "URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client." : "Bir WOPI istemcisi işleviyle düzenleme işlevine izin veren Collabora Onlie sunucusunun adresi (ve bağlantı noktası).",
     "Apply" : "Uygula",
     "Groups" : "Gruplar",
+    "Add" : "Ekle",
     "New Document" : "Yeni Belge",
     "New Spreadsheet" : "Yeni Çalışma Sayfası",
     "New Presentation" : "Yeni Sunum",

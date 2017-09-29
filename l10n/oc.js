@@ -86,6 +86,7 @@ OC.L10N.register(
     "Collabora Online server" : "Servidor Collabora en linha",
     "Apply" : "Aplicar",
     "Groups" : "Gropes",
+    "Add" : "Apondre",
     "New Document" : "Document novèl",
     "New Spreadsheet" : "Novèl fuèlh de calcul",
     "New Presentation" : "Presentacion novèla",
