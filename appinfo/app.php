@@ -23,40 +23,40 @@
 
 namespace OCA\Richdocuments\AppInfo;
 
-use OCA\Richdocuments\Config;
-
 $app = new Application();
 $c = $app->getContainer();
 
 \OCP\App::registerAdmin('richdocuments', 'admin');
 
-$navigationEntry = function () use ($c) {
-	return [
-		'id' => 'richdocuments_index',
-		'order' => 2,
-		'href' => $c->query('ServerContainer')->getURLGenerator()->linkToRoute('richdocuments.document.index'),
-		'icon' => $c->query('ServerContainer')->getURLGenerator()->imagePath('richdocuments', 'app.svg'),
-		'name' => $c->query('L10N')->t('Office')
-	];
-};
-$c->getServer()->getNavigationManager()->add($navigationEntry);
+if ($app->isUserAllowedToUseCollabora()) {
+	$navigationEntry = function () use ($c) {
+		return [
+			'id' => 'richdocuments_index',
+			'order' => 2,
+			'href' => $c->query('ServerContainer')->getURLGenerator()->linkToRoute('richdocuments.document.index'),
+			'icon' => $c->query('ServerContainer')->getURLGenerator()->imagePath('richdocuments', 'app.svg'),
+			'name' => $c->query('L10N')->t('Office')
+		];
+	};
+	$c->getServer()->getNavigationManager()->add($navigationEntry);
 
-//Script for registering file actions
-$eventDispatcher = \OC::$server->getEventDispatcher();
-$eventDispatcher->addListener(
-	'OCA\Files::loadAdditionalScripts',
-	function() {
-		\OCP\Util::addScript('richdocuments', 'viewer/viewer');
-		\OCP\Util::addStyle('richdocuments', 'viewer/odfviewer');
+	//Script for registering file actions
+	$eventDispatcher = \OC::$server->getEventDispatcher();
+	$eventDispatcher->addListener(
+		'OCA\Files::loadAdditionalScripts',
+		function() {
+			\OCP\Util::addScript('richdocuments', 'viewer/viewer');
+			\OCP\Util::addStyle('richdocuments', 'viewer/odfviewer');
+		}
+	);
+
+	if (class_exists('\OC\Files\Type\TemplateManager')) {
+		$manager = \OC_Helper::getFileTemplateManager();
+
+		$manager->registerTemplate('application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'apps/richdocuments/assets/docxtemplate.docx');
+		$manager->registerTemplate('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'apps/richdocuments/assets/xlsxtemplate.xlsx');
+		$manager->registerTemplate('application/vnd.openxmlformats-officedocument.presentationml.presentation', 'apps/richdocuments/assets/pptxtemplate.pptx');
 	}
-);
-
-if (class_exists('\OC\Files\Type\TemplateManager')) {
-    $manager = \OC_Helper::getFileTemplateManager();
-
-    $manager->registerTemplate('application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'apps/richdocuments/assets/docxtemplate.docx');
-    $manager->registerTemplate('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'apps/richdocuments/assets/xlsxtemplate.xlsx');
-    $manager->registerTemplate('application/vnd.openxmlformats-officedocument.presentationml.presentation', 'apps/richdocuments/assets/pptxtemplate.pptx');
 }
 
 //Listen to delete file signal
