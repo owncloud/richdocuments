@@ -106,6 +106,7 @@ OC.L10N.register(
     "URL (and port) of the Collabora Online test server." : "נתיב (ושער גישה - פורט) של שרת הבדיקה המקוון Collabora.",
     "Enable edit for specific groups" : "מאפשר עריכה לקבוצות מסויימות",
     "Use OOXML by default for new files" : "השתמש ב- OOXML כברירת מחדל לקבצים חדשים",
+    "Enable access for external apps" : "הפעלת גישה ליישומים חיצוניים",
     "Add" : "הוספה",
     "New Document" : "מסמך חדש",
     "New Spreadsheet" : "גיליון נתונים חדש",
