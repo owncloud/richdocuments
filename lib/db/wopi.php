@@ -41,7 +41,7 @@ class Wopi extends \OCA\Richdocuments\Db{
 	 * its the version number as stored by files_version app
 	 * Returns the token.
 	 */
-	public function generateFileToken($fileId, $version, $updatable, $serverHost){
+	public function generateFileToken($fileId, $version, $updatable, $serverHost, $editor){
 
 		// Get the FS view of the current user.
 		$view = \OC\Files\Filesystem::getView();
@@ -63,8 +63,6 @@ class Wopi extends \OCA\Richdocuments\Db{
 		if (!$view->is_file($path)) {
 			throw new \Exception('Invalid fileId.');
 		}
-
-		$editor = \OC::$server->getUserSession()->getUser()->getUID();
 
 		$token = \OC::$server->getSecureRandom()->getMediumStrengthGenerator()->generate(32,
 					\OCP\Security\ISecureRandom::CHAR_LOWER . \OCP\Security\ISecureRandom::CHAR_UPPER .
