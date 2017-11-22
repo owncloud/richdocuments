@@ -593,7 +593,7 @@ class DocumentController extends Controller {
 			'UserId' => $res['editor'],
 			'UserFriendlyName' => $editorName,
 			'UserCanWrite' => $res['canwrite'] ? true : false,
-			'UserCanNotWriteRelative' => false,
+			'UserCanNotWriteRelative' => \OC::$server->getEncryptionManager()->isEnabled() ? true : false,
 			'PostMessageOrigin' => $res['server_host'],
 			'LastModifiedTime' => Helper::toISO8601($info->getMTime())
 		);
