@@ -516,7 +516,7 @@ var documentsMain = {
 									return;
 
 								documentsMain.UI.showRevHistory($('li[data-id=' + documentsMain.fileId + ']>a').attr('original-title'));
-							} else if (msg === 'UI_SaveAs') {
+							} else if (msgId === 'UI_SaveAs') {
 								// TODO it's not possible to enter the
 								// filename into the OC.dialogs.filepicker; so
 								// it will be necessary to use an own tree
