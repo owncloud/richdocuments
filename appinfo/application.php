@@ -13,7 +13,6 @@ namespace OCA\Richdocuments\AppInfo;
 
 use \OCP\AppFramework\App;
 
-use \OCA\Richdocuments\Controller\UserController;
 use \OCA\Richdocuments\Controller\SessionController;
 use \OCA\Richdocuments\Controller\DocumentController;
 use \OCA\Richdocuments\Controller\SettingsController;
@@ -32,13 +31,6 @@ class Application extends App {
 		/**
 		 * Controllers
 		 */
-		$container->registerService('UserController', function($c) {
-			/** @var IContainer $c */
-			return new UserController(
-				$c->query('AppName'),
-				$c->query('Request')
-			);
-		});
 		$container->registerService('SessionController', function($c) {
 			/** @var IContainer $c */
 			return new SessionController(

@@ -638,7 +638,6 @@ var documentsMain = {
 	prepareSession : function(){
 		documentsMain.isEditorMode = true;
 		documentsMain.overlay.documentOverlay('show');
-		$(window).on("unload", documentsMain.onTerminate);
 	},
 
 	prepareGrid : function(){
@@ -680,7 +679,6 @@ var documentsMain = {
 			documentsMain.loadDocument();
 		});
 	},
-
 
 	joinSession: function(fileId) {
 		console.log('joining session '+fileId);
@@ -813,17 +811,6 @@ var documentsMain = {
 		documentsMain.UI.revisionsStart = 0;
 
 		$('#loleafletframe').focus();
-	},
-
-	onTerminate: function(){
-		var url = OC.generateUrl('apps/richdocuments/ajax/user/disconnect/{member_id}', {member_id: documentsMain.memberId});
-		$.ajax({
-				type: "POST",
-				url: url,
-				data: {esId: documentsMain.esId},
-				dataType: "json",
-				async: false // Should be sync to complete before the page is closed
-		});
 	},
 
 	show: function(fileId){
