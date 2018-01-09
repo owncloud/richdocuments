@@ -15,7 +15,6 @@ $application = new \OCA\Richdocuments\AppInfo\Application();
 $application->registerRoutes($this, [
 	'routes' => [
 		//users
-		['name' => 'user#rename', 'url' => 'ajax/user/rename', 'verb' => 'POST'],
 		['name' => 'user#disconnectUser', 'url' => 'ajax/user/disconnect', 'verb' => 'POST'],
 		['name' => 'user#disconnectGuest', 'url' => 'ajax/user/disconnectGuest', 'verb' => 'POST'],
 		//session

@@ -19,18 +19,18 @@ use \OCP\AppFramework\Http\JSONResponse;
 use \OCA\Richdocuments\Db;
 
 class UserController extends Controller {
-	
+
 	public function __construct($appName, IRequest $request){
 		parent::__construct($appName, $request);
 	}
-	
+
 	/**
 	 * @NoAdminRequired
 	 */
 	public function disconnectUser($memberId, $esId){
 		return $this->disconnect($memberId, $esId);
 	}
-	
+
 	/**
 	 * @NoAdminRequired
 	 * @PublicPage
@@ -38,7 +38,7 @@ class UserController extends Controller {
 	public function disconnectGuest($memberId, $esId){
 		return $this->disconnect($memberId, $esId);
 	}
-	
+
 	private function disconnect($memberId, $esId){
 		$member = new Db\Member();
 		$member->loadBy('member_id', $memberId);
@@ -49,33 +49,7 @@ class UserController extends Controller {
 				$op->removeMember($esId, $memberId);
 			}
 		}
-		
-		return array('status'=>'success');
-	}
-	
-	/**
-	 * @NoAdminRequired
-	 * @PublicPage
-	 * @param int $memberId
-	 * @param string $name
-	 */
-	public function rename($memberId, $name){
-		$member = new Db\Member();
-		$member->load($memberId);
 
-		if ($member->getEsId()
-				&& $member->getStatus() == Db\Member::MEMBER_STATUS_ACTIVE 
-				&& $member->getIsGuest()
-		){
-			$guestMark = Db\Member::getGuestPostfix();
-			if (substr($name, -strlen($guestMark)) !== $guestMark){
-				$name = $name . ' ' . $guestMark;
-			}
-			
-			$op = new Db\Op();
-			$op->changeNick($member->getEsId(), $memberId, $name);
-		}
-		
 		return array('status'=>'success');
 	}
 }
