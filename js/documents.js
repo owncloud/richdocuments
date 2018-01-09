@@ -180,7 +180,6 @@ $.widget('oc.documentOverlay', {
 var documentsMain = {
 	isEditorMode : false,
 	isViewerMode: false,
-	isGuest : false,
 	memberId : false,
 	esId : false,
 	ready :false,
@@ -413,11 +412,6 @@ var documentsMain = {
 		},
 
 		showEditor : function(title, action){
-			if (documentsMain.isGuest){
-				// !Login page mess wih WebODF toolbars
-				$(document.body).attr('id', 'body-user');
-			}
-
 			if (documentsMain.loadError) {
 				documentsMain.onEditorShutdown(documentsMain.loadErrorMessage + '\n' + documentsMain.loadErrorHint);
 				return;
@@ -556,12 +550,6 @@ var documentsMain = {
 		},
 
 		hideEditor : function(){
-			if (documentsMain.isGuest){
-				// !Login page mess wih WebODF toolbars
-				$(document.body).attr('id', 'body-login');
-				$('footer,nav').show();
-			}
-
 			// Fade out editor
 			$('#mainContainer').fadeOut('fast', function() {
 				$('#mainContainer').remove();
@@ -616,25 +604,12 @@ var documentsMain = {
 		var fileId;
 		documentsMain.UI.init();
 
-		if (!OC.currentUser){
-			documentsMain.isGuest = true;
+		// Does anything indicate that we need to autostart a session?
+		fileId = parent.location.hash.replace(/^\W*/, '');
 
-			if ($("[name='document']").val()){
-				$(documentsMain.toolbar).appendTo('#header');
-				documentsMain.prepareSession();
-				documentsMain.joinSession(
-					$("[name='document']").val()
-				);
-			}
-
-		} else {
-			// Does anything indicate that we need to autostart a session?
-			fileId = parent.location.hash.replace(/^\W*/, '');
-
-			if (fileId.indexOf('_') >= 0) {
-				documentsMain.returnToDir = unescape(fileId.replace(/^[^_]*_/, ''));
-				fileId = fileId.replace(/_.*/, '');
-			}
+		if (fileId.indexOf('_') >= 0) {
+			documentsMain.returnToDir = unescape(fileId.replace(/^[^_]*_/, ''));
+			fileId = fileId.replace(/_.*/, '');
 		}
 
 		documentsMain.show(fileId);
@@ -690,15 +665,9 @@ var documentsMain = {
 			return;
 		}
 
-		var pollUrl = documentsMain.isGuest
-				? OC.generateUrl('apps/richdocuments/session/guest/poll/{token}', {'token' : $("[name='document']").val()})
-				: OC.generateUrl('apps/richdocuments/session/user/poll'),
-			saveUrl = documentsMain.isGuest
-				? OC.generateUrl('apps/richdocuments/session/guest/save/{token}', {'token' : $("[name='document']").val()})
-				: OC.generateUrl('apps/richdocuments/session/user/save')
-				;
-		documentsMain.canShare = !documentsMain.isGuest
-				&& typeof OC.Share !== 'undefined' && response.permissions & OC.PERMISSION_SHARE;
+		var pollUrl = OC.generateUrl('apps/richdocuments/session/user/poll');
+		var saveUrl =  OC.generateUrl('apps/richdocuments/session/user/save');
+		documentsMain.canShare = typeof OC.Share !== 'undefined' && response.permissions & OC.PERMISSION_SHARE;
 
 		// fade out file list and show the cloudsuite
 		$('#content-wrapper').fadeOut('fast').promise().done(function() {
@@ -711,23 +680,13 @@ var documentsMain = {
 			documentsMain.canEdit = response.permissions & OC.PERMISSION_UPDATE;
 
 			documentsMain.loadDocument();
-
-			if (documentsMain.isGuest){
-				$('#odf-close').text(t('richdocuments', 'Save') );
-				$('#odf-close').removeClass('icon-view-close');
-			}
 		});
 	},
 
 
 	joinSession: function(fileId) {
 		console.log('joining session '+fileId);
-		var url;
-		if (documentsMain.isGuest){
-			url = OC.generateUrl('apps/richdocuments/session/guest/join/{token}', {token: fileId});
-		} else {
-			url = OC.generateUrl('apps/richdocuments/session/user/join/{file_id}', {file_id: fileId});
-		}
+		var url = OC.generateUrl('apps/richdocuments/session/user/join/{file_id}', {file_id: fileId});
 		$.post(
 			url,
 			{ name : $("[name='memberName']").val() },
@@ -878,12 +837,7 @@ var documentsMain = {
 	},
 
 	onTerminate: function(){
-		var url = '';
-		if (documentsMain.isGuest){
-			url = OC.generateUrl('apps/richdocuments/ajax/user/disconnectGuest/{member_id}', {member_id: documentsMain.memberId});
-		} else {
-			url = OC.generateUrl('apps/richdocuments/ajax/user/disconnect/{member_id}', {member_id: documentsMain.memberId});
-		}
+		var url = OC.generateUrl('apps/richdocuments/ajax/user/disconnect/{member_id}', {member_id: documentsMain.memberId});
 		$.ajax({
 				type: "POST",
 				url: url,
@@ -891,16 +845,9 @@ var documentsMain = {
 				dataType: "json",
 				async: false // Should be sync to complete before the page is closed
 		});
-
-		if (documentsMain.isGuest){
-			$('footer,nav').show();
-		}
 	},
 
 	show: function(fileId){
-		if (documentsMain.isGuest){
-			return;
-		}
 		documentsMain.UI.showProgress(t('richdocuments', 'Loading documents...'));
 		documentsMain.docs.documentGrid('render', fileId);
 		documentsMain.UI.hideProgress();
@@ -979,7 +926,6 @@ FileList.findFile = function(fileName){
 };
 
 $(document).ready(function() {
-
 	if (!OCA.Files) {
 		OCA.Files = {};
 		OCA.Files.App = {};
