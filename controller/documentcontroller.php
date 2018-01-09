@@ -781,19 +781,6 @@ class DocumentController extends Controller {
 
 	/**
 	 * @NoAdminRequired
-	 * @PublicPage
-	 * Process partial/complete file download
-	 */
-	public function serve($esId){
-		$session = new Db\Session();
-		$session->load($esId);
-
-		$filename = $session->getGenesisUrl() ? $session->getGenesisUrl() : '';
-		return new DownloadResponse($this->request, $session->getOwner(), $filename);
-	}
-
-	/**
-	 * @NoAdminRequired
 	 */
 	public function download($path){
 		if (!$path){
