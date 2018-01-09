@@ -109,39 +109,6 @@ class Storage {
 		return false;
 	}
 
-	/**
-	 * @brief Cleanup session data on removing the document
-	 * @param array
-	 *
-	 * This function is connected to the delete signal of OC_Filesystem
-	 * to delete the related info from database
-	 */
-	public static function onDelete($params) {
-		$info = \OC\Files\Filesystem::getFileInfo($params['path']);
-
-		$fileId = @$info['fileid'];
-		if (!$fileId){
-			return;
-		}
-
-		$session = new Db\Session();
-		$session->loadBy('file_id', $fileId);
-
-		if (!$session->getEsId()){
-			return;
-		}
-
-		$member = new Db\Member();
-		$sessionMembers = $member->getCollectionBy('es_id', $session->getEsId());
-		foreach ($sessionMembers as $memberData){
-			if (intval($memberData['status'])===Db\Member::MEMBER_STATUS_ACTIVE){
-				return;
-			}
-		}
-
-		Db\Session::cleanUp($session->getEsId());
-	}
-
 	private static function processDocuments($rawDocuments){
 		$documents = array();
 		$view = \OC\Files\Filesystem::getView();
