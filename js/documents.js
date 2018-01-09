@@ -767,25 +767,6 @@ var documentsMain = {
 		documentsMain.UI.showEditor(documentsMain.fileName, action);
 	},
 
-	renameDocument: function(name) {
-		var url = OC.generateUrl('apps/richdocuments/ajax/documents/rename/{file_id}', {file_id: documentsMain.fileId});
-		$.post(
-			url,
-			{ name : name },
-			function(result) {
-				if (result && result.status === 'error') {
-					if (result.message){
-						documentsMain.UI.notify(result.message);
-					}
-					return;
-				}
-				documentsMain.fileName = name;
-				$('title').text(documentsMain.UI.mainTitle + '| ' + name);
-				$('#document-title').text(name);
-			}
-		);
-	},
-
 	onEditorShutdown : function (message){
 			OC.Notification.show(message);
 

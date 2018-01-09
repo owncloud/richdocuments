@@ -812,28 +812,6 @@ class DocumentController extends Controller {
 		return new DownloadResponse($this->request, $this->uid, $fullPath);
 	}
 
-
-	/**
-	 * @NoAdminRequired
-	 */
-	public function rename($fileId){
-		$name = $this->request->post['name'];
-
-		$view = \OC\Files\Filesystem::getView();
-		$path = $view->getPath($fileId);
-
-		if ($name && $view->is_file($path) && $view->isUpdatable($path)) {
-			$newPath = dirname($path) . '/' . $name;
-			if ($view->rename($path, $newPath)) {
-						return array('status' => 'success');
-			}
-		}
-		return array(
-			'status' => 'error',
-			'message' => (string) $this->l10n->t('You don\'t have permission to rename this document')
-		);
-	}
-
 	/**
 	 * @NoAdminRequired
 	 * Get file information about single document with fileId
