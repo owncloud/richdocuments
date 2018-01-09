@@ -781,26 +781,6 @@ class DocumentController extends Controller {
 
 	/**
 	 * @NoAdminRequired
-	 */
-	public function download($path){
-		if (!$path){
-			$response = new JSONResponse();
-			$response->setStatus(Http::STATUS_BAD_REQUEST);
-			return $response;
-		}
-
-		$fullPath = '/files' . $path;
-		$fileInfo = \OC\Files\Filesystem::getFileInfo($path);
-		if ($fileInfo){
-			$file = new File($fileInfo->getId());
-			$genesis = new Genesis($file);
-			$fullPath = $genesis->getPath();
-		}
-		return new DownloadResponse($this->request, $this->uid, $fullPath);
-	}
-
-	/**
-	 * @NoAdminRequired
 	 * Get file information about single document with fileId
 	 */
 	public function get($fileId){
