@@ -665,8 +665,6 @@ var documentsMain = {
 			return;
 		}
 
-		var pollUrl = OC.generateUrl('apps/richdocuments/session/user/poll');
-		var saveUrl =  OC.generateUrl('apps/richdocuments/session/user/save');
 		documentsMain.canShare = typeof OC.Share !== 'undefined' && response.permissions & OC.PERMISSION_SHARE;
 
 		// fade out file list and show the cloudsuite

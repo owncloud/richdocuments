@@ -19,8 +19,6 @@ $application->registerRoutes($this, [
 		['name' => 'user#disconnectGuest', 'url' => 'ajax/user/disconnectGuest', 'verb' => 'POST'],
 		//session
 		['name' => 'session#join', 'url' => 'session/user/join/{fileId}', 'verb' => 'POST'],
-		['name' => 'session#poll', 'url' => 'session/user/poll', 'verb' => 'POST'],
-		['name' => 'session#save', 'url' => 'session/user/save', 'verb' => 'POST'],
 		//documents
 		['name' => 'document#index', 'url' => 'index', 'verb' => 'GET'],
 		['name' => 'document#create', 'url' => 'ajax/documents/create', 'verb' => 'POST'],
