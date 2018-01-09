@@ -49,50 +49,6 @@ class SessionController extends Controller{
 
 	/**
 	 * @NoAdminRequired
-	 * @PublicPage
-	 */
-	public function joinAsGuest($token, $name){
-		$uid = substr($name, 0, 16);
-
-		try {
-			$file = File::getByShareToken($token);
-			if ($file->isPasswordProtected() && !$file->checkPassword('')){
-				throw new \Exception('Not authorized');
-			}
-
-			$response = array_merge(
-				Db\Session::start($uid, $file),
-				[ 'status'=>'success' ]
-			);
-		} catch (\Exception $e){
-			$this->logger->warning('Starting a session failed. Reason: ' . $e->getMessage(), ['app' => $this->appName]);
-			$response = [ 'status'=>'error' ];
-		}
-
-		return $response;
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @PublicPage
-	 */
-	public function pollAsGuest($command, $args){
-		$this->shareToken = $this->request->getParam('token');
-		return $this->poll($command, $args);
-	}
-
-	/**
-	 * Store the document content to its origin
-	 * @NoAdminRequired
-	 * @PublicPage
-	 */
-	public function saveAsGuest(){
-		$this->shareToken = $this->request->getParam('token');
-		return $this->save();
-	}
-
-	/**
-	 * @NoAdminRequired
 	 */
 	public function join($fileId){
 		try {

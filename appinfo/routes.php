@@ -21,9 +21,6 @@ $application->registerRoutes($this, [
 		['name' => 'session#join', 'url' => 'session/user/join/{fileId}', 'verb' => 'POST'],
 		['name' => 'session#poll', 'url' => 'session/user/poll', 'verb' => 'POST'],
 		['name' => 'session#save', 'url' => 'session/user/save', 'verb' => 'POST'],
-		['name' => 'session#joinAsGuest', 'url' => 'session/guest/join/{token}', 'verb' => 'POST'],
-		['name' => 'session#pollAsGuest', 'url' => 'session/guest/poll/{token}', 'verb' => 'POST'],
-		['name' => 'session#saveAsGuest', 'url' => 'session/guest/save/{token}', 'verb' => 'POST'],
 		//documents
 		['name' => 'document#index', 'url' => 'index', 'verb' => 'GET'],
 		['name' => 'document#create', 'url' => 'ajax/documents/create', 'verb' => 'POST'],
