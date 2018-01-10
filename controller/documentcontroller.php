@@ -26,8 +26,6 @@ use \OCA\Richdocuments\Helper;
 use \OCA\Richdocuments\Storage;
 use \OCA\Richdocuments\Download;
 use \OCA\Richdocuments\DownloadResponse;
-use \OCA\Richdocuments\File;
-use \OCA\Richdocuments\Genesis;
 use \OC\Files\View;
 use \OCP\ICacheFactory;
 use \OCP\ILogger;
@@ -294,17 +292,8 @@ class DocumentController extends Controller {
 			return @$b['mtime']-@$a['mtime'];
 		});
 
-		$session = new Db\Session();
-		$sessions = $session->getCollectionBy('file_id', $fileIds);
-
-		$members = array();
-		$member = new Db\Member();
-		foreach ($sessions as $session) {
-			$members[$session['es_id']] = $member->getActiveCollection($session['es_id']);
-		}
-
 		return array(
-			'status' => 'success', 'documents' => $documents,'sessions' => $sessions,'members' => $members
+			'status' => 'success', 'documents' => $documents
 		);
 	}
 

@@ -14,8 +14,6 @@ namespace OCA\Richdocuments;
 $application = new \OCA\Richdocuments\AppInfo\Application();
 $application->registerRoutes($this, [
 	'routes' => [
-		//session
-		['name' => 'session#join', 'url' => 'session/user/join/{fileId}', 'verb' => 'POST'],
 		//documents
 		['name' => 'document#index', 'url' => 'index', 'verb' => 'GET'],
 		['name' => 'document#create', 'url' => 'ajax/documents/create', 'verb' => 'POST'],
