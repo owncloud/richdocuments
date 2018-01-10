@@ -1,5 +1,11 @@
 <script>
-	 var instanceId = '<?php p($_['instanceId']) ?>';
+	 var rd_instanceId = '<?php p($_['instanceId']) ?>';
+	 var rd_permissions = '<?php p($_['permissions']) ?>';
+	 var rd_title = '<?php p($_['title']) ?>';
+	 var rd_fileId = '<?php p($_['fileId']) ?>';
+	 var rd_token = '<?php p($_['token']) ?>';
+	 var rd_urlsrc = '<?php p($_['urlsrc']) ?>';
+	 var rd_path = '<?php p($_['path']) ?>';
 </script>
 
 <?php

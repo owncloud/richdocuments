@@ -26,8 +26,6 @@ use \OCA\Richdocuments\Helper;
 use \OCA\Richdocuments\Storage;
 use \OCA\Richdocuments\Download;
 use \OCA\Richdocuments\DownloadResponse;
-use \OCA\Richdocuments\File;
-use \OCA\Richdocuments\Genesis;
 use \OC\Files\View;
 use \OCP\ICacheFactory;
 use \OCP\ILogger;
@@ -294,17 +292,8 @@ class DocumentController extends Controller {
 			return @$b['mtime']-@$a['mtime'];
 		});
 
-		$session = new Db\Session();
-		$sessions = $session->getCollectionBy('file_id', $fileIds);
-
-		$members = array();
-		$member = new Db\Member();
-		foreach ($sessions as $session) {
-			$members[$session['es_id']] = $member->getActiveCollection($session['es_id']);
-		}
-
 		return array(
-			'status' => 'success', 'documents' => $documents,'sessions' => $sessions,'members' => $members
+			'status' => 'success', 'documents' => $documents
 		);
 	}
 
@@ -312,7 +301,7 @@ class DocumentController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function index(){
+	public function index($fileId, $dir){
 		$wopiRemote = $this->getWopiUrl($this->isTester());
 		if (($parts = parse_url($wopiRemote)) && isset($parts['scheme']) && isset($parts['host'])) {
 			$webSocketProtocol = "ws://";
@@ -329,14 +318,10 @@ class DocumentController extends Controller {
 			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', array($wopiRemote)), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
 		}
 
-		$user = \OC::$server->getUserSession()->getUser();
-		$usergroups = array_filter(\OC::$server->getGroupManager()->getUserGroupIds($user));
-		$usergroups = join('|', $usergroups);
-		\OC::$server->getLogger()->debug('User is in groups: {groups}', [ 'app' => $this->appName, 'groups' => $usergroups ]);
 
 		\OC::$server->getNavigationManager()->setActiveEntry( 'richdocuments_index' );
 		$maxUploadFilesize = \OCP\Util::maxUploadFilesize("/");
-		$response = new TemplateResponse('richdocuments', 'documents', [
+		$retVal = array(
 			'enable_previews' => $this->settings->getSystemValue('enable_previews', true),
 			'uploadMaxFilesize' => $maxUploadFilesize,
 			'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
@@ -344,8 +329,25 @@ class DocumentController extends Controller {
 			'wopi_url' => $webSocket,
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
 			'instanceId' => $this->settings->getSystemValue('instanceid')
-		]);
+		);
 
+		if (!is_null($fileId)) {
+			$tokenResult = $this->wopiGetToken($fileId);
+			$userFolder = \OC::$server->getRootFolder()->getUserFolder($this->uid);
+			$item = $userFolder->getById($fileId)[0];
+			$docs = $this->get($fileId);
+			$docRetVal = array(
+				'permissions' => $item->getPermissions(),
+				'title' => $item->getName(),
+				'fileId' => $item->getId() . '_' . $this->settings->getSystemValue('instanceid'),
+				'token' => $tokenResult['token'],
+				'urlsrc' => $docs['documents'][0]['urlsrc'],
+				'path' => $userFolder->getRelativePath($item->getPath())
+			);
+			$retVal = array_merge($retVal, $docRetVal);
+		}
+
+		$response = new TemplateResponse('richdocuments', 'documents', $retVal);
 		$policy = new ContentSecurityPolicy();
 		$policy->addAllowedFrameDomain($wopiRemote);
 		$policy->allowInlineScript(true);
@@ -459,7 +461,7 @@ class DocumentController extends Controller {
 	 * Generates and returns an access token for a given fileId.
 	 * Only for authenticated users!
 	 */
-	public function wopiGetToken($fileId){
+	private function wopiGetToken($fileId){
 		list($fileId, , $version) = Helper::parseFileId($fileId);
 		\OC::$server->getLogger()->debug('Generating WOPI Token for file {fileId}, version {version}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'version' => $version ]);
 
@@ -567,7 +569,7 @@ class DocumentController extends Controller {
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
 
-		$res = $row->getPathForToken($fileId, $version, $token);
+		$res = $row->getPathForToken($token);
 		if ($res == false || http_response_code() != 200)
 		{
 			return false;
@@ -617,7 +619,7 @@ class DocumentController extends Controller {
 		$row->loadBy('token', $token);
 
 		//TODO: Support X-WOPIMaxExpectedSize header.
-		$res = $row->getPathForToken($fileId, $version, $token);
+		$res = $row->getPathForToken($token);
 		$ownerid = $res['owner'];
 
 		// Login the user to see his mount locations
@@ -667,7 +669,7 @@ class DocumentController extends Controller {
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
 
-		$res = $row->getPathForToken($fileId, $version, $token);
+		$res = $row->getPathForToken($token);
 		if (!$res['canwrite']) {
 			return array(
 				'status' => 'error',
@@ -777,61 +779,6 @@ class DocumentController extends Controller {
 	 */
 	public function wopiPutRelativeFile($fileId) {
 		return $this->wopiPutFile($fileId);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @PublicPage
-	 * Process partial/complete file download
-	 */
-	public function serve($esId){
-		$session = new Db\Session();
-		$session->load($esId);
-
-		$filename = $session->getGenesisUrl() ? $session->getGenesisUrl() : '';
-		return new DownloadResponse($this->request, $session->getOwner(), $filename);
-	}
-
-	/**
-	 * @NoAdminRequired
-	 */
-	public function download($path){
-		if (!$path){
-			$response = new JSONResponse();
-			$response->setStatus(Http::STATUS_BAD_REQUEST);
-			return $response;
-		}
-
-		$fullPath = '/files' . $path;
-		$fileInfo = \OC\Files\Filesystem::getFileInfo($path);
-		if ($fileInfo){
-			$file = new File($fileInfo->getId());
-			$genesis = new Genesis($file);
-			$fullPath = $genesis->getPath();
-		}
-		return new DownloadResponse($this->request, $this->uid, $fullPath);
-	}
-
-
-	/**
-	 * @NoAdminRequired
-	 */
-	public function rename($fileId){
-		$name = $this->request->post['name'];
-
-		$view = \OC\Files\Filesystem::getView();
-		$path = $view->getPath($fileId);
-
-		if ($name && $view->is_file($path) && $view->isUpdatable($path)) {
-			$newPath = dirname($path) . '/' . $name;
-			if ($view->rename($path, $newPath)) {
-						return array('status' => 'success');
-			}
-		}
-		return array(
-			'status' => 'error',
-			'message' => (string) $this->l10n->t('You don\'t have permission to rename this document')
-		);
 	}
 
 	/**

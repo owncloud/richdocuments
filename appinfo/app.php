@@ -58,6 +58,3 @@ if ($app->isUserAllowedToUseCollabora()) {
 		$manager->registerTemplate('application/vnd.openxmlformats-officedocument.presentationml.presentation', 'apps/richdocuments/assets/pptxtemplate.pptx');
 	}
 }
-
-//Listen to delete file signal
-\OCP\Util::connectHook('OC_Filesystem', 'delete', "OCA\Richdocuments\Storage", "onDelete");
