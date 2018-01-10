@@ -222,39 +222,37 @@ var documentsMain = {
 				$('#revViewerContainer').prepend($('<div id="revViewer">'));
 			}
 
-			$.get(OC.generateUrl('apps/richdocuments/wopi/token/{fileId}', { fileId: fileId }),
-				  function (result) {
-					  // WOPISrc - URL that loolwsd will access (ie. pointing to ownCloud)
-					  var wopiurl = window.location.protocol + '//' + window.location.host + OC.generateUrl('apps/richdocuments/wopi/files/{file_id}', {file_id: fileId});
-					  var wopisrc = encodeURIComponent(wopiurl);
+			// WOPISrc - URL that loolwsd will access (ie. pointing to ownCloud)
+			var wopiurl = window.location.protocol + '//' + window.location.host + OC.generateUrl('apps/richdocuments/wopi/files/{file_id}', {file_id: fileId});
+			var wopisrc = encodeURIComponent(wopiurl);
 
-					  // urlsrc - the URL from discovery xml that we access for the particular
-					  // document; we add various parameters to that.
-					  // The discovery is available at
-					  //   https://<loolwsd-server>:9980/hosting/discovery
-					  var urlsrc = $('li[data-id='+ fileId.replace(/_.*/, '') +']>a').attr('urlsrc') +
-						  "WOPISrc=" + wopisrc +
-						  "&title=" + encodeURIComponent(title) +
-						  "&lang=" + $('li[data-id='+ fileId.replace(/_.*/, '') +']>a').attr('lolang') +
-						  "&permission=readonly";
+			// urlsrc - the URL from discovery xml that we access for the particular
+			// document; we add various parameters to that.
+			// The discovery is available at
+			//   https://<loolwsd-server>:9980/hosting/discovery
+			var urlsrc = documentsMain.urlsrc +
+			    "WOPISrc=" + wopisrc +
+			    "&title=" + encodeURIComponent(title) +
+			    "&lang=" + OC.getLocale().replace('_', '-') +
+			    "&permission=readonly";
 
-					  // access_token - must be passed via a form post
-					  var access_token = encodeURIComponent(result.token);
+			// access_token - must be passed via a form post
+			var access_token = encodeURIComponent(documentsMain.token);
 
-					  // form to post the access token for WOPISrc
-					  var form = '<form id="loleafletform_viewer" name="loleafletform_viewer" target="loleafletframe_viewer" action="' + urlsrc + '" method="post">' +
-						  '<input name="access_token" value="' + access_token + '" type="hidden"/></form>';
+			// form to post the access token for WOPISrc
+			var form = '<form id="loleafletform_viewer" name="loleafletform_viewer" target="loleafletframe_viewer" action="' + urlsrc + '" method="post">' +
+			    '<input name="access_token" value="' + access_token + '" type="hidden"/></form>';
 
-					  // iframe that contains the Collabora Online Viewer
-					  var frame = '<iframe id="loleafletframe_viewer" name= "loleafletframe_viewer" style="width:100%;height:100%;position:absolute;"/>';
+			// iframe that contains the Collabora Online Viewer
+			var frame = '<iframe id="loleafletframe_viewer" name= "loleafletframe_viewer" style="width:100%;height:100%;position:absolute;"/>';
 
-					  $('#revViewer').append(form);
-					  $('#revViewer').append(frame);
+			$('#revViewer').append(form);
+			$('#revViewer').append(frame);
 
-					  // submit that
-					  $('#loleafletform_viewer').submit();
-					  documentsMain.isViewerMode = true;
-				  });
+			// submit that
+			$('#loleafletform_viewer').submit();
+			documentsMain.isViewerMode = true;
+
 
 			// for closing revision mode
 			$('#revPanelHeader .closeButton').click(function(e) {
@@ -267,7 +265,6 @@ var documentsMain = {
 			var formattedTimestamp = OC.Util.formatDate(parseInt(version) * 1000);
 			var fileName = documentsMain.fileName.substring(0, documentsMain.fileName.indexOf('.'));
 			var downloadUrl, restoreUrl;
-			fileId = fileId.replace(/_.*/, '') + '_' + instanceId;
 			// Tweak the fileId format as {fileId_instanceId_version}. this is what WOPI backend expects the fileId to be in
 			// Ofc, if no version, then just {fileId_instanceId}
 			if (version === 0) {
@@ -421,7 +418,7 @@ var documentsMain = {
 			// document; we add various parameters to that.
 			// The discovery is available at
 			//	 https://<loolwsd-server>:9980/hosting/discovery
-			var urlsrc = rd_urlsrc +
+			var urlsrc = documentsMain.urlsrc +
 			    "WOPISrc=" + wopisrc +
 			    "&title=" + encodeURIComponent(title) +
 			    "&lang=" + OC.getLocale().replace('_', '-') +
@@ -482,7 +479,7 @@ var documentsMain = {
 						if (deprecated)
 							return;
 
-						documentsMain.UI.showRevHistory($('li[data-id=' + documentsMain.fileId + ']>a').attr('original-title'));
+						documentsMain.UI.showRevHistory(documentsMain.fullPath);
 					} else if (msgId === 'UI_SaveAs') {
 						// TODO it's not possible to enter the
 						// filename into the OC.dialogs.filepicker; so

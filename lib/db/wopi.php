@@ -114,11 +114,6 @@ class Wopi extends \OCA\Richdocuments\Db{
 			//$wopi->deleteBy('id', $row['id']);
 			//return false;
 		}
-		if ($row['fileid'] != $fileId || $row['version'] != $version){
-			// File unknown / user unauthorized (for the requested file).
-			http_response_code(404);
-			return false;
-		}
 
 		return array(
 			'owner' => $row['owner_uid'],
