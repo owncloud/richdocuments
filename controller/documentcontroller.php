@@ -318,33 +318,36 @@ class DocumentController extends Controller {
 			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', array($wopiRemote)), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
 		}
 
-		$tokenResult = $this->wopiGetToken($fileId);
-		$userFolder = \OC::$server->getRootFolder()->getUserFolder($this->uid);
-		$item = $userFolder->getById($fileId)[0];
-		$docs = $this->get($fileId);
-		if (!($item instanceof Node)) {
-			\OC::$server->getLogger()->debug('Could not get item for fileId, {fileId}', [ 'app' => $this->appName, 'fileId' => $fileId ]);
-			//throw new \Exception();
-		}
 
 		\OC::$server->getNavigationManager()->setActiveEntry( 'richdocuments_index' );
 		$maxUploadFilesize = \OCP\Util::maxUploadFilesize("/");
-		$response = new TemplateResponse('richdocuments', 'documents', [
+		$retVal = array(
 			'enable_previews' => $this->settings->getSystemValue('enable_previews', true),
 			'uploadMaxFilesize' => $maxUploadFilesize,
 			'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
 			'allowShareWithLink' => $this->settings->getAppValue('core', 'shareapi_allow_links', 'yes'),
 			'wopi_url' => $webSocket,
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
-			'instanceId' => $this->settings->getSystemValue('instanceid'),
-			'permissions' => $item->getPermissions(),
-			'title' => $item->getName(),
-			'fileId' => $item->getId() . '_' . $this->settings->getSystemValue('instanceid'),
-			'token' => $tokenResult['token'],
-			'urlsrc' => $docs['documents'][0]['urlsrc'],
-			'path' => $userFolder->getRelativePath($item->getPath())
-		]);
+			'instanceId' => $this->settings->getSystemValue('instanceid')
+		);
 
+		if (!is_null($fileId)) {
+			$tokenResult = $this->wopiGetToken($fileId);
+			$userFolder = \OC::$server->getRootFolder()->getUserFolder($this->uid);
+			$item = $userFolder->getById($fileId)[0];
+			$docs = $this->get($fileId);
+			$docRetVal = array(
+				'permissions' => $item->getPermissions(),
+				'title' => $item->getName(),
+				'fileId' => $item->getId() . '_' . $this->settings->getSystemValue('instanceid'),
+				'token' => $tokenResult['token'],
+				'urlsrc' => $docs['documents'][0]['urlsrc'],
+				'path' => $userFolder->getRelativePath($item->getPath())
+			);
+			$retVal = array_merge($retVal, $docRetVal);
+		}
+
+		$response = new TemplateResponse('richdocuments', 'documents', $retVal);
 		$policy = new ContentSecurityPolicy();
 		$policy->addAllowedFrameDomain($wopiRemote);
 		$policy->allowInlineScript(true);
