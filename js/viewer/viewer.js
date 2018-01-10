@@ -69,9 +69,9 @@ var odfViewer = {
 		var fileDir = context.dir;
 
 		if (fileDir) {
-			window.location = OC.generateUrl('apps/richdocuments/index#{file_id}_{dir}', {file_id: fileId, dir: fileDir});
+			window.location = OC.generateUrl('apps/richdocuments/index?fileId={file_id}&dir={dir}', {file_id: fileId, dir: fileDir});
 		} else {
-			window.location = OC.generateUrl('apps/richdocuments/index#{file_id}', {file_id: fileId});
+			window.location = OC.generateUrl('apps/richdocuments/index?fileId={file_id}', {file_id: fileId});
 		}
 	},
 

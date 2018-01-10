@@ -312,7 +312,7 @@ class DocumentController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function index(){
+	public function index($fileId, $dir){
 		$wopiRemote = $this->getWopiUrl($this->isTester());
 		if (($parts = parse_url($wopiRemote)) && isset($parts['scheme']) && isset($parts['host'])) {
 			$webSocketProtocol = "ws://";
@@ -329,10 +329,14 @@ class DocumentController extends Controller {
 			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', array($wopiRemote)), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
 		}
 
-		$user = \OC::$server->getUserSession()->getUser();
-		$usergroups = array_filter(\OC::$server->getGroupManager()->getUserGroupIds($user));
-		$usergroups = join('|', $usergroups);
-		\OC::$server->getLogger()->debug('User is in groups: {groups}', [ 'app' => $this->appName, 'groups' => $usergroups ]);
+		$tokenResult = $this->wopiGetToken($fileId);
+		$userFolder = \OC::$server->getRootFolder()->getUserFolder($this->uid);
+		$item = $userFolder->getById($fileId)[0];
+		$docs = $this->get($fileId);
+		if (!($item instanceof Node)) {
+			\OC::$server->getLogger()->debug('Could not get item for fileId, {fileId}', [ 'app' => $this->appName, 'fileId' => $fileId ]);
+			//throw new \Exception();
+		}
 
 		\OC::$server->getNavigationManager()->setActiveEntry( 'richdocuments_index' );
 		$maxUploadFilesize = \OCP\Util::maxUploadFilesize("/");
@@ -343,7 +347,13 @@ class DocumentController extends Controller {
 			'allowShareWithLink' => $this->settings->getAppValue('core', 'shareapi_allow_links', 'yes'),
 			'wopi_url' => $webSocket,
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
-			'instanceId' => $this->settings->getSystemValue('instanceid')
+			'instanceId' => $this->settings->getSystemValue('instanceid'),
+			'permissions' => $item->getPermissions(),
+			'title' => $item->getName(),
+			'fileId' => $item->getId() . '_' . $this->settings->getSystemValue('instanceid'),
+			'token' => $tokenResult['token'],
+			'urlsrc' => $docs['documents'][0]['urlsrc'],
+			'path' => $userFolder->getRelativePath($item->getPath())
 		]);
 
 		$policy = new ContentSecurityPolicy();
@@ -459,7 +469,7 @@ class DocumentController extends Controller {
 	 * Generates and returns an access token for a given fileId.
 	 * Only for authenticated users!
 	 */
-	public function wopiGetToken($fileId){
+	private function wopiGetToken($fileId){
 		list($fileId, , $version) = Helper::parseFileId($fileId);
 		\OC::$server->getLogger()->debug('Generating WOPI Token for file {fileId}, version {version}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'version' => $version ]);
 
