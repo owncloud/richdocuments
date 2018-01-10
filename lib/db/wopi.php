@@ -95,8 +95,7 @@ class Wopi extends \OCA\Richdocuments\Db{
 	 * constructs and validates the path.
 	 * Returns the path, if valid, else false.
 	 */
-	public function getPathForToken($fileId, $version, $token){
-
+	public function getPathForToken($token){
 		$wopi = new Wopi();
 		$row = $wopi->loadBy('token', $token)->getData();
 		\OC::$server->getLogger()->debug('Loaded WOPI Token record: {row}.', [ 'row' => $row ]);

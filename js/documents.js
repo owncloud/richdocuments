@@ -459,9 +459,10 @@ var documentsMain = {
 						return;
 					}
 
+					var msg, msgId;
 					try {
-						var msg = JSON.parse(e.data);
-						var msgId = msg.MessageId;
+						msg = JSON.parse(e.data);
+						msgId = msg.MessageId;
 						var args = msg.Values;
 						var deprecated = !!args.Deprecated;
 					} catch(exc) {

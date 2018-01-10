@@ -569,7 +569,7 @@ class DocumentController extends Controller {
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
 
-		$res = $row->getPathForToken($fileId, $version, $token);
+		$res = $row->getPathForToken($token);
 		if ($res == false || http_response_code() != 200)
 		{
 			return false;
@@ -619,7 +619,7 @@ class DocumentController extends Controller {
 		$row->loadBy('token', $token);
 
 		//TODO: Support X-WOPIMaxExpectedSize header.
-		$res = $row->getPathForToken($fileId, $version, $token);
+		$res = $row->getPathForToken($token);
 		$ownerid = $res['owner'];
 
 		// Login the user to see his mount locations
@@ -669,7 +669,7 @@ class DocumentController extends Controller {
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
 
-		$res = $row->getPathForToken($fileId, $version, $token);
+		$res = $row->getPathForToken($token);
 		if (!$res['canwrite']) {
 			return array(
 				'status' => 'error',
