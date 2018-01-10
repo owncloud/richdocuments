@@ -573,14 +573,16 @@ var documentsMain = {
 
 		// Does anything indicate that we need to autostart a session?
 		var fileId = getURLParameter('fileId');
+		if (fileId != 'null')
+			documentsMain.fileId = fileId;
 		var dir = getURLParameter('dir');
 		if (dir != 'null')
 			documentsMain.returnToDir = dir;
 
 		// this will launch the document with given fileId
-		documentsMain.show(fileId);
+		documentsMain.show(documentsMain.fileId);
 
-		if (fileId) {
+		if (documentsMain.fileId) {
 			documentsMain.overlay.documentOverlay('show');
 			documentsMain.prepareSession();
 		}
@@ -610,7 +612,7 @@ var documentsMain = {
 		documentsMain.overlay.documentOverlay('hide');
 	},
 
-	initSession: function(docInfo) {
+	initSession: function() {
 		documentsMain.urlsrc = rd_urlsrc;
 		documentsMain.fullPath = rd_path;
 		documentsMain.token = rd_token;
