@@ -151,7 +151,7 @@ var documentsSettings = {
 			page.find('#test-server-section').toggleClass('hidden', !this.checked);
 			if (this.checked) {
 				OC.Settings.setupGroupsSelect($select, {
-					placeholder: t('core', 'None')
+					placeholder: t('richdocuments', 'None')
 				});
 			} else {
 				$select.select2('destroy');
@@ -248,7 +248,7 @@ var documentsSettings = {
 
 			if (this.checked) {
 				OC.Settings.setupGroupsSelect($select, {
-					placeholder: t('core', 'All')
+					placeholder: t('richdocuments', 'All')
 				});
 			} else {
 				$select.select2('destroy');
