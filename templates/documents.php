@@ -6,6 +6,7 @@
 	 var rd_token = '<?php p($_['token']) ?>';
 	 var rd_urlsrc = '<?php p($_['urlsrc']) ?>';
 	 var rd_path = '<?php p($_['path']) ?>';
+	 var rd_canonical_webroot = '<?php p($_['canonical_webroot']) ?>';
 </script>
 
 <?php

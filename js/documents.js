@@ -177,6 +177,19 @@ var documentsMain = {
 	toolbar : '<div id="ocToolbar"><div id="ocToolbarInside"></div><span id="toolbar" class="claro"></span></div>',
 	returnToDir : null, // directory where we started from in the 'Files' app
 
+	// generates docKey for given fileId
+	_generateDocKey: function(wopiFileId) {
+		var ocurl = OC.generateUrl('apps/richdocuments/wopi/files/{file_id}', {file_id: wopiFileId});
+		if (rd_canonical_webroot) {
+			if (!rd_canonical_webroot.startsWith('/'))
+				rd_canonical_webroot = '/' + rd_canonical_webroot;
+
+			ocurl = ocurl.replace(OC.webroot, rd_canonical_webroot);
+		}
+
+		return ocurl;
+	},
+
 	UI : {
 		/* Editor wrapper HTML */
 		container : '<div id="mainContainer" class="claro">' +
@@ -222,8 +235,9 @@ var documentsMain = {
 				$('#revViewerContainer').prepend($('<div id="revViewer">'));
 			}
 
+			var ocurl = documentsMain._generateDocKey(fileId);
 			// WOPISrc - URL that loolwsd will access (ie. pointing to ownCloud)
-			var wopiurl = window.location.protocol + '//' + window.location.host + OC.generateUrl('apps/richdocuments/wopi/files/{file_id}', {file_id: fileId});
+			var wopiurl = window.location.protocol + '//' + window.location.host + ocurl;
 			var wopisrc = encodeURIComponent(wopiurl);
 
 			// urlsrc - the URL from discovery xml that we access for the particular
@@ -409,9 +423,10 @@ var documentsMain = {
 			$('title').text(title + ' - ' + documentsMain.UI.mainTitle);
 
 			var wopiFileId = documentsMain.fileId;
+			var ocurl = documentsMain._generateDocKey(wopiFileId);
 			// WOPISrc - URL that loolwsd will access (ie. pointing to ownCloud)
 			// Include the unique instanceId in the WOPI URL as part of the fileId
-			var wopiurl = window.location.protocol + '//' + window.location.host + OC.generateUrl('apps/richdocuments/wopi/files/{file_id}', {file_id: wopiFileId});
+			var wopiurl = window.location.protocol + '//' + window.location.host + ocurl;
 			var wopisrc = encodeURIComponent(wopiurl);
 
 			// urlsrc - the URL from discovery xml that we access for the particular

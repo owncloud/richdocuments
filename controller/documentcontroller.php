@@ -328,7 +328,8 @@ class DocumentController extends Controller {
 			'allowShareWithLink' => $this->settings->getAppValue('core', 'shareapi_allow_links', 'yes'),
 			'wopi_url' => $webSocket,
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
-			'instanceId' => $this->settings->getSystemValue('instanceid')
+			'instanceId' => $this->settings->getSystemValue('instanceid'),
+			'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot')
 		);
 
 		if (!is_null($fileId)) {
