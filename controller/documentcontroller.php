@@ -625,7 +625,6 @@ class DocumentController extends Controller {
 	 * Expects a valid token in access_token parameter.
 	 */
 	public function wopiGetFile($fileId){
-		\OC_User::setIncognitoMode(true);
 		$token = $this->request->getParam('access_token');
 
 		list($fileId, , $version) = Helper::parseFileId($fileId);
@@ -664,7 +663,9 @@ class DocumentController extends Controller {
 
 		$this->logoutUser();
 
-		/* This is required for reading encrypted files */
+		// This is required to be able to read encrypted documents
+		\OC_User::setIncognitoMode(true);
+		// This is required for reading encrypted files
 		\OC_Util::tearDownFS();
 		\OC_Util::setupFS($ownerid);
 
