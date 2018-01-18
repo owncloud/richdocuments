@@ -276,7 +276,7 @@ var documentsSettings = {
 			if (!this.checked) {
 				documentsSettings.saveWebroot('');
 			} else {
-				var val = $('#canonical-webroot').value();
+				var val = $('#canonical-webroot').val();
 				if (val)
 					documentsSettings.saveWebroot();
 			}
