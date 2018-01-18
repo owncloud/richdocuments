@@ -46,4 +46,13 @@ script('richdocuments', 'admin');
 	    <button type="button" id="external-apps-add-button"><?php p($l->t('Add')) ?></button>
 	    <span id="enable-external-apps-section-msg" class="msg"></span>
 	</div>
+
+	<br/>
+	<input type="checkbox" id="enable_canonical_webroot_cb-richdocuments" <?php p($_['canonical_webroot'] !== '' ? 'checked' : '') ?> />
+	<label for="canonical_webroot_cb-richdocuments"><?php p($l->t('Use Canonical webroot')) ?></label>
+	<div id="enable-canonical-webroot-section" class="indent <?php if ($_['canonical_webroot'] == '') p('hidden') ?>" >
+	<input type="text" id="canonical-webroot" name="canonical-webroot-name" value="<?php p($_['canonical_webroot']) ?>">
+	<br/>
+	<p style="max-width: 50em;"><em><?php p($l->t('Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance.')) ?></em></p>
+	</div>
 </div>

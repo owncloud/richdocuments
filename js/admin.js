@@ -85,6 +85,18 @@ var documentsSettings = {
 		);
 	},
 
+	saveWebroot: function(value) {
+		var data = {
+			'canonical_webroot': value
+		};
+
+		console.log('saving new webroot: ' + value);
+		$.post(
+			OC.filePath('richdocuments', 'ajax', 'admin.php'),
+			data
+		);
+	},
+
 	afterSaveExternalApps: function(response) {
 		OC.msg.finishedAction('#enable-external-apps-section-msg', response);
 	},
@@ -255,6 +267,23 @@ var documentsSettings = {
 			}
 
 			$select.change();
+		});
+
+		$(document).on('change', '#enable_canonical_webroot_cb-richdocuments', function() {
+			var page = $(this).parent();
+
+			page.find('#enable-canonical-webroot-section').toggleClass('hidden', !this.checked);
+			if (!this.checked) {
+				documentsSettings.saveWebroot('');
+			} else {
+				var val = $('#canonical-webroot').val();
+				if (val)
+					documentsSettings.saveWebroot();
+			}
+		});
+
+		$(document).on('change', '#canonical-webroot', function() {
+			documentsSettings.saveWebroot(this.value);
 		});
 	}
 };
