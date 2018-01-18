@@ -48,6 +48,6 @@ script('richdocuments', 'admin');
 	<div id="enable-canonical-webroot-section" class="indent <?php if ($_['canonical_webroot'] == '') p('hidden') ?>" >
 	<input type="text" id="canonical-webroot" name="canonical-webroot-name" value="<?php p($_['canonical_webroot']) ?>">
 	<br/>
-	<em><?php p($l->t('Canonical owncloud webroot that Collabora should use.')) ?></em>
+	<em><?php p($l->t('Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance.')) ?></em>
 	</div>
 </div>
