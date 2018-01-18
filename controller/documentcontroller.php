@@ -11,24 +11,23 @@
 
 namespace OCA\Richdocuments\Controller;
 
+use \OC\Files\View;
 use \OCP\AppFramework\Controller;
 use \OCP\IRequest;
 use \OCP\IConfig;
 use \OCP\IL10N;
 use \OCP\AppFramework\Http\ContentSecurityPolicy;
-use OCP\AppFramework\Http;
+use \OCP\AppFramework\Http;
 use \OCP\AppFramework\Http\JSONResponse;
 use \OCP\AppFramework\Http\TemplateResponse;
+use \OCP\ICacheFactory;
+use \OCP\ILogger;
 
 use \OCA\Richdocuments\AppConfig;
 use \OCA\Richdocuments\Db;
 use \OCA\Richdocuments\Helper;
 use \OCA\Richdocuments\Storage;
-use \OCA\Richdocuments\Download;
 use \OCA\Richdocuments\DownloadResponse;
-use \OC\Files\View;
-use \OCP\ICacheFactory;
-use \OCP\ILogger;
 
 class ResponseException extends \Exception {
 	private $hint;
@@ -162,14 +161,14 @@ class DocumentController extends Controller {
 
          $user = \OC::$server->getUserSession()->getUser()->getUID();
          $testgroups = array_filter(explode('|', $this->appConfig->getAppValue('test_server_groups')));
-         \OC::$server->getLogger()->debug('Testgroups are {testgroups}', [
+         $this->logger->debug('Testgroups are {testgroups}', [
              'app' => $this->appName,
              'testgroups' => $testgroups
          ]);
          foreach ($testgroups as $testgroup) {
              $test = \OC::$server->getGroupManager()->get($testgroup);
              if ($test !== null && sizeof($test->searchUsers($user)) > 0) {
-                 \OC::$server->getLogger()->debug('User {user} found in {group}', [
+                 $this->logger->debug('User {user} found in {group}', [
                      'app' => $this->appName,
                      'user' => $user,
                      'group' => $testgroup
@@ -187,8 +186,6 @@ class DocumentController extends Controller {
 	 * @return string
 	 */
 	private function getDiscovery(){
-		\OC::$server->getLogger()->debug('getDiscovery(): Getting discovery.xml from the cache.');
-
 		$tester = $this->isTester();
 		$wopiRemote = $this->getWopiUrl($tester);
 		$discoveryKey = 'discovery.xml';
@@ -203,6 +200,8 @@ class DocumentController extends Controller {
 		$discovery = $this->cache->get($discoveryKey);
 
 		if (is_null($discovery)) {
+			$this->logger->debug('getDiscovery(): Not found in cache; Fetching discovery.xml', ['app' => $this->appName]);
+
 			$contact_admin = $this->l10n->t('Please contact the "%s" administrator.', array($wopiRemote));
 
 			try {
@@ -235,8 +234,11 @@ class DocumentController extends Controller {
 				throw new ResponseException($this->l10n->t('Collabora Online: Unable to read discovery.xml from "%s".', array($wopiRemote)), $contact_admin);
 			}
 
-			\OC::$server->getLogger()->debug('Storing the discovery.xml under key ' . $discoveryKey . ' to the cache.');
+			$this->logger->debug('Storing the discovery.xml under key ' . $discoveryKey . ' to the cache.', ['app' => $this->appName]);
 			$this->cache->set($discoveryKey, $discovery, 3600);
+		}
+		else {
+			$this->logger->debug('getDiscovery(): Found in cache', ['app' => $this->appName]);
 		}
 
 		return $discovery;
@@ -466,7 +468,10 @@ class DocumentController extends Controller {
 	 */
 	private function wopiGetToken($fileId){
 		list($fileId, , $version) = Helper::parseFileId($fileId);
-		\OC::$server->getLogger()->debug('Generating WOPI Token for file {fileId}, version {version}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'version' => $version ]);
+		$this->logger->info('wopiGetToken(): Generating WOPI Token for file {fileId}, version {version}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'version' => $version ]);
 
 		$view = \OC\Files\Filesystem::getView();
 		$path = $view->getPath($fileId);
@@ -474,7 +479,9 @@ class DocumentController extends Controller {
 
 		$encryptionManager = \OC::$server->getEncryptionManager();
 		if ($encryptionManager->isEnabled()) {
-			// Update the current file to be accessible with system public shared key
+			// Update the current file to be accessible with system public
+			// shared key
+			$this->logger->debug('wopiGetToken(): Encryption enabled.', ['app' => $this->appName]);
 			$owner = $view->getOwner($path);
 			$absPath = '/' . $owner . '/files' .  $path;
 			$accessList = \OC::$server->getEncryptionFilesHelper()->getAccessList($absPath);
@@ -493,7 +500,7 @@ class DocumentController extends Controller {
 			foreach($editGroups as $editGroup) {
 				$editorGroup = \OC::$server->getGroupManager()->get($editGroup);
 				if ($editorGroup !== null && sizeof($editorGroup->searchUsers($editorUid)) > 0) {
-					\OC::$server->getLogger()->debug("Editor {editor} is in edit group {group}", [
+					$this->logger->debug("wopiGetToken(): Editor {editor} is in edit group {group}", [
 						'app' => $this->appName,
 						'editor' => $editorUid,
 						'group' => $editGroup
@@ -506,21 +513,24 @@ class DocumentController extends Controller {
 
 		// If token is for some versioned file
 		if ($version !== '0') {
-			\OC::$server->getLogger()->debug('setting updatable to false');
 			$updatable = false;
 		}
 
-		\OC::$server->getLogger()->debug('File with {fileid} has updatable set to {updatable}', [ 'app' => $this->appName, 'fileid' => $fileId, 'updatable' => $updatable ]);
-
+		$this->logger->debug('wopiGetToken(): File {fileid} is updatable? {updatable}', [
+			'app' => $this->appName,
+			'fileid' => $fileId,
+			'updatable' => $updatable ]);
 		$row = new Db\Wopi();
 		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 		$token = $row->generateFileToken($fileId, $version, (int)$updatable, $serverHost, $editorUid);
 
 		// Return the token.
-		return array(
+		$result = array(
 			'status' => 'success',
 			'token' => $token
 		);
+		$this->logger->debug('wopiGetToken(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
+		return $result;
 	}
 
 	/**
@@ -536,7 +546,7 @@ class DocumentController extends Controller {
 			if ($app !== '') {
 				if ($secretToken === $app) {
 					$appName = explode(':', $app);
-					\OC::$server->getLogger()->debug('External app "{extApp}" authenticated; issuing access token for fileId {fileId}', [
+					$this->logger->info('extAppWopiGetData(): External app "{extApp}" authenticated; issuing access token for fileId {fileId}', [
 						'app' => $this->appName,
 						'extApp' => $appName[0],
 						'fileId' => $fileId
@@ -551,10 +561,7 @@ class DocumentController extends Controller {
 			}
 		}
 
-		return array(
-			'status' => 'error',
-			'message' => 'Permission denied'
-		);
+		return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
 	}
 
 	/**
@@ -567,15 +574,19 @@ class DocumentController extends Controller {
 		$token = $this->request->getParam('access_token');
 
 		list($fileId, , $version) = Helper::parseFileId($fileId);
-		\OC::$server->getLogger()->debug('Getting info about file {fileId}, version {version} by token {token}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'version' => $version, 'token' => $token ]);
+		$this->logger->info('wopiCheckFileInfo(): Getting info about file {fileId}, version {version} by token {token}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'version' => $version,
+			'token' => $token ]);
 
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
 
 		$res = $row->getPathForToken($token);
-		if ($res == false || http_response_code() != 200)
-		{
-			return false;
+		if ($res == false) {
+			$this->logger->debug('wopiCheckFileInfo(): getPathForToken() failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
 		// Login the user to see his mount locations
@@ -585,12 +596,12 @@ class DocumentController extends Controller {
 		$this->logoutUser();
 
 		if (!$info) {
-			http_response_code(404);
-			return false;
+			$this->logger->warning('wopiCheckFileInfo(): No valid file info', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
 		$editorName = \OC::$server->getUserManager()->get($res['editor'])->getDisplayName();
-		return array(
+		$result = array(
 			'BaseFileName' => $info['name'],
 			'Size' => $info['size'],
 			'Version' => $version,
@@ -602,6 +613,8 @@ class DocumentController extends Controller {
 			'PostMessageOrigin' => $res['server_host'],
 			'LastModifiedTime' => Helper::toISO8601($info->getMTime())
 		);
+		$this->logger->debug("wopiCheckFileInfo(): Result: {result}", ['app' => $this->appName, 'result' => $result]);
+		return $result;
 	}
 
 	/**
@@ -612,11 +625,14 @@ class DocumentController extends Controller {
 	 * Expects a valid token in access_token parameter.
 	 */
 	public function wopiGetFile($fileId){
-		\OC_User::setIncognitoMode(true);
 		$token = $this->request->getParam('access_token');
 
 		list($fileId, , $version) = Helper::parseFileId($fileId);
-		\OC::$server->getLogger()->debug('Getting contents of file {fileId}, version {version} by token {token}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'version' => $version, 'token' => $token ]);
+		$this->logger->info('wopiGetFile(): File {fileId}, version {version}, token {token}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'version' => $version,
+			'token' => $token ]);
 
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
@@ -631,8 +647,8 @@ class DocumentController extends Controller {
 		$info = $view->getFileInfo($res['path']);
 
 		if (!$info) {
-			http_response_code(404);
-			return false;
+			$this->logger->warning('wopiGetFile(): No valid info found', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
 		$filename = '';
@@ -647,7 +663,9 @@ class DocumentController extends Controller {
 
 		$this->logoutUser();
 
-		/* This is required for reading encrypted files */
+		// This is required to be able to read encrypted documents
+		\OC_User::setIncognitoMode(true);
+		// This is required for reading encrypted files
 		\OC_Util::tearDownFS();
 		\OC_Util::setupFS($ownerid);
 
@@ -667,17 +685,25 @@ class DocumentController extends Controller {
 		$isPutRelative = ($this->request->getHeader('X-WOPI-Override') === 'PUT_RELATIVE');
 
 		list($fileId, , $version) = Helper::parseFileId($fileId);
-		\OC::$server->getLogger()->debug('Putting contents of file {fileId}, version {version} by token {token}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'version' => $version, 'token' => $token ]);
+		$this->logger->debug('wopiputFile(): File {fileId}, version {version}, token {token}, WopiOverride {wopiOverride}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'version' => $version,
+			'token' => $token,
+			'wopiOverride' => $this->request->getHeader('X-WOPI-Override')]);
 
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
 
 		$res = $row->getPathForToken($token);
+		if ($res == false) {
+			$this->logger->debug('wopiPutFile(): getPathForToken() failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
 		if (!$res['canwrite']) {
-			return array(
-				'status' => 'error',
-				'message' => 'Permission denied'
-			);
+			$this->logger->debug('wopiPutFile(): getPathForToken() failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
 		// This call is made from loolwsd, so we need to initialize the
@@ -726,12 +752,16 @@ class DocumentController extends Controller {
 		}
 		else {
 			$wopiHeaderTime = $this->request->getHeader('X-LOOL-WOPI-Timestamp');
-			\OC::$server->getLogger()->debug('WOPI header timestamp provided: {wopiHeaderTime}', ['wopiHeaderTime' => $wopiHeaderTime]);
+			$this->logger->debug('wopiPutFile(): WOPI header timestamp: {wopiHeaderTime}', [
+				'app' => $this->appName,
+				'wopiHeaderTime' => $wopiHeaderTime]);
 			if (!$wopiHeaderTime) {
-				\OC::$server->getLogger()->debug('No header X-LOOL-WOPI-Timestamp present. ' .
-				                                 'Continuing to save the file.');
+				$this->logger->debug('wopiPutFile(): X-LOOL-WOPI-Timestamp absent. Saving file.', ['app' => $this->appName]);
 			} else if ($wopiHeaderTime != Helper::toISO8601($file->getMTime())) {
-				\OC::$server->getLogger()->debug('Document timestamp mismatch ! WOPI client says mtime {headerTime} but storage says {storageTime}', ['headerTime' => $wopiHeaderTime, 'storageTime' => Helper::toISO8601($file->getMtime())]);
+				$this->logger->debug('wopiPutFile(): Document timestamp mismatch ! WOPI client says mtime {headerTime} but storage says {storageTime}', [
+					'app' => $this->appName,
+					'headerTime' => $wopiHeaderTime,
+					'storageTime' => Helper::toISO8601($file->getMtime())]);
 				// Tell WOPI client about this conflict.
 				return new JSONResponse(['LOOLStatusCode' => self::LOOL_STATUS_DOC_CHANGED], Http::STATUS_CONFLICT);
 			}
@@ -739,7 +769,11 @@ class DocumentController extends Controller {
 
 		// Read the contents of the file from the POST body and store.
 		$content = fopen('php://input', 'r');
-		\OC::$server->getLogger()->debug('Storing file {fileId} by {editor} owned by {owner}.', [ 'app' => $this->appName, 'fileId' => $fileId, 'editor' => $res['editor'], 'owner' => $res['owner']]);
+		$this->logger->debug('wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'editor' => $res['editor'],
+			'owner' => $res['owner']]);
 
 		// To be able to make it work when server-side encryption is enabled
 		\OC_User::setIncognitoMode(true);

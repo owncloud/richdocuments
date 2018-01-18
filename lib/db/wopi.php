@@ -27,6 +27,8 @@ class Wopi extends \OCA\Richdocuments\Db{
 	// Tokens expire after this many seconds (not defined by WOPI specs).
 	const TOKEN_LIFETIME_SECONDS = 1800;
 
+	const appName = 'richdocuments';
+
 	protected $tableName  = '`*PREFIX*richdocuments_wopi`';
 
 	protected $insertStatement  = 'INSERT INTO `*PREFIX*richdocuments_wopi` (`owner_uid`, `editor_uid`, `fileid`, `version`, `path`, `canwrite`, `server_host`, `token`, `expiry`)
@@ -68,8 +70,14 @@ class Wopi extends \OCA\Richdocuments\Db{
 					\OCP\Security\ISecureRandom::CHAR_LOWER . \OCP\Security\ISecureRandom::CHAR_UPPER .
 					\OCP\Security\ISecureRandom::CHAR_DIGITS);
 
-		\OC::$server->getLogger()->debug('Issuing token for {editor} file {fileId}, version {version} owned by {owner}, path {path}: {token}',
-		[ 'owner' => $owner, 'editor' => $editor, 'fileId' => $fileId, 'version' => $version, 'path' => $path, 'token' => $token ]);
+		\OC::$server->getLogger()->debug('generateFileToken(): Issuing token, editor: {editor}, file: {fileId}, version: {version}, owner: {owner}, path: {path}, token: {token}', [
+			'app' => self::appName,
+			'owner' => $owner,
+			'editor' => $editor,
+			'fileId' => $fileId,
+			'version' => $version,
+			'path' => $path,
+			'token' => $token ]);
 
 		$wopi = new \OCA\Richdocuments\Db\Wopi([
 			$owner,
@@ -98,7 +106,9 @@ class Wopi extends \OCA\Richdocuments\Db{
 	public function getPathForToken($token){
 		$wopi = new Wopi();
 		$row = $wopi->loadBy('token', $token)->getData();
-		\OC::$server->getLogger()->debug('Loaded WOPI Token record: {row}.', [ 'row' => $row ]);
+		\OC::$server->getLogger()->debug('Loaded WOPI Token record: {row}.', [
+			'app' => self::appName,
+			'row' => $row ]);
 		if (count($row) == 0)
 		{
 			// Invalid token.
