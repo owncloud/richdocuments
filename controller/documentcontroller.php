@@ -11,24 +11,23 @@
 
 namespace OCA\Richdocuments\Controller;
 
+use \OC\Files\View;
 use \OCP\AppFramework\Controller;
 use \OCP\IRequest;
 use \OCP\IConfig;
 use \OCP\IL10N;
 use \OCP\AppFramework\Http\ContentSecurityPolicy;
-use OCP\AppFramework\Http;
+use \OCP\AppFramework\Http;
 use \OCP\AppFramework\Http\JSONResponse;
 use \OCP\AppFramework\Http\TemplateResponse;
+use \OCP\ICacheFactory;
+use \OCP\ILogger;
 
 use \OCA\Richdocuments\AppConfig;
 use \OCA\Richdocuments\Db;
 use \OCA\Richdocuments\Helper;
 use \OCA\Richdocuments\Storage;
-use \OCA\Richdocuments\Download;
 use \OCA\Richdocuments\DownloadResponse;
-use \OC\Files\View;
-use \OCP\ICacheFactory;
-use \OCP\ILogger;
 
 class ResponseException extends \Exception {
 	private $hint;

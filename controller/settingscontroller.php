@@ -15,10 +15,10 @@ use \OCP\AppFramework\Controller;
 use \OCP\IRequest;
 use \OCP\IL10N;
 use \OCP\AppFramework\Http\JSONResponse;
-use OCP\AppFramework\Http\TemplateResponse;
+use \OCP\AppFramework\Http\TemplateResponse;
 
-use OCA\Richdocuments\AppConfig;
-use OCA\Richdocuments\Filter;
+use \OCA\Richdocuments\AppConfig;
+use \OCA\Richdocuments\Filter;
 
 class SettingsController extends Controller{
 
