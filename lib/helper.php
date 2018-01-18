@@ -59,6 +59,9 @@ class Helper {
 		return false;
 	}
 
+	/**
+	 * @param string $path
+	 */
 	public static function getNewFileName($view, $path, $prepend = ' '){
 		$fileNum = 1;
 

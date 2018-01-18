@@ -67,7 +67,7 @@ class DocumentController extends Controller {
 	}
 
 	/**
-	 * @param \SimpleXMLElement $discovery
+	 * @param \SimpleXMLElement $discovery_parsed
 	 * @param string $mimetype
 	 */
 	private function getWopiSrcUrl($discovery_parsed, $mimetype) {
@@ -139,6 +139,7 @@ class DocumentController extends Controller {
 
     /**
      * Return the original wopi url or test wopi url
+     * @param boolean $tester
      */
 	private function getWopiUrl($tester) {
 		$wopiurl = '';
@@ -183,6 +184,7 @@ class DocumentController extends Controller {
      }
 
 	/** Return the content of discovery.xml - either from cache, or download it.
+	 * @return string
 	 */
 	private function getDiscovery(){
 		\OC::$server->getLogger()->debug('getDiscovery(): Getting discovery.xml from the cache.');
