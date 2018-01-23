@@ -73,6 +73,7 @@ OC.L10N.register(
     "Presentation" : "Presentation",
     "Could not create file" : "Kunde ej skapa fil",
     "Collabora Online" : "Collabora Online",
+    "Open documentation" : "Öppna dokumentation",
     "Collabora Online server" : "Collabora Online-server",
     "Apply" : "Tillämpa",
     "Groups" : "Grupper",

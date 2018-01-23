@@ -95,6 +95,7 @@ OC.L10N.register(
     "Presentation" : "Presentation",
     "Could not create file" : "Could not create file",
     "Collabora Online" : "Collabora Online",
+    "Open documentation" : "Open documentation",
     "Collabora Online server" : "Collabora Online server",
     "URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client." : "URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client.",
     "Apply" : "Apply",

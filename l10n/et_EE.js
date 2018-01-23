@@ -76,6 +76,7 @@ OC.L10N.register(
     "Presentation" : "Esitlus",
     "Could not create file" : "Ei suuda luua faili",
     "Collabora Online" : "Collabora Online",
+    "Open documentation" : "Ava dokumentatsioon",
     "Collabora Online server" : "Collabora Online server",
     "Apply" : "Rakenda",
     "Groups" : "Grupid",

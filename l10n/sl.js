@@ -92,6 +92,7 @@ OC.L10N.register(
     "Presentation" : "Predstavitev",
     "Could not create file" : "Ni mogoče ustvariti datoteke",
     "Collabora Online" : "Collabora Online",
+    "Open documentation" : "Odpri dokumentacijo",
     "Collabora Online server" : "Strežnik Collabora Online",
     "URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client." : "Naslov URL (in vrata) strežnika Collabora Online, ki omogoča dostop do urejevalnih funkcij kot odjemalec WOPI.",
     "Apply" : "Uveljavi",

@@ -76,6 +76,7 @@ OC.L10N.register(
     "Presentation" : "Presentacion",
     "Could not create file" : "No se pudo crear el archivo",
     "Collabora Online" : "Collabora Online",
+    "Open documentation" : "Abrir documentación",
     "Collabora Online server" : "Servidor Collabora Online",
     "Apply" : "Aplicar",
     "Groups" : "Grupos",

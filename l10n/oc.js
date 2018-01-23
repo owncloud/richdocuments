@@ -80,6 +80,7 @@ OC.L10N.register(
     "Presentation" : "Presentacion",
     "Could not create file" : "Impossible de crear lo fichièr",
     "Collabora Online" : "Collabora en linha",
+    "Open documentation" : "Veire la documentacion",
     "Collabora Online server" : "Servidor Collabora en linha",
     "Apply" : "Aplicar",
     "Groups" : "Gropes",

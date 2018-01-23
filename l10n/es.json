@@ -93,6 +93,7 @@
     "Presentation" : "Presentación",
     "Could not create file" : "No se pudo crear el archivo",
     "Collabora Online" : "Collabora Online",
+    "Open documentation" : "Abrir Documentación",
     "Collabora Online server" : "Servidor Collabora Online",
     "URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client." : "La dirección URL (y puerto) del servidor Collabora Online que proporciona la funcionalidad de edición es un cliente WOPI.",
     "Apply" : "Aplicar",

@@ -77,6 +77,7 @@ OC.L10N.register(
     "Spreadsheet" : "Таблиця",
     "Presentation" : "Презентація",
     "Could not create file" : "Не вдалося створити файл",
+    "Open documentation" : "Відкрити документацію",
     "Apply" : "Застосувати",
     "Groups" : "Групи",
     "Save" : "Зберегти",

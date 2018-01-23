@@ -85,6 +85,7 @@ OC.L10N.register(
     "Presentation" : "Sunum",
     "Could not create file" : "Dosya oluşturulamadı",
     "Collabora Online" : "Collabora Online",
+    "Open documentation" : "Belgelendirmeyi aç",
     "Collabora Online server" : "Collabora Online sunucusu",
     "URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client." : "Bir WOPI istemcisi işleviyle düzenleme işlevine izin veren Collabora Onlie sunucusunun adresi (ve bağlantı noktası).",
     "Apply" : "Uygula",

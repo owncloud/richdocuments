@@ -92,6 +92,7 @@ OC.L10N.register(
     "Presentation" : "Kynning",
     "Could not create file" : "Gat ekki búið til skrá",
     "Collabora Online" : "Collabora Online",
+    "Open documentation" : "Opna hjálparskjöl",
     "Collabora Online server" : "Collabora Online þjónn",
     "URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client." : "URL-slóð (og gátt) Collabora Online þjónsins sem gefur út breytingaeigindi sem WOPI-biðlari.",
     "Apply" : "Virkja",

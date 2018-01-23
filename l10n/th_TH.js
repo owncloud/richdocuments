@@ -95,6 +95,7 @@ OC.L10N.register(
     "Presentation" : "งานนำเสนอ",
     "Could not create file" : "ไม่สามารถสร้างไฟล์",
     "Collabora Online" : "Collabora ออนไลน์",
+    "Open documentation" : "เปิดเอกสาร",
     "Collabora Online server" : "เซิร์ฟเวอร์ Collabora ออนไลน์",
     "URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client." : "URL (และพอร์ต) ของเซิร์ฟเวอร์ Collabora ออนไลน์ นั้นระบุฟังก์ชั่นการแก้ไขไคลเอนต์ WOPI",
     "Apply" : "นำไปใช้",

@@ -92,6 +92,7 @@ OC.L10N.register(
     "Presentation" : "מצגת",
     "Could not create file" : "יצירת הקובץ נכשלה",
     "Collabora Online" : "Collabora מקוון",
+    "Open documentation" : "תיעוד פתוח",
     "Collabora Online server" : "שרת Collabora מקוון",
     "URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client." : "נתיב (ושער גישה - פורט) של שרת Collabora מקוון שמספק את תכונת העריכה כלקוח WOPI.",
     "Apply" : "הפעלה",

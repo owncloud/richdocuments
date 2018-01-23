@@ -95,6 +95,7 @@ OC.L10N.register(
     "Presentation" : "Prezentáció",
     "Could not create file" : "Az állomány nem hozható létre",
     "Collabora Online" : "Collabora Online",
+    "Open documentation" : "Dokumentáció megnyitása",
     "Collabora Online server" : "Collabora Online kiszolgáló",
     "URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client." : "A Collabora Online kiszolgáló URL-je (és portja), amely WOPI-ügyfélként lehetővé teszi a szerkesztés funkciót.",
     "Apply" : "Alkalmaz",

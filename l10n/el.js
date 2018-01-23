@@ -92,6 +92,7 @@ OC.L10N.register(
     "Presentation" : "Παρουσίαση",
     "Could not create file" : "Αδυναμία δημιουργίας αρχείου",
     "Collabora Online" : "Collabora Online",
+    "Open documentation" : "Ανοιχτή τεκμηρίωση.",
     "Collabora Online server" : "Διακομιστής Collabora Online",
     "URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client." : "URL (και θύρα) του διακομιστή Collabora Online που παρέχει δυνατότητες επεξεργασίας ως πελάτης WOPI.",
     "Apply" : "Εφαρμογή",

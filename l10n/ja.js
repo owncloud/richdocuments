@@ -92,6 +92,7 @@ OC.L10N.register(
     "Presentation" : "プレゼンテーション",
     "Could not create file" : "ファイルを作成できませんでした",
     "Collabora Online" : "コラボラ オンライン",
+    "Open documentation" : "ドキュメントを開く",
     "Collabora Online server" : "コラボラ オンライン サーバー",
     "URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client." : "WOPI クライアントで編集できる機能を提供するコラボラ オンライン サーバーのURL(とポート)",
     "Apply" : "適用",

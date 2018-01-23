@@ -81,6 +81,7 @@ OC.L10N.register(
     "Presentation" : "Prezentacja",
     "Could not create file" : "Nie można utworzyć pliku",
     "Collabora Online" : "Collabora Online",
+    "Open documentation" : "Otwórz dokumentację",
     "Collabora Online server" : "Serwer Collabora Online",
     "Apply" : "Zastosuj",
     "Enable test server for specific groups" : "Włącz serwer testowy dla określonych grup",
