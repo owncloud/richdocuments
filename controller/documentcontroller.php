@@ -469,9 +469,7 @@ class DocumentController extends Controller {
 	}
 
 	/**
-	 * @NoAdminRequired
 	 * Generates and returns an access token for a given fileId.
-	 * Only for authenticated users!
 	 */
 	private function wopiGetToken($fileId){
 		list($fileId, , $version) = Helper::parseFileId($fileId);
