@@ -461,6 +461,13 @@ class DocumentController extends Controller {
 		return $response;
 	}
 
+	private function get($fileId){
+		$documents = array();
+		$documents[0] = Storage::getDocumentById($fileId);
+
+		return $this->prepareDocuments($documents);
+	}
+
 	/**
 	 * @NoAdminRequired
 	 * Generates and returns an access token for a given fileId.
@@ -817,18 +824,6 @@ class DocumentController extends Controller {
 	public function wopiPutRelativeFile($fileId) {
 		return $this->wopiPutFile($fileId);
 	}
-
-	/**
-	 * @NoAdminRequired
-	 * Get file information about single document with fileId
-	 */
-	public function get($fileId){
-		$documents = array();
-		$documents[0] = Storage::getDocumentById($fileId);
-
-		return $this->prepareDocuments($documents);
-	}
-
 
 	/**
 	 * @NoAdminRequired

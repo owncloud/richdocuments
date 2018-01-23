@@ -3,9 +3,7 @@
 $.widget('oc.documentGrid', {
 	options : {
 		context : '.documentslist',
-		documents : {},
-		sessions : {},
-		members : {}
+		documents : {}
 	},
 
 	render : function(fileId){
@@ -101,8 +99,6 @@ $.widget('oc.documentGrid', {
 				}
 				else {
 					that.options.documents = result.documents;
-					that.options.sessions = result.sessions;
-					that.options.members = result.members;
 				}
 			})
 			.fail(function(data){
@@ -113,8 +109,6 @@ $.widget('oc.documentGrid', {
 	_render : function (data){
 		var that = this,
 			documents = data && data.documents || this.options.documents,
-			sessions = data && data.sessions || this.options.sessions,
-		    members = data && data.members || this.options.members,
 			hasDocuments = false
 		;
 
@@ -163,9 +157,6 @@ $.widget('oc.documentOverlay', {
 var documentsMain = {
 	isEditorMode : false,
 	isViewerMode: false,
-	memberId : false,
-	esId : false,
-	ready :false,
 	fileName: null,
 	baseName: null,
 	canShare : false,
@@ -602,8 +593,6 @@ var documentsMain = {
 			documentsMain.overlay.documentOverlay('show');
 			documentsMain.prepareSession();
 		}
-
-		documentsMain.ready = true;
 	},
 
 	WOPIPostMessage: function(iframe, msgId, values) {
