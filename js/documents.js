@@ -880,29 +880,33 @@ $(document).ready(function() {
 	$('.add-document').on('click', '.add-xlsx', documentsMain.onCreateXLSX);
 	$('.add-document').on('click', '.add-pptx', documentsMain.onCreatePPTX);
 
-	// Fixes #175
-	if (OC.Uploader) {
+	var supportAjaxUploadFn;
+	if (OC.Uploader) { // OC.Uploader in oc10 but OC.Upload in < 10
 		OC.Uploader._isReceivedSharedFile = function () {
 			return false;
 		};
+		supportAjaxUploadFn = OC.Uploader.prototype._supportAjaxUploadWithProgress;
 	} else if (OC.Upload) {
 		OC.Upload._isReceivedSharedFile = function () {
 			return false;
 		};
+		supportAjaxUploadFn = supportAjaxUploadWithProgress;
 	}
 
 	var file_upload_start = $('#file_upload_start');
-	if (typeof supportAjaxUploadWithProgress !== 'undefined' && supportAjaxUploadWithProgress()) {
-		file_upload_start.on('fileuploadstart', function(e, data) {
+	if (typeof supportAjaxUploadFn !== 'undefined' &&
+	    supportAjaxUploadFn()) {
+		file_upload_start.bind('fileuploadstart', function(e, data) {
 			$('#upload').addClass('icon-loading');
 			$('.add-document .upload').css({opacity:0});
 		});
 	}
-	file_upload_start.on('fileuploaddone', function(){
+	file_upload_start.bind('fileuploaddone', function() {
 		$('#upload').removeClass('icon-loading');
 		$('.add-document .upload').css({opacity:0.7});
 		documentsMain.show();
 	});
+	file_upload_start.fileupload();
 
 	documentsMain.onStartup();
 });
