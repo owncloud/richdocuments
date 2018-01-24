@@ -80,6 +80,9 @@ $.widget('oc.documentGrid', {
 			return null;
 		}
 
+		// show the document list template
+		$('.documentslist').show();
+
 		var that = this;
 		var url = 'apps/richdocuments/ajax/documents/list';
 		return $.getJSON(OC.generateUrl(url))
@@ -106,13 +109,10 @@ $.widget('oc.documentGrid', {
 			});
 	},
 
-	_render : function (data){
+	_render : function (){
 		var that = this,
-			documents = data && data.documents || this.options.documents,
-			hasDocuments = false
-		;
-
-		$(this.options.context + ' .document:not(.template,.progress)').remove();
+		    documents = this.options.documents,
+		    hasDocuments = !!documents;
 
 		if (documentsMain.loadError) {
 			$(this.options.context).after('<div id="errormessage">'
@@ -123,6 +123,11 @@ $.widget('oc.documentGrid', {
 			return;
 		}
 
+		// no need to render anything if we don't have any documents and we know which fileId to open
+		if (!hasDocuments && documentsMain.fileId)
+			return;
+
+		$(this.options.context + ' .document:not(.template,.progress)').remove();
 		$.each(documents, function(i, document){
 			hasDocuments = true;
 			that.add(document);
@@ -908,5 +913,7 @@ $(document).ready(function() {
 	});
 	file_upload_start.fileupload();
 
+	// hide the documentlist until we know we don't have any fileId
+	$('.documentslist').hide();
 	documentsMain.onStartup();
 });
