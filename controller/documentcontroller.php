@@ -283,6 +283,7 @@ class DocumentController extends Controller {
 			} else {
 				$documents[$key] = $document;
 			}
+
 			$documents[$key]['icon'] = preg_replace('/\.png$/', '.svg', \OCP\Template::mimetype_icon($document['mimetype']));
 			$documents[$key]['hasPreview'] = \OC::$server->getPreviewManager()->isMimeSupported($document['mimetype']);
 			$ret = $this->getWopiSrcUrl($discovery_parsed, $document['mimetype']);
@@ -341,8 +342,14 @@ class DocumentController extends Controller {
 			$userFolder = \OC::$server->getRootFolder()->getUserFolder($this->uid);
 			$item = $userFolder->getById($fileId)[0];
 			$docs = $this->get($fileId);
+
+			$actionIsEditable = $docs['documents'][0]['action'] === 'edit';
+			$permissions = $item->getPermissions();
+			if (!$actionIsEditable)
+				$permissions = $permissions & ~\OCP\Constants::PERMISSION_UPDATE;
+
 			$docRetVal = array(
-				'permissions' => $item->getPermissions(),
+				'permissions' => $permissions,
 				'title' => $item->getName(),
 				'fileId' => $item->getId() . '_' . $this->settings->getSystemValue('instanceid'),
 				'token' => $tokenResult['token'],
