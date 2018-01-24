@@ -163,7 +163,6 @@ var documentsMain = {
 	isEditorMode : false,
 	isViewerMode: false,
 	fileName: null,
-	baseName: null,
 	canShare : false,
 	canEdit: false,
 	loadError : false,

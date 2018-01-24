@@ -12,18 +12,12 @@
 
 namespace OCA\Richdocuments\Db;
 
-use \OCA\Richdocuments\Download;
-use \OCA\Richdocuments\DownloadResponse;
-
 /**
  * @method string generateFileToken()
  * @method string getPathForToken()
  */
 
 class Wopi extends \OCA\Richdocuments\Db{
-
-	const DB_TABLE = '`*PREFIX*richdocuments_wopi`';
-
 	// Tokens expire after this many seconds (not defined by WOPI specs).
 	const TOKEN_LIFETIME_SECONDS = 1800;
 
