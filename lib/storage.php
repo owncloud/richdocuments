@@ -97,10 +97,10 @@ class Storage {
 
 	public static function resolvePath($fileId){
 		$list = array_filter(
-				self::searchDocuments(),
-				function($item) use ($fileId){
-					return intval($item['fileid'])==$fileId;
-				}
+			self::searchDocuments(),
+			function($item) use ($fileId){
+				return intval($item['fileid'])==$fileId;
+			}
 		);
 		if (count($list)>0){
 			$item = current($list);
@@ -112,13 +112,28 @@ class Storage {
 	private static function processDocuments($rawDocuments){
 		$documents = array();
 		$view = \OC\Files\Filesystem::getView();
-		foreach($rawDocuments as $rawDocument){
+
+		foreach($rawDocuments as $rawDocument) {
+			$fileId = $rawDocument['fileid'];
+			$fileName = $rawDocument['name'];
+			$mimeType = $rawDocument['mimetype'];
+			$mtime = $rawDocument['mtime'];
+			try {
+				$path = $view->getPath($fileId);
+			} catch (\Exception $e) {
+				\OC::$server->getLogger()->debug('Path not found for fileId: {fileId}. Skipping', [
+					'app' => 'richdocuments',
+					'fileId' => $fileId
+				]);
+				continue;
+			}
+
 			$document = array(
-				'fileid' => $rawDocument->getId(),
-				'path' => $view->getPath($rawDocument->getId()),
-				'name' => $rawDocument->getName(),
-				'mimetype' => $rawDocument->getMimetype(),
-				'mtime' => $rawDocument->getMTime()
+				'fileid' => $fileId,
+				'path' => $path,
+				'name' => $fileName,
+				'mimetype' => $mimeType,
+				'mtime' => $mtime
 				);
 
 			array_push($documents, $document);
@@ -128,11 +143,9 @@ class Storage {
 	}
 
 	protected static function searchDocuments(){
-		$documents = array();
-		foreach (self::getSupportedMimetypes() as $mime){
-			$rawDocuments = \OCP\Files::searchByMime($mime);
-			$documents = array_merge($documents, self::processDocuments($rawDocuments));
-		}
+		$db = new Db\Storage();
+		$rawDocuments = $db->loadRecentDocumentsForMimes(self::$MIMETYPE_LIBREOFFICE_WORDPROCESSOR);
+		$documents = self::processDocuments($rawDocuments);
 
 		return $documents;
 	}

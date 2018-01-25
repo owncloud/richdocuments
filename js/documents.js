@@ -3,9 +3,7 @@
 $.widget('oc.documentGrid', {
 	options : {
 		context : '.documentslist',
-		documents : {},
-		sessions : {},
-		members : {}
+		documents : {}
 	},
 
 	render : function(fileId){
@@ -82,6 +80,9 @@ $.widget('oc.documentGrid', {
 			return null;
 		}
 
+		// show the document list template
+		$('.documentslist').show();
+
 		var that = this;
 		var url = 'apps/richdocuments/ajax/documents/list';
 		return $.getJSON(OC.generateUrl(url))
@@ -101,8 +102,6 @@ $.widget('oc.documentGrid', {
 				}
 				else {
 					that.options.documents = result.documents;
-					that.options.sessions = result.sessions;
-					that.options.members = result.members;
 				}
 			})
 			.fail(function(data){
@@ -110,15 +109,10 @@ $.widget('oc.documentGrid', {
 			});
 	},
 
-	_render : function (data){
+	_render : function (){
 		var that = this,
-			documents = data && data.documents || this.options.documents,
-			sessions = data && data.sessions || this.options.sessions,
-		    members = data && data.members || this.options.members,
-			hasDocuments = false
-		;
-
-		$(this.options.context + ' .document:not(.template,.progress)').remove();
+		    documents = this.options.documents,
+		    hasDocuments = !!documents;
 
 		if (documentsMain.loadError) {
 			$(this.options.context).after('<div id="errormessage">'
@@ -129,6 +123,11 @@ $.widget('oc.documentGrid', {
 			return;
 		}
 
+		// no need to render anything if we don't have any documents and we know which fileId to open
+		if (!hasDocuments && documentsMain.fileId)
+			return;
+
+		$(this.options.context + ' .document:not(.template,.progress)').remove();
 		$.each(documents, function(i, document){
 			hasDocuments = true;
 			that.add(document);
@@ -163,11 +162,7 @@ $.widget('oc.documentOverlay', {
 var documentsMain = {
 	isEditorMode : false,
 	isViewerMode: false,
-	memberId : false,
-	esId : false,
-	ready :false,
 	fileName: null,
-	baseName: null,
 	canShare : false,
 	canEdit: false,
 	loadError : false,
@@ -602,8 +597,6 @@ var documentsMain = {
 			documentsMain.overlay.documentOverlay('show');
 			documentsMain.prepareSession();
 		}
-
-		documentsMain.ready = true;
 	},
 
 	WOPIPostMessage: function(iframe, msgId, values) {
@@ -891,29 +884,35 @@ $(document).ready(function() {
 	$('.add-document').on('click', '.add-xlsx', documentsMain.onCreateXLSX);
 	$('.add-document').on('click', '.add-pptx', documentsMain.onCreatePPTX);
 
-	// Fixes #175
-	if (OC.Uploader) {
+	var supportAjaxUploadFn;
+	if (OC.Uploader) { // OC.Uploader in oc10 but OC.Upload in < 10
 		OC.Uploader._isReceivedSharedFile = function () {
 			return false;
 		};
+		supportAjaxUploadFn = OC.Uploader.prototype._supportAjaxUploadWithProgress;
 	} else if (OC.Upload) {
 		OC.Upload._isReceivedSharedFile = function () {
 			return false;
 		};
+		supportAjaxUploadFn = supportAjaxUploadWithProgress;
 	}
 
 	var file_upload_start = $('#file_upload_start');
-	if (typeof supportAjaxUploadWithProgress !== 'undefined' && supportAjaxUploadWithProgress()) {
-		file_upload_start.on('fileuploadstart', function(e, data) {
+	if (typeof supportAjaxUploadFn !== 'undefined' &&
+	    supportAjaxUploadFn()) {
+		file_upload_start.bind('fileuploadstart', function(e, data) {
 			$('#upload').addClass('icon-loading');
 			$('.add-document .upload').css({opacity:0});
 		});
 	}
-	file_upload_start.on('fileuploaddone', function(){
+	file_upload_start.bind('fileuploaddone', function() {
 		$('#upload').removeClass('icon-loading');
 		$('.add-document .upload').css({opacity:0.7});
 		documentsMain.show();
 	});
+	file_upload_start.fileupload();
 
+	// hide the documentlist until we know we don't have any fileId
+	$('.documentslist').hide();
 	documentsMain.onStartup();
 });
