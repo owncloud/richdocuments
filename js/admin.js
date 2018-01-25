@@ -97,6 +97,13 @@ var documentsSettings = {
 		);
 	},
 
+	saveMenuOption: function(value) {
+		$.post(
+			OC.filePath('richdocuments', 'ajax', 'admin.php'),
+			{ 'menu_option': value }
+		);
+	},
+
 	afterSaveExternalApps: function(response) {
 		OC.msg.finishedAction('#enable-external-apps-section-msg', response);
 	},
@@ -284,6 +291,11 @@ var documentsSettings = {
 
 		$(document).on('change', '#canonical-webroot', function() {
 			documentsSettings.saveWebroot(this.value);
+		});
+
+		$(document).on('change', '#enable_menu_option_cb-richdocuments', function() {
+			var page = $(this).parent();
+			documentsSettings.saveMenuOption(this.checked);
 		});
 	}
 };

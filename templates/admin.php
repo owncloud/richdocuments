@@ -55,4 +55,8 @@ script('richdocuments', 'admin');
 	<br/>
 	<p style="max-width: 50em;"><em><?php p($l->t('Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance.')) ?></em></p>
 	</div>
+	<br/>
+
+	<input type="checkbox" id="enable_menu_option_cb-richdocuments" <?php p($_['menu_option'] !== 'false' ? 'checked' : '') ?> />
+	<label for="enable_menu_option_cb-richdocuments"><?php p($l->t('Use Menu option')) ?></label>
 </div>
