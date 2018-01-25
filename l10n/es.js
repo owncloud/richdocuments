@@ -108,6 +108,8 @@ OC.L10N.register(
     "Enable access for external apps" : "Habilitar acceso a las aplicaciones externas",
     "Save" : "Guardar",
     "Add" : "Añadir",
+    "Use Canonical webroot" : "Usar WebRoot canonico",
+    "Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance." : "WebRoot canonico, en caso de multiples instancias, usar el que tenga menos restricciones de uso. Ej: Usar el webroot que no use simbolos.\nSe puede ignorar esta opción si solo se usa un webroot para acceder a esta instancia",
     "New Document" : "Documento nuevo",
     "New Spreadsheet" : "Planilla de cálculo nueva",
     "New Presentation" : "Presentación nueva",
