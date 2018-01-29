@@ -36,6 +36,7 @@ OC.L10N.register(
     "More versions..." : "Altre versioni...",
     "Just now" : "In questo istante",
     "Failed to revert the document to older version" : "Il ripristino del documento alla versione più datata non è riuscito",
+    "Save As" : "Salva come",
     "No connection to server. Trying to reconnect." : "Nessuna connessione al server. Riprova a connetterti.",
     "Loading documents..." : "Caricamento documenti in corso...",
     "'.' is an invalid file name." : "'.' non è un nome file valido.",
