@@ -29,16 +29,20 @@ $c = $app->getContainer();
 \OCP\App::registerAdmin('richdocuments', 'admin');
 
 if ($app->isUserAllowedToUseCollabora()) {
-	$navigationEntry = function () use ($c) {
-		return [
-			'id' => 'richdocuments_index',
-			'order' => 2,
-			'href' => $c->query('ServerContainer')->getURLGenerator()->linkToRoute('richdocuments.document.index'),
-			'icon' => $c->query('ServerContainer')->getURLGenerator()->imagePath('richdocuments', 'app.svg'),
-			'name' => $c->query('L10N')->t('Office')
-		];
-	};
-	$c->getServer()->getNavigationManager()->add($navigationEntry);
+	$menuOption = $c->getServer()->getConfig()->getAppValue('richdocuments', 'menu_option');
+	$c->getServer()->getLogger()->debug('x: {x}', ['x' => $menuOption]);
+	if ($menuOption !== 'false') {
+		$navigationEntry = function () use ($c) {
+			return [
+				'id' => 'richdocuments_index',
+				'order' => 2,
+				'href' => $c->query('ServerContainer')->getURLGenerator()->linkToRoute('richdocuments.document.index'),
+				'icon' => $c->query('ServerContainer')->getURLGenerator()->imagePath('richdocuments', 'app.svg'),
+				'name' => $c->query('L10N')->t('Office')
+			];
+		};
+		$c->getServer()->getNavigationManager()->add($navigationEntry);
+	}
 
 	//Script for registering file actions
 	$eventDispatcher = \OC::$server->getEventDispatcher();

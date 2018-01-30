@@ -77,13 +77,14 @@ class SettingsController extends Controller{
 				'test_wopi_url' => $this->appConfig->getAppValue('test_wopi_url'),
 				'test_server_groups' => $this->appConfig->getAppValue('test_server_groups'),
 				'external_apps' => $this->appConfig->getAppValue('external_apps'),
-				'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot')
+				'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
+				'menu_option' => $this->appConfig->getAppValue('menu_option')
 			],
 			'blank'
 		);
 	}
 
-	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot){
+	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option){
 		$message = $this->l10n->t('Saved');
 
 		if (!is_null($wopi_url)){
@@ -117,6 +118,10 @@ class SettingsController extends Controller{
 
 		if (!is_null($canonical_webroot)){
 			$this->appConfig->setAppValue('canonical_webroot', $canonical_webroot);
+		}
+
+		if (!is_null($menu_option)) {
+			$this->appConfig->setAppValue('menu_option', $menu_option);
 		}
 
 		$richMemCache = \OC::$server->getMemCacheFactory()->create('richdocuments');
