@@ -185,6 +185,17 @@ var documentsMain = {
 		return ocurl;
 	},
 
+	// generates owncloud web url to access given fileId
+	_generateFullUrl: function(fileId, dir) {
+		var ocurl;
+		if (dir)
+			ocurl = OC.generateUrl('apps/richdocuments/index?fileId={fileId}&dir={dir}', {fileId: fileId, dir: dir});
+		else
+			ocurl = OC.generateUrl('apps/richdocuments/index?fileId={fileId}', {fileId: fileId});
+
+		return window.location.protocol + '//' + window.location.host + ocurl;
+	},
+
 	UI : {
 		/* Editor wrapper HTML */
 		container : '<div id="mainContainer" class="claro">' +
@@ -383,12 +394,7 @@ var documentsMain = {
 								documentsMain.UI.notify(t('richdocuments', 'Failed to revert the document to older version'));
 							}
 
-							// generate file id with returnToDir information in it, if any
-							var fileid = e.currentTarget.parentElement.dataset.fileid.replace(/_.*/, '') +
-							    (documentsMain.returnToDir ? '_' + documentsMain.returnToDir : '');
-
 							// load the file again, it should get reverted now
-							window.location = OC.generateUrl('apps/richdocuments/index/{fileid}', {fileid: fileid});
 							window.location.reload();
 							documentsMain.overlay.documentOverlay('hide');
 						}
@@ -694,7 +700,7 @@ var documentsMain = {
 			function(response){
 				if (response && response.fileid){
 					documentsMain.prepareSession();
-					window.location = OC.generateUrl('apps/richdocuments/index?fileId={file_id}', {file_id: response.fileid});
+					window.location = documentsMain._generateFullUrl(response.fileid);
 				} else {
 					if (response && response.message){
 						documentsMain.UI.notify(response.message);
@@ -873,7 +879,7 @@ $(document).ready(function() {
 		documentsMain.prepareSession();
 		var fileId = $(this).attr('data-id');
 		if (fileId) {
-			window.location = OC.generateUrl('apps/richdocuments/index?fileId={file_id}', {file_id: fileId});
+			window.location = documentsMain._generateFullUrl(fileId);
 		}
 	});
 
