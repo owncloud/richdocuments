@@ -108,6 +108,8 @@ OC.L10N.register(
     "Enable access for external apps" : "เปิดใช้งานการเข้าถึงแอพภายนอก",
     "Save" : "บันทึก",
     "Add" : "เพิ่ม",
+    "Use Canonical webroot" : "ใช้ Webroot แบบ Canonical",
+    "Use Menu option" : "ใช้ตัวเลือกเมนู",
     "New Document" : "เอกสารใหม่",
     "New Spreadsheet" : "สเปรดชีตใหม่",
     "New Presentation" : "งานนำเสนอใหม่",
