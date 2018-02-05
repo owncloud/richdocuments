@@ -110,6 +110,7 @@ OC.L10N.register(
     "Add" : "Shtoje",
     "Use Canonical webroot" : "Përdor webroot Canonical",
     "Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance." : "Webroot Canonical, në rast se ka të shumëfishtë, për përdorim nga Collabora. Ofroni atë me më pak kufizime. P.sh.: Përdor webroot pa Shibboleth, nëse te kjo instancë hyhet nga webroo-e me ose pa përdorim të Shibboleth-it. Këtë rregullim mund ta shpërfillni, nëse për hyrje në këtë instancë përdoret vetëm një webroot.",
+    "Use Menu option" : "Përdor mundësinë Menu",
     "New Document" : "Dokument i Ri",
     "New Spreadsheet" : "Fletëllogaritje e Re",
     "New Presentation" : "Prezantim i Ri",
