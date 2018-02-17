@@ -515,7 +515,7 @@ var documentsMain = {
 						OC.dialogs.prompt(t('richdocuments', 'Please enter filename to which this document should be stored.'),
 						                  t('richdocuments', 'Save As'),
 						                  function(result, value) {
-							                  if (result === true) {
+							                  if (result === true && value) {
 								                  documentsMain.WOPIPostMessage($('#loleafletframe')[0], 'Action_SaveAs', {'Filename': value});
 							                  }
 						                  },
