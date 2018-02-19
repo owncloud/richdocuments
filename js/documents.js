@@ -653,7 +653,7 @@ var documentsMain = {
 
 		documentsMain.canShare = typeof OC.Share !== 'undefined' && rd_permissions & OC.PERMISSION_SHARE;
 
-		// fade out file list and show the cloudsuite
+		// fade out file list and show the document
 		$('#content-wrapper').fadeOut('fast').promise().done(function() {
 			documentsMain.fileId = rd_fileId;
 			documentsMain.fileName = rd_title;
