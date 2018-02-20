@@ -1,4 +1,3 @@
-VERSION=$(shell grep '<version>' appinfo/info.xml | sed -e 's/^.*<version>\(.*\)<\/version>.*$$/\1/')
 app_name=richdocuments
 project_dir=$(CURDIR)/../$(app_name)
 build_dir=$(CURDIR)/build/artifacts
@@ -8,24 +7,6 @@ source_dir=$(build_dir)/source
 package_name=$(app_name)
 cert_dir=$(HOME)/.owncloud/certificates
 occ=$(CURDIR)/../core/occ
-
-.PHONY: dist
-dist: appinfo/info.xml
-	rm -rf owncloud-collabora-online-$(VERSION)
-	mkdir owncloud-collabora-online-$(VERSION)
-	tar cf - *.php \
-                appinfo \
-                assets \
-                controller \
-                css \
-                img \
-                js \
-                l10n \
-                lib \
-                templates \
-                | ( cd owncloud-collabora-online-$(VERSION) && tar xf - )
-	tar cfz owncloud-collabora-online-$(VERSION).tar.gz owncloud-collabora-online-$(VERSION)
-	rm -rf owncloud-collabora-online-$(VERSION)
 
 appstore:
 	mkdir -p $(sign_dir)
