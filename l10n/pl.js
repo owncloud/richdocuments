@@ -26,6 +26,7 @@ OC.L10N.register(
     "Latest revision" : "Najnowsza wersja",
     "More versions..." : "Więcej wersji...",
     "Failed to revert the document to older version" : "Nie udało się przywrócić starszej wersji dokumentu",
+    "Cancel" : "Anuluj",
     "Save" : "Zapisz",
     "No connection to server. Trying to reconnect." : "Nie połączono z serwerem. Próba ponownego łączenia. ",
     "Loading documents..." : "Ładowanie dokumentów...",

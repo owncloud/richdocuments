@@ -39,6 +39,7 @@ OC.L10N.register(
     "Please enter filename to which this document should be stored." : "Adja meg a fájlnevet, amely néven ezt a dokumentumot tárolni kívánja.",
     "Save As" : "Mentés másként",
     "New filename" : "Új fájlnév",
+    "Cancel" : "Mégsem",
     "Save" : "Mentés",
     "No connection to server. Trying to reconnect." : "Nincs kapcsolat a kiszolgálóval. Újra próbálunk csatlakozni.",
     "Loading documents..." : "Dokumentumok betöltése...",

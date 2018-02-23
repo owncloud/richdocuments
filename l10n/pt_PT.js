@@ -36,6 +36,7 @@ OC.L10N.register(
     "More versions..." : "Mais versões...",
     "Just now" : "Agora mesmo",
     "Failed to revert the document to older version" : "Não foi possível reverter o documento para a versão antiga",
+    "Cancel" : "Cancelar",
     "Save" : "Guardar",
     "No connection to server. Trying to reconnect." : "Sem ligação ao servidor. A tentar religar.",
     "Loading documents..." : "A carregar os documentos...",

@@ -36,6 +36,7 @@ OC.L10N.register(
     "More versions..." : "Περισσότερες εκδόσεις...",
     "Just now" : "Μόλις τώρα",
     "Failed to revert the document to older version" : "Αποτυχία επαναφοράς το εγγράφου σε παλαιότερη έκδοση",
+    "Cancel" : "Ακύρωση",
     "Save" : "Αποθήκευση",
     "No connection to server. Trying to reconnect." : "Αποτυχία σύνδεσης με το διακομιστή. Προσπάθεια επανασύνδεσης σε εξέλιξη.",
     "Loading documents..." : "Φόρτωση εγγράφων...",

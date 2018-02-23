@@ -21,6 +21,7 @@ OC.L10N.register(
     "Latest revision" : "Viimane versioon",
     "More versions..." : "Rohkem versioone...",
     "Just now" : "Kohe",
+    "Cancel" : "Loobu",
     "Save" : "Salvesta",
     "No connection to server. Trying to reconnect." : "Serveriga puudub ühendus. Proovin uuesti ühenduda.",
     "Loading documents..." : "Laadin dokumente...",

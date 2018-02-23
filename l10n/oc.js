@@ -25,6 +25,7 @@ OC.L10N.register(
     "Latest revision" : "Darrièra version",
     "More versions..." : "Mai de versions...",
     "Just now" : "Ara",
+    "Cancel" : "Anullar",
     "Save" : "Enregistrar",
     "No connection to server. Trying to reconnect." : "Pas cap de connexion al servidor. Temptativa de reconnexion en cors.",
     "Loading documents..." : "Cargament dels documents...",

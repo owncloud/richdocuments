@@ -34,6 +34,7 @@
     "More versions..." : "他のバージョン...",
     "Just now" : "今",
     "Failed to revert the document to older version" : "以前のバージョンに戻すことに失敗しました。",
+    "Cancel" : "キャンセル",
     "Save" : "保存",
     "No connection to server. Trying to reconnect." : "サーバーに接続されていません。再接続してください。",
     "Loading documents..." : "ドキュメントを読込中...",

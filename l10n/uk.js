@@ -23,6 +23,7 @@ OC.L10N.register(
     "No documents were found. Upload or create a document to get started!" : "Документів не знайдено. Завантажте або створіть новий документ для початку!",
     "Latest revision" : "Остання ревізія",
     "More versions..." : "Більше версій ...",
+    "Cancel" : "Скасувати",
     "Save" : "Зберегти",
     "No connection to server. Trying to reconnect." : "Немає з'єднання з сервером. Підключаємось заново.",
     "Loading documents..." : "Завантаження документів...",

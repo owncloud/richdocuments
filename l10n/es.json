@@ -37,6 +37,7 @@
     "Please enter filename to which this document should be stored." : "Por favor, introduce el nombre de archivo con el que se debería almacenar este documento.",
     "Save As" : "Guardar como",
     "New filename" : "Nuevo nombre de archivo",
+    "Cancel" : "Cancelar",
     "Save" : "Guardar",
     "No connection to server. Trying to reconnect." : "No hay conexión con el servidor. Intentando reconectar.",
     "Loading documents..." : "Cargando documentos...",

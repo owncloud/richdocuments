@@ -30,6 +30,7 @@ OC.L10N.register(
     "More versions..." : "Daha fazla sürüm...",
     "Just now" : "Henüz",
     "Failed to revert the document to older version" : "Belge eski sürümüne döndürülemedi",
+    "Cancel" : "İptal",
     "Save" : "Kaydet",
     "No connection to server. Trying to reconnect." : "Sunucuya bağlantı yok. Yeniden bağlanmaya çalışıyor.",
     "Loading documents..." : "Belgeler yükleniyor...",

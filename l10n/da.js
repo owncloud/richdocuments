@@ -36,6 +36,7 @@ OC.L10N.register(
     "More versions..." : "Flere versioner...",
     "Just now" : "Lige nu",
     "Failed to revert the document to older version" : "Det lykkedes ikke at gendanne dokumentet, til en ældre version",
+    "Cancel" : "Annullér",
     "Save" : "Gem",
     "No connection to server. Trying to reconnect." : "Ingen forbindelse til servver. Prøv at forbinde igen.",
     "Loading documents..." : "Henter dokumenter...",

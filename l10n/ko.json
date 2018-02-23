@@ -37,6 +37,7 @@
     "Please enter filename to which this document should be stored." : "이 문서를 저장할 파일 이름을 입력하십시오.",
     "Save As" : "다른 이름으로 저장",
     "New filename" : "새 파일 이름",
+    "Cancel" : "취소",
     "Save" : "저장",
     "No connection to server. Trying to reconnect." : "서버에 연결되지 않았습니다. 재연결을 시도합니다.",
     "Loading documents..." : "문서 불러오는 중...",

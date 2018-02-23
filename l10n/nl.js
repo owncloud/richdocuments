@@ -38,6 +38,7 @@ OC.L10N.register(
     "Failed to revert the document to older version" : "Kon het document niet terugdraaien naar een vorige versie",
     "Save As" : "Opslaan als",
     "New filename" : "Nieuwe bestandsnaam",
+    "Cancel" : "Annuleren",
     "Save" : "Opslaan",
     "No connection to server. Trying to reconnect." : "Geen verbinding met de server. Bezig te verbinden.",
     "Loading documents..." : "Laden documenten...",

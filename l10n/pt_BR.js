@@ -39,6 +39,7 @@ OC.L10N.register(
     "Please enter filename to which this document should be stored." : "Digite o nome do arquivo ao qual este documento deve ser armazenado.",
     "Save As" : "Salvar como",
     "New filename" : "Novo nome de arquivo",
+    "Cancel" : "Cancelar",
     "Save" : "Salvar",
     "No connection to server. Trying to reconnect." : "Sem conexão com o servidor. Tentando reconectar.",
     "Loading documents..." : "Carregando documentos...",

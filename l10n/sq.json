@@ -37,6 +37,7 @@
     "Please enter filename to which this document should be stored." : "Ju lutemi, jepni emër kartele nën të cilin duhet ruajtur ky dokument.",
     "Save As" : "Ruaje Si",
     "New filename" : "Emër i ri kartele",
+    "Cancel" : "Anuloje",
     "Save" : "Ruaje",
     "No connection to server. Trying to reconnect." : "Pa lidhje me shërbyesin. Po provohet të rilidhet.",
     "Loading documents..." : "Po ngarkohen dokumente…",

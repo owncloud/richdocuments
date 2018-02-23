@@ -36,6 +36,7 @@ OC.L10N.register(
     "More versions..." : "Nog weergawes…",
     "Just now" : "Sopas",
     "Failed to revert the document to older version" : "Kon nie die dokument na die ouer weergawe terugplaas nie",
+    "Cancel" : "Kanselleer",
     "Save" : "Bewaar",
     "No connection to server. Trying to reconnect." : "Geen verbinding met bediener. Probeer herverbind.",
     "Loading documents..." : "Laai tans dokumente…",

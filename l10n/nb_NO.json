@@ -37,6 +37,7 @@
     "Please enter filename to which this document should be stored." : "Vennligst skriv inn filnavn som dette dokumentet skal lagres på.",
     "Save As" : "Lagre som",
     "New filename" : "Nytt filnavn",
+    "Cancel" : "Avbryt",
     "Save" : "Lagre",
     "No connection to server. Trying to reconnect." : "Ingen forbindelse til server. Prøver å gjenopprette forbindelsen.",
     "Loading documents..." : "Laster dokumenter...",

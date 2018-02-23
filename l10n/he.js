@@ -36,6 +36,7 @@ OC.L10N.register(
     "More versions..." : "גרסאות נוספות...",
     "Just now" : "ממש עכשיו",
     "Failed to revert the document to older version" : "נכשל באחזור המסמך לגרסה קודמת",
+    "Cancel" : "ביטול",
     "Save" : "שמירה",
     "No connection to server. Trying to reconnect." : "אין תקשורת לשרת. מנסה להתחבר מחדש.",
     "Loading documents..." : "המסמך בטעינה...",

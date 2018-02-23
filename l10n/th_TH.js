@@ -39,6 +39,7 @@ OC.L10N.register(
     "Please enter filename to which this document should be stored." : "โปรดป้อนชื่อไฟล์สำหรับเอกสารนี้",
     "Save As" : "บันทึกเป็น",
     "New filename" : "ชื่อไฟล์ใหม่",
+    "Cancel" : "ยกเลิก",
     "Save" : "บันทึก",
     "No connection to server. Trying to reconnect." : "ไม่มีการเชื่อมต่อไปยังเซิร์ฟเวอร์ กำลังพยายามเชื่อมต่อใหม่",
     "Loading documents..." : "กำลังโหลดเอกสาร ...",

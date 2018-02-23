@@ -38,6 +38,7 @@ OC.L10N.register(
     "Failed to revert the document to older version" : "Mistókst að endurheimta skjalið sem eldri útgáfu",
     "Save As" : "Vista sem",
     "New filename" : "Nýtt skráarheiti",
+    "Cancel" : "Hætta við",
     "Save" : "Vista",
     "No connection to server. Trying to reconnect." : "Engin tenging við þjón. Reyni aftur að tengjast.",
     "Loading documents..." : "Hleð inn skjölum...",
