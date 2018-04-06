@@ -653,7 +653,6 @@ var documentsMain = {
 		documentsMain.fullPath = rd_path;
 		documentsMain.token = rd_token;
 
-		$('footer,nav').hide();
 		$(documentsMain.toolbar).appendTo('#header');
 
 		documentsMain.canShare = typeof OC.Share !== 'undefined' && rd_permissions & OC.PERMISSION_SHARE;
