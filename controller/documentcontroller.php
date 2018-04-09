@@ -729,6 +729,10 @@ class DocumentController extends Controller {
 		$file = $userFolder->getById($fileId)[0];
 
 		if ($isPutRelative) {
+			// the new file needs to be installed in the current user dir
+			$userFolder = \OC::$server->getRootFolder()->getUserFolder($res['editor']);
+			$file = $userFolder->getById($fileId)[0];
+
 			$suggested = $this->request->getHeader('X-WOPI-SuggestedTarget');
 			$suggested = iconv('utf-7', 'utf-8', $suggested);
 
@@ -791,7 +795,11 @@ class DocumentController extends Controller {
 		\OC_User::setIncognitoMode(true);
 		// Setup the FS which is needed to emit hooks (versioning).
 		\OC_Util::tearDownFS();
-		\OC_Util::setupFS($res['owner']);
+		if ($isPutRelative) {
+			\OC_Util::setupFS($res['editor']);
+		} else {
+			\OC_Util::setupFS($res['owner']);
+		}
 		$file->putContent($content);
 		$mtime = $file->getMtime();
 
