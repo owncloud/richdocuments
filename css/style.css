@@ -572,3 +572,13 @@ document p{
 .oc-dialog .oc-dialog-buttonrow .cancel {
 	float:left;
 }
+
+@media only screen and (max-width: 768px) {
+	#mainContainer {
+		top: 0;
+	}
+
+	#header {
+		display: none;
+	}
+}
