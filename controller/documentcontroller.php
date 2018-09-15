@@ -303,6 +303,20 @@ class DocumentController extends Controller {
 	}
 
 	/**
+	 * Strips the path and query parameters from the URL.
+	 *
+	 * @param string $url
+	 * @return string
+	 */
+	private function domainOnly($url) {
+		$parsed_url = parse_url($url);
+		$scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
+		$host   = isset($parsed_url['host']) ? $parsed_url['host'] : '';
+		$port   = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
+		return "$scheme$host$port";
+	}
+
+	/**
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -361,7 +375,7 @@ class DocumentController extends Controller {
 
 		$response = new TemplateResponse('richdocuments', 'documents', $retVal);
 		$policy = new ContentSecurityPolicy();
-		$policy->addAllowedFrameDomain($wopiRemote);
+		$policy->addAllowedFrameDomain($this->domainOnly($wopiRemote));
 		$policy->allowInlineScript(true);
 		$response->setContentSecurityPolicy($policy);
 
