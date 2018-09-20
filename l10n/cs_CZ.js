@@ -36,6 +36,7 @@ OC.L10N.register(
     "More versions..." : "Více verzí...",
     "Just now" : "Právě teď",
     "Failed to revert the document to older version" : "Nepodařilo se obnovit starší verzi dokumentu",
+    "Save As" : "Uložit jako",
     "Cancel" : "Zrušit",
     "Save" : "Uložit",
     "No connection to server. Trying to reconnect." : "Ztráta připojení k serveru. Zkouším znovu.",
