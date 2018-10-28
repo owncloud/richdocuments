@@ -62,3 +62,8 @@ if ($app->isUserAllowedToUseCollabora()) {
 		$manager->registerTemplate('application/vnd.openxmlformats-officedocument.presentationml.presentation', 'apps/richdocuments/assets/pptxtemplate.pptx');
 	}
 }
+
+if ($app->publicLinksAllowedToUseCollabora()) {
+	\OCP\Util::connectHook("OCP\Share", "share_link_access", \OCA\Richdocuments\Hookhandler::class, "PublicPage");
+}
+

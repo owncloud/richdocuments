@@ -50,12 +50,21 @@ class DocumentController extends Controller {
 	private $appConfig;
 	private $cache;
 	private $logger;
+	private $storage;
 	const ODT_TEMPLATE_PATH = '/assets/odttemplate.odt';
 
 	// Signifies LOOL that document has been changed externally in this storage
 	const LOOL_STATUS_DOC_CHANGED = 1010;
 
-	public function __construct($appName, IRequest $request, IConfig $settings, AppConfig $appConfig, IL10N $l10n, $uid, ICacheFactory $cache, ILogger $logger){
+	public function __construct($appName,
+								IRequest $request,
+								IConfig $settings,
+								AppConfig $appConfig,
+								IL10N $l10n,
+								$uid,
+								ICacheFactory $cache,
+								ILogger $logger,
+								Storage $storage){
 		parent::__construct($appName, $request);
 		$this->uid = $uid;
 		$this->l10n = $l10n;
@@ -63,6 +72,7 @@ class DocumentController extends Controller {
 		$this->appConfig = $appConfig;
 		$this->cache = $cache->create($appName);
 		$this->logger = $logger;
+		$this->storage = $storage;
 	}
 
 	/**
@@ -159,7 +169,12 @@ class DocumentController extends Controller {
      private function isTester() {
 		 $tester = false;
 
-         $user = \OC::$server->getUserSession()->getUser()->getUID();
+         $user = \OC::$server->getUserSession()->getUser();
+		 if ($user === null) {
+			 return false;
+		 }
+
+		 $uid = $user->getUID();
          $testgroups = array_filter(explode('|', $this->appConfig->getAppValue('test_server_groups')));
          $this->logger->debug('Testgroups are {testgroups}', [
              'app' => $this->appName,
@@ -167,10 +182,10 @@ class DocumentController extends Controller {
          ]);
          foreach ($testgroups as $testgroup) {
              $test = \OC::$server->getGroupManager()->get($testgroup);
-             if ($test !== null && sizeof($test->searchUsers($user)) > 0) {
+             if ($test !== null && sizeof($test->searchUsers($uid)) > 0) {
                  $this->logger->debug('User {user} found in {group}', [
                      'app' => $this->appName,
-                     'user' => $user,
+                     'user' => $uid,
                      'group' => $testgroup
                  ]);
 
@@ -320,7 +335,7 @@ class DocumentController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function index($fileId, $dir){
+	public function index($fileId, $token){
 		$wopiRemote = $this->getWopiUrl($this->isTester());
 		if (($parts = parse_url($wopiRemote)) && isset($parts['scheme']) && isset($parts['host'])) {
 			$webSocketProtocol = "ws://";
@@ -337,13 +352,9 @@ class DocumentController extends Controller {
 			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', array($wopiRemote)), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
 		}
 
-
 		\OC::$server->getNavigationManager()->setActiveEntry( 'richdocuments_index' );
-		$maxUploadFilesize = \OCP\Util::maxUploadFilesize("/");
 		$retVal = array(
 			'enable_previews' => $this->settings->getSystemValue('enable_previews', true),
-			'uploadMaxFilesize' => $maxUploadFilesize,
-			'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
 			'allowShareWithLink' => $this->settings->getAppValue('core', 'shareapi_allow_links', 'yes'),
 			'wopi_url' => $webSocket,
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
@@ -352,24 +363,11 @@ class DocumentController extends Controller {
 		);
 
 		if (!is_null($fileId)) {
-			$tokenResult = $this->wopiGetToken($fileId);
-			$userFolder = \OC::$server->getRootFolder()->getUserFolder($this->uid);
-			$item = $userFolder->getById($fileId)[0];
-			$docs = $this->get($fileId);
-
-			$actionIsEditable = $docs['documents'][0]['action'] === 'edit';
-			$permissions = $item->getPermissions();
-			if (!$actionIsEditable)
-				$permissions = $permissions & ~\OCP\Constants::PERMISSION_UPDATE;
-
-			$docRetVal = array(
-				'permissions' => $permissions,
-				'title' => $item->getName(),
-				'fileId' => $item->getId() . '_' . $this->settings->getSystemValue('instanceid'),
-				'token' => $tokenResult['token'],
-				'urlsrc' => $docs['documents'][0]['urlsrc'],
-				'path' => $userFolder->getRelativePath($item->getPath())
-			);
+			if ($this->uid || $token == null) {
+				$docRetVal = $this->getDocumentInfoByUserAuth($fileId, $this->uid);
+			} else {
+				$docRetVal = array();
+			}
 			$retVal = array_merge($retVal, $docRetVal);
 		}
 
@@ -380,6 +378,40 @@ class DocumentController extends Controller {
 		$response->setContentSecurityPolicy($policy);
 
 		return $response;
+	}
+
+	private function getDocumentInfoByUserAuth($fileId, $userId) {
+		if ($doc = $this->prepareDocumentWithUserAuth($fileId, $userId)) {
+			// Restrict filesize only possible when edited by authenticated user
+			$maxUploadFilesize = \OCP\Util::maxUploadFilesize("/");
+
+			$permissions = $doc['permissions'];
+			if (!($doc['action'] === 'edit')) {
+				$permissions = $permissions & ~\OCP\Constants::PERMISSION_UPDATE;
+			}
+
+			$tokenResult = $this->wopiGetToken($fileId);
+			return array(
+				'uploadMaxFilesize' => $maxUploadFilesize,
+				'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
+				'permissions' => $permissions,
+				'title' => $doc['name'],
+				'fileId' => $doc['fileid'] . '_' . $this->settings->getSystemValue('instanceid'),
+				'token' => $tokenResult['token'],
+				'urlsrc' => $doc['urlsrc'],
+				'path' => $doc['path']
+			);
+		}
+		return array();
+	}
+
+	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @PublicPage
+	 */
+	public function publicIndex($token, $fileId){
+		return $this->index($fileId, $token);
 	}
 
 	/**
@@ -482,11 +514,23 @@ class DocumentController extends Controller {
 		return $response;
 	}
 
-	private function get($fileId){
+	/**
+	 * @param $fileId
+	 * @param $userId
+	 * @return null|array
+	 */
+	private function prepareDocumentWithUserAuth($fileId, $userId){
 		$documents = array();
-		$documents[0] = Storage::getDocumentById($fileId);
+		$documents[0] = $this->storage->getDocumentByUserId($fileId, $userId);
+		$preparedDocuments = $this->prepareDocuments($documents);
 
-		return $this->prepareDocuments($documents);
+		if ($preparedDocuments['status'] === 'success' &&
+			$preparedDocuments['documents'] &&
+			count($preparedDocuments['documents']) > 0) {
+			return $preparedDocuments['documents'][0];
+		}
+
+		return null;
 	}
 
 	/**
@@ -578,9 +622,8 @@ class DocumentController extends Controller {
 						'fileId' => $fileId
 					]);
 					$retArray = $this->wopiGetToken($fileId);
-					$docs = $this->get($fileId);
-					if ($docs['status'] === 'success' && $docs['documents'] && count($docs['documents']) > 0) {
-						$retArray['urlsrc'] = $docs['documents'][0]['urlsrc'];
+					if ($doc = $this->prepareDocumentWithUserAuth($fileId, $this->uid)) {
+						$retArray['urlsrc'] = $doc['urlsrc'];
 					}
 					return $retArray;
 				}
@@ -858,6 +901,6 @@ class DocumentController extends Controller {
 	 * also adds session and member info for these files
 	 */
 	public function listAll(){
-		return $this->prepareDocuments(Storage::getDocuments());
+		return $this->prepareDocuments($this->storage->getDocuments());
 	}
 }

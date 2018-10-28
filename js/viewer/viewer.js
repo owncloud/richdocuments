@@ -70,13 +70,15 @@ var odfViewer = {
 
 	onEdit : function(fileName, context){
 		var fileId = context.$file.attr('data-id');
-		var fileDir = context.dir;
 
-		if (fileDir) {
-			window.location = OC.generateUrl('apps/richdocuments/index?fileId={file_id}&dir={dir}', {file_id: fileId, dir: fileDir});
+		var url;
+		if ($("#isPublic").val()) {
+			url = OC.generateUrl("apps/richdocuments/s/{token}?fileId={file_id}", { token: encodeURIComponent($("#sharingToken").val()), file_id: fileId });
 		} else {
-			window.location = OC.generateUrl('apps/richdocuments/index?fileId={file_id}', {file_id: fileId});
+			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}', {file_id: fileId});
 		}
+
+		window.location = url;
 	},
 
 	onView: function(filename, context) {
@@ -184,11 +186,14 @@ $(document).ready(function() {
 			odfViewer.register
 		);
 
-		$.get(
-			OC.filePath('richdocuments', 'ajax', 'settings.php'),
-			{},
-			odfViewer.registerFilesMenu
-		);
+		if (!$("#isPublic").val()) {
+			// Dont register file menu with public links
+			$.get(
+				OC.filePath('richdocuments', 'ajax', 'settings.php'),
+				{},
+				odfViewer.registerFilesMenu
+			);
+		}
 	}
 
 	$('#odf_close').live('click', odfViewer.onClose);

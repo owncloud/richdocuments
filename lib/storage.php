@@ -64,9 +64,13 @@ class Storage {
 		'application/vnd.ms-powerpoint.slideshow.macroEnabled.12'
 	);
 
-	public static function getDocuments() {
+	public function getDocuments() {
+		$db = new Db\Storage();
+		$rawDocuments = $db->loadRecentDocumentsForMimes(self::$MIMETYPE_LIBREOFFICE_WORDPROCESSOR);
+		$documents = $this->processDocuments($rawDocuments);
+
 		$list = array_filter(
-				self::searchDocuments(),
+				$documents,
 				function($item){
 					//filter Deleted
 					if (strpos($item['path'], '_trashbin')===0){
@@ -79,9 +83,9 @@ class Storage {
 		return $list;
 	}
 
-	public static function getDocumentById($fileId){
-		$root = \OC::$server->getUserFolder();
+	public function getDocumentByUserId($fileId, $userId){
 		$ret = array();
+		$root = \OC::$server->getRootFolder()->getUserFolder($userId);
 
 		// If type of fileId is a string, then it
 		// doesn't work for shared documents, lets cast to int everytime
@@ -91,6 +95,7 @@ class Storage {
 			return $ret;
 		}
 
+		$ret['permissions'] = $document->getPermissions();
 		$ret['mimetype'] = $document->getMimeType();
 		$ret['path'] = $root->getRelativePath($document->getPath());
 		$ret['name'] = $document->getName();
@@ -99,21 +104,14 @@ class Storage {
 		return $ret;
 	}
 
-	public static function resolvePath($fileId){
-		$list = array_filter(
-			self::searchDocuments(),
-			function($item) use ($fileId){
-				return intval($item['fileid'])==$fileId;
-			}
+	public static function getSupportedMimetypes(){
+		return array_merge(
+			self::$MIMETYPE_LIBREOFFICE_WORDPROCESSOR,
+			Filter::getAll()
 		);
-		if (count($list)>0){
-			$item = current($list);
-			return $item['path'];
-		}
-		return false;
 	}
 
-	private static function processDocuments($rawDocuments){
+	private function processDocuments($rawDocuments){
 		$documents = array();
 		$view = \OC\Files\Filesystem::getView();
 
@@ -144,20 +142,5 @@ class Storage {
 		}
 
 		return $documents;
-	}
-
-	protected static function searchDocuments(){
-		$db = new Db\Storage();
-		$rawDocuments = $db->loadRecentDocumentsForMimes(self::$MIMETYPE_LIBREOFFICE_WORDPROCESSOR);
-		$documents = self::processDocuments($rawDocuments);
-
-		return $documents;
-	}
-
-	public static function getSupportedMimetypes(){
-		return array_merge(
-			self::$MIMETYPE_LIBREOFFICE_WORDPROCESSOR,
-			Filter::getAll()
-		);
 	}
 }
