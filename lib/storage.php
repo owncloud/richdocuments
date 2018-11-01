@@ -24,6 +24,10 @@
 
 namespace OCA\Richdocuments;
 
+use OCP\Files\Folder;
+use OCP\Files\NotFoundException;
+use OCP\Share\Exceptions\ShareNotFound;
+
 class Storage {
 	public static $MIMETYPE_LIBREOFFICE_WORDPROCESSOR = array(
 		'application/vnd.oasis.opendocument.text',
@@ -83,8 +87,38 @@ class Storage {
 		return $list;
 	}
 
+	public function getDocumentByToken($fileId, $token){
+		try {
+			$share = \OC::$server->getShareManager()->getShareByToken($token);
+			$node = $share->getNode();
+			if ($node instanceof Folder) {
+				$document = $node->getById($fileId)[0];
+			} else {
+				$document = $node;
+			}
+
+			if ($document === null){
+				error_log('File with file id, ' . $fileId . ', not found');
+				return null;
+			}
+
+			$ret = array();
+			$ret['owner'] = $document->getOwner()->getUID();
+			$ret['permissions'] = $document->getPermissions();
+			$ret['mimetype'] = $document->getMimeType();
+			$ret['path'] = $document->getPath();
+			$ret['name'] = $document->getName();
+			$ret['fileid'] = $fileId;
+
+			return $ret;
+		} catch (ShareNotFound $e) {
+			return null;
+		} catch (NotFoundException $e) {
+			return null;
+		}
+	}
+
 	public function getDocumentByUserId($fileId, $userId){
-		$ret = array();
 		$root = \OC::$server->getRootFolder()->getUserFolder($userId);
 
 		// If type of fileId is a string, then it
@@ -92,9 +126,10 @@ class Storage {
 		$document = $root->getById((int)$fileId)[0];
 		if ($document === null){
 			error_log('File with file id, ' . $fileId . ', not found');
-			return $ret;
+			return null;
 		}
 
+		$ret = array();
 		$ret['permissions'] = $document->getPermissions();
 		$ret['mimetype'] = $document->getMimeType();
 		$ret['path'] = $root->getRelativePath($document->getPath());

@@ -30,6 +30,41 @@ class Wopi extends \OCA\Richdocuments\Db{
 
 	protected $loadStatement = 'SELECT * FROM `*PREFIX*richdocuments_wopi` WHERE `token`= ?';
 
+	public function generatePublicFileToken($fileId, $path, $version, $updatable, $serverHost, $editor){
+		$owner = $editor;
+
+		$token = \OC::$server->getSecureRandom()->getMediumStrengthGenerator()->generate(32,
+			\OCP\Security\ISecureRandom::CHAR_LOWER . \OCP\Security\ISecureRandom::CHAR_UPPER .
+			\OCP\Security\ISecureRandom::CHAR_DIGITS);
+
+		\OC::$server->getLogger()->debug('generateFileToken(): Issuing token, editor: {editor}, file: {fileId}, version: {version}, owner: {owner}, path: {path}, token: {token}', [
+			'app' => self::appName,
+			'owner' => $owner,
+			'editor' => $editor,
+			'fileId' => $fileId,
+			'version' => $version,
+			'path' => $path,
+			'token' => $token ]);
+
+		$wopi = new \OCA\Richdocuments\Db\Wopi([
+			$owner,
+			$editor,
+			$fileId,
+			$version,
+			$path,
+			$updatable,
+			$serverHost,
+			$token,
+			time() + self::TOKEN_LIFETIME_SECONDS
+		]);
+
+		if (!$wopi->insert()){
+			throw new \Exception('Failed to add wopi token into database');
+		}
+
+		return $token;
+	}
+
 	/*
 	 * Given a fileId and version, generates a token
 	 * and stores in the database.

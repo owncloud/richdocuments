@@ -13,6 +13,8 @@ namespace OCA\Richdocuments\Controller;
 
 use \OC\Files\View;
 use \OCP\AppFramework\Controller;
+use OCP\Files\Folder;
+use OCP\Files\NotFoundException;
 use \OCP\IRequest;
 use \OCP\IConfig;
 use \OCP\IL10N;
@@ -28,6 +30,7 @@ use \OCA\Richdocuments\Db;
 use \OCA\Richdocuments\Helper;
 use \OCA\Richdocuments\Storage;
 use \OCA\Richdocuments\DownloadResponse;
+use OCP\Share\Exceptions\ShareNotFound;
 
 class ResponseException extends \Exception {
 	private $hint;
@@ -259,7 +262,8 @@ class DocumentController extends Controller {
 		return $discovery;
 	}
 
-	/** Prepare document(s) structure
+	/**
+	 * Prepare document(s) structure
 	 */
 	private function prepareDocuments($rawDocuments){
 		$discovery_parsed = null;
@@ -363,11 +367,7 @@ class DocumentController extends Controller {
 		);
 
 		if (!is_null($fileId)) {
-			if ($this->uid || $token == null) {
-				$docRetVal = $this->getDocumentInfoByUserAuth($fileId, $this->uid);
-			} else {
-				$docRetVal = array();
-			}
+			$docRetVal = $this->getDocIndex($fileId, $token);
 			$retVal = array_merge($retVal, $docRetVal);
 		}
 
@@ -380,30 +380,49 @@ class DocumentController extends Controller {
 		return $response;
 	}
 
-	private function getDocumentInfoByUserAuth($fileId, $userId) {
-		if ($doc = $this->prepareDocumentWithUserAuth($fileId, $userId)) {
-			// Restrict filesize only possible when edited by authenticated user
-			$maxUploadFilesize = \OCP\Util::maxUploadFilesize("/");
-
-			$permissions = $doc['permissions'];
-			if (!($doc['action'] === 'edit')) {
-				$permissions = $permissions & ~\OCP\Constants::PERMISSION_UPDATE;
-			}
-
-			$tokenResult = $this->wopiGetToken($fileId);
-			return array(
-				'uploadMaxFilesize' => $maxUploadFilesize,
-				'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
-				'permissions' => $permissions,
-				'title' => $doc['name'],
-				'fileId' => $doc['fileid'] . '_' . $this->settings->getSystemValue('instanceid'),
-				'token' => $tokenResult['token'],
-				'urlsrc' => $doc['urlsrc'],
-				'path' => $doc['path']
-			);
+	private function getDocIndex($fileId, $token) {
+		// Get document info
+		if ($token == null) {
+			$doc = $this->getDocumentByUserAuth($fileId, $this->uid);
+		} else {
+			$doc = $this->getDocumentByToken($fileId, $token);
 		}
-		return array();
+		if ($doc == null) {
+			return array();
+		}
+
+		// Update permissions
+		$permissions = $doc['permissions'];
+		if (!($doc['action'] === 'edit')) {
+			$permissions = $permissions & ~\OCP\Constants::PERMISSION_UPDATE;
+		}
+
+		// Get wopi token
+		$tokenResult = $this->wopiGetTokenPublic($fileId, $doc['path'], $doc['owner']);
+
+		if ($token == null) {
+			// Restrict filesize not possible when edited by public share
+			$maxUploadFilesize = \OCP\Util::maxUploadFilesize("/");
+		} else {
+			// In public links allow max 100MB
+			$maxUploadFilesize = 100000000;
+		}
+
+		// Create document index
+		$docIndex = array(
+			'permissions' => $permissions,
+			'uploadMaxFilesize' => $maxUploadFilesize,
+			'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
+			'title' => $doc['name'],
+			'fileId' => $doc['fileid'] . '_' . $this->settings->getSystemValue('instanceid'),
+			'token' => $tokenResult['token'],
+			'urlsrc' => $doc['urlsrc'],
+			'path' => $doc['path']
+		);
+
+		return $docIndex;
 	}
+
 
 	/**
 	 * @NoAdminRequired
@@ -515,13 +534,12 @@ class DocumentController extends Controller {
 	}
 
 	/**
-	 * @param $fileId
-	 * @param $userId
+	 * @param array $node
 	 * @return null|array
 	 */
-	private function prepareDocumentWithUserAuth($fileId, $userId){
+	private function prepareDocument($node){
 		$documents = array();
-		$documents[0] = $this->storage->getDocumentByUserId($fileId, $userId);
+		$documents[0] = $node;
 		$preparedDocuments = $this->prepareDocuments($documents);
 
 		if ($preparedDocuments['status'] === 'success' &&
@@ -531,6 +549,64 @@ class DocumentController extends Controller {
 		}
 
 		return null;
+	}
+
+	/**
+	 * @param $fileId
+	 * @param $userId
+	 * @return null|array
+	 */
+	private function getDocumentByUserAuth($fileId, $userId){
+		if ($node = $this->storage->getDocumentByUserId($fileId, $userId)) {
+			return $this->prepareDocument($node);
+		}
+		return null;
+	}
+
+	/**
+	 * @param $fileId
+	 * @param $token
+	 * @return null|array
+	 */
+	private function getDocumentByToken($fileId, $token){
+		if ($node = $this->storage->getDocumentByToken($fileId, $token)) {
+			return $this->prepareDocument($node);
+		}
+		return null;
+	}
+
+	/**
+	 * Generates and returns an access token for a given fileId.
+	 */
+	private function wopiGetTokenPublic($fileId, $path, $editorUid){
+		list($fileId, , $version) = Helper::parseFileId($fileId);
+		$this->logger->info('wopiGetToken(): Generating WOPI Token for file {fileId}, version {version}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'version' => $version ]);
+
+		$updatable = true;
+		// If token is for some versioned file
+		if ($version !== '0') {
+			$updatable = false;
+		}
+
+		$this->logger->debug('wopiGetToken(): File {fileid} is updatable? {updatable}', [
+			'app' => $this->appName,
+			'fileid' => $fileId,
+			'updatable' => $updatable ]);
+
+		$row = new Db\Wopi();
+		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
+		$token = $row->generatePublicFileToken($fileId, $path, $version, (int)$updatable, $serverHost, $editorUid);
+
+		// Return the token.
+		$result = array(
+			'status' => 'success',
+			'token' => $token
+		);
+		$this->logger->debug('wopiGetToken(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
+		return $result;
 	}
 
 	/**
@@ -622,7 +698,7 @@ class DocumentController extends Controller {
 						'fileId' => $fileId
 					]);
 					$retArray = $this->wopiGetToken($fileId);
-					if ($doc = $this->prepareDocumentWithUserAuth($fileId, $this->uid)) {
+					if ($doc = $this->getDocumentByUserAuth($fileId, $this->uid)) {
 						$retArray['urlsrc'] = $doc['urlsrc'];
 					}
 					return $retArray;
@@ -643,7 +719,7 @@ class DocumentController extends Controller {
 		$token = $this->request->getParam('access_token');
 
 		list($fileId, , $version) = Helper::parseFileId($fileId);
-		$this->logger->info('wopiCheckFileInfo(): Getting info about file {fileId}, version {version} by token {token}.', [
+		$this->logger->warning('wopiCheckFileInfo(): Getting info about file {fileId}, version {version} by token {token}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
 			'version' => $version,
@@ -654,25 +730,23 @@ class DocumentController extends Controller {
 
 		$res = $row->getPathForToken($token);
 		if ($res == false) {
-			$this->logger->debug('wopiCheckFileInfo(): getPathForToken() failed.', ['app' => $this->appName]);
+			$this->logger->warning('wopiCheckFileInfo(): getPathForToken() failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
-		// Login the user to see his mount locations
-		$this->loginUser($res['owner']);
-		$view = new \OC\Files\View('/' . $res['owner'] . '/files');
-		$info = $view->getFileInfo($res['path']);
-		$this->logoutUser();
-
-		if (!$info) {
+		$userFolder = \OC::$server->getRootFolder()->getUserFolder($res['owner']);
+		$nodes = $userFolder->getById($fileId);
+		if (empty($nodes)) {
 			$this->logger->warning('wopiCheckFileInfo(): No valid file info', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
+		$file = $nodes[0];
+		$this->logger->debug('wopiCheckFileInfo(): $file='.$file->getPath(), ['app' => $this->appName]);
 
 		$editorName = \OC::$server->getUserManager()->get($res['editor'])->getDisplayName();
 		$result = array(
-			'BaseFileName' => $info['name'],
-			'Size' => $info['size'],
+			'BaseFileName' => $file->getName(),
+			'Size' => $file->getSize(),
 			'Version' => $version,
 			'OwnerId' => $res['owner'],
 			'UserId' => $res['editor'],
@@ -680,7 +754,7 @@ class DocumentController extends Controller {
 			'UserCanWrite' => $res['canwrite'] ? true : false,
 			'UserCanNotWriteRelative' => \OC::$server->getEncryptionManager()->isEnabled() ? true : false,
 			'PostMessageOrigin' => $res['server_host'],
-			'LastModifiedTime' => Helper::toISO8601($info->getMTime())
+			'LastModifiedTime' => Helper::toISO8601($file->getMTime())
 		);
 		$this->logger->debug("wopiCheckFileInfo(): Result: {result}", ['app' => $this->appName, 'result' => $result]);
 		return $result;
@@ -710,33 +784,29 @@ class DocumentController extends Controller {
 		$res = $row->getPathForToken($token);
 		$ownerid = $res['owner'];
 
-		// Login the user to see his mount locations
-		$this->loginUser($ownerid);
-		$view = new \OC\Files\View('/' . $res['owner'] . '/files');
-		$info = $view->getFileInfo($res['path']);
-
-		if (!$info) {
-			$this->logger->warning('wopiGetFile(): No valid info found', ['app' => $this->appName]);
+		$userFolder = \OC::$server->getRootFolder()->getUserFolder($res['owner']);
+		$nodes = $userFolder->getById($fileId);
+		if (empty($nodes)) {
+			$this->logger->warning('wopiCheckFileInfo(): No valid file info', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
-
-		$filename = '';
+		$file = $nodes[0];
 		// If some previous version is requested, fetch it from Files_Version app
 		if ($version !== '0') {
 			\OCP\JSON::checkAppEnabled('files_versions');
 
 			$filename = '/files_versions/' . $res['path'] . '.v' . $version;
 		} else {
-			$filename = '/files' . $res['path'];
+			$filename = $file->getInternalPath();
 		}
-
-		$this->logoutUser();
+		$this->logger->warning('wopiCheckFileInfo(): $filename='.$filename, ['app' => $this->appName]);
 
 		// This is required to be able to read encrypted documents
 		\OC_User::setIncognitoMode(true);
 		// This is required for reading encrypted files
 		\OC_Util::tearDownFS();
 		\OC_Util::setupFS($ownerid);
+		$this->logger->warning('wopiCheckFileInfo(): setupFSed '.$ownerid, ['app' => $this->appName]);
 
 		return new DownloadResponse($this->request, $ownerid, $filename);
 	}
@@ -785,6 +855,7 @@ class DocumentController extends Controller {
 		$userFolder = \OC::$server->getRootFolder()->getUserFolder($res['owner']);
 		$file = $userFolder->getById($fileId)[0];
 
+		$this->logger->warning('wopiPutFile(): $filename='.$file->getPath(), ['app' => $this->appName]);
 		if ($isPutRelative) {
 			// the new file needs to be installed in the current user dir
 			$userFolder = \OC::$server->getRootFolder()->getUserFolder($res['editor']);
