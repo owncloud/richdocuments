@@ -108,7 +108,7 @@ class Storage {
 			$ret['mimetype'] = $document->getMimeType();
 			$ret['path'] = $document->getPath();
 			$ret['name'] = $document->getName();
-			$ret['fileid'] = $fileId;
+			$ret['fileid'] = $document->getId();
 
 			return $ret;
 		} catch (ShareNotFound $e) {

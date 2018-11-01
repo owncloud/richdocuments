@@ -73,6 +73,7 @@ var odfViewer = {
 
 		var url;
 		if ($("#isPublic").val()) {
+			// Generate url for click on file in public share folder
 			url = OC.generateUrl("apps/richdocuments/s/{token}?fileId={file_id}", { token: encodeURIComponent($("#sharingToken").val()), file_id: fileId });
 		} else {
 			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}', {file_id: fileId});
@@ -185,6 +186,18 @@ $(document).ready(function() {
 			{},
 			odfViewer.register
 		);
+
+		// Check if public file share button
+		var mimetype = $("#mimetype").val();
+		if (odfViewer.supportedMimes.indexOf(mimetype) !== -1 && $("#isPublic").val()){
+			// Single file public share, add button to allow view or edit
+			var button = document.createElement("a");
+			button.href = OC.generateUrl("apps/richdocuments/s/{token}?fileId={file_id}", { token: encodeURIComponent($("#sharingToken").val()), file_id: null });
+			button.className = "button";
+			button.innerText = t('richdocuments', 'View/Edit in Collabora');
+
+			$("#preview").append(button);
+		}
 
 		if (!$("#isPublic").val()) {
 			// Dont register file menu with public links

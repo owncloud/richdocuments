@@ -340,6 +340,7 @@ class DocumentController extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function index($fileId, $token){
+		$this->logger->warning('index(): $fileId='.$fileId.'$token='.$token, ['app' => $this->appName]);
 		$wopiRemote = $this->getWopiUrl($this->isTester());
 		if (($parts = parse_url($wopiRemote)) && isset($parts['scheme']) && isset($parts['host'])) {
 			$webSocketProtocol = "ws://";
@@ -366,7 +367,7 @@ class DocumentController extends Controller {
 			'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot')
 		);
 
-		if (!is_null($fileId)) {
+		if (!is_null($fileId) || $token != null) {
 			$docRetVal = $this->getDocIndex($fileId, $token);
 			$retVal = array_merge($retVal, $docRetVal);
 		}
@@ -398,7 +399,7 @@ class DocumentController extends Controller {
 		}
 
 		// Get wopi token
-		$tokenResult = $this->wopiGetTokenPublic($fileId, $doc['path'], $doc['owner']);
+		$tokenResult = $this->wopiGetTokenPublic($doc['fileid'], $doc['path'], $doc['owner']);
 
 		if ($token == null) {
 			// Restrict filesize not possible when edited by public share
@@ -741,7 +742,7 @@ class DocumentController extends Controller {
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 		$file = $nodes[0];
-		$this->logger->debug('wopiCheckFileInfo(): $file='.$file->getPath(), ['app' => $this->appName]);
+		$this->logger->warning('wopiCheckFileInfo(): $file='.$file->getPath(), ['app' => $this->appName]);
 
 		$editorName = \OC::$server->getUserManager()->get($res['editor'])->getDisplayName();
 		$result = array(
@@ -771,7 +772,7 @@ class DocumentController extends Controller {
 		$token = $this->request->getParam('access_token');
 
 		list($fileId, , $version) = Helper::parseFileId($fileId);
-		$this->logger->info('wopiGetFile(): File {fileId}, version {version}, token {token}.', [
+		$this->logger->warning('wopiGetFile(): File {fileId}, version {version}, token {token}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
 			'version' => $version,
@@ -824,7 +825,7 @@ class DocumentController extends Controller {
 		$isPutRelative = ($this->request->getHeader('X-WOPI-Override') === 'PUT_RELATIVE');
 
 		list($fileId, , $version) = Helper::parseFileId($fileId);
-		$this->logger->debug('wopiputFile(): File {fileId}, version {version}, token {token}, WopiOverride {wopiOverride}.', [
+		$this->logger->warning('wopiputFile(): File {fileId}, version {version}, token {token}, WopiOverride {wopiOverride}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
 			'version' => $version,
