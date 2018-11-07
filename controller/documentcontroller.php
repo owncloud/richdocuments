@@ -382,8 +382,7 @@ class DocumentController extends Controller {
 		);
 
 		// Get doc index if possible
-		$editorId = $this->uid;
-		$docRetVal = $this->handleDocIndex($fileId, $shareToken, $editorId);
+		$docRetVal = $this->handleDocIndex($fileId, $shareToken, $this->uid);
 		$retVal = array_merge($retVal, $docRetVal);
 
 		$response = new TemplateResponse('richdocuments', 'documents', $retVal);
@@ -395,7 +394,7 @@ class DocumentController extends Controller {
 		return $response;
 	}
 
-	private function handleDocIndex($fileId, $shareToken, $editorId) {
+	private function handleDocIndex($fileId, $shareToken, $currentUser) {
 		if (is_null($fileId) && is_null($shareToken)) {
 			return array();
 		}
@@ -403,7 +402,7 @@ class DocumentController extends Controller {
 		$useUserAuth = (!is_null($fileId) && is_null($shareToken));
 		if ($useUserAuth) {
 			// Normal editing or share by user/group
-			$doc = $this->getDocumentByUserAuth($editorId, $fileId);
+			$doc = $this->getDocumentByUserAuth($currentUser, $fileId);
 		} else {
 			// Share by link in public folder or file
 			$doc = $this->getDocumentByShareToken($shareToken, $fileId);
@@ -432,11 +431,7 @@ class DocumentController extends Controller {
 		if ($useUserAuth) {
 			$tokenResult = $this->wopiGetToken($doc['fileid']);
 		} else {
-			if (!$editorId) {
-				// if no user is authenticated, use owner as editor
-				$editorId = $doc['owner'];
-			}
-			$tokenResult = $this->wopiGetTokenForPublicLink($doc['fileid'], $doc['path'], $permissions, $editorId, $doc['owner']);
+			$tokenResult = $this->wopiGetTokenForPublicLink($doc['fileid'], $doc['path'], $permissions, $currentUser, $doc['owner']);
 		}
 
 		// Create document index
@@ -568,13 +563,13 @@ class DocumentController extends Controller {
 		$path = $view->getPath($fileId);
 		$updatable = (bool)$view->isUpdatable($path);
 
-		$this->updateDocumentEncryptionAccessList($view->getOwner($path), $path);
+		$editorUid = \OC::$server->getUserSession()->getUser()->getUID();
+		$this->updateDocumentEncryptionAccessList($view->getOwner($path), $editorUid, $path);
 
 		// Check if the editor (user who is accessing) is in editable group
 		// UserCanWrite only if
 		// 1. No edit groups are set or
 		// 2. if they are set, it is in one of the edit groups
-		$editorUid = \OC::$server->getUserSession()->getUser()->getUID();
 		$editGroups = array_filter(explode('|', $this->appConfig->getAppValue('edit_groups')));
 		if ($updatable && count($editGroups) > 0) {
 			$updatable = false;
@@ -656,7 +651,7 @@ class DocumentController extends Controller {
 		return null;
 	}
 
-	private function updateDocumentEncryptionAccessList($owner, $path) {
+	private function updateDocumentEncryptionAccessList($owner, $currentUser, $path) {
 		$encryptionManager = \OC::$server->getEncryptionManager();
 		if ($encryptionManager->isEnabled()) {
 			// Update the current file to be accessible with system public
@@ -665,21 +660,21 @@ class DocumentController extends Controller {
 			$absPath = '/' . $owner . '/files' .  $path;
 			$accessList = \OC::$server->getEncryptionFilesHelper()->getAccessList($absPath);
 			$accessList['public'] = true;
-			$encryptionManager->getEncryptionModule()->update($absPath, $owner, $accessList);
+			$encryptionManager->getEncryptionModule()->update($absPath, $currentUser, $accessList);
 		}
 	}
 
 	/**
 	 * Generates and returns an access token for a given fileId.
 	 */
-	private function wopiGetTokenForPublicLink($fileId, $path, $permissions, $editorUid, $ownerUid){
+	private function wopiGetTokenForPublicLink($fileId, $path, $permissions, $currentUser, $ownerUid){
 		list($fileId, , $version) = Helper::parseFileId($fileId);
 		$this->logger->info('wopiGetToken(): Generating WOPI Token for file {fileId}, version {version}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
 			'version' => $version ]);
 
-		$this->updateDocumentEncryptionAccessList($ownerUid, $path);
+		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
 
 		$updateable = ($permissions & Constants::PERMISSION_UPDATE) === Constants::PERMISSION_UPDATE;
 		// If token is for some versioned file
@@ -689,6 +684,13 @@ class DocumentController extends Controller {
 
 		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 		$row = new Db\Wopi();
+
+		if (!$currentUser) {
+			// if no user is authenticated, use owner as editor
+			$editorUid = $ownerUid;
+		} else {
+			$editorUid = $currentUser;
+		}
 		$token = $row->generateTokenForPublicShare($fileId, $path, $version, $updateable, $serverHost, $ownerUid, $editorUid);
 
 		// Return the token.
