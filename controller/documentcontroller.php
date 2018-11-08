@@ -14,8 +14,6 @@ namespace OCA\Richdocuments\Controller;
 use \OC\Files\View;
 use \OCP\AppFramework\Controller;
 use OCP\Constants;
-use OCP\Files\Folder;
-use OCP\Files\NotFoundException;
 use \OCP\IRequest;
 use \OCP\IConfig;
 use \OCP\IL10N;
@@ -31,7 +29,6 @@ use \OCA\Richdocuments\Db;
 use \OCA\Richdocuments\Helper;
 use \OCA\Richdocuments\Storage;
 use \OCA\Richdocuments\DownloadResponse;
-use OCP\Share\Exceptions\ShareNotFound;
 
 class ResponseException extends \Exception {
 	private $hint;
@@ -343,6 +340,7 @@ class DocumentController extends Controller {
 	 * @PublicPage
 	 */
 	public function publicIndex($token, $fileId){
+		$key = \OC::$server->getSession()->get('public_link_authenticated');
 		// Public share link (folder or file)
 		return $this->handleIndex($fileId, $token);
 	}

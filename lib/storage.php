@@ -28,6 +28,7 @@ use OCP\Files\FileInfo;
 use OCP\Files\InvalidPathException;
 use OCP\Files\NotFoundException;
 use OCP\Share\Exceptions\ShareNotFound;
+use OCP\Share\IShare;
 
 class Storage {
 	public static $MIMETYPE_LIBREOFFICE_WORDPROCESSOR = array(
@@ -125,6 +126,18 @@ class Storage {
 		}
 	}
 
+	private function isShareAuthValid(IShare $share) {
+		// check if password authentication has been passed
+		// (calling directly from API, password form cannot be enforced, so check is needed)
+		if ($share->getPassword() === null) {
+			return true;
+		} else if (! \OC::$server->getSession()->exists('public_link_authenticated')
+			|| \OC::$server->getSession()->get('public_link_authenticated') !== (string)$share->getId()) {
+			return false;
+		}
+		return true;
+	}
+
 	/**
 	 * Retrieve document info for the public share link token. If file in the public link is used,
 	 * fileId has to be provided.
@@ -137,9 +150,13 @@ class Storage {
 	 */
 	public function getDocumentByShareToken($token, $fileId = null){
 		try {
+			// Get share by token
 			$share = \OC::$server->getShareManager()->getShareByToken($token);
-			$node = $share->getNode();
+			if(!$this->isShareAuthValid($share)) {
+				return null;
+			}
 
+			$node = $share->getNode();
 			if ($node->getType() == FileInfo::TYPE_FILE) {
 				$document = $node;
 			} else if ($node->getType() == FileInfo::TYPE_FOLDER && !is_null($fileId)) {
