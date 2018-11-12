@@ -253,7 +253,28 @@ class DocumentController extends Controller {
 	}
 
 	/**
-	 * Prepare document(s) structure
+	 * Prepare document structure from raw file node metadata
+	 *
+	 * @param array $fileInfo
+	 * @return null|array
+	 */
+	private function prepareDocument($fileInfo){
+		$preparedDocuments = $this->prepareDocuments([$fileInfo]);
+
+		if ($preparedDocuments['status'] === 'success' &&
+			$preparedDocuments['documents'] &&
+			count($preparedDocuments['documents']) > 0) {
+			return $preparedDocuments['documents'][0];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Prepare documents structure from raw file nodes metadata
+	 *
+	 * @param array $rawDocuments
+	 * @return array
 	 */
 	private function prepareDocuments($rawDocuments){
 		$discovery_parsed = null;
@@ -340,14 +361,18 @@ class DocumentController extends Controller {
 	 * @PublicPage
 	 */
 	public function publicIndex($token, $fileId){
-		$key = \OC::$server->getSession()->get('public_link_authenticated');
 		// Public share link (folder or file)
 		return $this->handleIndex($fileId, $token);
 	}
 
 	/**
-	 * @param $fileId
-	 * @param $shareToken
+	 * Get collabora document template for:
+	 * - the base template if both fileId and shareToken are null
+	 * - file in user folder (also shared by user/group) if fileId not null and shareToken is null
+	 * - public link (public file share or file in public folder share identified by fileId) if shareToken is not null
+	 *
+	 * @param string|null $fileId
+	 * @param string|null $shareToken
 	 * @return TemplateResponse
 	 */
 	private function handleIndex($fileId, $shareToken) {
@@ -392,6 +417,17 @@ class DocumentController extends Controller {
 		return $response;
 	}
 
+	/**
+	 * Get document metadata for:
+	 * - file in user folder if fileId and currently authenticated user are specified, and shareToken is null
+	 * - public link (public file share or file in public folder share identified by fileId) if shareToken is not null
+	 *
+	 * @param string|null $fileId
+	 * @param string|null $shareToken
+	 * @param string|null $currentUser
+	 *
+	 * @return array
+	 */
 	private function handleDocIndex($fileId, $shareToken, $currentUser) {
 		if (is_null($fileId) && is_null($shareToken)) {
 			return array();
@@ -608,43 +644,25 @@ class DocumentController extends Controller {
 	}
 
 	/**
-	 * @param array $node
-	 * @return null|array
-	 */
-	private function prepareDocument($node){
-		$documents = array();
-		$documents[0] = $node;
-		$preparedDocuments = $this->prepareDocuments($documents);
-
-		if ($preparedDocuments['status'] === 'success' &&
-			$preparedDocuments['documents'] &&
-			count($preparedDocuments['documents']) > 0) {
-			return $preparedDocuments['documents'][0];
-		}
-
-		return null;
-	}
-
-	/**
-	 * @param $userId
-	 * @param $fileId
+	 * @param string $userId
+	 * @param string $fileId
 	 * @return null|array
 	 */
 	private function getDocumentByUserAuth($userId, $fileId){
-		if ($node = $this->storage->getDocumentByUserId($userId, $fileId)) {
-			return $this->prepareDocument($node);
+		if ($fileInfo = $this->storage->getDocumentByUserId($userId, $fileId)) {
+			return $this->prepareDocument($fileInfo);
 		}
 		return null;
 	}
 
 	/**
-	 * @param $token
-	 * @param $fileId
+	 * @param string $token
+	 * @param string $fileId
 	 * @return null|array
 	 */
 	private function getDocumentByShareToken($token, $fileId = null){
-		if ($node = $this->storage->getDocumentByShareToken($token, $fileId)) {
-			return $this->prepareDocument($node);
+		if ($fileInfo = $this->storage->getDocumentByShareToken($token, $fileId)) {
+			return $this->prepareDocument($fileInfo);
 		}
 		return null;
 	}

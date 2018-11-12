@@ -93,8 +93,7 @@ class Application extends App {
 	}
 
 	public function publicLinksAllowedToUseCollabora() {
-		// TODO: some more rules? additional collabora flag?
-		// No need to check for groups, because access to public link with collabora document was required
+		// FIXME: some more rules? additional collabora flag?
 		return ($this->getContainer()->getServer()->getConfig()->getAppValue('core', 'shareapi_allow_links', 'yes') == 'yes');
 	}
 
