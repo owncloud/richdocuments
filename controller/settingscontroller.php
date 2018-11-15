@@ -35,6 +35,7 @@ class SettingsController extends Controller{
 
 	/**
 	 * @NoAdminRequired
+	 * @PublicPage
 	 */
 	public function getSupportedMimes(){
 		return array(

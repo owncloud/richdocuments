@@ -13,7 +13,8 @@
 namespace OCA\Richdocuments\Db;
 
 /**
- * @method string generateFileToken()
+ * @method string generateTokenForPublicShare()
+ * @method string generateTokenForUserFile()
  * @method string getPathForToken()
  */
 
@@ -30,6 +31,51 @@ class Wopi extends \OCA\Richdocuments\Db{
 
 	protected $loadStatement = 'SELECT * FROM `*PREFIX*richdocuments_wopi` WHERE `token`= ?';
 
+	/**
+	 * Generate token for document being shared with public link
+	 *
+	 * @param $fileId
+	 * @param $path
+	 * @param $version
+	 * @param $serverHost
+	 * @param $owner
+	 * @param $editor
+	 * @return string
+	 * @throws \Exception
+	 */
+	public function generateTokenForPublicShare($fileId, $path, $version, $updatable, $serverHost, $owner, $editor){
+		$token = \OC::$server->getSecureRandom()->getMediumStrengthGenerator()->generate(32,
+			\OCP\Security\ISecureRandom::CHAR_LOWER . \OCP\Security\ISecureRandom::CHAR_UPPER .
+			\OCP\Security\ISecureRandom::CHAR_DIGITS);
+
+		\OC::$server->getLogger()->debug('generateFileToken(): Issuing token, editor: {editor}, file: {fileId}, version: {version}, owner: {owner}, path: {path}, token: {token}', [
+			'app' => self::appName,
+			'owner' => $owner,
+			'editor' => $editor,
+			'fileId' => $fileId,
+			'version' => $version,
+			'path' => $path,
+			'token' => $token ]);
+
+		$wopi = new \OCA\Richdocuments\Db\Wopi([
+			$owner,
+			$editor,
+			$fileId,
+			$version,
+			$path,
+			(int)$updatable,
+			$serverHost,
+			$token,
+			time() + self::TOKEN_LIFETIME_SECONDS
+		]);
+
+		if (!$wopi->insert()){
+			throw new \Exception('Failed to add wopi token into database');
+		}
+
+		return $token;
+	}
+
 	/*
 	 * Given a fileId and version, generates a token
 	 * and stores in the database.
@@ -37,7 +83,7 @@ class Wopi extends \OCA\Richdocuments\Db{
 	 * its the version number as stored by files_version app
 	 * Returns the token.
 	 */
-	public function generateFileToken($fileId, $version, $updatable, $serverHost, $editor){
+	public function generateTokenForUserFile($fileId, $version, $updatable, $serverHost, $editor){
 
 		// Get the FS view of the current user.
 		$view = \OC\Files\Filesystem::getView();
@@ -79,7 +125,7 @@ class Wopi extends \OCA\Richdocuments\Db{
 			$fileId,
 			$version,
 			$path,
-			$updatable,
+			(int)$updatable,
 			$serverHost,
 			$token,
 			time() + self::TOKEN_LIFETIME_SECONDS

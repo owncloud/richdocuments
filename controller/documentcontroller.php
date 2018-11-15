@@ -13,6 +13,7 @@ namespace OCA\Richdocuments\Controller;
 
 use \OC\Files\View;
 use \OCP\AppFramework\Controller;
+use OCP\Constants;
 use \OCP\IRequest;
 use \OCP\IConfig;
 use \OCP\IL10N;
@@ -50,12 +51,21 @@ class DocumentController extends Controller {
 	private $appConfig;
 	private $cache;
 	private $logger;
+	private $storage;
 	const ODT_TEMPLATE_PATH = '/assets/odttemplate.odt';
 
 	// Signifies LOOL that document has been changed externally in this storage
 	const LOOL_STATUS_DOC_CHANGED = 1010;
 
-	public function __construct($appName, IRequest $request, IConfig $settings, AppConfig $appConfig, IL10N $l10n, $uid, ICacheFactory $cache, ILogger $logger){
+	public function __construct($appName,
+								IRequest $request,
+								IConfig $settings,
+								AppConfig $appConfig,
+								IL10N $l10n,
+								$uid,
+								ICacheFactory $cache,
+								ILogger $logger,
+								Storage $storage){
 		parent::__construct($appName, $request);
 		$this->uid = $uid;
 		$this->l10n = $l10n;
@@ -63,6 +73,7 @@ class DocumentController extends Controller {
 		$this->appConfig = $appConfig;
 		$this->cache = $cache->create($appName);
 		$this->logger = $logger;
+		$this->storage = $storage;
 	}
 
 	/**
@@ -159,27 +170,24 @@ class DocumentController extends Controller {
      private function isTester() {
 		 $tester = false;
 
-         $user = \OC::$server->getUserSession()->getUser()->getUID();
-         $testgroups = array_filter(explode('|', $this->appConfig->getAppValue('test_server_groups')));
-         $this->logger->debug('Testgroups are {testgroups}', [
-             'app' => $this->appName,
-             'testgroups' => $testgroups
-         ]);
-         foreach ($testgroups as $testgroup) {
-             $test = \OC::$server->getGroupManager()->get($testgroup);
-             if ($test !== null && sizeof($test->searchUsers($user)) > 0) {
-                 $this->logger->debug('User {user} found in {group}', [
-                     'app' => $this->appName,
-                     'user' => $user,
-                     'group' => $testgroup
-                 ]);
+		 $user = \OC::$server->getUserSession()->getUser();
+		 if ($user === null) {
+		 	return false;
+		 }
 
-				 $tester = true;
-				 break;
-             }
-         }
+		 $uid = $user->getUID();
+		 $testgroups = array_filter(explode('|', $this->appConfig->getAppValue('test_server_groups')));
+		 $this->logger->debug('Testgroups are {testgroups}', [ 'app' => $this->appName, 'testgroups' => $testgroups ]);
+		 foreach ($testgroups as $testgroup) {
+		 	$test = \OC::$server->getGroupManager()->get($testgroup);
+		 	if ($test !== null && sizeof($test->searchUsers($uid)) > 0) {
+		 		$this->logger->debug('User {user} found in {group}', ['app' => $this->appName, 'user' => $uid, 'group' => $testgroup ]);
+		 		$tester = true;
+				break;
+			}
+		 }
 
-         return $tester;
+		 return $tester;
      }
 
 	/** Return the content of discovery.xml - either from cache, or download it.
@@ -244,7 +252,29 @@ class DocumentController extends Controller {
 		return $discovery;
 	}
 
-	/** Prepare document(s) structure
+	/**
+	 * Prepare document structure from raw file node metadata
+	 *
+	 * @param array $fileInfo
+	 * @return null|array
+	 */
+	private function prepareDocument($fileInfo){
+		$preparedDocuments = $this->prepareDocuments([$fileInfo]);
+
+		if ($preparedDocuments['status'] === 'success' &&
+			$preparedDocuments['documents'] &&
+			count($preparedDocuments['documents']) > 0) {
+			return $preparedDocuments['documents'][0];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Prepare documents structure from raw file nodes metadata
+	 *
+	 * @param array $rawDocuments
+	 * @return array
 	 */
 	private function prepareDocuments($rawDocuments){
 		$discovery_parsed = null;
@@ -320,7 +350,33 @@ class DocumentController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function index($fileId, $dir){
+	public function index($fileId){
+		// Normal editing and user/group share editing
+		return $this->handleIndex($fileId, null);
+	}
+
+	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @PublicPage
+	 */
+	public function publicIndex($token, $fileId){
+		// Public share link (folder or file)
+		return $this->handleIndex($fileId, $token);
+	}
+
+	/**
+	 * Get collabora document template for:
+	 * - the base template if both fileId and shareToken are null
+	 * - file in user folder (also shared by user/group) if fileId not null and shareToken is null
+	 * - public link (public file share or file in public folder share identified by fileId) if shareToken is not null
+	 *
+	 * @param string|null $fileId
+	 * @param string|null $shareToken
+	 * @return TemplateResponse
+	 */
+	private function handleIndex($fileId, $shareToken) {
+		// Handle general response
 		$wopiRemote = $this->getWopiUrl($this->isTester());
 		if (($parts = parse_url($wopiRemote)) && isset($parts['scheme']) && isset($parts['host'])) {
 			$webSocketProtocol = "ws://";
@@ -339,11 +395,8 @@ class DocumentController extends Controller {
 
 
 		\OC::$server->getNavigationManager()->setActiveEntry( 'richdocuments_index' );
-		$maxUploadFilesize = \OCP\Util::maxUploadFilesize("/");
 		$retVal = array(
 			'enable_previews' => $this->settings->getSystemValue('enable_previews', true),
-			'uploadMaxFilesize' => $maxUploadFilesize,
-			'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
 			'allowShareWithLink' => $this->settings->getAppValue('core', 'shareapi_allow_links', 'yes'),
 			'wopi_url' => $webSocket,
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
@@ -351,27 +404,9 @@ class DocumentController extends Controller {
 			'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot')
 		);
 
-		if (!is_null($fileId)) {
-			$tokenResult = $this->wopiGetToken($fileId);
-			$userFolder = \OC::$server->getRootFolder()->getUserFolder($this->uid);
-			$item = $userFolder->getById($fileId)[0];
-			$docs = $this->get($fileId);
-
-			$actionIsEditable = $docs['documents'][0]['action'] === 'edit';
-			$permissions = $item->getPermissions();
-			if (!$actionIsEditable)
-				$permissions = $permissions & ~\OCP\Constants::PERMISSION_UPDATE;
-
-			$docRetVal = array(
-				'permissions' => $permissions,
-				'title' => $item->getName(),
-				'fileId' => $item->getId() . '_' . $this->settings->getSystemValue('instanceid'),
-				'token' => $tokenResult['token'],
-				'urlsrc' => $docs['documents'][0]['urlsrc'],
-				'path' => $userFolder->getRelativePath($item->getPath())
-			);
-			$retVal = array_merge($retVal, $docRetVal);
-		}
+		// Get doc index if possible
+		$docRetVal = $this->handleDocIndex($fileId, $shareToken, $this->uid);
+		$retVal = array_merge($retVal, $docRetVal);
 
 		$response = new TemplateResponse('richdocuments', 'documents', $retVal);
 		$policy = new ContentSecurityPolicy();
@@ -380,6 +415,72 @@ class DocumentController extends Controller {
 		$response->setContentSecurityPolicy($policy);
 
 		return $response;
+	}
+
+	/**
+	 * Get document metadata for:
+	 * - file in user folder if fileId and currently authenticated user are specified, and shareToken is null
+	 * - public link (public file share or file in public folder share identified by fileId) if shareToken is not null
+	 *
+	 * @param string|null $fileId
+	 * @param string|null $shareToken
+	 * @param string|null $currentUser
+	 *
+	 * @return array
+	 */
+	private function handleDocIndex($fileId, $shareToken, $currentUser) {
+		if (is_null($fileId) && is_null($shareToken)) {
+			return array();
+		}
+
+		$useUserAuth = (!is_null($fileId) && is_null($shareToken));
+		if ($useUserAuth) {
+			// Normal editing or share by user/group
+			$doc = $this->getDocumentByUserAuth($currentUser, $fileId);
+		} else {
+			// Share by link in public folder or file
+			$doc = $this->getDocumentByShareToken($shareToken, $fileId);
+		}
+
+		if ($doc == null) {
+			return array();
+		}
+
+		// Update permissions
+		$permissions = $doc['permissions'];
+		if (!($doc['action'] === 'edit')) {
+			$permissions = $permissions & ~\OCP\Constants::PERMISSION_UPDATE;
+		}
+
+		// Get wopi token and decide max upload size
+		if ($useUserAuth) {
+			// Restrict filesize not possible when using public share
+			$maxUploadFilesize = \OCP\Util::maxUploadFilesize("/");
+		} else {
+			// FIXME: In public links allow max 100MB
+			$maxUploadFilesize = 100000000;
+		}
+
+		// Get wopi token and decide max upload size
+		if ($useUserAuth) {
+			$tokenResult = $this->wopiGetToken($doc['fileid']);
+		} else {
+			$tokenResult = $this->wopiGetTokenForPublicLink($doc['fileid'], $doc['path'], $permissions, $currentUser, $doc['owner']);
+		}
+
+		// Create document index
+		$docIndex = array(
+			'permissions' => $permissions,
+			'uploadMaxFilesize' => $maxUploadFilesize,
+			'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
+			'title' => $doc['name'],
+			'fileId' => $doc['fileid'] . '_' . $this->settings->getSystemValue('instanceid'),
+			'token' => $tokenResult['token'],
+			'urlsrc' => $doc['urlsrc'],
+			'path' => $doc['path']
+		);
+
+		return $docIndex;
 	}
 
 	/**
@@ -482,13 +583,6 @@ class DocumentController extends Controller {
 		return $response;
 	}
 
-	private function get($fileId){
-		$documents = array();
-		$documents[0] = Storage::getDocumentById($fileId);
-
-		return $this->prepareDocuments($documents);
-	}
-
 	/**
 	 * Generates and returns an access token for a given fileId.
 	 */
@@ -503,23 +597,13 @@ class DocumentController extends Controller {
 		$path = $view->getPath($fileId);
 		$updatable = (bool)$view->isUpdatable($path);
 
-		$encryptionManager = \OC::$server->getEncryptionManager();
-		if ($encryptionManager->isEnabled()) {
-			// Update the current file to be accessible with system public
-			// shared key
-			$this->logger->debug('wopiGetToken(): Encryption enabled.', ['app' => $this->appName]);
-			$owner = $view->getOwner($path);
-			$absPath = '/' . $owner . '/files' .  $path;
-			$accessList = \OC::$server->getEncryptionFilesHelper()->getAccessList($absPath);
-			$accessList['public'] = true;
-			$encryptionManager->getEncryptionModule()->update($absPath, $owner, $accessList);
-		}
+		$editorUid = \OC::$server->getUserSession()->getUser()->getUID();
+		$this->updateDocumentEncryptionAccessList($view->getOwner($path), $editorUid, $path);
 
 		// Check if the editor (user who is accessing) is in editable group
 		// UserCanWrite only if
 		// 1. No edit groups are set or
 		// 2. if they are set, it is in one of the edit groups
-		$editorUid = \OC::$server->getUserSession()->getUser()->getUID();
 		$editGroups = array_filter(explode('|', $this->appConfig->getAppValue('edit_groups')));
 		if ($updatable && count($editGroups) > 0) {
 			$updatable = false;
@@ -548,7 +632,82 @@ class DocumentController extends Controller {
 			'updatable' => $updatable ]);
 		$row = new Db\Wopi();
 		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
-		$token = $row->generateFileToken($fileId, $version, (int)$updatable, $serverHost, $editorUid);
+		$token = $row->generateTokenForUserFile($fileId, $version, $updatable, $serverHost, $editorUid);
+
+		// Return the token.
+		$result = array(
+			'status' => 'success',
+			'token' => $token
+		);
+		$this->logger->debug('wopiGetToken(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
+		return $result;
+	}
+
+	/**
+	 * @param string $userId
+	 * @param string $fileId
+	 * @return null|array
+	 */
+	private function getDocumentByUserAuth($userId, $fileId){
+		if ($fileInfo = $this->storage->getDocumentByUserId($userId, $fileId)) {
+			return $this->prepareDocument($fileInfo);
+		}
+		return null;
+	}
+
+	/**
+	 * @param string $token
+	 * @param string $fileId
+	 * @return null|array
+	 */
+	private function getDocumentByShareToken($token, $fileId = null){
+		if ($fileInfo = $this->storage->getDocumentByShareToken($token, $fileId)) {
+			return $this->prepareDocument($fileInfo);
+		}
+		return null;
+	}
+
+	private function updateDocumentEncryptionAccessList($owner, $currentUser, $path) {
+		$encryptionManager = \OC::$server->getEncryptionManager();
+		if ($encryptionManager->isEnabled()) {
+			// Update the current file to be accessible with system public
+			// shared key
+			$this->logger->debug('wopiGetToken(): Encryption enabled.', ['app' => $this->appName]);
+			$absPath = '/' . $owner . '/files' .  $path;
+			$accessList = \OC::$server->getEncryptionFilesHelper()->getAccessList($absPath);
+			$accessList['public'] = true;
+			$encryptionManager->getEncryptionModule()->update($absPath, $currentUser, $accessList);
+		}
+	}
+
+	/**
+	 * Generates and returns an access token for a given fileId.
+	 */
+	private function wopiGetTokenForPublicLink($fileId, $path, $permissions, $currentUser, $ownerUid){
+		list($fileId, , $version) = Helper::parseFileId($fileId);
+		$this->logger->info('wopiGetToken(): Generating WOPI Token for file {fileId}, version {version}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'version' => $version ]);
+
+		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
+
+		$updateable = ($permissions & Constants::PERMISSION_UPDATE) === Constants::PERMISSION_UPDATE;
+		// If token is for some versioned file
+		if ($version !== '0') {
+			$updateable = false;
+		}
+
+		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
+		$row = new Db\Wopi();
+
+		if (!$currentUser) {
+			// if no user is authenticated, use owner as editor
+			$editorUid = $ownerUid;
+		} else {
+			$editorUid = $currentUser;
+		}
+		$token = $row->generateTokenForPublicShare($fileId, $path, $version, $updateable, $serverHost, $ownerUid, $editorUid);
 
 		// Return the token.
 		$result = array(
@@ -578,9 +737,8 @@ class DocumentController extends Controller {
 						'fileId' => $fileId
 					]);
 					$retArray = $this->wopiGetToken($fileId);
-					$docs = $this->get($fileId);
-					if ($docs['status'] === 'success' && $docs['documents'] && count($docs['documents']) > 0) {
-						$retArray['urlsrc'] = $docs['documents'][0]['urlsrc'];
+					if ($doc = $this->getDocumentByUserAuth($fileId, $this->uid)) {
+						$retArray['urlsrc'] = $doc['urlsrc'];
 					}
 					return $retArray;
 				}
@@ -617,19 +775,17 @@ class DocumentController extends Controller {
 
 		// Login the user to see his mount locations
 		$this->loginUser($res['owner']);
-		$view = new \OC\Files\View('/' . $res['owner'] . '/files');
+		$view = new View('/' . $res['owner'] . '/files');
 		$info = $view->getFileInfo($res['path']);
 		$this->logoutUser();
-
 		if (!$info) {
-			$this->logger->warning('wopiCheckFileInfo(): No valid file info', ['app' => $this->appName]);
+			$this->logger->warning('wopiGetFile(): No valid info found', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
-
 		$editorName = \OC::$server->getUserManager()->get($res['editor'])->getDisplayName();
 		$result = array(
-			'BaseFileName' => $info['name'],
-			'Size' => $info['size'],
+			'BaseFileName' => $info->getName(),
+			'Size' => $info->getSize(),
 			'Version' => $version,
 			'OwnerId' => $res['owner'],
 			'UserId' => $res['editor'],
@@ -669,15 +825,13 @@ class DocumentController extends Controller {
 
 		// Login the user to see his mount locations
 		$this->loginUser($ownerid);
-		$view = new \OC\Files\View('/' . $res['owner'] . '/files');
+		$view = new View('/' . $ownerid . '/files');
 		$info = $view->getFileInfo($res['path']);
 
 		if (!$info) {
-			$this->logger->warning('wopiGetFile(): No valid info found', ['app' => $this->appName]);
+			$this->logger->warning('wopiCheckFileInfo(): No valid file info', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
-
-		$filename = '';
 		// If some previous version is requested, fetch it from Files_Version app
 		if ($version !== '0') {
 			\OCP\JSON::checkAppEnabled('files_versions');
@@ -858,6 +1012,6 @@ class DocumentController extends Controller {
 	 * also adds session and member info for these files
 	 */
 	public function listAll(){
-		return $this->prepareDocuments(Storage::getDocuments());
+		return $this->prepareDocuments($this->storage->getDocuments());
 	}
 }

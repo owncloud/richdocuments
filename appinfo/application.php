@@ -11,6 +11,7 @@
 
 namespace OCA\Richdocuments\AppInfo;
 
+use OCA\Richdocuments\Storage;
 use \OCP\AppFramework\App;
 
 use \OCA\Richdocuments\Controller\DocumentController;
@@ -31,6 +32,7 @@ class Application extends App {
 		 * Controllers
 		 */
 		$container->registerService('DocumentController', function($c) {
+			$storage = new Storage();
 			/** @var IContainer $c */
 			return new DocumentController(
 				$c->query('AppName'),
@@ -40,7 +42,8 @@ class Application extends App {
 				$c->query('L10N'),
 				$c->query('UserId'),
 				$c->query('ICacheFactory'),
-				$c->query('Logger')
+				$c->query('Logger'),
+				$storage
 			);
 		});
 		$container->registerService('SettingsController', function($c) {
@@ -87,6 +90,11 @@ class Application extends App {
 			/** @var IContainer $c */
 			return $c->query('ServerContainer')->getMemCacheFactory();
 		});
+	}
+
+	public function publicLinksAllowedToUseCollabora() {
+		// FIXME: some more rules? additional collabora flag?
+		return ($this->getContainer()->getServer()->getConfig()->getAppValue('core', 'shareapi_allow_links', 'yes') == 'yes');
 	}
 
 	public function isUserAllowedToUseCollabora() {

@@ -24,6 +24,12 @@
 
 namespace OCA\Richdocuments;
 
+use OCP\Files\FileInfo;
+use OCP\Files\InvalidPathException;
+use OCP\Files\NotFoundException;
+use OCP\Share\Exceptions\ShareNotFound;
+use OCP\Share\IShare;
+
 class Storage {
 	public static $MIMETYPE_LIBREOFFICE_WORDPROCESSOR = array(
 		'application/vnd.oasis.opendocument.text',
@@ -64,9 +70,13 @@ class Storage {
 		'application/vnd.ms-powerpoint.slideshow.macroEnabled.12'
 	);
 
-	public static function getDocuments() {
+	public function getDocuments() {
+		$db = new Db\Storage();
+		$rawDocuments = $db->loadRecentDocumentsForMimes(self::$MIMETYPE_LIBREOFFICE_WORDPROCESSOR);
+		$documents = $this->processDocuments($rawDocuments);
+
 		$list = array_filter(
-				self::searchDocuments(),
+				$documents,
 				function($item){
 					//filter Deleted
 					if (strpos($item['path'], '_trashbin')===0){
@@ -79,41 +89,114 @@ class Storage {
 		return $list;
 	}
 
-	public static function getDocumentById($fileId){
-		$root = \OC::$server->getUserFolder();
-		$ret = array();
+	/**
+	 * Retrieve document info for file in the user directory (also shared file or within shared folder).
+	 *
+	 * If share is invalid or file does not exist, null is returned
+	 *
+	 * @param string $userId
+	 * @param string|int $fileId
+	 * @return array|null
+	 */
+	public function getDocumentByUserId($userId, $fileId){
+		$root = \OC::$server->getRootFolder()->getUserFolder($userId);
 
 		// If type of fileId is a string, then it
 		// doesn't work for shared documents, lets cast to int everytime
 		$document = $root->getById((int)$fileId)[0];
 		if ($document === null){
-			error_log('File with file id, ' . $fileId . ', not found');
+			return $this->reportError('Document for the fileId ' . $fileId . 'not found');
+		}
+
+		try {
+			$ret = array();
+			$ret['owner'] = $document->getOwner()->getUID();
+			$ret['updateable'] = $document->isUpdateable();
+			$ret['permissions'] = $document->getPermissions();
+			$ret['mimetype'] = $document->getMimeType();
+			$ret['path'] = $root->getRelativePath($document->getPath());
+			$ret['name'] = $document->getName();
+			$ret['fileid'] = $fileId;
+
 			return $ret;
+		} catch (InvalidPathException $e) {
+			return $this->reportError($e->getMessage());
+		} catch (NotFoundException $e) {
+			return $this->reportError($e->getMessage());
 		}
-
-		$ret['mimetype'] = $document->getMimeType();
-		$ret['path'] = $root->getRelativePath($document->getPath());
-		$ret['name'] = $document->getName();
-		$ret['fileid'] = $fileId;
-
-		return $ret;
 	}
 
-	public static function resolvePath($fileId){
-		$list = array_filter(
-			self::searchDocuments(),
-			function($item) use ($fileId){
-				return intval($item['fileid'])==$fileId;
+	private function isShareAuthValid(IShare $share) {
+		// check if password authentication has been passed
+		// (calling directly from API, password form cannot be enforced, so check is needed)
+		if ($share->getPassword() === null) {
+			return true;
+		} else if (! \OC::$server->getSession()->exists('public_link_authenticated')
+			|| \OC::$server->getSession()->get('public_link_authenticated') !== (string)$share->getId()) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Retrieve document info for the public share link token. If file in the public link is used,
+	 * fileId has to be provided.
+	 *
+	 * If share or file does not exist, null is returned
+	 *
+	 * @param string $token
+	 * @param int|null $fileId
+	 * @return array|null
+	 */
+	public function getDocumentByShareToken($token, $fileId = null){
+		try {
+			// Get share by token
+			$share = \OC::$server->getShareManager()->getShareByToken($token);
+			if(!$this->isShareAuthValid($share)) {
+				return null;
 			}
-		);
-		if (count($list)>0){
-			$item = current($list);
-			return $item['path'];
+
+			$node = $share->getNode();
+			if ($node->getType() == FileInfo::TYPE_FILE) {
+				$document = $node;
+			} else if ($node->getType() == FileInfo::TYPE_FOLDER && !is_null($fileId)) {
+				$document = $node->getById($fileId)[0];
+			} else {
+				return $this->reportError('Cannot retrieve metadata for the node ' . $node->getPath());
+			}
+
+			if ($document === null){
+				return $this->reportError('Document for the node ' . $node->getPath() . 'not found');
+			}
+
+			// Retrieve user folder for the file to be able to get relative path
+			$owner = $document->getOwner()->getUID();
+			$root = \OC::$server->getRootFolder()->getUserFolder($owner);
+
+			$ret = array();
+			$ret['owner'] = $document->getOwner()->getUID();
+			$ret['permissions'] = $share->getPermissions();
+			$ret['mimetype'] = $document->getMimeType();
+			$ret['path'] = $root->getRelativePath($document->getPath());
+			$ret['name'] = $document->getName();
+			$ret['fileid'] = $document->getId();
+
+			return $ret;
+		} catch (ShareNotFound $e) {
+			return $this->reportError('Share for the token ' . $token . ' and document fileid ' . $fileId . 'not found');
+		} catch (NotFoundException $e) {
+			return $this->reportError($e->getMessage());
+		} catch (InvalidPathException $e) {
+			return $this->reportError($e->getMessage());
 		}
-		return false;
 	}
 
-	private static function processDocuments($rawDocuments){
+	private function reportError($error) {
+		error_log($error);
+		return null;
+	}
+
+	private function processDocuments($rawDocuments){
 		$documents = array();
 		$view = \OC\Files\Filesystem::getView();
 
@@ -142,14 +225,6 @@ class Storage {
 
 			array_push($documents, $document);
 		}
-
-		return $documents;
-	}
-
-	protected static function searchDocuments(){
-		$db = new Db\Storage();
-		$rawDocuments = $db->loadRecentDocumentsForMimes(self::$MIMETYPE_LIBREOFFICE_WORDPROCESSOR);
-		$documents = self::processDocuments($rawDocuments);
 
 		return $documents;
 	}
