@@ -22,7 +22,7 @@ use OCP\Util;
  */
 class HookHandler {
 
-    public static function PublicPage() {
+    public static function addViewerScripts() {
 		Util::addScript('richdocuments', 'viewer/viewer');
 		Util::addStyle('richdocuments', 'viewer/odfviewer');
     }
