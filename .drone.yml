@@ -83,7 +83,7 @@ pipeline:
     paths:
       - tests/output/clover.xml
     files:
-      - '*.xml'
+      - "*.xml"
     when:
       matrix:
         COVERAGE: true
@@ -91,11 +91,11 @@ pipeline:
   notify:
     image: plugins/slack:1
     pull: true
-    secrets: [ slack_webhook ]
+    secrets: [slack_webhook]
     channel: builds
     when:
-      status: [ failure, changed ]
-      event: [ push, tag ]
+      status: [failure, changed]
+      event: [push, tag]
 
 services:
   mysql:
@@ -134,7 +134,7 @@ services:
     pull: true
     environment:
       - APACHE_WEBROOT=/var/www/owncloud/
-    command: [ "/usr/local/bin/apachectl", "-e", "debug", "-D", "FOREGROUND" ]
+    command: ["/usr/local/bin/apachectl", "-e", "debug", "-D", "FOREGROUND"]
     when:
       matrix:
         NEED_SERVER: true
@@ -154,16 +154,21 @@ services:
         USE_EMAIL: true
 
   collabora:
-      image: collabora/code
-      pull: true
-      environment:
-          - domain=http://owncloud
-          - username=admin
-          - password=admin
-          - name=collabora
-      when:
-        matrix:
-            NEED_SERVER: true
+    image: collabora/code
+    pull: true
+    environment:
+      - domain=http://owncloud
+      - username=admin
+      - password=admin
+      - name=collabora
+    commands:
+      - apt-get -y update
+      - apt-get -y install xmlstarlet
+      - xmlstarlet ed --inplace -u \"/config/ssl/enable\" -v false /etc/loolwsd/loolwsd.xml
+      - xmlstarlet ed --inplace -u \"/config/ssl/termination\" -v false /etc/loolwsd/loolwsd.xml
+    when:
+      matrix:
+        NEED_SERVER: true
 
 matrix:
   include:
@@ -179,4 +184,3 @@ matrix:
       DB_NAME: owncloud
       NEED_SERVER: true
       NEED_INSTALL_APP: true
-
