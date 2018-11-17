@@ -96,6 +96,7 @@ OC.L10N.register(
     "Spreadsheet" : "Fletëllogaritje",
     "Presentation" : "Paraqitje",
     "Could not create file" : "Kartela s’u krijua dot",
+    "View/Edit in Collabora" : "Shiheni/Përpunojeni në Collabora",
     "Collabora Online" : "Collabora Online",
     "Open documentation" : "Hap dokumentimin",
     "Collabora Online server" : "Shërbyes Collabora Online",

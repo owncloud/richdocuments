@@ -96,6 +96,7 @@ OC.L10N.register(
     "Spreadsheet" : "Таблица",
     "Presentation" : "Презентация",
     "Could not create file" : "Не удалось создать файл",
+    "View/Edit in Collabora" : "Посмотреть/изменить в Collabora",
     "Collabora Online" : "Collabora Online",
     "Open documentation" : "Открыть документацию",
     "Collabora Online server" : "Сервер Collabora Online",
