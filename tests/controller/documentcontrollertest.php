@@ -66,6 +66,5 @@ class DocumentControllerTest extends \PHPUnit_Framework_TestCase {
 		}
 		$userSession->login($this->uid, $this->password);
 		\OC_Util::setupFS();
-		var_dump("hello");
 	}
 }

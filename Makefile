@@ -40,6 +40,7 @@ PHPUNITDBG=phpdbg -qrr -d memory_limit=4096M -d zend.enable_gc=0 "./vendor/bin/p
 PHP_CS_FIXER=php -d zend.enable_gc=0 vendor-bin/owncloud-codestyle/vendor/bin/php-cs-fixer
 PHAN=php -d zend.enable_gc=0 vendor-bin/phan/vendor/bin/phan
 PHPSTAN=php -d zend.enable_gc=0 vendor-bin/phpstan/vendor/bin/phpstan
+PHPLINT=php -d zend.enable_gc=0 vendor/bin/parallel-lint
 
 .DEFAULT_GOAL := help
 
@@ -105,6 +106,10 @@ test-php-unit-dbg:         ## Run php unit tests using phpdbg
 test-php-unit-dbg: vendor/bin/phpunit
 	$(PHPUNITDBG) --configuration ./phpunit.xml --testsuite unit
 
+.PHONY: test-php-lint
+test-php-lint: vendor/bin/phpunit
+	$(PHPLINT) . --exclude vendor --exclude vendor-bin
+
 .PHONY: test-php-style
 test-php-style:            ## Run php-cs-fixer and check owncloud code-style
 test-php-style: vendor-bin/owncloud-codestyle/vendor
@@ -118,7 +123,7 @@ test-php-style-fix: vendor-bin/owncloud-codestyle/vendor
 .PHONY: test-php-phan
 test-php-phan:             ## Run phan
 test-php-phan: vendor-bin/phan/vendor
-	$(PHAN) --config-file .phan/config.php --require-config-exists
+	$(PHAN) --config-file .phan/config.php --require-config-exists --allow-polyfill-parser
 
 .PHONY: test-php-phpstan
 test-php-phpstan:          ## Run phpstan
@@ -128,12 +133,12 @@ test-php-phpstan: vendor-bin/phpstan/vendor
 .PHONY: test-acceptance-api
 test-acceptance-api:       ## Run API acceptance tests
 test-acceptance-api: vendor/bin/phpunit
-	../../tests/acceptance/run.sh --type api
+	../../tests/acceptance/run.sh --type api --remote
 
 .PHONY: test-acceptance-webui
 test-acceptance-webui:     ## Run webUI acceptance tests
 test-acceptance-webui: vendor/bin/phpunit
-	../../tests/acceptance/run.sh --type webUI
+	../../tests/acceptance/run.sh --type webUI --remote
 
 #
 # Dependency management
