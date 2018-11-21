@@ -25,8 +25,7 @@ script:
   - find . -name \*.php -exec php -l "{}" \;
 
   # Run phpunit tests
-  - phpunit --configuration phpunit.xml
-
+  - ../../lib/composer/bin/phpunit --configuration ./phpunit.xml
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 

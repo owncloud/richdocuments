@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <phpunit bootstrap="../../tests/bootstrap.php"
-		 verbose="true"  failOnWarning="true"
+		 verbose="true"
+		 failOnWarning="true"
 		 timeoutForSmallTests="900"
 		 timeoutForMediumTests="900"
 		 timeoutForLargeTests="900"
 		>
-	<testsuite name='phpunit'>
-		<directory suffix='test.php'>./tests</directory>
+	<testsuite name='unit'>
+		<directory suffix='test.php'>./tests/unit</directory>
 	</testsuite>
 	<!-- filters for code coverage -->
 	<filter>
@@ -15,6 +16,8 @@
 			<exclude>
 				<directory suffix=".php">./l10n</directory>
 				<directory suffix=".php">./tests</directory>
+				<directory suffix=".php">./templates</directory>
+				<directory suffix=".php">./appinfo</directory>
 			</exclude>
 		</whitelist>
 	</filter>

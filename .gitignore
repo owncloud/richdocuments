@@ -1,4 +1,3 @@
-tests/clover.xml
 *.tar.gz
 build/
 
