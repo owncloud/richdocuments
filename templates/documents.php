@@ -10,9 +10,7 @@
 </script>
 
 <?php
-style( 'richdocuments', 'share' );
 style( 'richdocuments', 'style' );
-script('richdocuments', 'share');
 script('richdocuments', 'documents');
 script('files', 'file-upload');
 script('files', 'jquery.fileupload');
@@ -62,4 +60,3 @@ script('files', 'jquery.fileupload');
 <?php if ($_['enable_previews']): ?>
 <input type="hidden" id="previews_enabled" value="<?php p($_['enable_previews']) ?>" />
 <?php endif; ?>
-<input type="hidden" name="allowShareWithLink" id="allowShareWithLink" value="<?php p($_['allowShareWithLink']) ?>" />

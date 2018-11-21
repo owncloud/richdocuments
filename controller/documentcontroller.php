@@ -397,7 +397,6 @@ class DocumentController extends Controller {
 		\OC::$server->getNavigationManager()->setActiveEntry( 'richdocuments_index' );
 		$retVal = array(
 			'enable_previews' => $this->settings->getSystemValue('enable_previews', true),
-			'allowShareWithLink' => $this->settings->getAppValue('core', 'shareapi_allow_links', 'yes'),
 			'wopi_url' => $webSocket,
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
 			'instanceId' => $this->settings->getSystemValue('instanceid'),
