@@ -25,7 +25,6 @@ script:
   - find . -name \*.php -exec php -l "{}" \;
 
   # Run phpunit tests
-  - cd tests
   - phpunit --configuration phpunit.xml
 
 after_success:
