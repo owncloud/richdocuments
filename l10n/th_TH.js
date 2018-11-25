@@ -96,6 +96,7 @@ OC.L10N.register(
     "Spreadsheet" : "สเปรดชีต",
     "Presentation" : "งานนำเสนอ",
     "Could not create file" : "ไม่สามารถสร้างไฟล์",
+    "View/Edit in Collabora" : "ดู/แก้ไข ใน Collabora",
     "Collabora Online" : "Collabora ออนไลน์",
     "Open documentation" : "เปิดเอกสาร",
     "Collabora Online server" : "เซิร์ฟเวอร์ Collabora ออนไลน์",
