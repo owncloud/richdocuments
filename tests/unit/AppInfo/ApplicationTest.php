@@ -8,7 +8,7 @@
  * This file is licensed under the Affero General Public License version 3 or
  * later.
  */
-namespace OCA\Richdocuments\Tests\unit;
+namespace OCA\Richdocuments\Tests\AppInfo;
 
 use \OC_Hook;
 use OCA\Richdocuments\AppInfo\Application;
@@ -18,7 +18,7 @@ use OCA\Richdocuments\AppInfo\Application;
  *
  * @group DB
  *
- * @package OCA\Richdocuments\Tests\Unit
+ * @package OCA\Richdocuments\Tests\AppInfo
  */
 class ApplicationTest extends \Test\TestCase {
 

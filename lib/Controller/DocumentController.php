@@ -13,7 +13,7 @@ namespace OCA\Richdocuments\Controller;
 
 use \OC\Files\View;
 use \OCP\AppFramework\Controller;
-use OCP\Constants;
+use \OCP\Constants;
 use \OCP\IRequest;
 use \OCP\IConfig;
 use \OCP\IL10N;
@@ -28,20 +28,8 @@ use \OCA\Richdocuments\AppConfig;
 use \OCA\Richdocuments\Db;
 use \OCA\Richdocuments\Helper;
 use \OCA\Richdocuments\Storage;
-use \OCA\Richdocuments\DownloadResponse;
-
-class ResponseException extends \Exception {
-	private $hint;
-
-	public function __construct($description, $hint = '') {
-		parent::__construct($description);
-		$this->hint = $hint;
-	}
-
-	public function getHint() {
-		return $this->hint;
-	}
-}
+use \OCA\Richdocuments\Http\DownloadResponse;
+use \OCA\Richdocuments\Http\ResponseException;
 
 class DocumentController extends Controller {
 

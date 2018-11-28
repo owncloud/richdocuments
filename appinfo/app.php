@@ -1,5 +1,4 @@
 <?php
-
 /**
  * ownCloud - Richdocuments App
  *
@@ -21,11 +20,9 @@
  *
  */
 
-namespace OCA\Richdocuments\AppInfo;
+use OCA\Richdocuments\AppInfo\Application;
 
 $app = new Application();
 $app->registerScripts();
 
 \OCP\App::registerAdmin('richdocuments', 'admin');
-
-

@@ -8,7 +8,7 @@
  * This file is licensed under the Affero General Public License version 3 or
  * later.
  */
-namespace OCA\Richdocuments\Tests\unit;
+namespace OCA\Richdocuments\Tests\Controller;
 
 use \OCA\Richdocuments\Controller\DocumentController;
 use \OCP\IRequest;
@@ -22,9 +22,9 @@ use \OCA\Richdocuments\Storage;
 /**
  * Class DocumentControllerTest
  *
- * @package OCA\Richdocuments\Tests\Unit
+ * @package OCA\Richdocuments\Tests\Controller
  */
-class DocumentControllerTest extends \PHPUnit_Framework_TestCase {
+class DocumentControllerTest extends \Test\TestCase {
 
 	/**
 	 * @var IRequest
@@ -50,13 +50,13 @@ class DocumentControllerTest extends \PHPUnit_Framework_TestCase {
 	 * @var ILogger
 	 */
 	private $logger;
-
 	/**
 	 * @var Storage
 	 */
 	private $storage;
 
 	public function setUp(){
+		parent::setUp();
 		$this->request = $this->createMock(IRequest::class);
 		$this->settings = $this->createMock(IConfig::class);
 		$this->appConfig = $this->createMock(AppConfig::class);

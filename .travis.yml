@@ -6,6 +6,7 @@ php:
 env:
   global:
     - CORE_BRANCH=master
+    - APP_NAME=richdocuments
   matrix:
     - DB=sqlite
 
@@ -17,7 +18,9 @@ branches:
 sudo: true
 before_install:
   - wget https://raw.githubusercontent.com/owncloud/administration/master/travis-ci/before_install.sh
-  - bash ./before_install.sh richdocuments $CORE_BRANCH $DB
+  - bash ./before_install.sh $APP_NAME $CORE_BRANCH $DB
+  - cd ../core
+  - php occ app:enable $APP_NAME
 
 script:
   # Test lint
