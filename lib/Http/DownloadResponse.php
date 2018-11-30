@@ -9,7 +9,7 @@
  * later.
  */
 
-namespace OCA\Richdocuments;
+namespace OCA\Richdocuments\Http;
 
 use \OCP\AppFramework\Http;
 use \OCP\IRequest;

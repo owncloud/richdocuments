@@ -13,7 +13,7 @@ namespace OCA\Richdocuments\Controller;
 
 use \OC\Files\View;
 use \OCP\AppFramework\Controller;
-use OCP\Constants;
+use \OCP\Constants;
 use \OCP\IRequest;
 use \OCP\IConfig;
 use \OCP\IL10N;
@@ -28,20 +28,8 @@ use \OCA\Richdocuments\AppConfig;
 use \OCA\Richdocuments\Db;
 use \OCA\Richdocuments\Helper;
 use \OCA\Richdocuments\Storage;
-use \OCA\Richdocuments\DownloadResponse;
-
-class ResponseException extends \Exception {
-	private $hint;
-
-	public function __construct($description, $hint = '') {
-		parent::__construct($description);
-		$this->hint = $hint;
-	}
-
-	public function getHint() {
-		return $this->hint;
-	}
-}
+use \OCA\Richdocuments\Http\DownloadResponse;
+use \OCA\Richdocuments\Http\ResponseException;
 
 class DocumentController extends Controller {
 
@@ -397,7 +385,6 @@ class DocumentController extends Controller {
 		\OC::$server->getNavigationManager()->setActiveEntry( 'richdocuments_index' );
 		$retVal = array(
 			'enable_previews' => $this->settings->getSystemValue('enable_previews', true),
-			'allowShareWithLink' => $this->settings->getAppValue('core', 'shareapi_allow_links', 'yes'),
 			'wopi_url' => $webSocket,
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
 			'instanceId' => $this->settings->getSystemValue('instanceid'),
