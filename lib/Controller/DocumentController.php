@@ -334,8 +334,9 @@ class DocumentController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function index($fileId) {
+	public function index($fileId, $dir) {
 		// Normal editing and user/group share editing
+		// Parameter $dir is not used during indexing, but might be used by Document Server
 		return $this->handleIndex($fileId, null);
 	}
 
@@ -344,9 +345,9 @@ class DocumentController extends Controller {
 	 * @NoCSRFRequired
 	 * @PublicPage
 	 */
-	public function publicIndex($token, $fileId) {
+	public function publicIndex($fileId, $shareToken) {
 		// Public share link (folder or file)
-		return $this->handleIndex($fileId, $token);
+		return $this->handleIndex($fileId, $shareToken);
 	}
 
 	/**

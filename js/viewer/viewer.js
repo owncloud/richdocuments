@@ -70,11 +70,14 @@ var odfViewer = {
 
 	onEdit : function(fileName, context){
 		var fileId = context.$file.attr('data-id');
+		var fileDir = context.dir;
 
 		var url;
 		if ($("#isPublic").val()) {
 			// Generate url for click on file in public share folder
-			url = OC.generateUrl("apps/richdocuments/s/{token}?fileId={file_id}", { token: encodeURIComponent($("#sharingToken").val()), file_id: fileId });
+			url = OC.generateUrl("apps/richdocuments/public?fileId={file_id}&shareToken={shareToken}", { file_id: fileId, shareToken: encodeURIComponent($("#sharingToken").val()) });
+		} else if (fileDir) {
+			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}&dir={dir}', { file_id: fileId, dir: fileDir });
 		} else {
 			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}', {file_id: fileId});
 		}
@@ -188,7 +191,7 @@ $(document).ready(function() {
 		if (odfViewer.supportedMimes.indexOf(mimetype) !== -1 && $("#isPublic").val()){
 			// Single file public share, add button to allow view or edit
 			var button = document.createElement("a");
-			button.href = OC.generateUrl("apps/richdocuments/s/{token}?fileId={file_id}", { token: encodeURIComponent($("#sharingToken").val()), file_id: null });
+			button.href = OC.generateUrl("apps/richdocuments/public?fileId={file_id}&shareToken={shareToken}", { file_id: null, shareToken: encodeURIComponent($("#sharingToken").val()) });
 			button.className = "button";
 			button.innerText = t('richdocuments', 'View/Edit in Collabora');
 

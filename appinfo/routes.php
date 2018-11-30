@@ -18,7 +18,7 @@ $application->registerRoutes($this, [
 		['name' => 'document#index', 'url' => 'index', 'verb' => 'GET'],
 		['name' => 'document#create', 'url' => 'ajax/documents/create', 'verb' => 'POST'],
 		['name' => 'document#listAll', 'url' => 'ajax/documents/list', 'verb' => 'GET'],
-		["name" => 'document#publicIndex', "url" => "s/{token}", "verb" => "GET"],
+		["name" => 'document#publicIndex', "url" => "public", "verb" => "GET"],
 		//documents - for WOPI access
 		['name' => 'document#extAppWopiGetData', 'url' => 'wopi/extapp/data/{fileId}', 'verb' => 'POST'],
 		['name' => 'document#wopiCheckFileInfo', 'url' => 'wopi/files/{fileId}', 'verb' => 'GET'],
