@@ -228,11 +228,4 @@ class Storage {
 
 		return $documents;
 	}
-
-	public static function getSupportedMimetypes(){
-		return array_merge(
-			self::$MIMETYPE_LIBREOFFICE_WORDPROCESSOR,
-			Filter::getAll()
-		);
-	}
 }

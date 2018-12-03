@@ -40,7 +40,7 @@ var odfViewer = {
 		'application/vnd.ms-powerpoint.slideshow.macroEnabled.12'
 	],
 
-	register : function(response){
+	register : function(){
 		var i,
 		    mime;
 
@@ -181,11 +181,7 @@ $(document).ready(function() {
 		&& typeof OCA.Files !== 'undefined'
 		&& typeof OCA.Files.fileActions !== 'undefined'
 	) {
-		$.get(
-			OC.filePath('richdocuments', 'ajax', 'mimes.php'),
-			{},
-			odfViewer.register
-		);
+		odfViewer.register();
 
 		// Check if public file share button
 		var mimetype = $("#mimetype").val();

@@ -14,11 +14,9 @@ namespace OCA\Richdocuments\Controller;
 use \OCP\AppFramework\Controller;
 use \OCP\IRequest;
 use \OCP\IL10N;
-use \OCP\AppFramework\Http\JSONResponse;
 use \OCP\AppFramework\Http\TemplateResponse;
 
 use \OCA\Richdocuments\AppConfig;
-use \OCA\Richdocuments\Filter;
 
 class SettingsController extends Controller{
 
@@ -31,17 +29,6 @@ class SettingsController extends Controller{
 		$this->userId = $userId;
 		$this->l10n = $l10n;
 		$this->appConfig = $appConfig;
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @PublicPage
-	 */
-	public function getSupportedMimes(){
-		return array(
-			'status' => 'success',
-			'mimes' => Filter::getAll()
-		);
 	}
 
 	/**
