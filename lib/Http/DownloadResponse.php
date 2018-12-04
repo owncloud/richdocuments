@@ -42,9 +42,11 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 		}
 		$info = $this->view->getFileInfo($this->path);
 		$this->ETag = $info['etag'];
-		
-		$content = $this->view->file_get_contents($this->path);
-		$data = \OCA\Richdocuments\Filter::read($content, $info['mimetype']);
+
+		$data = array(
+			'mimetype' => $info['mimetype'],
+			'content' => $this->view->file_get_contents($this->path)
+		);
 		$size = strlen($data['content']);
 		
 		
