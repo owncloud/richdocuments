@@ -55,6 +55,17 @@ var odfViewer = {
 					t('richdocuments', 'Edit')
 			);
 			OCA.Files.fileActions.setDefault(mime, 'Edit');
+
+			// Allow to add collabora permissions only if UPDATE permission is set on file
+			OCA.Files.fileActions.registerAction({
+				name: 'Secure',
+				displayName: '',
+				mime: mime,
+				actionHandler: odfViewer.onSecure,
+				permissions: OC.PERMISSION_UPDATE,
+				icon: OC.imagePath('core', 'apps/shield'),
+				type: OCA.Files.FileActions.TYPE_INLINE
+			});
 		}
 	},
 
@@ -80,6 +91,63 @@ var odfViewer = {
 		}
 
 		window.location = url;
+	},
+
+
+	_onClickSaveSecure: function() {
+		var $dialogShell = $('.oc-dialog:visible');
+		$dialog = $dialogShell.find('.oc-dialog-content');
+		$dialog.ocdialog('close');
+	},
+
+	onSecure : function(filename, context){
+		var buttons = [
+			{
+				text: t('core', 'Save'),
+				click: _.bind(odfViewer._onClickSaveSecure, this)
+			}
+		];
+		var title = t('core', 'Collabora permissions: {name}', {name: filename});
+		OC.dialogs.message(
+			'',
+			title,
+			'custom',
+			buttons,
+			null,
+			true,
+			'public-link-modal'
+		).then(function adjustDialog() {
+			var $dialogShell = $('.oc-dialog:visible');
+			$dialog = $dialogShell.find('.oc-dialog-content');
+			var TEMPLATE =
+				'<div id="linkPass-1" class="public-link-modal--item">' +
+				'<div id="test-0" class="public-link-modal--item">' +
+				'<p><b>Read-only share found</b>. Add special security permissions:</p>' +
+				'</div>' +
+				'<div id="test-1" class="public-link-modal--item">' +
+				'<input type="checkbox" value="1" name="readOnlyPermissions" id="test-1" class="checkbox readOnlyPermissions" checked />' +
+				'<label class="bold" for="test-1">Enable priting</label>' +
+				'<p><em>Read-only file can be printed in Collabora</em></p>' +
+				'</div>' +
+				'<div id="test-2" class="public-link-modal--item">' +
+				'<input type="checkbox" value="1" name="readOnlyPermissions" id="test-2" class="checkbox readOnlyPermissions" checked/>' +
+				'<label class="bold" for="test-2">Enable downloading</label>' +
+				'<p><em>Read-only file can be downloaded in Collabora</em></p>' +
+				'</div>' +
+				'<div id="test-2" class="public-link-modal--item">' +
+				'<input type="checkbox" value="1" name="readOnlyPermissions" id="test-2" class="checkbox readOnlyPermissions"/>' +
+				'<label class="bold" for="test-2">Restrict only to secure editor</label>' +
+				'<p><em>Read-only file can only by downloaded/viewed through Collabora</em></p>' +
+				'</div>' +
+				'<div id="test-3" class="public-link-modal--item">' +
+				'<input type="checkbox" value="1" name="readOnlyPermissions" id="test-3" class="checkbox readOnlyPermissions"/>' +
+				'<label class="bold" for="test-3">Include watermarks</label>' +
+				'<p><em>Printing or download will include watermark</em></p>' +
+				'</div>' +
+				'</div>'
+			;
+			$dialog.html(TEMPLATE);
+		});
 	},
 
 	onView: function(filename, context) {
