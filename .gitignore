@@ -2,6 +2,12 @@
 build/
 
 .php_cs.cache
+
+# Composer
 vendor/
+vendor-bin/**/vendor
 vendor-bin/**/composer.lock
-tests/output
+
+# Tests - auto-generated files
+/tests/acceptance/output*
+/tests/output

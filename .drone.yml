@@ -63,14 +63,14 @@ pipeline:
       matrix:
         TEST_SUITE: owncloud-coding-standard
 
-  phplint:
+  owncloud-coding-standard:
     image: owncloudci/php:${PHP_VERSION}
     pull: true
     commands:
-      - make test-php-lint
+      - make test-php-style
     when:
       matrix:
-        TEST_SUITE: lint
+        TEST_SUITE: owncloud-coding-style
 
   phpunit-tests:
     image: owncloudci/php:${PHP_VERSION}
@@ -84,6 +84,24 @@ pipeline:
     when:
       matrix:
         TEST_SUITE: phpunit
+
+  phan:
+    image: owncloudci/php:${PHP_VERSION}
+    pull: true
+    commands:
+      - make test-php-phan
+    when:
+      matrix:
+        TEST_SUITE: phan
+
+  phpstan:
+    image: owncloudci/php:${PHP_VERSION}
+    pull: true
+    commands:
+      - make test-php-phpstan
+    when:
+      matrix:
+        TEST_SUITE: phpstan
 
   codecov:
     image: plugins/codecov:2
@@ -182,18 +200,10 @@ matrix:
   include:
     # phan
     - PHP_VERSION: 7.2
-      TEST_SUITE: phan
+      TEST_SUITE: owncloud-coding-standard
 
-    # phpstan
-    - PHP_VERSION: 7.2
-      TEST_SUITE: phpstan
-
-    # linting
-    - TEST_SUITE: lint
-      PHP_VERSION: 7.1
-
-    - TEST_SUITE: lint
-      PHP_VERSION: 7.2
+    - PHP_VERSION: 5.6
+      TEST_SUITE: owncloud-coding-standard
 
     # Unit Tests
     - PHP_VERSION: 7.1

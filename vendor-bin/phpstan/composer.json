@@ -5,6 +5,6 @@
     }
   },
   "require": {
-    "phpstan/phpstan": "*"
+    "phpstan/phpstan": "^0.10.2"
   }
 }
