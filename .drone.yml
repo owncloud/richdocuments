@@ -76,7 +76,6 @@ pipeline:
     image: owncloudci/php:${PHP_VERSION}
     pull: true
     environment:
-      - PHP_VERSION=${PHP_VERSION}
       - COVERAGE=${COVERAGE}
     commands:
       - if [ -z "${COVERAGE}" ]; then make test-php-unit; fi
@@ -177,24 +176,6 @@ services:
     when:
       matrix:
         USE_EMAIL: true
-
-  php-phan:
-    image: owncloudci/php:7.1
-    pull: true
-    commands:
-      - make test-php-phan
-    when:
-      matrix:
-        TEST_SUITE: phan
-
-  phpstan:
-    image: owncloudci/php:${PHP_VERSION}
-    pull: true
-    commands:
-      - make test-php-phpstan
-    when:
-      matrix:
-        TEST_SUITE: phpstan
 
 matrix:
   include:
