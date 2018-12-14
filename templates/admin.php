@@ -17,7 +17,9 @@ script('richdocuments', 'admin');
 
     <input type="checkbox" class="test-server-enable" id="test_server_enable-richdocuments" />
     <label for="test-server-enable"><?php p($l->t('Enable test server for specific groups')) ?></label><br/>
-    <p id="test-server-section" class="indent <?php if ($_['test_server_groups'] === '' || $_['test_wopi_url'] === '') p('hidden') ?>">
+    <p id="test-server-section" class="indent <?php if ($_['test_server_groups'] === '' || $_['test_wopi_url'] === '') {
+	p('hidden');
+} ?>">
         <label for="test_server_group_select"><?php p($l->t('Groups')) ?></label>
         <input type="hidden" id="test_server_group_select" value="<?php p($_['test_server_groups'])?>" title="<?php p($l->t('None')); ?>" style="width: 200px" /><br/>
 
@@ -37,7 +39,9 @@ script('richdocuments', 'admin');
 	<br/>
     <input type="checkbox" id="enable_external_apps_cb-richdocuments" <?php p($_['external_apps'] !== '' ? 'checked' : '') ?> />
     <label for="enable_external_apps_cb-richdocuments"><?php p($l->t('Enable access for external apps')) ?></label>
-	<div id="enable-external-apps-section" class="indent <?php if ($_['external_apps'] == '') p('hidden') ?>" >
+	<div id="enable-external-apps-section" class="indent <?php if ($_['external_apps'] == '') {
+	p('hidden');
+} ?>" >
 	    <div id="external-apps-section">
 	       <input type="hidden" id="external-apps-raw" name="external-apps-raw" value="<?php p($_['external_apps']) ?>">
 	    </div>
@@ -50,7 +54,9 @@ script('richdocuments', 'admin');
 	<br/>
 	<input type="checkbox" id="enable_canonical_webroot_cb-richdocuments" <?php p($_['canonical_webroot'] !== '' ? 'checked' : '') ?> />
 	<label for="canonical_webroot_cb-richdocuments"><?php p($l->t('Use Canonical webroot')) ?></label>
-	<div id="enable-canonical-webroot-section" class="indent <?php if ($_['canonical_webroot'] == '') p('hidden') ?>" >
+	<div id="enable-canonical-webroot-section" class="indent <?php if ($_['canonical_webroot'] == '') {
+	p('hidden');
+} ?>" >
 	<input type="text" id="canonical-webroot" name="canonical-webroot-name" value="<?php p($_['canonical_webroot']) ?>">
 	<br/>
 	<p style="max-width: 50em;"><em><?php p($l->t('Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance.')) ?></em></p>

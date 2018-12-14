@@ -10,7 +10,7 @@
 </script>
 
 <?php
-style( 'richdocuments', 'style' );
+style('richdocuments', 'style');
 script('richdocuments', 'documents');
 script('files', 'file-upload');
 script('files', 'jquery.fileupload');
@@ -27,7 +27,7 @@ script('files', 'jquery.fileupload');
 			<a class="icon-add add-<?php p($_['doc_format'] === 'ooxml' ? 'pptx' : 'odp') ?> svg" target="_blank" href="">
 				<label><?php p($l->t('New Presentation')) ?></label>
 			</a>
-			<div id="upload" title="<?php p($l->t('Upload (max. %s)', array($_['uploadMaxHumanFilesize']))) ?>">
+			<div id="upload" title="<?php p($l->t('Upload (max. %s)', [$_['uploadMaxHumanFilesize']])) ?>">
 				<form data-upload-id="1"
 					  id="data-upload-form"
 					  class="file_upload_form"
@@ -35,7 +35,7 @@ script('files', 'jquery.fileupload');
 					  method="post"
 					  enctype="multipart/form-data"
 					  target="file_upload_target_1">
-					<?php if($_['uploadMaxFilesize'] >= 0):?>
+					<?php if ($_['uploadMaxFilesize'] >= 0):?>
 					<input type="hidden" name="MAX_FILE_SIZE" id="max_upload"
 						   value="<?php p($_['uploadMaxFilesize']) ?>" />
 					<?php endif;?>

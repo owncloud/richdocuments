@@ -18,13 +18,12 @@ use \OCP\AppFramework\Http\TemplateResponse;
 
 use \OCA\Richdocuments\AppConfig;
 
-class SettingsController extends Controller{
-
+class SettingsController extends Controller {
 	private $userId;
 	private $l10n;
 	private $appConfig;
 
-	public function __construct($appName, IRequest $request, IL10N $l10n, AppConfig $appConfig, $userId){
+	public function __construct($appName, IRequest $request, IL10N $l10n, AppConfig $appConfig, $userId) {
 		parent::__construct($appName, $request);
 		$this->userId = $userId;
 		$this->l10n = $l10n;
@@ -35,18 +34,18 @@ class SettingsController extends Controller{
 	 * @NoAdminRequired
 	 */
 	public function getSettings() {
-		return array(
+		return [
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
 			'wopi_url' => $this->appConfig->getAppValue('wopi_url'),
 			'test_wopi_url' => $this->appConfig->getAppValue('test_wopi_url'),
 			'test_server_groups' => $this->appConfig->getAppValue('test_server_groups')
-		);
+		];
 	}
 
 	/**
 	 * @NoCSRFRequired
 	 */
-	public function settingsIndex(){
+	public function settingsIndex() {
 		return new TemplateResponse(
 			$this->appName,
 			'settings',
@@ -54,7 +53,7 @@ class SettingsController extends Controller{
 		);
 	}
 
-	public function adminIndex(){
+	public function adminIndex() {
 		return new TemplateResponse(
 			$this->appName,
 			'admin',
@@ -72,53 +71,53 @@ class SettingsController extends Controller{
 		);
 	}
 
-	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option){
+	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option) {
 		$message = $this->l10n->t('Saved');
 
-		if (!is_null($wopi_url)){
+		if ($wopi_url !== null) {
 			$this->appConfig->setAppValue('wopi_url', $wopi_url);
 
-			$colon = strpos($wopi_url, ':', 0);
-			if (\OC::$server->getRequest()->getServerProtocol() !== substr($wopi_url, 0, $colon)){
+			$colon = \strpos($wopi_url, ':', 0);
+			if (\OC::$server->getRequest()->getServerProtocol() !== \substr($wopi_url, 0, $colon)) {
 				$message = $this->l10n->t('Saved with error: Collabora Online should use the same protocol as the server installation.');
 			}
 		}
 
-		if (!is_null($edit_groups)){
+		if ($edit_groups !== null) {
 			$this->appConfig->setAppValue('edit_groups', $edit_groups);
 		}
 
-		if (!is_null($doc_format)){
+		if ($doc_format !== null) {
 			$this->appConfig->setAppValue('doc_format', $doc_format);
 		}
 
-		if (!is_null($test_wopi_url)){
+		if ($test_wopi_url !== null) {
 			$this->appConfig->setAppValue('test_wopi_url', $test_wopi_url);
 		}
 
-		if (!is_null($test_server_groups)){
+		if ($test_server_groups !== null) {
 			$this->appConfig->setAppValue('test_server_groups', $test_server_groups);
 		}
 
-		if (!is_null($external_apps)){
+		if ($external_apps !== null) {
 			$this->appConfig->setAppValue('external_apps', $external_apps);
 		}
 
-		if (!is_null($canonical_webroot)){
+		if ($canonical_webroot !== null) {
 			$this->appConfig->setAppValue('canonical_webroot', $canonical_webroot);
 		}
 
-		if (!is_null($menu_option)) {
+		if ($menu_option !== null) {
 			$this->appConfig->setAppValue('menu_option', $menu_option);
 		}
 
 		$richMemCache = \OC::$server->getMemCacheFactory()->create('richdocuments');
 		$richMemCache->clear('discovery.xml');
 
-		$response = array(
+		$response = [
 			'status' => 'success',
-			'data' => array('message' => (string) $message)
-		);
+			'data' => ['message' => (string) $message]
+		];
 
 		return $response;
 	}

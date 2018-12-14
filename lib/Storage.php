@@ -21,7 +21,6 @@
  *
  */
 
-
 namespace OCA\Richdocuments;
 
 use OCP\Files\FileInfo;
@@ -31,7 +30,7 @@ use OCP\Share\Exceptions\ShareNotFound;
 use OCP\Share\IShare;
 
 class Storage {
-	public static $MIMETYPE_LIBREOFFICE_WORDPROCESSOR = array(
+	public static $MIMETYPE_LIBREOFFICE_WORDPROCESSOR = [
 		'application/vnd.oasis.opendocument.text',
 		'application/vnd.oasis.opendocument.presentation',
 		'application/vnd.oasis.opendocument.spreadsheet',
@@ -68,18 +67,18 @@ class Storage {
 		'application/vnd.ms-powerpoint.presentation.macroEnabled.12',
 		'application/vnd.ms-powerpoint.template.macroEnabled.12',
 		'application/vnd.ms-powerpoint.slideshow.macroEnabled.12'
-	);
+	];
 
 	public function getDocuments() {
 		$db = new Db\Storage();
 		$rawDocuments = $db->loadRecentDocumentsForMimes(self::$MIMETYPE_LIBREOFFICE_WORDPROCESSOR);
 		$documents = $this->processDocuments($rawDocuments);
 
-		$list = array_filter(
+		$list = \array_filter(
 				$documents,
-				function($item){
+				function ($item) {
 					//filter Deleted
-					if (strpos($item['path'], '_trashbin')===0){
+					if (\strpos($item['path'], '_trashbin')===0) {
 						return false;
 					}
 					return true;
@@ -98,18 +97,18 @@ class Storage {
 	 * @param string|int $fileId
 	 * @return array|null
 	 */
-	public function getDocumentByUserId($userId, $fileId){
+	public function getDocumentByUserId($userId, $fileId) {
 		$root = \OC::$server->getRootFolder()->getUserFolder($userId);
 
 		// If type of fileId is a string, then it
 		// doesn't work for shared documents, lets cast to int everytime
 		$document = $root->getById((int)$fileId)[0];
-		if ($document === null){
+		if ($document === null) {
 			return $this->reportError('Document for the fileId ' . $fileId . 'not found');
 		}
 
 		try {
-			$ret = array();
+			$ret = [];
 			$ret['owner'] = $document->getOwner()->getUID();
 			$ret['updateable'] = $document->isUpdateable();
 			$ret['permissions'] = $document->getPermissions();
@@ -131,7 +130,7 @@ class Storage {
 		// (calling directly from API, password form cannot be enforced, so check is needed)
 		if ($share->getPassword() === null) {
 			return true;
-		} else if (! \OC::$server->getSession()->exists('public_link_authenticated')
+		} elseif (! \OC::$server->getSession()->exists('public_link_authenticated')
 			|| \OC::$server->getSession()->get('public_link_authenticated') !== (string)$share->getId()) {
 			return false;
 		}
@@ -148,24 +147,24 @@ class Storage {
 	 * @param int|null $fileId
 	 * @return array|null
 	 */
-	public function getDocumentByShareToken($token, $fileId = null){
+	public function getDocumentByShareToken($token, $fileId = null) {
 		try {
 			// Get share by token
 			$share = \OC::$server->getShareManager()->getShareByToken($token);
-			if(!$this->isShareAuthValid($share)) {
+			if (!$this->isShareAuthValid($share)) {
 				return null;
 			}
 
 			$node = $share->getNode();
 			if ($node->getType() == FileInfo::TYPE_FILE) {
 				$document = $node;
-			} else if ($node->getType() == FileInfo::TYPE_FOLDER && !is_null($fileId)) {
+			} elseif ($node->getType() == FileInfo::TYPE_FOLDER && $fileId !== null) {
 				$document = $node->getById($fileId)[0];
 			} else {
 				return $this->reportError('Cannot retrieve metadata for the node ' . $node->getPath());
 			}
 
-			if ($document === null){
+			if ($document === null) {
 				return $this->reportError('Document for the node ' . $node->getPath() . 'not found');
 			}
 
@@ -173,7 +172,7 @@ class Storage {
 			$owner = $document->getOwner()->getUID();
 			$root = \OC::$server->getRootFolder()->getUserFolder($owner);
 
-			$ret = array();
+			$ret = [];
 			$ret['owner'] = $document->getOwner()->getUID();
 			$ret['permissions'] = $share->getPermissions();
 			$ret['mimetype'] = $document->getMimeType();
@@ -192,15 +191,15 @@ class Storage {
 	}
 
 	private function reportError($error) {
-		error_log($error);
+		\error_log($error);
 		return null;
 	}
 
-	private function processDocuments($rawDocuments){
-		$documents = array();
+	private function processDocuments($rawDocuments) {
+		$documents = [];
 		$view = \OC\Files\Filesystem::getView();
 
-		foreach($rawDocuments as $rawDocument) {
+		foreach ($rawDocuments as $rawDocument) {
 			$fileId = $rawDocument['fileid'];
 			$fileName = $rawDocument['name'];
 			$mimeType = $rawDocument['mimetype'];
@@ -215,15 +214,15 @@ class Storage {
 				continue;
 			}
 
-			$document = array(
+			$document = [
 				'fileid' => $fileId,
 				'path' => $path,
 				'name' => $fileName,
 				'mimetype' => $mimeType,
 				'mtime' => $mtime
-				);
+				];
 
-			array_push($documents, $document);
+			\array_push($documents, $document);
 		}
 
 		return $documents;

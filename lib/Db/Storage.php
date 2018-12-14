@@ -18,7 +18,7 @@ use OCP\Files\Cache\ICacheEntry;
  * @method string loadRecentDocumentsForMimes()
  */
 
-class Storage extends \OCA\Richdocuments\Db{
+class Storage extends \OCA\Richdocuments\Db {
 	const appName = 'richdocuments';
 
 	const documentShowLimit = 30;
@@ -30,7 +30,7 @@ class Storage extends \OCA\Richdocuments\Db{
 	/*
 	 * Loads the recent accessed documents that match any of the mimetypes given in array $mimes
 	 */
-	public function loadRecentDocumentsForMimes($mimes){
+	public function loadRecentDocumentsForMimes($mimes) {
 		$view = \OC\Files\Filesystem::getView();
 		$mount = $view->getMount('');
 		$mountPoint = $mount->getMountPoint();
@@ -40,13 +40,13 @@ class Storage extends \OCA\Richdocuments\Db{
 
 		$mimetypeLoader = \OC::$server->getMimeTypeLoader();
 		$mimeIds = [];
-		foreach($mimes as $mime) {
+		foreach ($mimes as $mime) {
 			$mimeIds[] = $mimetypeLoader->getId($mime);
 		}
 
 		$inStmt = $this->buildInQuery('mimetype', $mimeIds);
 		$query = 'SELECT * FROM `*PREFIX*filecache` WHERE `storage` =? AND ' . $inStmt . ' ORDER BY `mtime` DESC LIMIT ' . self::documentShowLimit;
-		$values = array_merge([$storageId], $mimeIds);
+		$values = \array_merge([$storageId], $mimeIds);
 		$result = $this->execute($query, $values);
 		$files = [];
 		while ($row = $result->fetch()) {
