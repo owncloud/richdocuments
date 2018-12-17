@@ -1,5 +1,5 @@
 <?php
-style( 'richdocuments', 'style' );
+style('richdocuments', 'style');
 ?>
 <div id="notification-container">
 	<div id="notification" style="display: none;"></div>
@@ -17,7 +17,7 @@ style( 'richdocuments', 'style' );
 	<?php endif; ?>
 	<?php if (isset($_['document']) && !isset($_['wrongpw'])): ?>
 		<input type="hidden" name="document" value ="<?php p($_['document']) ?>" />
-		<input type="hidden" name="memberName" value ="<?php p($l->t('Guest %s' ,$_['total'])) ?>" />
+		<input type="hidden" name="memberName" value ="<?php p($l->t('Guest %s', $_['total'])) ?>" />
 	<?php endif; ?>
 	<?php if (isset($_['notFound'])): ?>
 		<div class="push"></div>

@@ -31,34 +31,33 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 		$this->path = $path;
 		
 		$this->view = new View('/' . $user);
-		if (!$this->view->file_exists($path)){
+		if (!$this->view->file_exists($path)) {
 			$this->setStatus(Http::STATUS_NOT_FOUND);
 		}
 	}
 	
-	public function render(){
-		if ($this->getStatus() === Http::STATUS_NOT_FOUND){
+	public function render() {
+		if ($this->getStatus() === Http::STATUS_NOT_FOUND) {
 			return '';
 		}
 		$info = $this->view->getFileInfo($this->path);
 		$this->ETag = $info['etag'];
 
-		$data = array(
+		$data = [
 			'mimetype' => $info['mimetype'],
 			'content' => $this->view->file_get_contents($this->path)
-		);
-		$size = strlen($data['content']);
+		];
+		$size = \strlen($data['content']);
 		
-		
-		if (isset($this->request->server['HTTP_RANGE']) && !is_null($this->request->server['HTTP_RANGE'])){
-			$isValidRange = preg_match('/^bytes=\d*-\d*(,\d*-\d*)*$/', $this->request->server['HTTP_RANGE']);
-			if (!$isValidRange){
+		if (isset($this->request->server['HTTP_RANGE']) && $this->request->server['HTTP_RANGE'] !== null) {
+			$isValidRange = \preg_match('/^bytes=\d*-\d*(,\d*-\d*)*$/', $this->request->server['HTTP_RANGE']);
+			if (!$isValidRange) {
 				return $this->sendRangeNotSatisfiable($size);
 			}
 			
-			$ranges = explode(',', substr($this->request->server['HTTP_RANGE'], 6));
-			foreach ($ranges as $range){
-				$parts = explode('-', $range);
+			$ranges = \explode(',', \substr($this->request->server['HTTP_RANGE'], 6));
+			foreach ($ranges as $range) {
+				$parts = \explode('-', $range);
 
 				if ($parts[0]==='' && $parts[1]=='') {
 					$this->sendNotSatisfiable($size);
@@ -71,15 +70,15 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 					$end = ($parts[1]==='') ? $size - 1 : $parts[1];
 				}
 
-				if ($start > $end){
+				if ($start > $end) {
 					$this->sendNotSatisfiable($size);
 				}
 
-				$buffer = substr($data['content'], $start,  $end - $start);
-				$md5Sum = md5($buffer);
+				$buffer = \substr($data['content'], $start, $end - $start);
+				$md5Sum = \md5($buffer);
 
-				// send the headers and data 
-				$this->addHeader('Content-Length',  $end - $start);
+				// send the headers and data
+				$this->addHeader('Content-Length', $end - $start);
 				$this->addHeader('Content-md5', $md5Sum);
 				$this->addHeader('Accept-Ranges', 'bytes');
 				$this->addHeader('Content-Range', 'bytes ' . $start . '-' . ($end) . '/' . $size);
@@ -92,7 +91,7 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 		
 		$this->addHeader('Content-Type', $data['mimetype']);
 		$this->addContentDispositionHeader();
-		$this->addHeader('Content-Length',  $size);
+		$this->addHeader('Content-Length', $size);
 
 		return $data['content'];
 	}
@@ -101,16 +100,16 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 	 * Send 416 if we can't satisfy the requested ranges
 	 * @param integer $filesize
 	 */
-	protected function sendRangeNotSatisfiable($filesize){
+	protected function sendRangeNotSatisfiable($filesize) {
 		$this->setStatus(Http::STATUS_REQUEST_RANGE_NOT_SATISFIABLE);
 		$this->addHeader('Content-Range', 'bytes */' . $filesize); // Required in 416.
 		return '';
 	}
 	
-	protected function addContentDispositionHeader(){
-		$encodedName = rawurlencode(basename($this->path));
-		$isIE = preg_match("/MSIE/", $this->request->server["HTTP_USER_AGENT"]);
-		if ($isIE){
+	protected function addContentDispositionHeader() {
+		$encodedName = \rawurlencode(\basename($this->path));
+		$isIE = \preg_match("/MSIE/", $this->request->server["HTTP_USER_AGENT"]);
+		if ($isIE) {
 			$this->addHeader(
 					'Content-Disposition',
 					'attachment; filename="' . $encodedName . '"'

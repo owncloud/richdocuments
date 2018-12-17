@@ -15,15 +15,14 @@ use OCP\Util;
 
 /**
  * Class HookHandler
- * 
+ *
  * handles hooks
  *
  * @package OCA\Richdocuments
  */
 class HookHandler {
-
-    public static function addViewerScripts() {
+	public static function addViewerScripts() {
 		Util::addScript('richdocuments', 'viewer/viewer');
 		Util::addStyle('richdocuments', 'viewer/odfviewer');
-    }
+	}
 }

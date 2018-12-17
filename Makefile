@@ -1,3 +1,17 @@
+SHELL := /bin/bash
+
+COMPOSER_BIN := $(shell command -v composer 2> /dev/null)
+ifndef COMPOSER_BIN
+    $(error composer is not available on your system, please install composer)
+endif
+
+NPM := $(shell command -v npm 2> /dev/null)
+ifndef NPM
+    $(error npm is not available on your system, please install npm)
+endif
+
+NODE_PREFIX=$(shell pwd)
+
 app_name=richdocuments
 project_dir=$(CURDIR)/../$(app_name)
 build_dir=$(CURDIR)/build/artifacts
@@ -35,18 +49,17 @@ appstore:
 
 
 # bin file definitions
-PHPUNIT=php -d zend.enable_gc=0  vendor/bin/phpunit
-PHPUNITDBG=phpdbg -qrr -d memory_limit=4096M -d zend.enable_gc=0 "./vendor/bin/phpunit"
+PHPUNIT=php -d zend.enable_gc=0  "$(PWD)/../../lib/composer/bin/phpunit"
+PHPUNITDBG=phpdbg -qrr -d memory_limit=4096M -d zend.enable_gc=0 "$(PWD)/../../lib/composer/bin/phpunit"
 PHP_CS_FIXER=php -d zend.enable_gc=0 vendor-bin/owncloud-codestyle/vendor/bin/php-cs-fixer
 PHAN=php -d zend.enable_gc=0 vendor-bin/phan/vendor/bin/phan
 PHPSTAN=php -d zend.enable_gc=0 vendor-bin/phpstan/vendor/bin/phpstan
-PHPLINT=php -d zend.enable_gc=0 vendor/bin/parallel-lint
 
 .DEFAULT_GOAL := help
 
 # start with displaying help
-help:
-	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
+help: ## Show this help message
+	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//' | sed -e 's/  */ /' | column -t -s :
 
 #
 # Node dependencies
@@ -92,51 +105,47 @@ clean-deps:
 .PHONY: clean
 clean: clean-deps clean-dist clean-build
 
-##
+##-------------
 ## Tests
-##--------------------------------------
+##-------------
 
 .PHONY: test-php-unit
-test-php-unit:             ## Run php unit tests
+test-php-unit: ## Run php unit tests
 test-php-unit: vendor/bin/phpunit
 	$(PHPUNIT) --configuration ./phpunit.xml --testsuite unit
 
 .PHONY: test-php-unit-dbg
-test-php-unit-dbg:         ## Run php unit tests using phpdbg
+test-php-unit-dbg: ## Run php unit tests using phpdbg
 test-php-unit-dbg: vendor/bin/phpunit
 	$(PHPUNITDBG) --configuration ./phpunit.xml --testsuite unit
 
-.PHONY: test-php-lint
-test-php-lint: vendor/bin/phpunit
-	$(PHPLINT) . --exclude vendor --exclude vendor-bin
-
 .PHONY: test-php-style
-test-php-style:            ## Run php-cs-fixer and check owncloud code-style
+test-php-style: ## Run php-cs-fixer and check owncloud code-style
 test-php-style: vendor-bin/owncloud-codestyle/vendor
 	$(PHP_CS_FIXER) fix -v --diff --diff-format udiff --allow-risky yes --dry-run
 
 .PHONY: test-php-style-fix
-test-php-style-fix:        ## Run php-cs-fixer and fix code style issues
+test-php-style-fix: ## Run php-cs-fixer and fix code style issues
 test-php-style-fix: vendor-bin/owncloud-codestyle/vendor
 	$(PHP_CS_FIXER) fix -v --diff --diff-format udiff --allow-risky yes
 
 .PHONY: test-php-phan
-test-php-phan:             ## Run phan
+test-php-phan: ## Run phan
 test-php-phan: vendor-bin/phan/vendor
 	$(PHAN) --config-file .phan/config.php --require-config-exists --allow-polyfill-parser
 
 .PHONY: test-php-phpstan
-test-php-phpstan:          ## Run phpstan
+test-php-phpstan: ## Run phpstan
 test-php-phpstan: vendor-bin/phpstan/vendor
 	$(PHPSTAN) analyse --memory-limit=4G --configuration=./phpstan.neon --no-progress --level=5 appinfo lib
 
 .PHONY: test-acceptance-api
-test-acceptance-api:       ## Run API acceptance tests
+test-acceptance-api: ## Run API acceptance tests
 test-acceptance-api: vendor/bin/phpunit
 	../../tests/acceptance/run.sh --type api --remote
 
 .PHONY: test-acceptance-webui
-test-acceptance-webui:     ## Run webUI acceptance tests
+test-acceptance-webui: ## Run webUI acceptance tests
 test-acceptance-webui: vendor/bin/phpunit
 	../../tests/acceptance/run.sh --type webUI --remote
 

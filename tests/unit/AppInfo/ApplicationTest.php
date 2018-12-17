@@ -27,7 +27,7 @@ class ApplicationTest extends \Test\TestCase {
 	 */
 	private $app;
 
-	public function setUp(){
+	public function setUp() {
 		parent::setUp();
 		$this->app = new Application();
 	}
@@ -104,8 +104,8 @@ class ApplicationTest extends \Test\TestCase {
 
 	private function countListeners($name) {
 		$listeners = $this->app->getContainer()->getServer()->getEventDispatcher()->getListeners();
-		if (array_key_exists($name, $listeners)) {
-			return count($listeners[$name]);
+		if (\array_key_exists($name, $listeners)) {
+			return \count($listeners[$name]);
 		}
 		return 0;
 	}
@@ -160,7 +160,7 @@ class ApplicationTest extends \Test\TestCase {
 		$this->app->registerScripts();
 
 		$listenersAfter = $this->app->getContainer()->getServer()->getEventDispatcher()->getListeners()['OCA\Files::loadAdditionalScripts'];
-		$this->assertCount(count($listenersBefore)+1, $listenersAfter);
+		$this->assertCount(\count($listenersBefore)+1, $listenersAfter);
 
 		$this->tearDownUser();
 	}

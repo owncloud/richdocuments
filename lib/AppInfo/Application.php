@@ -22,20 +22,19 @@ use OCP\IUser;
 use OCP\Share;
 
 class Application extends App {
-
-	public function __construct (array $urlParams = array()) {
+	public function __construct(array $urlParams = []) {
 		parent::__construct('richdocuments', $urlParams);
 
 		$this->registerServices();
 	}
 
-	private function registerServices(){
+	private function registerServices() {
 		$container = $this->getContainer();
 
 		/**
 		 * Controllers
 		 */
-		$container->registerService('DocumentController', function($c) {
+		$container->registerService('DocumentController', function ($c) {
 			$storage = new Storage();
 			/** @var IContainer $c */
 			return new DocumentController(
@@ -50,7 +49,7 @@ class Application extends App {
 				$storage
 			);
 		});
-		$container->registerService('SettingsController', function($c) {
+		$container->registerService('SettingsController', function ($c) {
 			/** @var IContainer $c */
 			return new SettingsController(
 				$c->query('AppName'),
@@ -61,7 +60,7 @@ class Application extends App {
 			);
 		});
 
-		$container->registerService('AppConfig', function($c) {
+		$container->registerService('AppConfig', function ($c) {
 			/** @var IContainer $c */
 			return new AppConfig(
 				$c->query('CoreConfig')
@@ -71,26 +70,26 @@ class Application extends App {
 		/**
 		 * Core
 		 */
-		$container->registerService('Logger', function($c) {
+		$container->registerService('Logger', function ($c) {
 			/** @var IContainer $c */
 			return $c->query('ServerContainer')->getLogger();
 		});
-		$container->registerService('CoreConfig', function($c) {
+		$container->registerService('CoreConfig', function ($c) {
 			/** @var IContainer $c */
 			return $c->query('ServerContainer')->getConfig();
 		});
-		$container->registerService('L10N', function($c) {
+		$container->registerService('L10N', function ($c) {
 			/** @var IContainer $c */
 			return $c->query('ServerContainer')->getL10N($c->query('AppName'));
 		});
-		$container->registerService('UserId', function($c) {
+		$container->registerService('UserId', function ($c) {
 			/** @var IContainer $c */
 			/** @var IUser $user */
 			$user = $c->query('ServerContainer')->getUserSession()->getUser();
-			$uid = is_null($user) ? '' : $user->getUID();
+			$uid = $user === null ? '' : $user->getUID();
 			return $uid;
 		});
-		$container->registerService('ICacheFactory', function($c) {
+		$container->registerService('ICacheFactory', function ($c) {
 			/** @var IContainer $c */
 			return $c->query('ServerContainer')->getMemCacheFactory();
 		});
@@ -117,13 +116,13 @@ class Application extends App {
 			//Script for registering file actions
 			$container->getServer()->getEventDispatcher()->addListener(
 				'OCA\Files::loadAdditionalScripts',
-				function() {
+				function () {
 					\OCP\Util::addScript('richdocuments', 'viewer/viewer');
 					\OCP\Util::addStyle('richdocuments', 'viewer/odfviewer');
 				}
 			);
 
-			if (class_exists('\OC\Files\Type\TemplateManager')) {
+			if (\class_exists('\OC\Files\Type\TemplateManager')) {
 				$manager = \OC_Helper::getFileTemplateManager();
 
 				$manager->registerTemplate('application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'apps/richdocuments/assets/docxtemplate.docx');

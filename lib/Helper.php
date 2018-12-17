@@ -16,7 +16,6 @@ use \DateTime;
 use \DateTimeZone;
 
 class Helper {
-
 	const APP_ID = 'richdocuments';
 
 	/**
@@ -25,15 +24,15 @@ class Helper {
 	 * @throws \Exception
 	 */
 	public static function parseFileId($fileId) {
-		$arr = explode('_', $fileId);
-		if (count($arr) === 1) {
+		$arr = \explode('_', $fileId);
+		if (\count($arr) === 1) {
 			$fileId = $arr[0];
 			$instanceId = '';
 			$version = '0';
-		} else if (count($arr) === 2) {
+		} elseif (\count($arr) === 2) {
 			list($fileId, $instanceId) = $arr;
 			$version = '0';
-		} else if (count($arr) === 3) {
+		} elseif (\count($arr) === 3) {
 			list($fileId, $instanceId, $version) = $arr;
 		} else {
 			throw new \Exception('$fileId has not the expected format');
@@ -50,12 +49,12 @@ class Helper {
 	 * WOPI helper function to convert to ISO 8601 round-trip format.
 	 * @param integer $time Must be seconds since unix epoch
 	 */
-	public static function toISO8601($time)
-	{
+	public static function toISO8601($time) {
 		// TODO: Be more precise and don't ignore milli, micro seconds ?
 		$datetime = DateTime::createFromFormat('U', $time, new DateTimeZone('UTC'));
-		if ($datetime)
+		if ($datetime) {
 			return $datetime->format('Y-m-d\TH:i:s.u\Z');
+		}
 
 		return false;
 	}
@@ -63,41 +62,41 @@ class Helper {
 	/**
 	 * @param string $path
 	 */
-	public static function getNewFileName($view, $path, $prepend = ' '){
+	public static function getNewFileName($view, $path, $prepend = ' ') {
 		$fileNum = 1;
 
-		while ($view->file_exists($path)){
+		while ($view->file_exists($path)) {
 			$fileNum += 1;
-			$path = preg_replace('/(\.|' . $prepend . '\(\d+\)\.)([^.]*)$/', $prepend . '(' . $fileNum . ').$2', $path);
+			$path = \preg_replace('/(\.|' . $prepend . '\(\d+\)\.)([^.]*)$/', $prepend . '(' . $fileNum . ').$2', $path);
 		};
 
 		return $path;
 	}
 
-	public static function getArrayValueByKey($array, $key, $default=''){
-		if (array_key_exists($key, $array)){
+	public static function getArrayValueByKey($array, $key, $default='') {
+		if (\array_key_exists($key, $array)) {
 			return $array[$key];
 		}
 		return $default;
 	}
 
-	public static function isVersionsEnabled(){
+	public static function isVersionsEnabled() {
 		return \OCP\App::isEnabled('files_versions');
 	}
 
-	public static function getRandomColor(){
-		$str = dechex(floor(rand(0, 16777215)));
-		return '#' . str_pad($str, 6, "0", STR_PAD_LEFT);
+	public static function getRandomColor() {
+		$str = \dechex(\floor(\rand(0, 16777215)));
+		return '#' . \str_pad($str, 6, "0", STR_PAD_LEFT);
 	}
 
 	/**
 	 * @param string $name
 	 * @return string
 	 */
-	public static function getMemberColor($name){
-		$hash = md5($name);
-		$maxRange = hexdec('ffffffffffffffffffffffffffffffff');
-		$hue = hexdec($hash) / $maxRange * 256;
+	public static function getMemberColor($name) {
+		$hash = \md5($name);
+		$maxRange = \hexdec('ffffffffffffffffffffffffffffffff');
+		$hue = \hexdec($hash) / $maxRange * 256;
 		return '#' . self::convertHSLToRGB($hue, 90, 60);
 	}
 
@@ -107,23 +106,23 @@ class Helper {
 	 * @param integer $iV
 	 * @return string
 	 */
-	protected static function convertHSLToRGB($iH, $iS, $iV){
-		if ($iH < 0){
+	protected static function convertHSLToRGB($iH, $iS, $iV) {
+		if ($iH < 0) {
 			$iH = 0;   // Hue:
 		}
-		if ($iH > 360){
+		if ($iH > 360) {
 			$iH = 360; //   0-360
 		}
-		if ($iS < 0){
+		if ($iS < 0) {
 			$iS = 0;   // Saturation:
 		}
-		if ($iS > 100){
+		if ($iS > 100) {
 			$iS = 100; //   0-100
 		}
-		if ($iV < 0){
+		if ($iV < 0) {
 			$iV = 0;   // Lightness:
 		}
-		if ($iV > 100){
+		if ($iV > 100) {
 			$iV = 100; //   0-100
 		}
 
@@ -133,11 +132,12 @@ class Helper {
 		$dH = $iH / 60.0;  // H-Prime:    0.0-6.0
 		$dT = $dH;	   // Temp variable
 
-		while ($dT >= 2.0)
-			$dT -= 2.0; // php modulus does not work with float
-		$dX = $dC * (1 - abs($dT - 1));	 // as used in the Wikipedia link
+		while ($dT >= 2.0) {
+			$dT -= 2.0;
+		} // php modulus does not work with float
+		$dX = $dC * (1 - \abs($dT - 1));	 // as used in the Wikipedia link
 
-		switch ($dH){
+		switch ($dH) {
 			case($dH >= 0.0 && $dH < 1.0):
 				$dR = $dC;
 				$dG = $dX;
@@ -183,10 +183,9 @@ class Helper {
 		$dG *= 255;
 		$dB *= 255;
 
-		$dR = str_pad(dechex(round($dR)), 2, "0", STR_PAD_LEFT);
-		$dG = str_pad(dechex(round($dG)), 2, "0", STR_PAD_LEFT);
-		$dB = str_pad(dechex(round($dB)), 2, "0", STR_PAD_LEFT);
+		$dR = \str_pad(\dechex(\round($dR)), 2, "0", STR_PAD_LEFT);
+		$dG = \str_pad(\dechex(\round($dG)), 2, "0", STR_PAD_LEFT);
+		$dB = \str_pad(\dechex(\round($dB)), 2, "0", STR_PAD_LEFT);
 		return $dR.$dG.$dB;
 	}
-
 }

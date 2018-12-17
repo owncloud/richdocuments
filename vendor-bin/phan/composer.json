@@ -5,6 +5,6 @@
     }
   },
   "require": {
-    "phan/phan": "*"
+    "phan/phan": "^1.0.0"
   }
 }

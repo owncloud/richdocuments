@@ -13,7 +13,7 @@ namespace OCA\Richdocuments;
 
 use \OCP\IConfig;
 
-class AppConfig{
+class AppConfig {
 	private $appName = 'richdocuments';
 	private $defaults = [
 		'wopi_url' => 'https://localhost:9980'
@@ -32,7 +32,7 @@ class AppConfig{
 	 */
 	public function getAppValue($key) {
 		$defaultValue = null;
-		if (array_key_exists($key, $this->defaults)){
+		if (\array_key_exists($key, $this->defaults)) {
 			$defaultValue = $this->defaults[$key];
 		}
 		return $this->config->getAppValue($this->appName, $key, $defaultValue);
@@ -56,7 +56,7 @@ class AppConfig{
 	 */
 	public function getUserValue($userId, $key) {
 		$defaultValue = null;
-		if (array_key_exists($key, $this->defaults)){
+		if (\array_key_exists($key, $this->defaults)) {
 			$defaultValue = $this->defaults[$key];
 		}
 		return $this->config->getUserValue($userId, $this->appName, $key, $defaultValue);
@@ -72,4 +72,4 @@ class AppConfig{
 	public function setUserValue($userId, $key, $value) {
 		return $this->config->setAppValue($userId, $this->appName, $key, $value);
 	}
- }
+}

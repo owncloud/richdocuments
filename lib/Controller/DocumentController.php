@@ -32,7 +32,6 @@ use \OCA\Richdocuments\Http\DownloadResponse;
 use \OCA\Richdocuments\Http\ResponseException;
 
 class DocumentController extends Controller {
-
 	private $uid;
 	private $l10n;
 	private $settings;
@@ -53,7 +52,7 @@ class DocumentController extends Controller {
 								$uid,
 								ICacheFactory $cache,
 								ILogger $logger,
-								Storage $storage){
+								Storage $storage) {
 		parent::__construct($appName, $request);
 		$this->uid = $uid;
 		$this->l10n = $l10n;
@@ -69,16 +68,16 @@ class DocumentController extends Controller {
 	 * @param string $mimetype
 	 */
 	private function getWopiSrcUrl($discovery_parsed, $mimetype) {
-		if(is_null($discovery_parsed) || $discovery_parsed == false) {
+		if ($discovery_parsed === null || $discovery_parsed == false) {
 			return null;
 		}
 
-		$result = $discovery_parsed->xpath(sprintf('/wopi-discovery/net-zone/app[@name=\'%s\']/action', $mimetype));
-		if ($result && count($result) > 0) {
-			return array(
+		$result = $discovery_parsed->xpath(\sprintf('/wopi-discovery/net-zone/app[@name=\'%s\']/action', $mimetype));
+		if ($result && \count($result) > 0) {
+			return [
 				'urlsrc' => (string)$result[0]['urlsrc'],
 				'action' => (string)$result[0]['name']
-			);
+			];
 		}
 
 		return null;
@@ -98,9 +97,9 @@ class DocumentController extends Controller {
 		\OC_Util::tearDownFS();
 
 		$users = \OC::$server->getUserManager()->search($userid, 1, 0);
-		if (count($users) > 0) {
-			$user = array_shift($users);
-			if (strcasecmp($user->getUID(), $userid) === 0) {
+		if (\count($users) > 0) {
+			$user = \array_shift($users);
+			if (\strcasecmp($user->getUID(), $userid) === 0) {
 				// clear the existing sessions, if any
 				\OC::$server->getSession()->close();
 
@@ -129,16 +128,16 @@ class DocumentController extends Controller {
 		\OC::$server->getSession()->close();
 	}
 
-	private function responseError($message, $hint = ''){
-		$errors = array('errors' => array(array('error' => $message, 'hint' => $hint)));
+	private function responseError($message, $hint = '') {
+		$errors = ['errors' => [['error' => $message, 'hint' => $hint]]];
 		$response = new TemplateResponse('', 'error', $errors, 'error');
 		return $response;
 	}
 
-    /**
-     * Return the original wopi url or test wopi url
-     * @param boolean $tester
-     */
+	/**
+	 * Return the original wopi url or test wopi url
+	 * @param boolean $tester
+	 */
 	private function getWopiUrl($tester) {
 		$wopiurl = '';
 		if ($tester) {
@@ -151,37 +150,37 @@ class DocumentController extends Controller {
 	}
 
 	/**
-     * Return true if the currently logged in user is a tester.
-     * This depends on whether current user is the member of one of the groups
-     * mentioned in settings (test_server_groups)
-     */
-     private function isTester() {
-		 $tester = false;
+	 * Return true if the currently logged in user is a tester.
+	 * This depends on whether current user is the member of one of the groups
+	 * mentioned in settings (test_server_groups)
+	 */
+	private function isTester() {
+		$tester = false;
 
-		 $user = \OC::$server->getUserSession()->getUser();
-		 if ($user === null) {
-		 	return false;
-		 }
+		$user = \OC::$server->getUserSession()->getUser();
+		if ($user === null) {
+			return false;
+		}
 
-		 $uid = $user->getUID();
-		 $testgroups = array_filter(explode('|', $this->appConfig->getAppValue('test_server_groups')));
-		 $this->logger->debug('Testgroups are {testgroups}', [ 'app' => $this->appName, 'testgroups' => $testgroups ]);
-		 foreach ($testgroups as $testgroup) {
-		 	$test = \OC::$server->getGroupManager()->get($testgroup);
-		 	if ($test !== null && sizeof($test->searchUsers($uid)) > 0) {
-		 		$this->logger->debug('User {user} found in {group}', ['app' => $this->appName, 'user' => $uid, 'group' => $testgroup ]);
-		 		$tester = true;
+		$uid = $user->getUID();
+		$testgroups = \array_filter(\explode('|', $this->appConfig->getAppValue('test_server_groups')));
+		$this->logger->debug('Testgroups are {testgroups}', [ 'app' => $this->appName, 'testgroups' => $testgroups ]);
+		foreach ($testgroups as $testgroup) {
+			$test = \OC::$server->getGroupManager()->get($testgroup);
+			if ($test !== null && \sizeof($test->searchUsers($uid)) > 0) {
+				$this->logger->debug('User {user} found in {group}', ['app' => $this->appName, 'user' => $uid, 'group' => $testgroup ]);
+				$tester = true;
 				break;
 			}
-		 }
+		}
 
-		 return $tester;
-     }
+		return $tester;
+	}
 
 	/** Return the content of discovery.xml - either from cache, or download it.
 	 * @return string
 	 */
-	private function getDiscovery(){
+	private function getDiscovery() {
 		$tester = $this->isTester();
 		$wopiRemote = $this->getWopiUrl($tester);
 		$discoveryKey = 'discovery.xml';
@@ -195,30 +194,29 @@ class DocumentController extends Controller {
 		// Read the memcached value (if the memcache is installed)
 		$discovery = $this->cache->get($discoveryKey);
 
-		if (is_null($discovery)) {
+		if ($discovery === null) {
 			$this->logger->debug('getDiscovery(): Not found in cache; Fetching discovery.xml', ['app' => $this->appName]);
 
-			$contact_admin = $this->l10n->t('Please contact the "%s" administrator.', array($wopiRemote));
+			$contact_admin = $this->l10n->t('Please contact the "%s" administrator.', [$wopiRemote]);
 
 			try {
 				$wopiClient = \OC::$server->getHTTPClientService()->newClient();
 				$discovery = $wopiClient->get($wopiDiscovery)->getBody();
-			}
-			catch (\Exception $e) {
+			} catch (\Exception $e) {
 				$error_message = $e->getMessage();
-				if (preg_match('/^cURL error ([0-9]*):/', $error_message, $matches)) {
+				if (\preg_match('/^cURL error ([0-9]*):/', $error_message, $matches)) {
 					$admin_check = $this->l10n->t('Please ask your administrator to check the Collabora Online server setting. The exact error message was: ') . $error_message;
 
 					$curl_error = $matches[1];
 					switch ($curl_error) {
 					case '1':
-						throw new ResponseException($this->l10n->t('Collabora Online: The protocol specified in "%s" is not allowed.', array($wopiRemote)), $admin_check);
+						throw new ResponseException($this->l10n->t('Collabora Online: The protocol specified in "%s" is not allowed.', [$wopiRemote]), $admin_check);
 					case '3':
-						throw new ResponseException($this->l10n->t('Collabora Online: Malformed URL "%s".', array($wopiRemote)), $admin_check);
+						throw new ResponseException($this->l10n->t('Collabora Online: Malformed URL "%s".', [$wopiRemote]), $admin_check);
 					case '6':
-						throw new ResponseException($this->l10n->t('Collabora Online: Cannot resolve the host "%s".', array($wopiRemote)), $admin_check);
+						throw new ResponseException($this->l10n->t('Collabora Online: Cannot resolve the host "%s".', [$wopiRemote]), $admin_check);
 					case '7':
-						throw new ResponseException($this->l10n->t('Collabora Online: Cannot connect to the host "%s".', array($wopiRemote)), $admin_check);
+						throw new ResponseException($this->l10n->t('Collabora Online: Cannot connect to the host "%s".', [$wopiRemote]), $admin_check);
 					case '60':
 						throw new ResponseException($this->l10n->t('Collabora Online: SSL certificate is not installed.'), $this->l10n->t('Please ask your administrator to add ca-chain.cert.pem to the ca-bundle.crt, for example "cat /etc/loolwsd/ca-chain.cert.pem >> <server-installation>/resources/config/ca-bundle.crt" . The exact error message was: ') . $error_message);
 					}
@@ -227,13 +225,12 @@ class DocumentController extends Controller {
 			}
 
 			if (!$discovery) {
-				throw new ResponseException($this->l10n->t('Collabora Online: Unable to read discovery.xml from "%s".', array($wopiRemote)), $contact_admin);
+				throw new ResponseException($this->l10n->t('Collabora Online: Unable to read discovery.xml from "%s".', [$wopiRemote]), $contact_admin);
 			}
 
 			$this->logger->debug('Storing the discovery.xml under key ' . $discoveryKey . ' to the cache.', ['app' => $this->appName]);
 			$this->cache->set($discoveryKey, $discovery, 3600);
-		}
-		else {
+		} else {
 			$this->logger->debug('getDiscovery(): Found in cache', ['app' => $this->appName]);
 		}
 
@@ -246,12 +243,12 @@ class DocumentController extends Controller {
 	 * @param array $fileInfo
 	 * @return null|array
 	 */
-	private function prepareDocument($fileInfo){
+	private function prepareDocument($fileInfo) {
 		$preparedDocuments = $this->prepareDocuments([$fileInfo]);
 
 		if ($preparedDocuments['status'] === 'success' &&
 			$preparedDocuments['documents'] &&
-			count($preparedDocuments['documents']) > 0) {
+			\count($preparedDocuments['documents']) > 0) {
 			return $preparedDocuments['documents'][0];
 		}
 
@@ -264,45 +261,44 @@ class DocumentController extends Controller {
 	 * @param array $rawDocuments
 	 * @return array
 	 */
-	private function prepareDocuments($rawDocuments){
+	private function prepareDocuments($rawDocuments) {
 		$discovery_parsed = null;
 		try {
 			$discovery = $this->getDiscovery();
 
-			$loadEntities = libxml_disable_entity_loader(true);
-			$discovery_parsed = simplexml_load_string($discovery);
-			libxml_disable_entity_loader($loadEntities);
+			$loadEntities = \libxml_disable_entity_loader(true);
+			$discovery_parsed = \simplexml_load_string($discovery);
+			\libxml_disable_entity_loader($loadEntities);
 
 			if ($discovery_parsed === false) {
 				$this->cache->remove('discovery.xml');
 				$wopiRemote = $this->getWopiUrl($this->isTester());
 
-				return array(
+				return [
 					'status' => 'error',
-					'message' => $this->l10n->t('Collabora Online: discovery.xml from "%s" is not a well-formed XML string.', array($wopiRemote)),
-					'hint' => $this->l10n->t('Please contact the "%s" administrator.', array($wopiRemote))
-				);
+					'message' => $this->l10n->t('Collabora Online: discovery.xml from "%s" is not a well-formed XML string.', [$wopiRemote]),
+					'hint' => $this->l10n->t('Please contact the "%s" administrator.', [$wopiRemote])
+				];
 			}
-		}
-		catch (ResponseException $e) {
-			return array(
+		} catch (ResponseException $e) {
+			return [
 				'status' => 'error',
 				'message' => $e->getMessage(),
 				'hint' => $e->getHint()
-			);
+			];
 		}
 
-		$fileIds = array();
-		$documents = array();
-		$lolang = strtolower(str_replace('_', '-', $this->settings->getUserValue($this->uid, 'core', 'lang', 'en')));
+		$fileIds = [];
+		$documents = [];
+		$lolang = \strtolower(\str_replace('_', '-', $this->settings->getUserValue($this->uid, 'core', 'lang', 'en')));
 		foreach ($rawDocuments as $key=>$document) {
-			if (is_object($document)){
+			if (\is_object($document)) {
 				$documents[] = $document->getData();
 			} else {
 				$documents[$key] = $document;
 			}
 
-			$documents[$key]['icon'] = preg_replace('/\.png$/', '.svg', \OCP\Template::mimetype_icon($document['mimetype']));
+			$documents[$key]['icon'] = \preg_replace('/\.png$/', '.svg', \OCP\Template::mimetype_icon($document['mimetype']));
 			$documents[$key]['hasPreview'] = \OC::$server->getPreviewManager()->isMimeSupported($document['mimetype']);
 			$ret = $this->getWopiSrcUrl($discovery_parsed, $document['mimetype']);
 			$documents[$key]['urlsrc'] = $ret['urlsrc'];
@@ -311,13 +307,13 @@ class DocumentController extends Controller {
 			$fileIds[] = $document['fileid'];
 		}
 
-		usort($documents, function($a, $b){
+		\usort($documents, function ($a, $b) {
 			return @$b['mtime']-@$a['mtime'];
 		});
 
-		return array(
+		return [
 			'status' => 'success', 'documents' => $documents
-		);
+		];
 	}
 
 	/**
@@ -327,7 +323,7 @@ class DocumentController extends Controller {
 	 * @return string
 	 */
 	private function domainOnly($url) {
-		$parsed_url = parse_url($url);
+		$parsed_url = \parse_url($url);
 		$scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
 		$host   = isset($parsed_url['host']) ? $parsed_url['host'] : '';
 		$port   = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
@@ -338,7 +334,7 @@ class DocumentController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function index($fileId){
+	public function index($fileId) {
 		// Normal editing and user/group share editing
 		return $this->handleIndex($fileId, null);
 	}
@@ -348,7 +344,7 @@ class DocumentController extends Controller {
 	 * @NoCSRFRequired
 	 * @PublicPage
 	 */
-	public function publicIndex($token, $fileId){
+	public function publicIndex($token, $fileId) {
 		// Public share link (folder or file)
 		return $this->handleIndex($fileId, $token);
 	}
@@ -366,34 +362,32 @@ class DocumentController extends Controller {
 	private function handleIndex($fileId, $shareToken) {
 		// Handle general response
 		$wopiRemote = $this->getWopiUrl($this->isTester());
-		if (($parts = parse_url($wopiRemote)) && isset($parts['scheme']) && isset($parts['host'])) {
+		if (($parts = \parse_url($wopiRemote)) && isset($parts['scheme'], $parts['host'])) {
 			$webSocketProtocol = "ws://";
 			if ($parts['scheme'] == "https") {
 				$webSocketProtocol = "wss://";
 			}
-			$webSocket = sprintf(
+			$webSocket = \sprintf(
 				"%s%s%s",
 				$webSocketProtocol,
 				$parts['host'],
 				isset($parts['port']) ? ":" . $parts['port'] : "");
-		}
-		else {
-			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', array($wopiRemote)), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
+		} else {
+			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', [$wopiRemote]), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
 		}
 
-
-		\OC::$server->getNavigationManager()->setActiveEntry( 'richdocuments_index' );
-		$retVal = array(
+		\OC::$server->getNavigationManager()->setActiveEntry('richdocuments_index');
+		$retVal = [
 			'enable_previews' => $this->settings->getSystemValue('enable_previews', true),
 			'wopi_url' => $webSocket,
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
 			'instanceId' => $this->settings->getSystemValue('instanceid'),
 			'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot')
-		);
+		];
 
 		// Get doc index if possible
 		$docRetVal = $this->handleDocIndex($fileId, $shareToken, $this->uid);
-		$retVal = array_merge($retVal, $docRetVal);
+		$retVal = \array_merge($retVal, $docRetVal);
 
 		$response = new TemplateResponse('richdocuments', 'documents', $retVal);
 		$policy = new ContentSecurityPolicy();
@@ -416,11 +410,11 @@ class DocumentController extends Controller {
 	 * @return array
 	 */
 	private function handleDocIndex($fileId, $shareToken, $currentUser) {
-		if (is_null($fileId) && is_null($shareToken)) {
-			return array();
+		if ($fileId === null && $shareToken === null) {
+			return [];
 		}
 
-		$useUserAuth = (!is_null($fileId) && is_null($shareToken));
+		$useUserAuth = ($fileId !== null && $shareToken === null);
 		if ($useUserAuth) {
 			// Normal editing or share by user/group
 			$doc = $this->getDocumentByUserAuth($currentUser, $fileId);
@@ -430,7 +424,7 @@ class DocumentController extends Controller {
 		}
 
 		if ($doc == null) {
-			return array();
+			return [];
 		}
 
 		// Update permissions
@@ -456,7 +450,7 @@ class DocumentController extends Controller {
 		}
 
 		// Create document index
-		$docIndex = array(
+		$docIndex = [
 			'permissions' => $permissions,
 			'uploadMaxFilesize' => $maxUploadFilesize,
 			'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
@@ -465,7 +459,7 @@ class DocumentController extends Controller {
 			'token' => $tokenResult['token'],
 			'urlsrc' => $doc['urlsrc'],
 			'path' => $doc['path']
-		);
+		];
 
 		return $docIndex;
 	}
@@ -473,13 +467,13 @@ class DocumentController extends Controller {
 	/**
 	 * @NoAdminRequired
 	 */
-	public function create(){
+	public function create() {
 		$mimetype = $this->request->post['mimetype'];
 		$filename = $this->request->post['filename'];
 		$dir = $this->request->post['dir'];
 
 		$view = new View('/' . $this->uid . '/files');
-		if (!$dir){
+		if (!$dir) {
 			$dir = '/';
 		}
 
@@ -506,66 +500,65 @@ class DocumentController extends Controller {
 				break;
 		}
 
-		if (!$filename){
+		if (!$filename) {
 			$path = Helper::getNewFileName($view, $dir . '/' . $basename);
 		} else {
 			$path = $dir . '/' . $filename;
 		}
 
 		$content = '';
-		if (class_exists('\OC\Files\Type\TemplateManager')){
+		if (\class_exists('\OC\Files\Type\TemplateManager')) {
 			$manager = \OC_Helper::getFileTemplateManager();
 			$content = $manager->getTemplate($mimetype);
 		}
 
-		if (!$content){
-			$content = file_get_contents(dirname(__DIR__) . self::ODT_TEMPLATE_PATH);
+		if (!$content) {
+			$content = \file_get_contents(\dirname(__DIR__) . self::ODT_TEMPLATE_PATH);
 		}
 
 		$discovery_parsed = null;
 		try {
 			$discovery = $this->getDiscovery();
 
-			$loadEntities = libxml_disable_entity_loader(true);
-			$discovery_parsed = simplexml_load_string($discovery);
-			libxml_disable_entity_loader($loadEntities);
+			$loadEntities = \libxml_disable_entity_loader(true);
+			$discovery_parsed = \simplexml_load_string($discovery);
+			\libxml_disable_entity_loader($loadEntities);
 
 			if ($discovery_parsed === false) {
 				$this->cache->remove('discovery.xml');
 				$wopiRemote = $this->getWopiUrl($this->isTester());
 
-				return array(
+				return [
 					'status' => 'error',
-					'message' => $this->l10n->t('Collabora Online: discovery.xml from "%s" is not a well-formed XML string.', array($wopiRemote)),
-					'hint' => $this->l10n->t('Please contact the "%s" administrator.', array($wopiRemote))
-				);
+					'message' => $this->l10n->t('Collabora Online: discovery.xml from "%s" is not a well-formed XML string.', [$wopiRemote]),
+					'hint' => $this->l10n->t('Please contact the "%s" administrator.', [$wopiRemote])
+				];
 			}
-		}
-		catch (ResponseException $e) {
-			return array(
+		} catch (ResponseException $e) {
+			return [
 				'status' => 'error',
 				'message' => $e->getMessage(),
 				'hint' => $e->getHint()
-			);
+			];
 		}
 
-		if ($content && $view->file_put_contents($path, $content)){
+		if ($content && $view->file_put_contents($path, $content)) {
 			$info = $view->getFileInfo($path);
 			$ret = $this->getWopiSrcUrl($discovery_parsed, $mimetype);
-			$lolang = strtolower(str_replace('_', '-', $this->settings->getUserValue($this->uid, 'core', 'lang', 'en')));
-			$response =  array(
+			$lolang = \strtolower(\str_replace('_', '-', $this->settings->getUserValue($this->uid, 'core', 'lang', 'en')));
+			$response =  [
 				'status' => 'success',
 				'fileid' => $info['fileid'],
 				'urlsrc' => $ret['urlsrc'],
 				'action' => $ret['action'],
 				'lolang' => $lolang,
 				'data' => \OCA\Files\Helper::formatFileInfo($info)
-			);
+			];
 		} else {
-			$response =  array(
+			$response =  [
 				'status' => 'error',
 				'message' => (string) $this->l10n->t('Can\'t create document')
-			);
+			];
 		}
 		return $response;
 	}
@@ -573,7 +566,7 @@ class DocumentController extends Controller {
 	/**
 	 * Generates and returns an access token for a given fileId.
 	 */
-	private function wopiGetToken($fileId){
+	private function wopiGetToken($fileId) {
 		list($fileId, , $version) = Helper::parseFileId($fileId);
 		$this->logger->info('wopiGetToken(): Generating WOPI Token for file {fileId}, version {version}.', [
 			'app' => $this->appName,
@@ -591,12 +584,12 @@ class DocumentController extends Controller {
 		// UserCanWrite only if
 		// 1. No edit groups are set or
 		// 2. if they are set, it is in one of the edit groups
-		$editGroups = array_filter(explode('|', $this->appConfig->getAppValue('edit_groups')));
-		if ($updatable && count($editGroups) > 0) {
+		$editGroups = \array_filter(\explode('|', $this->appConfig->getAppValue('edit_groups')));
+		if ($updatable && \count($editGroups) > 0) {
 			$updatable = false;
-			foreach($editGroups as $editGroup) {
+			foreach ($editGroups as $editGroup) {
 				$editorGroup = \OC::$server->getGroupManager()->get($editGroup);
-				if ($editorGroup !== null && sizeof($editorGroup->searchUsers($editorUid)) > 0) {
+				if ($editorGroup !== null && \sizeof($editorGroup->searchUsers($editorUid)) > 0) {
 					$this->logger->debug("wopiGetToken(): Editor {editor} is in edit group {group}", [
 						'app' => $this->appName,
 						'editor' => $editorUid,
@@ -622,10 +615,10 @@ class DocumentController extends Controller {
 		$token = $row->generateTokenForUserFile($fileId, $version, $updatable, $serverHost, $editorUid);
 
 		// Return the token.
-		$result = array(
+		$result = [
 			'status' => 'success',
 			'token' => $token
-		);
+		];
 		$this->logger->debug('wopiGetToken(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
 		return $result;
 	}
@@ -635,7 +628,7 @@ class DocumentController extends Controller {
 	 * @param string $fileId
 	 * @return null|array
 	 */
-	private function getDocumentByUserAuth($userId, $fileId){
+	private function getDocumentByUserAuth($userId, $fileId) {
 		if ($fileInfo = $this->storage->getDocumentByUserId($userId, $fileId)) {
 			return $this->prepareDocument($fileInfo);
 		}
@@ -647,7 +640,7 @@ class DocumentController extends Controller {
 	 * @param string $fileId
 	 * @return null|array
 	 */
-	private function getDocumentByShareToken($token, $fileId = null){
+	private function getDocumentByShareToken($token, $fileId = null) {
 		if ($fileInfo = $this->storage->getDocumentByShareToken($token, $fileId)) {
 			return $this->prepareDocument($fileInfo);
 		}
@@ -670,7 +663,7 @@ class DocumentController extends Controller {
 	/**
 	 * Generates and returns an access token for a given fileId.
 	 */
-	private function wopiGetTokenForPublicLink($fileId, $path, $permissions, $currentUser, $ownerUid){
+	private function wopiGetTokenForPublicLink($fileId, $path, $permissions, $currentUser, $ownerUid) {
 		list($fileId, , $version) = Helper::parseFileId($fileId);
 		$this->logger->info('wopiGetToken(): Generating WOPI Token for file {fileId}, version {version}.', [
 			'app' => $this->appName,
@@ -697,10 +690,10 @@ class DocumentController extends Controller {
 		$token = $row->generateTokenForPublicShare($fileId, $path, $version, $updateable, $serverHost, $ownerUid, $editorUid);
 
 		// Return the token.
-		$result = array(
+		$result = [
 			'status' => 'success',
 			'token' => $token
-		);
+		];
 		$this->logger->debug('wopiGetToken(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
 		return $result;
 	}
@@ -713,11 +706,11 @@ class DocumentController extends Controller {
 	 */
 	public function extAppWopiGetData($fileId) {
 		$secretToken = $this->request->getParam('secret_token');
-		$apps = array_filter(explode(',', $this->appConfig->getAppValue('external_apps')));
-		foreach($apps as $app) {
+		$apps = \array_filter(\explode(',', $this->appConfig->getAppValue('external_apps')));
+		foreach ($apps as $app) {
 			if ($app !== '') {
 				if ($secretToken === $app) {
-					$appName = explode(':', $app);
+					$appName = \explode(':', $app);
 					$this->logger->info('extAppWopiGetData(): External app "{extApp}" authenticated; issuing access token for fileId {fileId}', [
 						'app' => $this->appName,
 						'extApp' => $appName[0],
@@ -741,7 +734,7 @@ class DocumentController extends Controller {
 	 * @PublicPage
 	 * Returns general info about a file.
 	 */
-	public function wopiCheckFileInfo($fileId){
+	public function wopiCheckFileInfo($fileId) {
 		$token = $this->request->getParam('access_token');
 
 		list($fileId, , $version) = Helper::parseFileId($fileId);
@@ -770,7 +763,7 @@ class DocumentController extends Controller {
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 		$editorName = \OC::$server->getUserManager()->get($res['editor'])->getDisplayName();
-		$result = array(
+		$result = [
 			'BaseFileName' => $info->getName(),
 			'Size' => $info->getSize(),
 			'Version' => $version,
@@ -781,7 +774,7 @@ class DocumentController extends Controller {
 			'UserCanNotWriteRelative' => \OC::$server->getEncryptionManager()->isEnabled() ? true : false,
 			'PostMessageOrigin' => $res['server_host'],
 			'LastModifiedTime' => Helper::toISO8601($info->getMTime())
-		);
+		];
 		$this->logger->debug("wopiCheckFileInfo(): Result: {result}", ['app' => $this->appName, 'result' => $result]);
 		return $result;
 	}
@@ -793,7 +786,7 @@ class DocumentController extends Controller {
 	 * Given an access token and a fileId, returns the contents of the file.
 	 * Expects a valid token in access_token parameter.
 	 */
-	public function wopiGetFile($fileId){
+	public function wopiGetFile($fileId) {
 		$token = $this->request->getParam('access_token');
 
 		list($fileId, , $version) = Helper::parseFileId($fileId);
@@ -889,46 +882,43 @@ class DocumentController extends Controller {
 			$file = $userFolder->getById($fileId)[0];
 
 			$suggested = $this->request->getHeader('X-WOPI-SuggestedTarget');
-			$suggested = iconv('utf-7', 'utf-8', $suggested);
+			$suggested = \iconv('utf-7', 'utf-8', $suggested);
 
 			$path = '';
 			if ($suggested[0] === '.') {
-				$path = dirname($file->getPath()) . '/New File' . $suggested;
-			}
-			else if ($suggested[0] !== '/') {
-				$path = dirname($file->getPath()) . '/' . $suggested;
-			}
-			else {
+				$path = \dirname($file->getPath()) . '/New File' . $suggested;
+			} elseif ($suggested[0] !== '/') {
+				$path = \dirname($file->getPath()) . '/' . $suggested;
+			} else {
 				$path = $userFolder->getPath() . $suggested;
 			}
 
 			if ($path === '') {
-				return array(
+				return [
 					'status' => 'error',
 					'message' => 'Cannot create the file'
-				);
+				];
 			}
 
 			$root = \OC::$server->getRootFolder();
 
 			// create the folder first
-			if (!$root->nodeExists(dirname($path))) {
-				$root->newFolder(dirname($path));
+			if (!$root->nodeExists(\dirname($path))) {
+				$root->newFolder(\dirname($path));
 			}
 
 			// create a unique new file
 			$path = $root->getNonExistingName($path);
 			$root->newFile($path);
 			$file = $root->get($path);
-		}
-		else {
+		} else {
 			$wopiHeaderTime = $this->request->getHeader('X-LOOL-WOPI-Timestamp');
 			$this->logger->debug('wopiPutFile(): WOPI header timestamp: {wopiHeaderTime}', [
 				'app' => $this->appName,
 				'wopiHeaderTime' => $wopiHeaderTime]);
 			if (!$wopiHeaderTime) {
 				$this->logger->debug('wopiPutFile(): X-LOOL-WOPI-Timestamp absent. Saving file.', ['app' => $this->appName]);
-			} else if ($wopiHeaderTime != Helper::toISO8601($file->getMTime())) {
+			} elseif ($wopiHeaderTime != Helper::toISO8601($file->getMTime())) {
 				$this->logger->debug('wopiPutFile(): Document timestamp mismatch ! WOPI client says mtime {headerTime} but storage says {storageTime}', [
 					'app' => $this->appName,
 					'headerTime' => $wopiHeaderTime,
@@ -939,7 +929,7 @@ class DocumentController extends Controller {
 		}
 
 		// Read the contents of the file from the POST body and store.
-		$content = fopen('php://input', 'r');
+		$content = \fopen('php://input', 'r');
 		$this->logger->debug('wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
@@ -970,13 +960,12 @@ class DocumentController extends Controller {
 
 			$this->logoutUser();
 			return new JSONResponse([ 'Name' => $file->getName(), 'Url' => $url ], Http::STATUS_OK);
-		}
-		else {
+		} else {
 			$this->logoutUser();
-			return array(
+			return [
 				'status' => 'success',
 				'LastModifiedTime' => Helper::toISO8601($mtime)
-			);
+			];
 		}
 	}
 
@@ -998,7 +987,7 @@ class DocumentController extends Controller {
 	 * lists the documents the user has access to (including shared files, once the code in core has been fixed)
 	 * also adds session and member info for these files
 	 */
-	public function listAll(){
+	public function listAll() {
 		return $this->prepareDocuments($this->storage->getDocuments());
 	}
 }
