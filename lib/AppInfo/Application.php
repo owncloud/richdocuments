@@ -5,6 +5,9 @@
  * @author Victor Dubiniuk
  * @copyright 2014 Victor Dubiniuk victor.dubiniuk@gmail.com
  *
+ * @author Piotr Mrowczynski
+ * @copyright 2018 Piotr Mrowczynski piotr@owncloud.com
+ *
  * This file is licensed under the Affero General Public License version 3 or
  * later.
  */
@@ -12,14 +15,16 @@
 namespace OCA\Richdocuments\AppInfo;
 
 use OCA\Richdocuments\Storage;
-use \OCP\AppFramework\App;
+use OCP\AppFramework\App;
 
-use \OCA\Richdocuments\Controller\DocumentController;
-use \OCA\Richdocuments\Controller\SettingsController;
-use \OCA\Richdocuments\AppConfig;
+use OCA\Richdocuments\Controller\DocumentController;
+use OCA\Richdocuments\Controller\SettingsController;
+use OCA\Richdocuments\AppConfig;
+use OCA\Richdocuments\HookHandler;
 use OCP\IContainer;
 use OCP\IUser;
 use OCP\Share;
+use OCP\Util;
 
 class Application extends App {
 	public function __construct(array $urlParams = []) {
@@ -95,6 +100,16 @@ class Application extends App {
 		});
 	}
 
+	public function registerHooks() {
+		// Add scripts for editing through public links
+		if ($this->publicLinksAllowedToUseCollabora()) {
+			Util::connectHook(Share::class, "share_link_access", HookHandler::class, "addViewerScripts");
+		}
+
+		// Make sure view-only shares through editor are respected
+		Util::connectHook('OC_Filesystem', 'preSetup', HookHandler::class, 'wrapSecureViewSharedStorage');
+	}
+
 	public function registerScripts() {
 		$container = $this->getContainer();
 
@@ -129,10 +144,6 @@ class Application extends App {
 				$manager->registerTemplate('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'apps/richdocuments/assets/xlsxtemplate.xlsx');
 				$manager->registerTemplate('application/vnd.openxmlformats-officedocument.presentationml.presentation', 'apps/richdocuments/assets/pptxtemplate.pptx');
 			}
-		}
-
-		if ($this->publicLinksAllowedToUseCollabora()) {
-			\OCP\Util::connectHook(Share::class, "share_link_access", \OCA\Richdocuments\HookHandler::class, "addViewerScripts");
 		}
 	}
 

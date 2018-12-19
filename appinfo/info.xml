@@ -13,6 +13,7 @@
 	<category>integration</category>
 	<types>
 		<prevent_group_restriction/>
+		<filesystem/>
 	</types>
 	<dependencies>
 		<owncloud min-version="9.1.7" max-version="10" />

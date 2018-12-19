@@ -24,5 +24,6 @@ use OCA\Richdocuments\AppInfo\Application;
 
 $app = new Application();
 $app->registerScripts();
+$app->registerHooks();
 
 \OCP\App::registerAdmin('richdocuments', 'admin');
