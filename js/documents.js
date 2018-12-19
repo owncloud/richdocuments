@@ -616,6 +616,9 @@ var documentsMain = {
 		var dir = getURLParameter('dir');
 		if (dir != 'null')
 			documentsMain.returnToDir = dir;
+		var shareToken = getURLParameter('shareToken');
+		if (shareToken != 'null')
+			documentsMain.returnToShare = shareToken;
 
 		// this will launch the document with given fileId
 		documentsMain.show(documentsMain.fileId);
@@ -771,6 +774,9 @@ var documentsMain = {
 		if (documentsMain.returnToDir) {
 			documentsMain.overlay.documentOverlay('show');
 			window.location = OC.generateUrl('apps/files?dir={dir}', {dir: documentsMain.returnToDir}, {escape: false});
+		} else if (documentsMain.returnToShare) {
+			documentsMain.overlay.documentOverlay('show');
+			window.location = OC.generateUrl('s/{shareToken}', {shareToken: documentsMain.returnToShare}, {escape: false});
 		} else {
 			documentsMain.show();
 		}
