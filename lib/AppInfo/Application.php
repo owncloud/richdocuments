@@ -119,6 +119,7 @@ class Application extends App {
 				function () {
 					\OCP\Util::addScript('richdocuments', 'viewer/viewer');
 					\OCP\Util::addStyle('richdocuments', 'viewer/odfviewer');
+					\OCP\Util::addScript('richdocuments', 'viewer/extrapermissions');
 				}
 			);
 

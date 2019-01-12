@@ -21,9 +21,10 @@ $.widget('oc.documentGrid', {
 		;
 
 		//Fill an element
-		docElem.removeClass('template').attr('data-id', document.fileid);
+		docElem.removeClass('template').attr('data-fileid', document.fileid);
 		a.css('background-image', 'url("'+document.icon+'")')
 			.attr('href', OC.generateUrl('apps/files/download{file}',{file:document.path}))
+			.attr('version', document.version)
 			.attr('title', document.path)
 			.attr('original-title', document.path)
 			.attr('urlsrc', document.urlsrc)
@@ -175,8 +176,8 @@ var documentsMain = {
 	wopiClientFeatures: null,
 
 	// generates docKey for given fileId
-	_generateDocKey: function(wopiFileId) {
-		var ocurl = OC.generateUrl('apps/richdocuments/wopi/files/{file_id}', {file_id: wopiFileId});
+	_generateDocKey: function(wopiSessionId) {
+		var ocurl = OC.generateUrl('apps/richdocuments/wopi/files/{sessionId}', {sessionId: wopiSessionId});
 		if (rd_canonical_webroot) {
 			if (!rd_canonical_webroot.startsWith('/'))
 				rd_canonical_webroot = '/' + rd_canonical_webroot;
@@ -235,15 +236,20 @@ var documentsMain = {
 			documentsMain.UI.mainTitle = $('title').text();
 		},
 
-		// fileId passed here already has the WOPI format, so needs no tweaking
-		showViewer: function(fileId, title){
+		// viewer has version revision-only permission,
+		// title will reflect the version selected
+		showViewer: function(version, title){
 			// remove previous viewer, if open, and set a new one
 			if (documentsMain.isViewerMode) {
 				$('#revViewer').remove();
 				$('#revViewerContainer').prepend($('<div id="revViewer">'));
 			}
 
-			var ocurl = documentsMain._generateDocKey(fileId);
+			var wopiSessionId = documentsMain.fileId + "_" +
+				documentsMain.instanceId + "_" +
+				version + "_" +
+				documentsMain.sessionId;
+			var ocurl = documentsMain._generateDocKey(wopiSessionId);
 			// WOPISrc - URL that loolwsd will access (ie. pointing to ownCloud)
 			var wopiurl = window.location.protocol + '//' + window.location.host + ocurl;
 			var wopisrc = encodeURIComponent(wopiurl);
@@ -287,12 +293,12 @@ var documentsMain = {
 			var formattedTimestamp = OC.Util.formatDate(parseInt(version) * 1000);
 			var fileName = documentsMain.fileName.substring(0, documentsMain.fileName.indexOf('.'));
 			var downloadUrl, restoreUrl;
-			// Tweak the fileId format as {fileId_instanceId_version}. this is what WOPI backend expects the fileId to be in
-			// Ofc, if no version, then just {fileId_instanceId}
+
 			if (version === 0) {
 				formattedTimestamp = t('richdocuments', 'Latest revision');
 				downloadUrl = OC.generateUrl('apps/files/download'+ documentPath);
 			} else {
+				// FIXME: this is no longer supported in OC10
 				downloadUrl = OC.generateUrl('apps/files_versions/download.php?file={file}&revision={revision}',
 				                             {file: documentPath, revision: version});
 				fileId = fileId + '_' + version;
@@ -311,12 +317,14 @@ var documentsMain = {
 			});
 
 			html = $(html).attr('data-fileid', fileId)
-				          .attr('data-title', fileName + ' - ' + formattedTimestamp);
+				.attr('data-version', version)
+				.attr('data-title', fileName + ' - ' + formattedTimestamp);
 			$('#revisionsContainer ul').append(html);
 		},
 
 		fetchAndFillRevisions: function(documentPath) {
 			// fill #rev-history with file versions
+			// FIXME: this is no longer supported in OC10
 			$.get(OC.generateUrl('apps/files_versions/ajax/getVersions.php?source={documentPath}&start={start}',
 			                     { documentPath: documentPath, start: documentsMain.UI.revisionsStart }),
 				  function(result) {
@@ -365,7 +373,7 @@ var documentsMain = {
 			// make these revisions clickable/attach functionality
 			$('#revisionsContainer').on('click', '.versionPreview', function(e) {
 				e.preventDefault();
-				documentsMain.UI.showViewer(e.currentTarget.parentElement.dataset.fileid,
+				documentsMain.UI.showViewer(e.currentTarget.parentElement.dataset.version,
 				                            e.currentTarget.parentElement.dataset.title);
 
 				// mark only current <li> as active
@@ -410,14 +418,14 @@ var documentsMain = {
 			$('#revisionsContainer li').first().find('.versionPreview').click();
 		},
 
-		showEditor : function(title, action){
+		showEditor : function(action){
 			if (documentsMain.loadError) {
 				documentsMain.onEditorShutdown(documentsMain.loadErrorMessage + '\n' + documentsMain.loadErrorHint);
 				return;
 			}
 
 			if (!documentsMain.renderComplete) {
-				setTimeout(function() { documentsMain.UI.showEditor(title, action); }, 500);
+				setTimeout(function() { documentsMain.UI.showEditor(action); }, 500);
 				console.log('Waiting for page to render ...');
 				return;
 			}
@@ -425,10 +433,13 @@ var documentsMain = {
 			$(document.body).addClass("claro");
 			$(document.body).prepend(documentsMain.UI.container);
 
-			$('title').text(title + ' - ' + documentsMain.UI.mainTitle);
+			$('title').text(documentsMain.fileName + ' - ' + documentsMain.UI.mainTitle);
 
-			var wopiFileId = documentsMain.fileId;
-			var ocurl = documentsMain._generateDocKey(wopiFileId);
+			var wopiSessionId = documentsMain.fileId + "_" +
+				documentsMain.instanceId + "_" +
+				documentsMain.version + "_" +
+				documentsMain.sessionId;
+			var ocurl = documentsMain._generateDocKey(wopiSessionId);
 			// WOPISrc - URL that loolwsd will access (ie. pointing to ownCloud)
 			// Include the unique instanceId in the WOPI URL as part of the fileId
 			var wopiurl = window.location.protocol + '//' + window.location.host + ocurl;
@@ -440,7 +451,7 @@ var documentsMain = {
 			//	 https://<loolwsd-server>:9980/hosting/discovery
 			var urlsrc = documentsMain.urlsrc +
 			    "WOPISrc=" + wopisrc +
-			    "&title=" + encodeURIComponent(title) +
+			    "&title=" + encodeURIComponent(documentsMain.fileName) +
 			    "&lang=" + OC.getLocale().replace('_', '-') +
 			    "&closebutton=1" +
 			    "&revisionhistory=1";
@@ -663,6 +674,9 @@ var documentsMain = {
 		// fade out file list and show the document
 		$('#content-wrapper').fadeOut('fast').promise().done(function() {
 			documentsMain.fileId = rd_fileId;
+			documentsMain.instanceId = rd_instanceId;
+			documentsMain.version = rd_version;
+			documentsMain.sessionId = rd_sessionId;
 			documentsMain.fileName = rd_title;
 			documentsMain.canEdit = Boolean(rd_permissions & OC.PERMISSION_UPDATE);
 
@@ -670,12 +684,12 @@ var documentsMain = {
 		});
 	},
 
-	view : function(id){
+	view: function(id){
 		OC.addScript('richdocuments', 'viewer/viewer', function() {
 			documentsMain.prepareGrid();
 			$(window).off('beforeunload');
 			$(window).off('unload');
-			var path = $('li[data-id='+ id +']>a').attr('href');
+			var path = $('li[data-fileid='+ id +']>a').attr('href');
 			odfViewer.isDocuments = true;
 			odfViewer.onView(path);
 		});
@@ -735,8 +749,10 @@ var documentsMain = {
 	},
 
 	loadDocument: function() {
-		var action = $('li[data-id='+ documentsMain.fileId +']>a').attr('action');
-		documentsMain.UI.showEditor(documentsMain.fileName, action);
+		var action = $('li[data-fileid='+ documentsMain.fileId +']>a').attr('action');
+		documentsMain.UI.showEditor(
+			action
+		);
 	},
 
 	onEditorShutdown : function (message){
@@ -903,7 +919,7 @@ $(document).ready(function() {
 		}
 
 		documentsMain.prepareSession();
-		var fileId = $(this).attr('data-id');
+		var fileId = $(this).attr('data-fileid');
 		if (fileId) {
 			window.location = documentsMain._generateFullUrl(fileId);
 		}

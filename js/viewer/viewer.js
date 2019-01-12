@@ -40,6 +40,10 @@ var odfViewer = {
 		'application/vnd.ms-powerpoint.slideshow.macroEnabled.12'
 	],
 
+	isSupportedMimeType: function(mimetype) {
+		return (odfViewer.supportedMimes.indexOf(mimetype) !== -1);
+	},
+
 	register : function(){
 		var i,
 		    mime;
@@ -56,10 +60,15 @@ var odfViewer = {
 			);
 			OCA.Files.fileActions.setDefault(mime, 'Edit');
 		}
+
+	},
+
+	onSecure : function(filename, context){
+		var file = filename;
 	},
 
 	dispatch : function(filename){
-		if (odfViewer.supportedMimes.indexOf(OCA.Files.fileActions.getCurrentMimeType()) !== -1
+		if (this.isSupportedMimeType(OCA.Files.fileActions.getCurrentMimeType())
 			&& OCA.Files.fileActions.getCurrentPermissions() & OC.PERMISSION_UPDATE
 		){
 			odfViewer.onEdit(filename);

@@ -15,7 +15,7 @@ namespace OCA\Richdocuments\Db;
 /**
  * @method string generateTokenForPublicShare()
  * @method string generateTokenForUserFile()
- * @method string getPathForToken()
+ * @method string getWopiForToken()
  */
 
 class Wopi extends \OCA\Richdocuments\Db {
@@ -143,7 +143,7 @@ class Wopi extends \OCA\Richdocuments\Db {
 	 * constructs and validates the path.
 	 * Returns the path, if valid, else false.
 	 */
-	public function getPathForToken($token) {
+	public function getWopiForToken($token) {
 		$wopi = new Wopi();
 		$row = $wopi->loadBy('token', $token)->getData();
 		\OC::$server->getLogger()->debug('Loaded WOPI Token record: {row}.', [

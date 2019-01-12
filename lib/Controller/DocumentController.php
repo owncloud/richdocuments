@@ -445,9 +445,9 @@ class DocumentController extends Controller {
 
 		// Get wopi token and decide max upload size
 		if ($useUserAuth) {
-			$tokenResult = $this->wopiGetToken($doc['fileid']);
+			$tokenResult = $this->getWopiToken($doc['fileid'], $doc['version']);
 		} else {
-			$tokenResult = $this->wopiGetTokenForPublicLink($doc['fileid'], $doc['path'], $permissions, $currentUser, $doc['owner']);
+			$tokenResult = $this->getWopiTokenForPublicLink($doc['fileid'], $doc['version'], $doc['path'], $permissions, $currentUser, $doc['owner']);
 		}
 
 		// Create document index
@@ -456,7 +456,10 @@ class DocumentController extends Controller {
 			'uploadMaxFilesize' => $maxUploadFilesize,
 			'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
 			'title' => $doc['name'],
-			'fileId' => $doc['fileid'] . '_' . $this->settings->getSystemValue('instanceid'),
+			'fileId' => $doc['fileid'],
+			'instanceId' => $doc['instanceid'],
+			'version' => $doc['version'],
+			'sessionId' => $doc['sessionid'],
 			'token' => $tokenResult['token'],
 			'urlsrc' => $doc['urlsrc'],
 			'path' => $doc['path']
@@ -567,9 +570,8 @@ class DocumentController extends Controller {
 	/**
 	 * Generates and returns an access token for a given fileId.
 	 */
-	private function wopiGetToken($fileId) {
-		list($fileId, , $version) = Helper::parseFileId($fileId);
-		$this->logger->info('wopiGetToken(): Generating WOPI Token for file {fileId}, version {version}.', [
+	private function getWopiToken($fileId, $version) {
+		$this->logger->info('getWopiToken(): Generating WOPI Token for file {fileId}, version {version}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
 			'version' => $version ]);
@@ -591,7 +593,7 @@ class DocumentController extends Controller {
 			foreach ($editGroups as $editGroup) {
 				$editorGroup = \OC::$server->getGroupManager()->get($editGroup);
 				if ($editorGroup !== null && \sizeof($editorGroup->searchUsers($editorUid)) > 0) {
-					$this->logger->debug("wopiGetToken(): Editor {editor} is in edit group {group}", [
+					$this->logger->debug("getWopiToken(): Editor {editor} is in edit group {group}", [
 						'app' => $this->appName,
 						'editor' => $editorUid,
 						'group' => $editGroup
@@ -607,7 +609,7 @@ class DocumentController extends Controller {
 			$updatable = false;
 		}
 
-		$this->logger->debug('wopiGetToken(): File {fileid} is updatable? {updatable}', [
+		$this->logger->debug('getWopiToken(): File {fileid} is updatable? {updatable}', [
 			'app' => $this->appName,
 			'fileid' => $fileId,
 			'updatable' => $updatable ]);
@@ -620,7 +622,7 @@ class DocumentController extends Controller {
 			'status' => 'success',
 			'token' => $token
 		];
-		$this->logger->debug('wopiGetToken(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
+		$this->logger->debug('getWopiToken(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
 		return $result;
 	}
 
@@ -653,7 +655,7 @@ class DocumentController extends Controller {
 		if ($encryptionManager->isEnabled()) {
 			// Update the current file to be accessible with system public
 			// shared key
-			$this->logger->debug('wopiGetToken(): Encryption enabled.', ['app' => $this->appName]);
+			$this->logger->debug('Encryption enabled.', ['app' => $this->appName]);
 			$absPath = '/' . $owner . '/files' .  $path;
 			$accessList = \OC::$server->getEncryptionFilesHelper()->getAccessList($absPath);
 			$accessList['public'] = true;
@@ -664,9 +666,8 @@ class DocumentController extends Controller {
 	/**
 	 * Generates and returns an access token for a given fileId.
 	 */
-	private function wopiGetTokenForPublicLink($fileId, $path, $permissions, $currentUser, $ownerUid) {
-		list($fileId, , $version) = Helper::parseFileId($fileId);
-		$this->logger->info('wopiGetToken(): Generating WOPI Token for file {fileId}, version {version}.', [
+	private function getWopiTokenForPublicLink($fileId, $version, $path, $permissions, $currentUser, $ownerUid) {
+		$this->logger->info('getWopiToken(): Generating WOPI Token for file {fileId}, version {version}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
 			'version' => $version ]);
@@ -695,7 +696,7 @@ class DocumentController extends Controller {
 			'status' => 'success',
 			'token' => $token
 		];
-		$this->logger->debug('wopiGetToken(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
+		$this->logger->debug('getWopiToken(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
 		return $result;
 	}
 
@@ -705,7 +706,8 @@ class DocumentController extends Controller {
 	 * Generates and returns an access token and urlsrc for a given fileId
 	 * for requests that provide secret token set in app settings
 	 */
-	public function extAppWopiGetData($fileId) {
+	public function extAppWopiGetData($sessionId) {
+		list($fileId, , $version, $sessionId) = Helper::parseSessionId($sessionId);
 		$secretToken = $this->request->getParam('secret_token');
 		$apps = \array_filter(\explode(',', $this->appConfig->getAppValue('external_apps')));
 		foreach ($apps as $app) {
@@ -715,10 +717,10 @@ class DocumentController extends Controller {
 					$this->logger->info('extAppWopiGetData(): External app "{extApp}" authenticated; issuing access token for fileId {fileId}', [
 						'app' => $this->appName,
 						'extApp' => $appName[0],
-						'fileId' => $fileId
+						'fileId' => $sessionId
 					]);
-					$retArray = $this->wopiGetToken($fileId);
-					if ($doc = $this->getDocumentByUserAuth($fileId, $this->uid)) {
+					$retArray = $this->getWopiToken($fileId, $version);
+					if ($doc = $this->getDocumentByUserAuth($this->uid, $fileId)) {
 						$retArray['urlsrc'] = $doc['urlsrc'];
 					}
 					return $retArray;
@@ -735,10 +737,10 @@ class DocumentController extends Controller {
 	 * @PublicPage
 	 * Returns general info about a file.
 	 */
-	public function wopiCheckFileInfo($fileId) {
+	public function wopiCheckFileInfo($sessionId) {
 		$token = $this->request->getParam('access_token');
 
-		list($fileId, , $version) = Helper::parseFileId($fileId);
+		list($fileId, , $version, $sessionId) = Helper::parseSessionId($sessionId);
 		$this->logger->info('wopiCheckFileInfo(): Getting info about file {fileId}, version {version} by token {token}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
@@ -748,9 +750,9 @@ class DocumentController extends Controller {
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
 
-		$res = $row->getPathForToken($token);
+		$res = $row->getWopiForToken($token);
 		if ($res == false) {
-			$this->logger->debug('wopiCheckFileInfo(): getPathForToken() failed.', ['app' => $this->appName]);
+			$this->logger->debug('wopiCheckFileInfo(): getWopiForToken() failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
@@ -763,19 +765,39 @@ class DocumentController extends Controller {
 			$this->logger->warning('wopiGetFile(): No valid info found', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
-		$editorName = \OC::$server->getUserManager()->get($res['editor'])->getDisplayName();
+
+		$editor = \OC::$server->getUserManager()->get($res['editor']);
+
 		$result = [
 			'BaseFileName' => $info->getName(),
 			'Size' => $info->getSize(),
 			'Version' => $version,
 			'OwnerId' => $res['owner'],
 			'UserId' => $res['editor'],
-			'UserFriendlyName' => $editorName,
+			'UserFriendlyName' => $editor->getDisplayName(),
 			'UserCanWrite' => $res['canwrite'] ? true : false,
 			'UserCanNotWriteRelative' => \OC::$server->getEncryptionManager()->isEnabled() ? true : false,
 			'PostMessageOrigin' => $res['server_host'],
 			'LastModifiedTime' => Helper::toISO8601($info->getMTime())
 		];
+
+		// check if in review-only-mode
+		// FIXME: check for admin setting - "secure-mode for readonly" and "watermark text"
+		$secureMode = true;
+		if (!$res['canwrite'] && $sessionId != '0' && $secureMode) {
+			$watermark = "Document strictly confidential - prepared for " . (is_null($editor->getEMailAddress()) ? $editor->getDisplayName() : $editor->getEMailAddress());
+			$result = array_merge($result, [
+				'WatermarkText' => $watermark,
+				//
+				'DisableExport' => true, // export as button, both READ and EDIT
+				'HideExportOption' => true, // export as button, both READ and EDIT
+				///
+				'DisablePrint' => false, // print button, only for EDIT perms
+				'HidePrintOption' => false, // print button, only for EDIT perms
+				'HideSaveOption' => true, // save button, only for EDIT perms
+				'DisableCopy' => true, // copying in the document, only for EDIT perms
+			]);
+		}
 		$this->logger->debug("wopiCheckFileInfo(): Result: {result}", ['app' => $this->appName, 'result' => $result]);
 		return $result;
 	}
@@ -787,10 +809,10 @@ class DocumentController extends Controller {
 	 * Given an access token and a fileId, returns the contents of the file.
 	 * Expects a valid token in access_token parameter.
 	 */
-	public function wopiGetFile($fileId) {
+	public function wopiGetFile($sessionId) {
 		$token = $this->request->getParam('access_token');
 
-		list($fileId, , $version) = Helper::parseFileId($fileId);
+		list($fileId, , $version, ) = Helper::parseSessionId($sessionId);
 		$this->logger->info('wopiGetFile(): File {fileId}, version {version}, token {token}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
@@ -801,7 +823,7 @@ class DocumentController extends Controller {
 		$row->loadBy('token', $token);
 
 		//TODO: Support X-WOPIMaxExpectedSize header.
-		$res = $row->getPathForToken($token);
+		$res = $row->getWopiForToken($token);
 		$ownerid = $res['owner'];
 
 		// Login the user to see his mount locations
@@ -840,12 +862,12 @@ class DocumentController extends Controller {
 	 * Given an access token and a fileId, replaces the files with the request body.
 	 * Expects a valid token in access_token parameter.
 	 */
-	public function wopiPutFile($fileId) {
+	public function wopiPutFile($sessionId) {
 		$token = $this->request->getParam('access_token');
 
 		$isPutRelative = ($this->request->getHeader('X-WOPI-Override') === 'PUT_RELATIVE');
 
-		list($fileId, , $version) = Helper::parseFileId($fileId);
+		list($fileId, , $version, ) = Helper::parseSessionId($sessionId);
 		$this->logger->debug('wopiputFile(): File {fileId}, version {version}, token {token}, WopiOverride {wopiOverride}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
@@ -856,14 +878,14 @@ class DocumentController extends Controller {
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
 
-		$res = $row->getPathForToken($token);
+		$res = $row->getWopiForToken($token);
 		if ($res == false) {
-			$this->logger->debug('wopiPutFile(): getPathForToken() failed.', ['app' => $this->appName]);
+			$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
 		if (!$res['canwrite']) {
-			$this->logger->debug('wopiPutFile(): getPathForToken() failed.', ['app' => $this->appName]);
+			$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
