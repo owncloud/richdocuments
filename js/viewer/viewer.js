@@ -63,10 +63,6 @@ var odfViewer = {
 
 	},
 
-	onSecure : function(filename, context){
-		var file = filename;
-	},
-
 	dispatch : function(filename){
 		if (this.isSupportedMimeType(OCA.Files.fileActions.getCurrentMimeType())
 			&& OCA.Files.fileActions.getCurrentPermissions() & OC.PERMISSION_UPDATE

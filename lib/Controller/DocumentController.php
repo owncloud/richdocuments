@@ -706,8 +706,8 @@ class DocumentController extends Controller {
 	 * Generates and returns an access token and urlsrc for a given fileId
 	 * for requests that provide secret token set in app settings
 	 */
-	public function extAppWopiGetData($sessionId) {
-		list($fileId, , $version, $sessionId) = Helper::parseSessionId($sessionId);
+	public function extAppWopiGetData($documentId) {
+		list($fileId, , $version, ) = Helper::parseDocumentId($documentId);
 		$secretToken = $this->request->getParam('secret_token');
 		$apps = \array_filter(\explode(',', $this->appConfig->getAppValue('external_apps')));
 		foreach ($apps as $app) {
@@ -717,7 +717,7 @@ class DocumentController extends Controller {
 					$this->logger->info('extAppWopiGetData(): External app "{extApp}" authenticated; issuing access token for fileId {fileId}', [
 						'app' => $this->appName,
 						'extApp' => $appName[0],
-						'fileId' => $sessionId
+						'fileId' => $fileId
 					]);
 					$retArray = $this->getWopiToken($fileId, $version);
 					if ($doc = $this->getDocumentByUserAuth($this->uid, $fileId)) {
@@ -737,10 +737,10 @@ class DocumentController extends Controller {
 	 * @PublicPage
 	 * Returns general info about a file.
 	 */
-	public function wopiCheckFileInfo($sessionId) {
+	public function wopiCheckFileInfo($documentId) {
 		$token = $this->request->getParam('access_token');
 
-		list($fileId, , $version, $sessionId) = Helper::parseSessionId($sessionId);
+		list($fileId, , $version, $sessionId) = Helper::parseDocumentId($documentId);
 		$this->logger->info('wopiCheckFileInfo(): Getting info about file {fileId}, version {version} by token {token}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
@@ -783,10 +783,14 @@ class DocumentController extends Controller {
 
 		// check if in review-only-mode
 		// FIXME: check for admin setting - "secure-mode for readonly" and "watermark text"
-		$secureMode = true;
+		$secureMode = \OC::$server->getConfig()->getAppValue('richdocuments', 'secure_view_option') === 'true';
 		if (!$res['canwrite'] && $sessionId != '0' && $secureMode) {
-			$watermark = "Document strictly confidential - prepared for " . (is_null($editor->getEMailAddress()) ? $editor->getDisplayName() : $editor->getEMailAddress());
-			$result = array_merge($result, [
+			$watermark = \str_replace(
+				'{viewer-email}',
+				$editor->getEMailAddress() === null ? $editor->getDisplayName() : $editor->getEMailAddress(),
+				\OC::$server->getConfig()->getAppValue('richdocuments', 'watermark_text', '')
+			);
+			$result = \array_merge($result, [
 				'WatermarkText' => $watermark,
 				//
 				'DisableExport' => true, // export as button, both READ and EDIT
@@ -806,13 +810,13 @@ class DocumentController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @PublicPage
-	 * Given an access token and a fileId, returns the contents of the file.
+	 * Given a request access token and a document id, returns the contents of the file.
 	 * Expects a valid token in access_token parameter.
 	 */
-	public function wopiGetFile($sessionId) {
+	public function wopiGetFile($documentId) {
 		$token = $this->request->getParam('access_token');
 
-		list($fileId, , $version, ) = Helper::parseSessionId($sessionId);
+		list($fileId, , $version, ) = Helper::parseDocumentId($documentId);
 		$this->logger->info('wopiGetFile(): File {fileId}, version {version}, token {token}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
@@ -859,15 +863,15 @@ class DocumentController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @PublicPage
-	 * Given an access token and a fileId, replaces the files with the request body.
+	 * Given a request access token and a document id, replaces the files with the request body.
 	 * Expects a valid token in access_token parameter.
 	 */
-	public function wopiPutFile($sessionId) {
+	public function wopiPutFile($documentId) {
 		$token = $this->request->getParam('access_token');
 
 		$isPutRelative = ($this->request->getHeader('X-WOPI-Override') === 'PUT_RELATIVE');
 
-		list($fileId, , $version, ) = Helper::parseSessionId($sessionId);
+		list($fileId, , $version, ) = Helper::parseDocumentId($documentId);
 		$this->logger->debug('wopiputFile(): File {fileId}, version {version}, token {token}, WopiOverride {wopiOverride}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
@@ -996,13 +1000,13 @@ class DocumentController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @PublicPage
-	 * Given an access token and a fileId, replaces the files with the request body.
+	 * Given a request access token and a document, replaces the files with the request body.
 	 * Expects a valid token in access_token parameter.
 	 * Just actually routes to the PutFile, the implementation of PutFile
 	 * handles both saving and saving as.
 	 */
-	public function wopiPutRelativeFile($fileId) {
-		return $this->wopiPutFile($fileId);
+	public function wopiPutRelativeFile($documentId) {
+		return $this->wopiPutFile($documentId);
 	}
 
 	/**

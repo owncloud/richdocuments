@@ -65,4 +65,15 @@ script('richdocuments', 'admin');
 
 	<input type="checkbox" id="enable_menu_option_cb-richdocuments" <?php p($_['menu_option'] !== 'false' ? 'checked' : '') ?> />
 	<label for="enable_menu_option_cb-richdocuments"><?php p($l->t('Use Menu option')) ?></label>
+
+	<br/>
+	<input type="checkbox" id="enable_secure_view_option_cb-richdocuments" <?php p($_['secure_view_option'] === 'true' ? 'checked' : '') ?> />
+	<label for="enable_secure_view_option_cb-richdocuments"><?php p($l->t('Allow setting secure-view for read-only shares')) ?></label>
+	<div id="enable-watermark-section" class="indent <?php if ($_['secure_view_option'] !== 'true') {
+	p('hidden');
+} ?>" >
+		<input type="text" style="width: 400px" id="secure-view-watermark" name="secure-view-watermark-name" value="<?php p($_['watermark_text'] !== null ? $_['watermark_text']: $l->t('Strictly confidential. Only for ').'{viewer-email}') ?>">
+		<br/>
+		<p style="max-width: 50em;"><em><?php p($l->t('Set watermark to be used in secure-view documents. If you wish to insert user email dynamically, leave {viewer-email} field. Click outside of the field to save field value.')) ?></em></p>
+	</div>
 </div>

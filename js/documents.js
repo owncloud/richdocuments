@@ -176,8 +176,8 @@ var documentsMain = {
 	wopiClientFeatures: null,
 
 	// generates docKey for given fileId
-	_generateDocKey: function(wopiSessionId) {
-		var ocurl = OC.generateUrl('apps/richdocuments/wopi/files/{sessionId}', {sessionId: wopiSessionId});
+	_generateDocKey: function(documentId) {
+		var ocurl = OC.generateUrl('apps/richdocuments/wopi/files/{documentId}', {documentId: documentId});
 		if (rd_canonical_webroot) {
 			if (!rd_canonical_webroot.startsWith('/'))
 				rd_canonical_webroot = '/' + rd_canonical_webroot;
@@ -245,11 +245,11 @@ var documentsMain = {
 				$('#revViewerContainer').prepend($('<div id="revViewer">'));
 			}
 
-			var wopiSessionId = documentsMain.fileId + "_" +
+			var documentId = documentsMain.fileId + "_" +
 				documentsMain.instanceId + "_" +
 				version + "_" +
 				documentsMain.sessionId;
-			var ocurl = documentsMain._generateDocKey(wopiSessionId);
+			var ocurl = documentsMain._generateDocKey(documentId);
 			// WOPISrc - URL that loolwsd will access (ie. pointing to ownCloud)
 			var wopiurl = window.location.protocol + '//' + window.location.host + ocurl;
 			var wopisrc = encodeURIComponent(wopiurl);
@@ -435,11 +435,11 @@ var documentsMain = {
 
 			$('title').text(documentsMain.fileName + ' - ' + documentsMain.UI.mainTitle);
 
-			var wopiSessionId = documentsMain.fileId + "_" +
+			var documentId = documentsMain.fileId + "_" +
 				documentsMain.instanceId + "_" +
 				documentsMain.version + "_" +
 				documentsMain.sessionId;
-			var ocurl = documentsMain._generateDocKey(wopiSessionId);
+			var ocurl = documentsMain._generateDocKey(documentId);
 			// WOPISrc - URL that loolwsd will access (ie. pointing to ownCloud)
 			// Include the unique instanceId in the WOPI URL as part of the fileId
 			var wopiurl = window.location.protocol + '//' + window.location.host + ocurl;

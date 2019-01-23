@@ -104,6 +104,23 @@ var documentsSettings = {
 		);
 	},
 
+	saveWatermarkText: function(value) {
+		$.post(
+			OC.filePath('richdocuments', 'ajax', 'admin.php'),
+			{ 'watermark_text': value }
+		);
+
+		OC.Notification.showTemporary(t('richdocuments', 'Saved watermark'), {timeout: 2});
+	},
+
+	saveSecureViewOption: function(value) {
+		// FIXME: if version too low, throw error that this permission cannot be set for version <10.2 ?
+		$.post(
+			OC.filePath('richdocuments', 'ajax', 'admin.php'),
+			{ 'secure_view_option': value }
+		);
+	},
+
 	afterSaveExternalApps: function(response) {
 		OC.msg.finishedAction('#enable-external-apps-section-msg', response);
 	},
@@ -296,6 +313,21 @@ var documentsSettings = {
 		$(document).on('change', '#enable_menu_option_cb-richdocuments', function() {
 			var page = $(this).parent();
 			documentsSettings.saveMenuOption(this.checked);
+		});
+
+		$(document).on('change', '#enable_secure_view_option_cb-richdocuments', function() {
+			var page = $(this).parent();
+			page.find('#enable-watermark-section').toggleClass('hidden', !this.checked);
+
+			documentsSettings.saveSecureViewOption(this.checked);
+			if (this.checked) {
+				var val = $('#secure-view-watermark').val();
+				documentsSettings.saveWatermarkText(val);
+			}
+		});
+
+		$(document).on('change', '#secure-view-watermark', function() {
+			documentsSettings.saveWatermarkText(this.value);
 		});
 	}
 };

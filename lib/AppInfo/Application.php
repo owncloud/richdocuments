@@ -119,9 +119,19 @@ class Application extends App {
 				function () {
 					\OCP\Util::addScript('richdocuments', 'viewer/viewer');
 					\OCP\Util::addStyle('richdocuments', 'viewer/odfviewer');
-					\OCP\Util::addScript('richdocuments', 'viewer/extrapermissions');
 				}
 			);
+
+			$secureViewOption = $container->getServer()->getConfig()->getAppValue('richdocuments', 'secure_view_option');
+
+			if ($secureViewOption === 'true') {
+				$container->getServer()->getEventDispatcher()->addListener(
+					'OCA\Files::loadAdditionalScripts',
+					function () {
+						\OCP\Util::addScript('richdocuments', 'viewer/extrapermissions');
+					}
+				);
+			}
 
 			if (\class_exists('\OC\Files\Type\TemplateManager')) {
 				$manager = \OC_Helper::getFileTemplateManager();

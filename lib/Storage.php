@@ -120,17 +120,19 @@ class Storage {
 			$ret['version'] = '0'; // latest
 			$ret['sessionid'] = '0'; // default shared session
 
-			// check if secure mode has been enabled (unique session with custom permissions)
-			$storage = $document->getStorage();
-			if ($storage->instanceOfStorage('\OCA\Files_Sharing\SharedStorage')) {
-				// Extract extra permissions
-				/** @var \OCA\Files_Sharing\SharedStorage $storage */
-				$share = $storage->getShare();
-				$canDownload = $share->getExtraPermissions()->getPermission('dav', 'can-download');
-				if (!$document->isUpdateable() && $canDownload !== null && !$canDownload) {
-					// use user id as session id in order to reuse
-					// it for multiple tabs in the browser
-					$ret['sessionid'] = $userId;
+			if (\OC::$server->getConfig()->getAppValue('richdocuments', 'secure_view_option') === 'true') {
+				// check if secure mode has been enabled (unique session with custom permissions)
+				$storage = $document->getStorage();
+				if ($storage->instanceOfStorage('\OCA\Files_Sharing\SharedStorage')) {
+					// Extract extra permissions
+					/** @var \OCA\Files_Sharing\SharedStorage $storage */
+					$share = $storage->getShare();
+					$canDownload = $share->getExtraPermissions()->getPermission('dav', 'can-download');
+					if (!$document->isUpdateable() && $canDownload !== null && !$canDownload) {
+						// use user id as session id in order to reuse
+						// it for multiple tabs in the browser
+						$ret['sessionid'] = $userId;
+					}
 				}
 			}
 

@@ -19,12 +19,15 @@ class Helper {
 	const APP_ID = 'richdocuments';
 
 	/**
-	 * @param string $fileId
+	 * Parse document id to retrieve fileid, instanceid, version and sessionid
+	 * for the document editing session
+	 *
+	 * @param string $documentId
 	 * @return array
 	 * @throws \Exception
 	 */
-	public static function parseSessionId($fileId) {
-		$arr = \explode('_', $fileId);
+	public static function parseDocumentId($documentId) {
+		$arr = \explode('_', $documentId);
 		if (\count($arr) === 1) {
 			$fileId = $arr[0];
 			$instanceId = '';
