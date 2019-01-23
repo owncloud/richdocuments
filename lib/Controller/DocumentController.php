@@ -954,7 +954,7 @@ class DocumentController extends Controller {
 			// logged in)
 			$row = new Db\Wopi();
 			$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
-			$wopiToken = $row->generateFileToken($file->getId(), 0, (int)true, $serverHost, $res['editor']);
+			$wopiToken = $row->generateTokenForUserFile($file->getId(), 0, (int)true, $serverHost, $res['editor']);
 
 			$wopi = 'index.php/apps/richdocuments/wopi/files/' . $file->getId() . '_' . $this->settings->getSystemValue('instanceid') . '?access_token=' . $wopiToken;
 			$url = \OC::$server->getURLGenerator()->getAbsoluteURL($wopi);
