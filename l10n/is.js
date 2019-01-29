@@ -30,6 +30,7 @@ OC.L10N.register(
     "Spreadsheet" : "Töflureiknisskjal",
     "Presentation" : "Kynning",
     "Could not create file" : "Gat ekki búið til skrá",
+    "View/Edit in Collabora" : "Skoða/Breyta í Collabora",
     "Office" : "Skrifstofa",
     "Please contact the \"%s\" administrator." : "Hafðu samband við kerfisstjóra \"%s\".",
     "Please ask your administrator to check the Collabora Online server setting. The exact error message was: " : "Biddu kerfisstjórann þinn um að athuga stillingar Collabora Online þjónsins. Villumeldingin var orðrétt: ",
