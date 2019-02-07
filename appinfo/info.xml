@@ -5,7 +5,7 @@
 	<description>Collabora Online allows you to to work with all kinds of office documents directly in your browser. This application can connect to a Collabora Online server (WOPI Client). ownCloud is the WOPI Host. Please read the documentation to learn more about that.</description>
 	<summary>Edit office documents directly in your browser.</summary>
 	<licence>AGPL</licence>
-	<version>2.1.1</version>
+	<version>2.1.2</version>
 	<author>Collabora Productivity based on work of Frank Karlitschek, Victor Dubiniuk</author>
 	<bugs>https://github.com/owncloud/richdocuments/issues</bugs>
 	<repository type="git">https://github.com/owncloud/richdocuments.git</repository>
