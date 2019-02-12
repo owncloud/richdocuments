@@ -33,7 +33,6 @@ appstore:
 	--exclude=CONTRIBUTING.md \
 	--exclude=composer.json \
 	--exclude=composer.lock \
-	--exclude=composer.phar \
 	--exclude=l10n/.tx \
 	--exclude=l10n/no-php \
 	--exclude=Makefile \
