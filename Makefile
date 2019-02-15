@@ -14,7 +14,12 @@ NODE_PREFIX=$(shell pwd)
 
 app_name=richdocuments
 project_dir=$(CURDIR)/../$(app_name)
-build_dir=$(CURDIR)/build/artifacts
+doc_files=README.md
+src_dirs=appinfo assets css img js l10n lib templates
+src_files=admin.php settings.php
+all_src=$(src_dirs) $(src_files) $(doc_files)
+build_dir=$(CURDIR)/build
+dist_dir=$(build_dir)/dist
 sign_dir=$(build_dir)/sign
 appstore_dir=$(build_dir)/appstore
 source_dir=$(build_dir)/source
@@ -46,6 +51,19 @@ appstore:
 	$(occ) integrity:sign-app --privateKey=$(cert_dir)/$(app_name).key --certificate=$(cert_dir)/$(app_name).crt --path=$(sign_dir)/$(app_name)
 	tar -czf $(build_dir)/$(app_name).tar.gz -C $(sign_dir) $(app_name)
 
+# signing
+occ=$(CURDIR)/../../occ
+private_key=$(HOME)/.owncloud/certificates/$(app_name).key
+certificate=$(HOME)/.owncloud/certificates/$(app_name).crt
+sign=$(occ) integrity:sign-app --privateKey="$(private_key)" --certificate="$(certificate)"
+sign_skip_msg="Skipping signing, either no key and certificate found in $(private_key) and $(certificate) or occ can not be found at $(occ)"
+ifneq (,$(wildcard $(private_key)))
+ifneq (,$(wildcard $(certificate)))
+ifneq (,$(wildcard $(occ)))
+	CAN_SIGN=true
+endif
+endif
+endif
 
 # bin file definitions
 PHPUNIT=php -d zend.enable_gc=0  "$(PWD)/../../lib/composer/bin/phpunit"
@@ -100,6 +118,8 @@ clean-build:
 .PHONY: clean-deps
 clean-deps:
 	rm -Rf $(nodejs_deps) $(bower_deps)
+	rm -Rf vendor
+	rm -Rf vendor-bin/**/vendor vendor-bin/**/composer.lock
 
 .PHONY: clean
 clean: clean-deps clean-dist clean-build

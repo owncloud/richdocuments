@@ -63,15 +63,6 @@ pipeline:
       matrix:
         TEST_SUITE: owncloud-coding-standard
 
-  owncloud-coding-standard:
-    image: owncloudci/php:${PHP_VERSION}
-    pull: true
-    commands:
-      - make test-php-style
-    when:
-      matrix:
-        TEST_SUITE: owncloud-coding-style
-
   phpunit-tests:
     image: owncloudci/php:${PHP_VERSION}
     pull: true
