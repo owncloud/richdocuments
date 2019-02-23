@@ -112,29 +112,13 @@ class Storage {
 			// Set basic parameters
 			$ret['owner'] = $document->getOwner()->getUID();
 			$ret['permissions'] = $document->getPermissions();
+			$ret['updateable'] = $document->isUpdateable();
 			$ret['mimetype'] = $document->getMimeType();
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $fileId;
 			$ret['instanceid'] = \OC::$server->getConfig()->getSystemValue('instanceid');
 			$ret['version'] = '0'; // latest
-			$ret['sessionid'] = '0'; // default shared session
-
-			if (\OC::$server->getConfig()->getAppValue('richdocuments', 'secure_view_option') === 'true') {
-				// check if secure mode has been enabled (unique session with custom permissions)
-				$storage = $document->getStorage();
-				if ($storage->instanceOfStorage('\OCA\Files_Sharing\SharedStorage')) {
-					// Extract extra permissions
-					/** @var \OCA\Files_Sharing\SharedStorage $storage */
-					$share = $storage->getShare();
-					$canDownload = $share->getExtraPermissions()->getPermission('dav', 'can-download');
-					if (!$document->isUpdateable() && $canDownload !== null && !$canDownload) {
-						// use user id as session id in order to reuse
-						// it for multiple tabs in the browser
-						$ret['sessionid'] = $userId;
-					}
-				}
-			}
 
 			return $ret;
 		} catch (InvalidPathException $e) {
@@ -194,6 +178,7 @@ class Storage {
 			$ret = [];
 			$ret['owner'] = $document->getOwner()->getUID();
 			$ret['permissions'] = $share->getPermissions();
+			$ret['updateable'] = $document->isUpdateable();
 			$ret['mimetype'] = $document->getMimeType();
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();

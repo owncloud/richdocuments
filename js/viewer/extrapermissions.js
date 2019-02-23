@@ -20,19 +20,13 @@ OC.Plugins.register('OC.Share.ShareItemModel', {
 				defaultValue,
 				incompatiblePermissions
 			);
+			model.registerExtraSharePermission(
+				"collabora",
+				"can-print",
+				t('richdocuments', 'allow printing'),
+				defaultValue,
+				incompatiblePermissions
+			);
 		}
-
-		// Display notification when can-download gets disabled
-		var oldUpdateShare = model.updateShare;
-		model.updateShare = function (shareId, attrs, options) {
-			oldUpdateShare.apply(this, [shareId, attrs, options]);
-			_.each(attrs.extraPermissions, function(extraPermission) {
-				if (extraPermission.app === "dav" &&
-					extraPermission.name === "can-download" &&
-					!extraPermission.enabled) {
-					OC.Notification.showTemporary(t('richdocuments', 'Secure-view mode on the file has been enabled for this user'));
-				}
-			});
-		};
 	}
 });
