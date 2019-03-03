@@ -19,7 +19,7 @@ $application->registerRoutes($this, [
 		['name' => 'document#create', 'url' => 'ajax/documents/create', 'verb' => 'POST'],
 		['name' => 'document#listAll', 'url' => 'ajax/documents/list', 'verb' => 'GET'],
 		["name" => 'document#publicIndex', "url" => "public", "verb" => "GET"],
-		// FIXME: Temporarly disable support for Ext App accessing Collabora Documents
+		//	FIXME: Disable support for Ext App accessing Collabora Documents (reason: No idea how to test if this works without unit/feature tests, and this requires refactor)
 		// ['name' => 'document#extAppWopiGetData', 'url' => 'wopi/extapp/data/{documentId}', 'verb' => 'POST'],
 		//documents - for WOPI access
 		['name' => 'document#wopiCheckFileInfo', 'url' => 'wopi/files/{documentId}', 'verb' => 'GET'],

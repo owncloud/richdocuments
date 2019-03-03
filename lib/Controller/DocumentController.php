@@ -426,6 +426,7 @@ class DocumentController extends Controller {
 		}
 
 		if ($doc == null) {
+			$this->logger->warning("Null returned for document with fileid {fileid}", ["fileid" => $fileId]);
 			return [];
 		}
 
@@ -631,12 +632,12 @@ class DocumentController extends Controller {
 			$info = $view->getFileInfo($path);
 			$storage = $info->getStorage();
 			if ($storage->instanceOfStorage('\OCA\Files_Sharing\SharedStorage')) {
-				// Extract extra permissions
+				// Extract share attributes
 				/** @var \OCA\Files_Sharing\SharedStorage $storage */
 				$share = $storage->getShare();
 
-				// Check download permission
-				$canDownload = $share->getExtraPermissions()->getPermission('dav', 'can-download');
+				// Check download attribute
+				$canDownload = $share->getAttributes()->getAttribute('core', 'can-download');
 				if ($canDownload !== null && !$canDownload) {
 					// cant download, use user id as id for unique session fork (no shared editing)
 					$sessionid = $currentUser;
@@ -644,8 +645,8 @@ class DocumentController extends Controller {
 					$attributes = $attributes | WOPI::ATTR_CAN_DOWNLOAD;
 				}
 
-				// Check print permission
-				$canPrint = $share->getExtraPermissions()->getPermission('collabora', 'can-print');
+				// Check print attribute
+				$canPrint = $share->getAttributes()->getAttribute('richdocuments', 'can-print');
 				if (!($canPrint !== null && !$canPrint)) {
 					// can print is not set or true
 					$attributes = $attributes | WOPI::ATTR_CAN_PRINT;
@@ -763,7 +764,7 @@ class DocumentController extends Controller {
 		return $result;
 	}
 
-//	FIXME: Temporarly disable support for Ext App accessing Collabora Documents
+//	FIXME: Disable support for Ext App accessing Collabora Documents (reason: No idea how to test if this works without unit/feature tests, and this requires refactor)
 //	/**
 //	 * @NoCSRFRequired
 //	 * @PublicPage
@@ -851,7 +852,7 @@ class DocumentController extends Controller {
 
 		// check if in review-only-mode
 		$secureMode = \OC::$server->getConfig()->getAppValue('richdocuments', 'secure_view_option') === 'true';
-		if (!$canWrite && $secureMode) {
+		if ($secureMode) {
 			$canDownload = $res['attributes'] & WOPI::ATTR_CAN_DOWNLOAD;
 			if (!$canDownload) {
 				$watermark = \str_replace(
@@ -869,10 +870,12 @@ class DocumentController extends Controller {
 			}
 
 			$canPrint = $res['attributes'] & WOPI::ATTR_CAN_PRINT;
-			$result = \array_merge($result, [
-				'DisablePrint' => !$canPrint,
-				'HidePrintOption' => !$canPrint,
-			]);
+			if (!$canPrint) {
+				$result = \array_merge($result, [
+					'DisablePrint' => true,
+					'HidePrintOption' => true,
+				]);
+			}
 		}
 		$this->logger->debug("wopiCheckFileInfo(): Result: {result}", ['app' => $this->appName, 'result' => $result]);
 		return $result;
@@ -960,7 +963,7 @@ class DocumentController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		$canWrite = $row['attributes'] & WOPI::ATTR_CAN_UPDATE;
+		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
 		if (!$canWrite) {
 			$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);

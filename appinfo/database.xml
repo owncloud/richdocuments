@@ -55,7 +55,7 @@
 				<type>integer</type>
 				<default>0</default>
 				<notnull>true</notnull>
-				<comments>Attributes for collabora file</comments>
+				<comments>Attributes for collabora file. NOTE: This would require migration to the new field</comments>
 			</field>
 			<field>
 				<name>server_host</name>

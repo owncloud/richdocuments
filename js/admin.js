@@ -121,6 +121,21 @@ var documentsSettings = {
 		);
 	},
 
+	saveAttributesOption: function(page) {
+		// FIXME: if version too low, throw error that this permission cannot be set for version <10.2 ?
+		var canDownload = page.find('#enable_can_download_option_cb-richdocuments').is(':checked');
+		var canPrint = page.find('#enable_can_print_option_cb-richdocuments').is(':checked');
+
+		$.post(
+			OC.filePath('richdocuments', 'ajax', 'admin.php'),
+			{ 'default_share_attributes': {
+					'can_download': canDownload,
+					'can_print': canPrint
+				}
+			}
+		);
+	},
+
 	afterSaveExternalApps: function(response) {
 		OC.msg.finishedAction('#enable-external-apps-section-msg', response);
 	},
@@ -318,12 +333,22 @@ var documentsSettings = {
 		$(document).on('change', '#enable_secure_view_option_cb-richdocuments', function() {
 			var page = $(this).parent();
 			page.find('#enable-watermark-section').toggleClass('hidden', !this.checked);
+			page.find('#enable-share-permissions-defaults').toggleClass('hidden', !this.checked);
 
 			documentsSettings.saveSecureViewOption(this.checked);
 			if (this.checked) {
 				var val = $('#secure-view-watermark').val();
 				documentsSettings.saveWatermarkText(val);
 			}
+		});
+
+		$(document).on('change', '#enable_can_download_option_cb-richdocuments', function() {
+			var page = $(this).parent();
+			documentsSettings.saveAttributesOption(page);
+		});
+		$(document).on('change', '#enable_can_print_option_cb-richdocuments', function() {
+			var page = $(this).parent();
+			documentsSettings.saveAttributesOption(page);
 		});
 
 		$(document).on('change', '#secure-view-watermark', function() {

@@ -69,11 +69,20 @@ script('richdocuments', 'admin');
 	<br/>
 	<input type="checkbox" id="enable_secure_view_option_cb-richdocuments" <?php p($_['secure_view_option'] === 'true' ? 'checked' : '') ?> />
 	<label for="enable_secure_view_option_cb-richdocuments"><?php p($l->t('Allow setting secure-view for read-only shares')) ?></label>
-	<div id="enable-watermark-section" class="indent <?php if ($_['secure_view_option'] !== 'true') {
+	<div id="enable-share-permissions-defaults" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
 	p('hidden');
 } ?>" >
-		<input type="text" style="width: 400px" id="secure-view-watermark" name="secure-view-watermark-name" value="<?php p($_['watermark_text'] !== null ? $_['watermark_text']: $l->t('Strictly confidential. Only for ').'{viewer-email}') ?>">
-		<br/>
+		<p style="max-width: 50em;"><em><?php p($l->t('Set default share permissions for all the users')) ?></em></p>
+		<input type="checkbox" id="enable_can_download_option_cb-richdocuments" <?php p($_['default_share_attributes']['can_download'] === 'true' ? 'checked' : '') ?> />
+		<label for="enable_can_download_option_cb-richdocuments"><?php p($l->t('can download')) ?></label>
+		<input type="checkbox" id="enable_can_print_option_cb-richdocuments" <?php p($_['default_share_attributes']['can_print'] === 'true' ? 'checked' : '') ?> />
+		<label for="enable_can_print_option_cb-richdocuments"><?php p($l->t('can print')) ?></label>
+	</div>
+	<br/>
+	<div id="enable-watermark-section" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
+	p('hidden');
+} ?>" >
 		<p style="max-width: 50em;"><em><?php p($l->t('Set watermark to be used in secure-view documents. If you wish to insert user email dynamically, leave {viewer-email} field. Click outside of the field to save field value.')) ?></em></p>
+		<input type="text" style="width: 400px" id="secure-view-watermark" name="secure-view-watermark-name" value="<?php p($_['watermark_text'] !== null ? $_['watermark_text']: $l->t('Strictly confidential. Only for ').'{viewer-email}') ?>">
 	</div>
 </div>
