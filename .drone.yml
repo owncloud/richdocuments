@@ -172,9 +172,13 @@ matrix:
   include:
     # phan
     - PHP_VERSION: 7.2
+      OC_VERSION: daily-master-qa
+      NEED_CORE: true
       TEST_SUITE: owncloud-coding-standard
 
     - PHP_VERSION: 5.6
+      OC_VERSION: daily-stable10-qa
+      NEED_CORE: true
       TEST_SUITE: owncloud-coding-standard
 
     # Unit Tests
