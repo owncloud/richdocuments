@@ -30,7 +30,7 @@ class Wopi extends \OCA\Richdocuments\Db {
 
 	protected $tableName  = '`*PREFIX*richdocuments_wopi`';
 
-	protected $insertStatement  = 'INSERT INTO `*PREFIX*richdocuments_wopi` (`owner_uid`, `editor_uid`, `fileid`, `version`, `path`, `attributes`, `server_host`, `token`, `expiry`)
+	protected $insertStatement  = 'INSERT INTO `*PREFIX*richdocuments_wopi` (`owner_uid`, `editor_uid`, `fileid`, `version`, `path`, `canwrite`, `server_host`, `token`, `expiry`)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
 	protected $loadStatement = 'SELECT * FROM `*PREFIX*richdocuments_wopi` WHERE `token`= ?';
@@ -68,7 +68,7 @@ class Wopi extends \OCA\Richdocuments\Db {
 			$fileId,
 			$version,
 			$path,
-			$attributes,
+			1,
 			$serverHost,
 			$token,
 			\time() + self::TOKEN_LIFETIME_SECONDS
@@ -110,7 +110,7 @@ class Wopi extends \OCA\Richdocuments\Db {
 			'owner' => $row['owner_uid'],
 			'editor' => $row['editor_uid'],
 			'path' => $row['path'],
-			'attributes' => $row['attributes'],
+			'attributes' => 7,
 			'server_host' => $row['server_host']
 		];
 	}
