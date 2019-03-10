@@ -17,7 +17,8 @@ class AppConfig {
 	private $appName = 'richdocuments';
 	private $defaults = [
 		'wopi_url' => 'https://localhost:9980',
-		'default_share_attributes' => '{"can_download": "false", "can_print": "true"}'
+		'can_download_default' => false,
+		'can_print_default' => true
 	];
 
 	private $config;

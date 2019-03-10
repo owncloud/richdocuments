@@ -12,7 +12,6 @@
 namespace OCA\Richdocuments;
 
 use OCP\Util;
-
 /**
  * Class HookHandler
  *
@@ -24,5 +23,15 @@ class HookHandler {
 	public static function addViewerScripts() {
 		Util::addScript('richdocuments', 'viewer/viewer');
 		Util::addStyle('richdocuments', 'viewer/odfviewer');
+	}
+
+	public static function addConfigScripts($array) {
+		$appConfig = new AppConfig(\OC::$server->getConfig());
+		$array['array']['oc_appconfig']['richdocuments'] = [
+			'defaultShareAttributes' => [
+				'canDownload' => $appConfig->getAppValue('can_download_default'),
+				'canPrint' => $appConfig->getAppValue('can_print_default'),
+			],
+		];
 	}
 }

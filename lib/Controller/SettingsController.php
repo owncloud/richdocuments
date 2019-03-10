@@ -39,7 +39,6 @@ class SettingsController extends Controller {
 			'wopi_url' => $this->appConfig->getAppValue('wopi_url'),
 			'test_wopi_url' => $this->appConfig->getAppValue('test_wopi_url'),
 			'test_server_groups' => $this->appConfig->getAppValue('test_server_groups'),
-			'default_share_attributes' => \json_decode($this->appConfig->getAppValue('default_share_attributes'), true),
 		];
 	}
 
@@ -68,14 +67,15 @@ class SettingsController extends Controller {
 				'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
 				'menu_option' => $this->appConfig->getAppValue('menu_option'),
 				'secure_view_option' => $this->appConfig->getAppValue('secure_view_option'),
-				'default_share_attributes' => \json_decode($this->appConfig->getAppValue('default_share_attributes'), true),
+				'can_download_default' => $this->appConfig->getAppValue('can_download_default'),
+				'can_print_default' => $this->appConfig->getAppValue('can_print_default'),
 				'watermark_text' => $this->appConfig->getAppValue('watermark_text')
 			],
 			'blank'
 		);
 	}
 
-	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option, $secure_view_option, $watermark_text, $default_share_attributes) {
+	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option, $secure_view_option, $watermark_text, $can_download_default, $can_print_default) {
 		$message = $this->l10n->t('Saved');
 
 		if ($wopi_url !== null) {
@@ -123,8 +123,12 @@ class SettingsController extends Controller {
 			$this->appConfig->setAppValue('watermark_text', $watermark_text);
 		}
 
-		if ($default_share_attributes !== null) {
-			$this->appConfig->setAppValue('default_share_attributes', \json_encode($default_share_attributes));
+		if ($can_download_default !== null) {
+			$this->appConfig->setAppValue('can_download_default', $can_download_default);
+		}
+
+		if ($can_print_default !== null) {
+			$this->appConfig->setAppValue('can_print_default', $can_print_default);
 		}
 
 		$richMemCache = \OC::$server->getMemCacheFactory()->create('richdocuments');

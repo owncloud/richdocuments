@@ -73,9 +73,9 @@ script('richdocuments', 'admin');
 	p('hidden');
 } ?>" >
 		<p style="max-width: 50em;"><em><?php p($l->t('Set default share permissions for all the users')) ?></em></p>
-		<input type="checkbox" id="enable_can_download_option_cb-richdocuments" <?php p($_['default_share_attributes']['can_download'] === 'true' ? 'checked' : '') ?> />
+		<input type="checkbox" id="enable_can_download_option_cb-richdocuments" <?php p($_['can_download_default'] === 'true' ? 'checked' : '') ?> />
 		<label for="enable_can_download_option_cb-richdocuments"><?php p($l->t('can download')) ?></label>
-		<input type="checkbox" id="enable_can_print_option_cb-richdocuments" <?php p($_['default_share_attributes']['can_print'] === 'true' ? 'checked' : '') ?> />
+		<input type="checkbox" id="enable_can_print_option_cb-richdocuments" <?php p($_['can_print_default'] === 'true' ? 'checked' : '') ?> />
 		<label for="enable_can_print_option_cb-richdocuments"><?php p($l->t('can print')) ?></label>
 	</div>
 	<br/>

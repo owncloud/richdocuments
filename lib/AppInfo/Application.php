@@ -11,6 +11,7 @@
 
 namespace OCA\Richdocuments\AppInfo;
 
+use OC_Hook;
 use OCA\Richdocuments\Storage;
 use \OCP\AppFramework\App;
 
@@ -145,6 +146,8 @@ class Application extends App {
 		if ($this->publicLinksAllowedToUseCollabora()) {
 			\OCP\Util::connectHook(Share::class, "share_link_access", \OCA\Richdocuments\HookHandler::class, "addViewerScripts");
 		}
+
+		\OCP\Util::connectHook('\OCP\Config', 'js', \OCA\Richdocuments\HookHandler::class, 'addConfigScripts');
 	}
 
 	private function publicLinksAllowedToUseCollabora() {

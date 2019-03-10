@@ -121,18 +121,17 @@ var documentsSettings = {
 		);
 	},
 
-	saveAttributesOption: function(page) {
-		// FIXME: if version too low, throw error that this permission cannot be set for version <10.2 ?
-		var canDownload = page.find('#enable_can_download_option_cb-richdocuments').is(':checked');
-		var canPrint = page.find('#enable_can_print_option_cb-richdocuments').is(':checked');
-
+	saveCanDownloadDefaultOption: function(value) {
 		$.post(
 			OC.filePath('richdocuments', 'ajax', 'admin.php'),
-			{ 'default_share_attributes': {
-					'can_download': canDownload,
-					'can_print': canPrint
-				}
-			}
+			{ 'can_download_default': value }
+		);
+	},
+
+	saveCanPrintDefaultOption: function(value) {
+		$.post(
+			OC.filePath('richdocuments', 'ajax', 'admin.php'),
+			{ 'can_print_default': value }
 		);
 	},
 
@@ -343,12 +342,10 @@ var documentsSettings = {
 		});
 
 		$(document).on('change', '#enable_can_download_option_cb-richdocuments', function() {
-			var page = $(this).parent();
-			documentsSettings.saveAttributesOption(page);
+			documentsSettings.saveCanDownloadDefaultOption(this.checked);
 		});
 		$(document).on('change', '#enable_can_print_option_cb-richdocuments', function() {
-			var page = $(this).parent();
-			documentsSettings.saveAttributesOption(page);
+			documentsSettings.saveCanPrintDefaultOption(this.checked);
 		});
 
 		$(document).on('change', '#secure-view-watermark', function() {
