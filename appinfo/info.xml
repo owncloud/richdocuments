@@ -15,7 +15,7 @@
 		<prevent_group_restriction/>
 	</types>
 	<dependencies>
-		<owncloud min-version="9.1.7" max-version="10" />
+		<owncloud min-version="10.2" max-version="10" />
 	</dependencies>
 	<screenshot>https://owncloud.com/wp-content/uploads/2016/07/code_v2_writer-1-1024x576.png</screenshot>
 	<screenshot>https://owncloud.com/wp-content/uploads/2016/07/code_v2_calc-1-1024x576.png</screenshot>
