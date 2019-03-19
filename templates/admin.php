@@ -69,14 +69,14 @@ script('richdocuments', 'admin');
 	<br/>
 	<input type="checkbox" id="enable_secure_view_option_cb-richdocuments" <?php p($_['secure_view_option'] === 'true' ? 'checked' : '') ?> />
 	<label for="enable_secure_view_option_cb-richdocuments"><?php p($l->t('Allow setting secure-view for read-only shares')) ?></label>
-	<div id="enable-share-permissions-defaults" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
+	<div id="enable-share-attributes-defaults" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
 	p('hidden');
 } ?>" >
-		<p style="max-width: 50em;"><em><?php p($l->t('Set default share permissions for all the users')) ?></em></p>
-		<input type="checkbox" id="enable_can_download_option_cb-richdocuments" <?php p($_['can_download_default'] === 'true' ? 'checked' : '') ?> />
-		<label for="enable_can_download_option_cb-richdocuments"><?php p($l->t('can download')) ?></label>
-		<input type="checkbox" id="enable_can_print_option_cb-richdocuments" <?php p($_['can_print_default'] === 'true' ? 'checked' : '') ?> />
-		<label for="enable_can_print_option_cb-richdocuments"><?php p($l->t('can print')) ?></label>
+		<p style="max-width: 50em;"><em><?php p($l->t('Set default share attributes for all the users')) ?></em></p>
+		<input type="checkbox" id="secure_view_enabled_default_option_cb-richdocuments" <?php p($_['secure_view_enabled_default'] === 'true' ? 'checked' : '') ?> />
+		<label for="secure_view_enabled_default_option_cb-richdocuments"><?php p($l->t('enable secure view by default')) ?></label>
+		<input type="checkbox" id="secure_view_can_print_default_option_cb-richdocuments" <?php p($_['secure_view_can_print_default'] === 'true' ? 'checked' : '') ?> />
+		<label for="secure_view_can_print_default_option_cb-richdocuments"><?php p($l->t('enable printing with watermark by default for secure view')) ?></label>
 	</div>
 	<br/>
 	<div id="enable-watermark-section" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {

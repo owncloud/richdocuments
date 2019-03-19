@@ -121,17 +121,17 @@ var documentsSettings = {
 		);
 	},
 
-	saveCanDownloadDefaultOption: function(value) {
+	saveSecureViewDefaultOption: function(value) {
 		$.post(
 			OC.filePath('richdocuments', 'ajax', 'admin.php'),
-			{ 'can_download_default': value }
+			{ 'secure_view_enabled_default': value }
 		);
 	},
 
 	saveCanPrintDefaultOption: function(value) {
 		$.post(
 			OC.filePath('richdocuments', 'ajax', 'admin.php'),
-			{ 'can_print_default': value }
+			{ 'secure_view_can_print_default': value }
 		);
 	},
 
@@ -332,7 +332,7 @@ var documentsSettings = {
 		$(document).on('change', '#enable_secure_view_option_cb-richdocuments', function() {
 			var page = $(this).parent();
 			page.find('#enable-watermark-section').toggleClass('hidden', !this.checked);
-			page.find('#enable-share-permissions-defaults').toggleClass('hidden', !this.checked);
+			page.find('#enable-share-attributes-defaults').toggleClass('hidden', !this.checked);
 
 			documentsSettings.saveSecureViewOption(this.checked);
 			if (this.checked) {
@@ -341,10 +341,10 @@ var documentsSettings = {
 			}
 		});
 
-		$(document).on('change', '#enable_can_download_option_cb-richdocuments', function() {
-			documentsSettings.saveCanDownloadDefaultOption(this.checked);
+		$(document).on('change', '#secure_view_enabled_default_option_cb-richdocuments', function() {
+			documentsSettings.saveSecureViewDefaultOption(this.checked);
 		});
-		$(document).on('change', '#enable_can_print_option_cb-richdocuments', function() {
+		$(document).on('change', '#secure_view_can_print_default_option_cb-richdocuments', function() {
 			documentsSettings.saveCanPrintDefaultOption(this.checked);
 		});
 

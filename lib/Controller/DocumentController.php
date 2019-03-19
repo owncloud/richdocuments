@@ -623,7 +623,7 @@ class DocumentController extends Controller {
 		}
 
 		$sessionid = '0'; // default shared session
-		$attributes = WOPI::ATTR_CAN_READ;
+		$attributes = WOPI::ATTR_CAN_VIEW;
 		if ($updatable) {
 			// Default editing attributes
 			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
@@ -637,19 +637,19 @@ class DocumentController extends Controller {
 				$share = $storage->getShare();
 
 				// Check download attribute
-				$canDownload = $share->getAttributes()->getAttribute('core', 'can-download');
-				if ($canDownload !== null && !$canDownload) {
+				$secureViewEnabled = $share->getAttributes()->getAttribute('core', 'secure-view-enabled');
+				if ($secureViewEnabled !== null && $secureViewEnabled) {
 					// cant download, use user id as id for unique session fork (no shared editing)
 					$sessionid = $currentUser;
-				} else {
-					$attributes = $attributes | WOPI::ATTR_CAN_DOWNLOAD;
-				}
 
-				// Check print attribute
-				$canPrint = $share->getAttributes()->getAttribute('richdocuments', 'can-print');
-				if (!($canPrint !== null && !$canPrint)) {
-					// can print is not set or true
-					$attributes = $attributes | WOPI::ATTR_CAN_PRINT;
+					// Check print attribute for secure view
+					$canPrint = $share->getAttributes()->getAttribute('richdocuments', 'secure-view-can-print');
+					if ($canPrint === null || $canPrint === true) {
+						// can print is not set or true
+						$attributes = $attributes | WOPI::ATTR_CAN_PRINT;
+					}
+				} else {
+					$attributes = $attributes | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
 				}
 			}
 		}
@@ -746,7 +746,7 @@ class DocumentController extends Controller {
 			$editorUid = $currentUser;
 		}
 
-		$attributes = WOPI::ATTR_CAN_READ;
+		$attributes = WOPI::ATTR_CAN_VIEW;
 		if ($updateable) {
 			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
 		}
@@ -1057,7 +1057,7 @@ class DocumentController extends Controller {
 			$row = new Wopi();
 			$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 
-			$attributes = WOPI::ATTR_CAN_READ | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
+			$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
 			$wopiToken = $row->generateToken($file->getId(), $res['path'], 0, $attributes, $serverHost, $res['owner'], $res['editor']);
 
 			$wopi = 'index.php/apps/richdocuments/wopi/files/' . $file->getId() . '_' . $this->settings->getSystemValue('instanceid') . '?access_token=' . $wopiToken;

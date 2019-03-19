@@ -7,28 +7,38 @@ OC.Plugins.register('OC.Share.ShareItemModel', {
 			throw 'missing OC.Share.ShareItemModel';
 		}
 
-		// Make can-download available permission as checkbox
+		// Register additional available share attributes
 		var mimetype = model.getFileInfo().getMimeType();
 		var folderMimeType = 'httpd/unix-directory';
 		if ((odfViewer.isSupportedMimeType(mimetype) || mimetype === folderMimeType) &&
 			OC.appConfig.richdocuments && OC.appConfig.richdocuments.defaultShareAttributes) {
-			// With read-only permission set for the file, download will be disabled. Only viewing will be allowed
-			var incompatiblePermissions = [OC.PERMISSION_UPDATE];
+			/** @type OC.Share.Types.RegisteredShareAttribute **/
+			var secureViewEnabled = {
+				"scope": "core",
+				"name": "secure-view-enabled",
+				"default": JSON.parse(OC.appConfig.richdocuments.defaultShareAttributes.secureViewEnabled),
+				"label": t('richdocuments', 'secure viewing only'),
+				"incompatiblePermissions": [OC.PERMISSION_UPDATE],
+				"incompatibleAttributes": []
+			};
+			model.registerShareAttribute(secureViewEnabled);
 
-			model.registerShareAttribute(
-				"core",
-				"can-download",
-				t('richdocuments', 'allow download'),
-				OC.appConfig.richdocuments.defaultShareAttributes.canDownload,
-				incompatiblePermissions
-			);
-			model.registerShareAttribute(
-				"richdocuments",
-				"can-print",
-				t('richdocuments', 'allow printing of documents'),
-				OC.appConfig.richdocuments.defaultShareAttributes.canPrint,
-				incompatiblePermissions
-			);
+			/** @type OC.Share.Types.RegisteredShareAttribute **/
+			var secureViewCanPrint = {
+				"scope": "richdocuments",
+				"name": "secure-view-can-print",
+				"default": JSON.parse(OC.appConfig.richdocuments.defaultShareAttributes.secureViewCanPrint),
+				"label": t('richdocuments', 'allow printing (will include watermarks)'),
+				"incompatiblePermissions": [OC.PERMISSION_UPDATE],
+				"incompatibleAttributes": [
+					{
+						"scope": "core",
+						"name": "secure-view-enabled",
+						"enabled": false
+					}
+				]
+			};
+			model.registerShareAttribute(secureViewCanPrint);
 		}
 	}
 });
