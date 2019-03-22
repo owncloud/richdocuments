@@ -764,40 +764,39 @@ class DocumentController extends Controller {
 		return $result;
 	}
 
-//	FIXME: Disable support for Ext App accessing Collabora Documents (reason: No idea how to test if this works without unit/feature tests, and this requires refactor)
-//	/**
-//	 * @NoCSRFRequired
-//	 * @PublicPage
-//	 * Generates and returns an access token and urlsrc for a given fileId
-//	 * for requests that provide secret token set in app settings
-//	 */
-//	public function extAppWopiGetData($documentId) {
-//		list($fileId, , $version, ) = Helper::parseDocumentId($documentId);
-//		$secretToken = $this->request->getParam('secret_token');
-//		$apps = \array_filter(\explode(',', $this->appConfig->getAppValue('external_apps')));
-//		foreach ($apps as $app) {
-//			if ($app !== '') {
-//				if ($secretToken === $app) {
-//					$appName = \explode(':', $app);
-//					$this->logger->info('extAppWopiGetData(): External app "{extApp}" authenticated; issuing access token for fileId {fileId}', [
-//						'app' => $this->appName,
-//						'extApp' => $appName[0],
-//						'fileId' => $fileId
-//					]);
-//
-//					$retArray = [];
-//					if ($doc = $this->getDocumentByUserAuth($this->uid, $fileId)) {
-//						$retArray = $this->getWopiTokenForAuthUser($fileId, $version, $this->uid);
-//						$retArray['urlsrc'] = $doc['urlsrc'];
-//					}
-//
-//					return $retArray;
-//				}
-//			}
-//		}
-//
-//		return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
-//	}
+	/**
+	 * @NoCSRFRequired
+	 * @PublicPage
+	 * Generates and returns an access token and urlsrc for a given fileId
+	 * for requests that provide secret token set in app settings
+	 */
+	public function extAppWopiGetData($documentId) {
+		list($fileId, , $version, ) = Helper::parseDocumentId($documentId);
+		$secretToken = $this->request->getParam('secret_token');
+		$apps = \array_filter(\explode(',', $this->appConfig->getAppValue('external_apps')));
+		foreach ($apps as $app) {
+			if ($app !== '') {
+				if ($secretToken === $app) {
+					$appName = \explode(':', $app);
+					$this->logger->info('extAppWopiGetData(): External app "{extApp}" authenticated; issuing access token for fileId {fileId}', [
+						'app' => $this->appName,
+						'extApp' => $appName[0],
+						'fileId' => $fileId
+					]);
+
+					$retArray = [];
+					if ($doc = $this->getDocumentByUserAuth($this->uid, $fileId)) {
+						$retArray = $this->getWopiInfoForAuthUser($fileId, $version, $this->uid);
+						$retArray['urlsrc'] = $doc['urlsrc'];
+					}
+
+					return $retArray;
+				}
+			}
+		}
+
+		return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
+	}
 
 	/**
 	 * @NoAdminRequired
