@@ -121,10 +121,10 @@ var documentsSettings = {
 		);
 	},
 
-	saveSecureViewDefaultOption: function(value) {
+	saveCanDownloadDefaultOption: function(value) {
 		$.post(
 			OC.filePath('richdocuments', 'ajax', 'admin.php'),
-			{ 'secure_view_enabled_default': value }
+			{ 'secure_view_can_download_default': value }
 		);
 	},
 
@@ -341,8 +341,8 @@ var documentsSettings = {
 			}
 		});
 
-		$(document).on('change', '#secure_view_enabled_default_option_cb-richdocuments', function() {
-			documentsSettings.saveSecureViewDefaultOption(this.checked);
+		$(document).on('change', '#secure_view_can_download_default_option_cb-richdocuments', function() {
+			documentsSettings.saveCanDownloadDefaultOption(this.checked);
 		});
 		$(document).on('change', '#secure_view_can_print_default_option_cb-richdocuments', function() {
 			documentsSettings.saveCanPrintDefaultOption(this.checked);

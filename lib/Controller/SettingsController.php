@@ -67,7 +67,7 @@ class SettingsController extends Controller {
 				'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
 				'menu_option' => $this->appConfig->getAppValue('menu_option'),
 				'secure_view_option' => $this->appConfig->getAppValue('secure_view_option'),
-				'secure_view_enabled_default' => $this->appConfig->getAppValue('secure_view_enabled_default'),
+				'secure_view_can_download_default' => $this->appConfig->getAppValue('secure_view_can_download_default'),
 				'secure_view_can_print_default' => $this->appConfig->getAppValue('secure_view_can_print_default'),
 				'watermark_text' => $this->appConfig->getAppValue('watermark_text')
 			],
@@ -75,7 +75,7 @@ class SettingsController extends Controller {
 		);
 	}
 
-	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option, $secure_view_option, $watermark_text, $secure_view_enabled_default, $secure_view_can_print_default) {
+	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option, $secure_view_option, $watermark_text, $secure_view_can_download_default, $secure_view_can_print_default) {
 		$message = $this->l10n->t('Saved');
 
 		if ($wopi_url !== null) {
@@ -123,8 +123,8 @@ class SettingsController extends Controller {
 			$this->appConfig->setAppValue('watermark_text', $watermark_text);
 		}
 
-		if ($secure_view_enabled_default !== null) {
-			$this->appConfig->setAppValue('secure_view_enabled_default', $secure_view_enabled_default);
+		if ($secure_view_can_download_default !== null) {
+			$this->appConfig->setAppValue('secure_view_can_download_default', $secure_view_can_download_default);
 		}
 
 		if ($secure_view_can_print_default !== null) {

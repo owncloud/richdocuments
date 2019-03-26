@@ -17,8 +17,8 @@ class AppConfig {
 	private $appName = 'richdocuments';
 	private $defaults = [
 		'wopi_url' => 'https://localhost:9980',
-		'secure_view_enabled_default' => 'true',
-		'secure_view_can_print_default' => 'true'
+		'secure_view_can_download_default' => 'false',
+		'secure_view_can_print_default' => 'false'
 	];
 
 	private $config;

@@ -13,28 +13,37 @@ OC.Plugins.register('OC.Share.ShareItemModel', {
 		if ((odfViewer.isSupportedMimeType(mimetype) || mimetype === folderMimeType) &&
 			OC.appConfig.richdocuments && OC.appConfig.richdocuments.defaultShareAttributes) {
 			/** @type OC.Share.Types.RegisteredShareAttribute **/
-			var secureViewEnabled = {
-				"scope": "core",
-				"name": "secure-view-enabled",
-				"default": JSON.parse(OC.appConfig.richdocuments.defaultShareAttributes.secureViewEnabled),
-				"label": t('richdocuments', 'secure viewing only'),
+			var secureViewCanDownload = {
+				"scope": "permissions",
+				"key": "download",
+				"default": JSON.parse(OC.appConfig.richdocuments.defaultShareAttributes.secureViewCanDownload),
+				"label": t('richdocuments', 'can view without watermark'),
+				"description": t('richdocuments', 'With this permission being' +
+					' set, share receiver will be allowed to download file ' +
+					' directly. Disabling this option will restrict receiver ' +
+					' to viewing the document(s) in secure mode with watermark included'),
+				"shareType" : [OC.Share.SHARE_TYPE_GROUP, OC.Share.SHARE_TYPE_USER],
 				"incompatiblePermissions": [OC.PERMISSION_UPDATE],
 				"incompatibleAttributes": []
 			};
-			model.registerShareAttribute(secureViewEnabled);
+			model.registerShareAttribute(secureViewCanDownload);
 
 			/** @type OC.Share.Types.RegisteredShareAttribute **/
 			var secureViewCanPrint = {
 				"scope": "richdocuments",
-				"name": "secure-view-can-print",
+				"key": "print",
 				"default": JSON.parse(OC.appConfig.richdocuments.defaultShareAttributes.secureViewCanPrint),
-				"label": t('richdocuments', 'allow printing (will include watermarks)'),
+				"label": t('richdocuments', 'can print/export (will include watermark)'),
+				"description": t('richdocuments', 'With this permission being' +
+					' set, share receiver will be able to print document(s) ' +
+					' with watermark included'),
+				"shareType" : [OC.Share.SHARE_TYPE_GROUP, OC.Share.SHARE_TYPE_USER],
 				"incompatiblePermissions": [OC.PERMISSION_UPDATE],
 				"incompatibleAttributes": [
 					{
-						"scope": "core",
-						"name": "secure-view-enabled",
-						"enabled": false
+						"scope": "permissions",
+						"key": "download",
+						"enabled": true
 					}
 				]
 			};

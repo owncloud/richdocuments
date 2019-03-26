@@ -214,5 +214,7 @@ $(document).ready(function() {
 		}
 	}
 
-	$('#odf_close').live('click', odfViewer.onClose);
+	if ($('#odf_close').length) {
+		$('#odf_close').live('click', odfViewer.onClose);
+	}
 });

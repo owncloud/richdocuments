@@ -68,21 +68,22 @@ script('richdocuments', 'admin');
 
 	<br/>
 	<input type="checkbox" id="enable_secure_view_option_cb-richdocuments" <?php p($_['secure_view_option'] === 'true' ? 'checked' : '') ?> />
-	<label for="enable_secure_view_option_cb-richdocuments"><?php p($l->t('Allow setting secure-view for read-only shares')) ?></label>
+	<label for="enable_secure_view_option_cb-richdocuments"><?php p($l->t('Enable Secure View for read-only shares')) ?></label>
 	<div id="enable-share-attributes-defaults" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
 	p('hidden');
 } ?>" >
-		<p style="max-width: 50em;"><em><?php p($l->t('Set default share attributes for all the users')) ?></em></p>
-		<input type="checkbox" id="secure_view_enabled_default_option_cb-richdocuments" <?php p($_['secure_view_enabled_default'] === 'true' ? 'checked' : '') ?> />
-		<label for="secure_view_enabled_default_option_cb-richdocuments"><?php p($l->t('enable secure view by default')) ?></label>
+		<p style="max-width: 50em;"><em><?php p($l->t('Set default share permissions for all users')) ?></em></p>
+		<input type="checkbox" id="secure_view_can_download_default_option_cb-richdocuments" <?php p($_['secure_view_can_download_default'] === 'true' ? 'checked' : '') ?> />
+		<label for="secure_view_can_download_default_option_cb-richdocuments"><?php p($l->t('can view with watermark (disabling allows only viewing with watermark)')) ?></label>
+		<br/>
 		<input type="checkbox" id="secure_view_can_print_default_option_cb-richdocuments" <?php p($_['secure_view_can_print_default'] === 'true' ? 'checked' : '') ?> />
-		<label for="secure_view_can_print_default_option_cb-richdocuments"><?php p($l->t('enable printing with watermark by default for secure view')) ?></label>
+		<label for="secure_view_can_print_default_option_cb-richdocuments"><?php p($l->t('can print/export (with watermark included)')) ?></label>
 	</div>
 	<br/>
 	<div id="enable-watermark-section" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
 	p('hidden');
 } ?>" >
-		<p style="max-width: 50em;"><em><?php p($l->t('Set watermark to be used in secure-view documents. If you wish to insert user email dynamically, leave {viewer-email} field. Click outside of the field to save field value.')) ?></em></p>
+		<p style="max-width: 50em;"><em><?php p($l->t('Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save.')) ?></em></p>
 		<input type="text" style="width: 400px" id="secure-view-watermark" name="secure-view-watermark-name" value="<?php p($_['watermark_text'] !== null ? $_['watermark_text']: $l->t('Strictly confidential. Only for ').'{viewer-email}') ?>">
 	</div>
 </div>

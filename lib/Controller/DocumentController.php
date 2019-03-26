@@ -637,12 +637,12 @@ class DocumentController extends Controller {
 				$share = $storage->getShare();
 
 				// Check download attribute
-				$secureViewEnabled = $share->getAttributes()->getAttribute('core', 'secure-view-enabled');
-				if ($secureViewEnabled !== null && $secureViewEnabled) {
+				$canDownload = $share->getAttributes()->getAttribute('permissions', 'download');
+				if ($canDownload !== null && !$canDownload) {
 					// cant download, use user id as id for unique session fork (no shared editing)
 					$sessionid = $currentUser;
 
-					// Check print attribute for secure view
+					// Disabling print with watermark only makes sense when cannot dowload
 					$canPrint = $share->getAttributes()->getAttribute('richdocuments', 'secure-view-can-print');
 					if ($canPrint === null || $canPrint === true) {
 						// can print is not set or true
@@ -651,6 +651,8 @@ class DocumentController extends Controller {
 				} else {
 					$attributes = $attributes | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
 				}
+			} else {
+				$attributes = $attributes | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
 			}
 		}
 
@@ -746,9 +748,9 @@ class DocumentController extends Controller {
 			$editorUid = $currentUser;
 		}
 
-		$attributes = WOPI::ATTR_CAN_VIEW;
+		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
 		if ($updateable) {
-			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
+			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE;
 		}
 
 		$row = new Db\Wopi();

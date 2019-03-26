@@ -30,7 +30,7 @@ class HookHandler {
 		$appConfig = new AppConfig(\OC::$server->getConfig());
 		$array['array']['oc_appconfig']['richdocuments'] = [
 			'defaultShareAttributes' => [
-				'secureViewEnabled' => $appConfig->getAppValue('secure_view_enabled_default'),
+				'secureViewCanDownload' => $appConfig->getAppValue('secure_view_can_dowload_default'),
 				'secureViewCanPrint' => $appConfig->getAppValue('secure_view_can_print_default'),
 			],
 		];
