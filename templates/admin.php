@@ -67,17 +67,30 @@ script('richdocuments', 'admin');
 	<label for="enable_menu_option_cb-richdocuments"><?php p($l->t('Use Menu option')) ?></label>
 
 	<br/>
-	<input type="checkbox" id="enable_secure_view_option_cb-richdocuments" <?php p($_['secure_view_option'] === 'true' ? 'checked' : '') ?> />
-	<label for="enable_secure_view_option_cb-richdocuments"><?php p($l->t('Enable Secure View for read-only shares')) ?></label>
+	<br/>
+	<input type="checkbox" id="enable_secure_view_option_cb-richdocuments" <?php if ($_['secure_view_option'] === 'true') {
+	p('checked />');
+} elseif ($_['secure_view_allowed'] !== 'true') {
+	p('disabled />');
+} else {
+	p(' />');
+}?>
+	<label for="enable_secure_view_option_cb-richdocuments"><?php if ($_['secure_view_allowed'] !== 'true') {
+	print_unescaped('<em>');
+	p($l->t('Enable Secure View (requires Enterprise edition)'));
+	print_unescaped('</em>');
+} else {
+	p($l->t('Enable Secure View'));
+}?></label>
 	<div id="enable-share-attributes-defaults" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
 	p('hidden');
 } ?>" >
-		<p style="max-width: 50em;"><em><?php p($l->t('Set default share permissions for all users')) ?></em></p>
-		<input type="checkbox" id="secure_view_can_download_default_option_cb-richdocuments" <?php p($_['secure_view_can_download_default'] === 'true' ? 'checked' : '') ?> />
-		<label for="secure_view_can_download_default_option_cb-richdocuments"><?php p($l->t('can view with watermark (disabling allows only viewing with watermark)')) ?></label>
-		<br/>
+		<p style="max-width: 50em;"><em><?php p($l->t('Set default share permissions for all users (available for shares without edit permission)')) ?></em></p>
 		<input type="checkbox" id="secure_view_can_print_default_option_cb-richdocuments" <?php p($_['secure_view_can_print_default'] === 'true' ? 'checked' : '') ?> />
-		<label for="secure_view_can_print_default_option_cb-richdocuments"><?php p($l->t('can print/export (with watermark included)')) ?></label>
+		<label for="secure_view_can_print_default_option_cb-richdocuments"><?php p($l->t('can print/export')) ?></label>
+		<br/>
+		<input type="checkbox" id="secure_view_has_watermark_default_option_cb-richdocuments" <?php p($_['secure_view_has_watermark_default'] === 'true' ? 'checked' : '') ?> />
+		<label for="secure_view_has_watermark_default_option_cb-richdocuments"><?php p($l->t('protect with watermarks')) ?></label>
 	</div>
 	<br/>
 	<div id="enable-watermark-section" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {

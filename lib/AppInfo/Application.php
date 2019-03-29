@@ -14,7 +14,6 @@ namespace OCA\Richdocuments\AppInfo;
 use OC_Hook;
 use OCA\Richdocuments\Storage;
 use \OCP\AppFramework\App;
-
 use \OCA\Richdocuments\Controller\DocumentController;
 use \OCA\Richdocuments\Controller\SettingsController;
 use \OCA\Richdocuments\AppConfig;
@@ -63,8 +62,10 @@ class Application extends App {
 
 		$container->registerService('AppConfig', function ($c) {
 			/** @var IContainer $c */
+			$appManager = $c->query('ServerContainer')->getAppManager();
 			return new AppConfig(
-				$c->query('CoreConfig')
+				$c->query('CoreConfig'),
+				$appManager
 			);
 		});
 

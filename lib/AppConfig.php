@@ -11,20 +11,24 @@
 
 namespace OCA\Richdocuments;
 
+use OCP\App\IAppManager;
 use \OCP\IConfig;
 
 class AppConfig {
 	private $appName = 'richdocuments';
 	private $defaults = [
 		'wopi_url' => 'https://localhost:9980',
-		'secure_view_can_download_default' => 'false',
-		'secure_view_can_print_default' => 'false'
+		'secure_view_option' => 'false',
+		'secure_view_can_print_default' => 'true',
+		'secure_view_has_watermark_default' => 'true'
 	];
 
 	private $config;
+	private $appManager;
 
-	public function __construct(IConfig $config) {
+	public function __construct(IConfig $config, IAppManager $appManager) {
 		$this->config = $config;
+		$this->appManager = $appManager;
 	}
 
 	/**
@@ -73,5 +77,18 @@ class AppConfig {
 	 */
 	public function setUserValue($userId, $key, $value) {
 		return $this->config->setAppValue($userId, $this->appName, $key, $value);
+	}
+
+	/**
+	 * Check if app can have enterprise features enabled
+	 *
+	 * @return bool
+	 */
+	public function enterpriseFeaturesEnabled() {
+		if (!$this->appManager->isEnabledForUser('enterprise_key') && !\getenv('CI')) {
+			return false;
+		}
+
+		return true;
 	}
 }
