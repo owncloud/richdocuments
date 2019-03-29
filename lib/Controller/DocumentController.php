@@ -638,18 +638,21 @@ class DocumentController extends Controller {
 
 				// Check download attribute
 				$canDownload = $share->getAttributes()->getAttribute('permissions', 'download');
-				if ($canDownload !== null && !$canDownload) {
-					// cant download, use user id as id for unique session fork (no shared editing)
-					$sessionid = $currentUser;
+				if ($canDownload === null || $canDownload === true) {
+					// can print is not set or true
+					$attributes = $attributes | WOPI::ATTR_CAN_DOWNLOAD;
+				}
 
-					// Disabling print with watermark only makes sense when cannot dowload
-					$canPrint = $share->getAttributes()->getAttribute('richdocuments', 'secure-view-can-print');
-					if ($canPrint === null || $canPrint === true) {
-						// can print is not set or true
-						$attributes = $attributes | WOPI::ATTR_CAN_PRINT;
-					}
-				} else {
-					$attributes = $attributes | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
+				$canPrint = $share->getAttributes()->getAttribute('richdocuments', 'print');
+				if ($canPrint === null || $canPrint === true) {
+					// can print is not set or true
+					$attributes = $attributes | WOPI::ATTR_CAN_PRINT;
+				}
+
+				$hasWatermark = $share->getAttributes()->getAttribute('richdocuments', 'watermark');
+				if ($hasWatermark === true) {
+					// can print is not set or true
+					$attributes = $attributes | WOPI::ATTR_HAS_WATERMARK;
 				}
 			} else {
 				$attributes = $attributes | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
@@ -856,6 +859,16 @@ class DocumentController extends Controller {
 		if ($secureMode) {
 			$canDownload = $res['attributes'] & WOPI::ATTR_CAN_DOWNLOAD;
 			if (!$canDownload) {
+				$result = \array_merge($result, [
+					'DisableExport' => true,
+					'HideExportOption' => true,
+					'HideSaveOption' => true, // dont show the §save to OC§ option as user cannot download file
+					'DisableCopy' => true, // disallow copying in document
+				]);
+			}
+
+			$hasWatermark = $res['attributes'] & WOPI::ATTR_HAS_WATERMARK;
+			if ($hasWatermark) {
 				$watermark = \str_replace(
 					'{viewer-email}',
 					$editor->getEMailAddress() === null ? $editor->getDisplayName() : $editor->getEMailAddress(),
@@ -863,10 +876,6 @@ class DocumentController extends Controller {
 				);
 				$result = \array_merge($result, [
 					'WatermarkText' => $watermark,
-					'DisableExport' => true, // FIXME: new permission?
-					'HideExportOption' => true, // FIXME: new permission?
-					'HideSaveOption' => true, // dont show the §save to OC§ option as user cannot download file
-					'DisableCopy' => true, // disallow copying in document
 				]);
 			}
 
