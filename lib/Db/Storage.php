@@ -12,8 +12,6 @@
 
 namespace OCA\Richdocuments\Db;
 
-use OCP\Files\Cache\ICacheEntry;
-
 /**
  * @method string loadRecentDocumentsForMimes()
  */
