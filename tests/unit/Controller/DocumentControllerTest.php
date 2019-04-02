@@ -78,5 +78,6 @@ class DocumentControllerTest extends \Test\TestCase {
 			$this->logger,
 			$this->storage
 		);
+		$this->assertInstanceOf(DocumentController::class, $documentController);
 	}
 }
