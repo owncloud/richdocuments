@@ -19,12 +19,12 @@ $application->registerRoutes($this, [
 		['name' => 'document#create', 'url' => 'ajax/documents/create', 'verb' => 'POST'],
 		['name' => 'document#listAll', 'url' => 'ajax/documents/list', 'verb' => 'GET'],
 		["name" => 'document#publicIndex', "url" => "public", "verb" => "GET"],
+		['name' => 'document#extAppWopiGetData', 'url' => 'wopi/extapp/data/{documentId}', 'verb' => 'POST'],
 		//documents - for WOPI access
-		['name' => 'document#extAppWopiGetData', 'url' => 'wopi/extapp/data/{fileId}', 'verb' => 'POST'],
-		['name' => 'document#wopiCheckFileInfo', 'url' => 'wopi/files/{fileId}', 'verb' => 'GET'],
-		['name' => 'document#wopiGetFile', 'url' => 'wopi/files/{fileId}/contents', 'verb' => 'GET'],
-		['name' => 'document#wopiPutFile', 'url' => 'wopi/files/{fileId}/contents', 'verb' => 'POST'],
-		['name' => 'document#wopiPutRelativeFile', 'url' => 'wopi/files/{fileId}', 'verb' => 'POST'],
+		['name' => 'document#wopiCheckFileInfo', 'url' => 'wopi/files/{documentId}', 'verb' => 'GET'],
+		['name' => 'document#wopiGetFile', 'url' => 'wopi/files/{documentId}/contents', 'verb' => 'GET'],
+		['name' => 'document#wopiPutFile', 'url' => 'wopi/files/{documentId}/contents', 'verb' => 'POST'],
+		['name' => 'document#wopiPutRelativeFile', 'url' => 'wopi/files/{documentId}', 'verb' => 'POST'],
 		//settings
 		['name' => 'settings#setSettings', 'url' => 'ajax/admin.php', 'verb' => 'POST'],
 		['name' => 'settings#getSettings', 'url' => 'ajax/settings.php', 'verb' => 'GET'],

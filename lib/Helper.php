@@ -19,21 +19,29 @@ class Helper {
 	const APP_ID = 'richdocuments';
 
 	/**
-	 * @param string $fileId
+	 * Parse document id to retrieve fileid, instanceid, version and sessionid
+	 * for the document editing session
+	 *
+	 * @param string $documentId
 	 * @return array
 	 * @throws \Exception
 	 */
-	public static function parseFileId($fileId) {
-		$arr = \explode('_', $fileId);
+	public static function parseDocumentId($documentId) {
+		$arr = \explode('_', $documentId);
 		if (\count($arr) === 1) {
 			$fileId = $arr[0];
 			$instanceId = '';
 			$version = '0';
+			$sessionId = null;
 		} elseif (\count($arr) === 2) {
 			list($fileId, $instanceId) = $arr;
 			$version = '0';
+			$sessionId = null;
 		} elseif (\count($arr) === 3) {
 			list($fileId, $instanceId, $version) = $arr;
+			$sessionId = null;
+		} elseif (\count($arr) === 4) {
+			list($fileId, $instanceId, $version, $sessionId) = $arr;
 		} else {
 			throw new \Exception('$fileId has not the expected format');
 		}
@@ -42,6 +50,7 @@ class Helper {
 			$fileId,
 			$instanceId,
 			$version,
+			$sessionId
 		];
 	}
 

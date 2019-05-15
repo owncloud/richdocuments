@@ -38,7 +38,7 @@ class SettingsController extends Controller {
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
 			'wopi_url' => $this->appConfig->getAppValue('wopi_url'),
 			'test_wopi_url' => $this->appConfig->getAppValue('test_wopi_url'),
-			'test_server_groups' => $this->appConfig->getAppValue('test_server_groups')
+			'test_server_groups' => $this->appConfig->getAppValue('test_server_groups'),
 		];
 	}
 
@@ -65,13 +65,18 @@ class SettingsController extends Controller {
 				'test_server_groups' => $this->appConfig->getAppValue('test_server_groups'),
 				'external_apps' => $this->appConfig->getAppValue('external_apps'),
 				'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
-				'menu_option' => $this->appConfig->getAppValue('menu_option')
+				'menu_option' => $this->appConfig->getAppValue('menu_option'),
+				'secure_view_allowed' => $this->appConfig->enterpriseFeaturesEnabled() ? 'true' : 'false',
+				'secure_view_option' => $this->appConfig->getAppValue('secure_view_option'),
+				'secure_view_has_watermark_default' => $this->appConfig->getAppValue('secure_view_has_watermark_default'),
+				'secure_view_can_print_default' => $this->appConfig->getAppValue('secure_view_can_print_default'),
+				'watermark_text' => $this->appConfig->getAppValue('watermark_text')
 			],
 			'blank'
 		);
 	}
 
-	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option) {
+	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option, $secure_view_option, $secure_view_can_print_default, $secure_view_has_watermark_default, $watermark_text) {
 		$message = $this->l10n->t('Saved');
 
 		if ($wopi_url !== null) {
@@ -109,6 +114,22 @@ class SettingsController extends Controller {
 
 		if ($menu_option !== null) {
 			$this->appConfig->setAppValue('menu_option', $menu_option);
+		}
+
+		if ($secure_view_option !== null) {
+			$this->appConfig->setAppValue('secure_view_option', $secure_view_option);
+		}
+
+		if ($secure_view_can_print_default !== null) {
+			$this->appConfig->setAppValue('secure_view_can_print_default', $secure_view_can_print_default);
+		}
+
+		if ($secure_view_has_watermark_default !== null) {
+			$this->appConfig->setAppValue('secure_view_has_watermark_default', $secure_view_has_watermark_default);
+		}
+
+		if ($watermark_text !== null) {
+			$this->appConfig->setAppValue('watermark_text', $watermark_text);
 		}
 
 		$richMemCache = \OC::$server->getMemCacheFactory()->create('richdocuments');

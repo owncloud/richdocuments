@@ -13,20 +13,25 @@
 namespace OCA\Richdocuments\Db;
 
 /**
- * @method string generateTokenForPublicShare()
- * @method string generateTokenForUserFile()
- * @method string getPathForToken()
+ * @method string generateToken()
+ * @method string getWopiForToken()
  */
 
 class Wopi extends \OCA\Richdocuments\Db {
 	// Tokens expire after this many seconds (not defined by WOPI specs).
 	const TOKEN_LIFETIME_SECONDS = 1800;
 
+	const ATTR_CAN_VIEW = 0;
+	const ATTR_CAN_DOWNLOAD = 1;
+	const ATTR_CAN_PRINT = 2;
+	const ATTR_HAS_WATERMARK = 4;
+	const ATTR_CAN_UPDATE = 8;
+
 	const appName = 'richdocuments';
 
 	protected $tableName  = '`*PREFIX*richdocuments_wopi`';
 
-	protected $insertStatement  = 'INSERT INTO `*PREFIX*richdocuments_wopi` (`owner_uid`, `editor_uid`, `fileid`, `version`, `path`, `canwrite`, `server_host`, `token`, `expiry`)
+	protected $insertStatement  = 'INSERT INTO `*PREFIX*richdocuments_wopi` (`owner_uid`, `editor_uid`, `fileid`, `version`, `path`, `attributes`, `server_host`, `token`, `expiry`)
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
 	protected $loadStatement = 'SELECT * FROM `*PREFIX*richdocuments_wopi` WHERE `token`= ?';
@@ -37,13 +42,14 @@ class Wopi extends \OCA\Richdocuments\Db {
 	 * @param $fileId
 	 * @param $path
 	 * @param $version
+	 * @param $attributes
 	 * @param $serverHost
 	 * @param $owner
 	 * @param $editor
 	 * @return string
 	 * @throws \Exception
 	 */
-	public function generateTokenForPublicShare($fileId, $path, $version, $updatable, $serverHost, $owner, $editor) {
+	public function generateToken($fileId, $path, $version, $attributes, $serverHost, $owner, $editor) {
 		$token = \OC::$server->getSecureRandom()->getMediumStrengthGenerator()->generate(32,
 			\OCP\Security\ISecureRandom::CHAR_LOWER . \OCP\Security\ISecureRandom::CHAR_UPPER .
 			\OCP\Security\ISecureRandom::CHAR_DIGITS);
@@ -63,69 +69,7 @@ class Wopi extends \OCA\Richdocuments\Db {
 			$fileId,
 			$version,
 			$path,
-			(int)$updatable,
-			$serverHost,
-			$token,
-			\time() + self::TOKEN_LIFETIME_SECONDS
-		]);
-
-		if (!$wopi->insert()) {
-			throw new \Exception('Failed to add wopi token into database');
-		}
-
-		return $token;
-	}
-
-	/*
-	 * Given a fileId and version, generates a token
-	 * and stores in the database.
-	 * version is 0 if current version of fileId is requested, otherwise
-	 * its the version number as stored by files_version app
-	 * Returns the token.
-	 */
-	public function generateTokenForUserFile($fileId, $version, $updatable, $serverHost, $editor) {
-
-		// Get the FS view of the current user.
-		$view = \OC\Files\Filesystem::getView();
-
-		// Get the virtual path (if the file is shared).
-		$path = $view->getPath($fileId);
-
-		if (!$view->is_file($path)) {
-			throw new \Exception('Invalid fileId.');
-		}
-
-		// Figure out the real owner, if not us.
-		$owner = $view->getOwner($path);
-
-		// Create a view into the owner's FS.
-		$view = new \OC\Files\View('/' . $owner . '/files');
-		// Find the real path.
-		$path = $view->getPath($fileId);
-		if (!$view->is_file($path)) {
-			throw new \Exception('Invalid fileId.');
-		}
-
-		$token = \OC::$server->getSecureRandom()->getMediumStrengthGenerator()->generate(32,
-					\OCP\Security\ISecureRandom::CHAR_LOWER . \OCP\Security\ISecureRandom::CHAR_UPPER .
-					\OCP\Security\ISecureRandom::CHAR_DIGITS);
-
-		\OC::$server->getLogger()->debug('generateFileToken(): Issuing token, editor: {editor}, file: {fileId}, version: {version}, owner: {owner}, path: {path}, token: {token}', [
-			'app' => self::appName,
-			'owner' => $owner,
-			'editor' => $editor,
-			'fileId' => $fileId,
-			'version' => $version,
-			'path' => $path,
-			'token' => $token ]);
-
-		$wopi = new \OCA\Richdocuments\Db\Wopi([
-			$owner,
-			$editor,
-			$fileId,
-			$version,
-			$path,
-			(int)$updatable,
+			$attributes,
 			$serverHost,
 			$token,
 			\time() + self::TOKEN_LIFETIME_SECONDS
@@ -143,7 +87,7 @@ class Wopi extends \OCA\Richdocuments\Db {
 	 * constructs and validates the path.
 	 * Returns the path, if valid, else false.
 	 */
-	public function getPathForToken($token) {
+	public function getWopiForToken($token) {
 		$wopi = new Wopi();
 		$row = $wopi->loadBy('token', $token)->getData();
 		\OC::$server->getLogger()->debug('Loaded WOPI Token record: {row}.', [
@@ -167,7 +111,7 @@ class Wopi extends \OCA\Richdocuments\Db {
 			'owner' => $row['owner_uid'],
 			'editor' => $row['editor_uid'],
 			'path' => $row['path'],
-			'canwrite' => $row['canwrite'],
+			'attributes' => $row['attributes'],
 			'server_host' => $row['server_host']
 		];
 	}

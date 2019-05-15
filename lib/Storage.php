@@ -31,6 +31,7 @@ use OCP\Share\IShare;
 
 class Storage {
 	public static $MIMETYPE_LIBREOFFICE_WORDPROCESSOR = [
+		'application/pdf',
 		'application/vnd.oasis.opendocument.text',
 		'application/vnd.oasis.opendocument.presentation',
 		'application/vnd.oasis.opendocument.spreadsheet',
@@ -98,6 +99,7 @@ class Storage {
 	 * @return array|null
 	 */
 	public function getDocumentByUserId($userId, $fileId) {
+		$ret = [];
 		$root = \OC::$server->getRootFolder()->getUserFolder($userId);
 
 		// If type of fileId is a string, then it
@@ -108,14 +110,16 @@ class Storage {
 		}
 
 		try {
-			$ret = [];
+			// Set basic parameters
 			$ret['owner'] = $document->getOwner()->getUID();
-			$ret['updateable'] = $document->isUpdateable();
 			$ret['permissions'] = $document->getPermissions();
+			$ret['updateable'] = $document->isUpdateable();
 			$ret['mimetype'] = $document->getMimeType();
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $fileId;
+			$ret['instanceid'] = \OC::$server->getConfig()->getSystemValue('instanceid');
+			$ret['version'] = '0'; // latest
 
 			return $ret;
 		} catch (InvalidPathException $e) {
@@ -138,7 +142,7 @@ class Storage {
 	}
 
 	/**
-	 * Retrieve document info for the public share link token. If file in the public link is used,
+	 * Retrieve document info for the public share link token. If file in the public link folder is used,
 	 * fileId has to be provided.
 	 *
 	 * If share or file does not exist, null is returned
@@ -175,10 +179,14 @@ class Storage {
 			$ret = [];
 			$ret['owner'] = $document->getOwner()->getUID();
 			$ret['permissions'] = $share->getPermissions();
+			$ret['updateable'] = $document->isUpdateable();
 			$ret['mimetype'] = $document->getMimeType();
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $document->getId();
+			$ret['instanceid'] = \OC::$server->getConfig()->getSystemValue('instanceid');
+			$ret['version'] = '0'; // latest
+			$ret['sessionid'] = '0'; // default shared session
 
 			return $ret;
 		} catch (ShareNotFound $e) {

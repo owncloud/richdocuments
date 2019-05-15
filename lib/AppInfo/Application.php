@@ -11,9 +11,9 @@
 
 namespace OCA\Richdocuments\AppInfo;
 
+use OC_Hook;
 use OCA\Richdocuments\Storage;
 use \OCP\AppFramework\App;
-
 use \OCA\Richdocuments\Controller\DocumentController;
 use \OCA\Richdocuments\Controller\SettingsController;
 use \OCA\Richdocuments\AppConfig;
@@ -62,8 +62,10 @@ class Application extends App {
 
 		$container->registerService('AppConfig', function ($c) {
 			/** @var IContainer $c */
+			$appManager = $c->query('ServerContainer')->getAppManager();
 			return new AppConfig(
-				$c->query('CoreConfig')
+				$c->query('CoreConfig'),
+				$appManager
 			);
 		});
 
@@ -122,6 +124,17 @@ class Application extends App {
 				}
 			);
 
+			$secureViewOption = $container->getServer()->getConfig()->getAppValue('richdocuments', 'secure_view_option');
+
+			if ($secureViewOption === 'true') {
+				$container->getServer()->getEventDispatcher()->addListener(
+					'OCA\Files::loadAdditionalScripts',
+					function () {
+						\OCP\Util::addScript('richdocuments', 'viewer/attributes');
+					}
+				);
+			}
+
 			if (\class_exists('\OC\Files\Type\TemplateManager')) {
 				$manager = \OC_Helper::getFileTemplateManager();
 
@@ -134,6 +147,8 @@ class Application extends App {
 		if ($this->publicLinksAllowedToUseCollabora()) {
 			\OCP\Util::connectHook(Share::class, "share_link_access", \OCA\Richdocuments\HookHandler::class, "addViewerScripts");
 		}
+
+		\OCP\Util::connectHook('\OCP\Config', 'js', \OCA\Richdocuments\HookHandler::class, 'addConfigScripts');
 	}
 
 	private function publicLinksAllowedToUseCollabora() {

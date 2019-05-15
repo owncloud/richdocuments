@@ -104,6 +104,36 @@ var documentsSettings = {
 		);
 	},
 
+	saveWatermarkText: function(value) {
+		$.post(
+			OC.filePath('richdocuments', 'ajax', 'admin.php'),
+			{ 'watermark_text': value }
+		);
+
+		OC.Notification.showTemporary(t('richdocuments', 'Saved watermark'), {timeout: 2});
+	},
+
+	saveSecureViewOption: function(value) {
+		$.post(
+			OC.filePath('richdocuments', 'ajax', 'admin.php'),
+			{ 'secure_view_option': value }
+		);
+	},
+
+	saveCanPrintDefaultOption: function(value) {
+		$.post(
+			OC.filePath('richdocuments', 'ajax', 'admin.php'),
+			{ 'secure_view_can_print_default': value }
+		);
+	},
+
+	saveHasWatermarkDefaultOption: function(value) {
+		$.post(
+			OC.filePath('richdocuments', 'ajax', 'admin.php'),
+			{ 'secure_view_has_watermark_default': value }
+		);
+	},
+
 	afterSaveExternalApps: function(response) {
 		OC.msg.finishedAction('#enable-external-apps-section-msg', response);
 	},
@@ -296,6 +326,30 @@ var documentsSettings = {
 		$(document).on('change', '#enable_menu_option_cb-richdocuments', function() {
 			var page = $(this).parent();
 			documentsSettings.saveMenuOption(this.checked);
+		});
+
+		$(document).on('change', '#enable_secure_view_option_cb-richdocuments', function() {
+			var page = $(this).parent();
+			page.find('#enable-watermark-section').toggleClass('hidden', !this.checked);
+			page.find('#enable-share-attributes-defaults').toggleClass('hidden', !this.checked);
+
+			documentsSettings.saveSecureViewOption(this.checked);
+			if (this.checked) {
+				var val = $('#secure-view-watermark').val();
+				documentsSettings.saveWatermarkText(val);
+			}
+		});
+
+		$(document).on('change', '#secure_view_has_watermark_default_option_cb-richdocuments', function() {
+			documentsSettings.saveHasWatermarkDefaultOption(this.checked);
+		});
+
+		$(document).on('change', '#secure_view_can_print_default_option_cb-richdocuments', function() {
+			documentsSettings.saveCanPrintDefaultOption(this.checked);
+		});
+
+		$(document).on('change', '#secure-view-watermark', function() {
+			documentsSettings.saveWatermarkText(this.value);
 		});
 	}
 };

@@ -65,4 +65,38 @@ script('richdocuments', 'admin');
 
 	<input type="checkbox" id="enable_menu_option_cb-richdocuments" <?php p($_['menu_option'] !== 'false' ? 'checked' : '') ?> />
 	<label for="enable_menu_option_cb-richdocuments"><?php p($l->t('Use Menu option')) ?></label>
+
+	<br/>
+	<br/>
+	<input type="checkbox" id="enable_secure_view_option_cb-richdocuments" <?php if ($_['secure_view_option'] === 'true') {
+	p('checked />');
+} elseif ($_['secure_view_allowed'] !== 'true') {
+	p('disabled />');
+} else {
+	p(' />');
+}?>
+	<label for="enable_secure_view_option_cb-richdocuments"><?php if ($_['secure_view_allowed'] !== 'true') {
+	print_unescaped('<em>');
+	p($l->t('Enable Secure View (requires Enterprise edition)'));
+	print_unescaped('</em>');
+} else {
+	p($l->t('Enable Secure View'));
+}?></label>
+	<div id="enable-share-attributes-defaults" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
+	p('hidden');
+} ?>" >
+		<p style="max-width: 50em;"><em><?php p($l->t('Set default share permissions for all users (available for shares without edit permission)')) ?></em></p>
+		<input type="checkbox" id="secure_view_can_print_default_option_cb-richdocuments" <?php p($_['secure_view_can_print_default'] === 'true' ? 'checked' : '') ?> />
+		<label for="secure_view_can_print_default_option_cb-richdocuments"><?php p($l->t('can print/export')) ?></label>
+		<br/>
+		<input type="checkbox" id="secure_view_has_watermark_default_option_cb-richdocuments" <?php p($_['secure_view_has_watermark_default'] === 'true' ? 'checked' : '') ?> />
+		<label for="secure_view_has_watermark_default_option_cb-richdocuments"><?php p($l->t('protect with watermarks')) ?></label>
+	</div>
+	<br/>
+	<div id="enable-watermark-section" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
+	p('hidden');
+} ?>" >
+		<p style="max-width: 50em;"><em><?php p($l->t('Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save.')) ?></em></p>
+		<input type="text" style="width: 400px" id="secure-view-watermark" name="secure-view-watermark-name" value="<?php p($_['watermark_text'] !== null ? $_['watermark_text']: $l->t('Strictly confidential. Only for ').'{viewer-email}') ?>">
+	</div>
 </div>

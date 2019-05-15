@@ -2,6 +2,7 @@
 var odfViewer = {
 	isDocuments : false,
 	supportedMimes: [
+		'application/pdf',
 		'application/vnd.oasis.opendocument.text',
 		'application/vnd.oasis.opendocument.spreadsheet',
 		'application/vnd.oasis.opendocument.graphics',
@@ -40,6 +41,10 @@ var odfViewer = {
 		'application/vnd.ms-powerpoint.slideshow.macroEnabled.12'
 	],
 
+	isSupportedMimeType: function(mimetype) {
+		return (odfViewer.supportedMimes.indexOf(mimetype) !== -1);
+	},
+
 	register : function(){
 		var i,
 		    mime;
@@ -56,10 +61,11 @@ var odfViewer = {
 			);
 			OCA.Files.fileActions.setDefault(mime, 'Edit');
 		}
+
 	},
 
 	dispatch : function(filename){
-		if (odfViewer.supportedMimes.indexOf(OCA.Files.fileActions.getCurrentMimeType()) !== -1
+		if (this.isSupportedMimeType(OCA.Files.fileActions.getCurrentMimeType())
 			&& OCA.Files.fileActions.getCurrentPermissions() & OC.PERMISSION_UPDATE
 		){
 			odfViewer.onEdit(filename);
@@ -208,5 +214,7 @@ $(document).ready(function() {
 		}
 	}
 
-	$('#odf_close').live('click', odfViewer.onClose);
+	if ($('#odf_close').length) {
+		$('#odf_close').live('click', odfViewer.onClose);
+	}
 });
