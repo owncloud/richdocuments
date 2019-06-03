@@ -72,12 +72,10 @@ script('richdocuments', 'admin');
 	<br/>
 	<br/>
 	<input type="checkbox" id="enable_secure_view_option_cb-richdocuments" <?php if ($_['secure_view_option'] === 'true') {
-	p('checked />');
+	p('checked');
 } elseif ($_['secure_view_allowed'] !== 'true') {
-	p('disabled />');
-} else {
-	p(' />');
-}?>
+	p('disabled');
+}?> />
 	<label for="enable_secure_view_option_cb-richdocuments"><?php if ($_['secure_view_allowed'] !== 'true') {
 	print_unescaped('<em>');
 	p($l->t('Enable Secure View (requires Enterprise edition)'));
@@ -93,7 +91,7 @@ script('richdocuments', 'admin');
 		<label for="secure_view_can_print_default_option_cb-richdocuments"><?php p($l->t('can print/export')) ?></label>
 		<br/>
 		<input type="checkbox" id="secure_view_has_watermark_default_option_cb-richdocuments" <?php p($_['secure_view_has_watermark_default'] === 'true' ? 'checked' : '') ?> />
-		<label for="secure_view_has_watermark_default_option_cb-richdocuments"><?php p($l->t('protect with watermarks')) ?></label>
+		<label for="secure_view_has_watermark_default_option_cb-richdocuments"><?php p($l->t('Secure View (with watermarks)')) ?></label>
 	</div>
 	<br/>
 	<div id="enable-watermark-section" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {

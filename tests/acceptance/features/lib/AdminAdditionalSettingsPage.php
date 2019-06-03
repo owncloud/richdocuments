@@ -94,7 +94,7 @@ class AdminAdditionalSettingsPage extends OwncloudPage {
 	 */
 	public function toggleSecureViewOption(Session $session, $option) {
 		if (!$this->isSecureViewEnabled()) {
-			throw new Exception('Cannot enable/disable $option as secure view is not enabled.');
+			throw new \Exception('Cannot enable/disable $option as secure view is not enabled.');
 		}
 		$checkbox = $this->getSecureViewOptionsCheckbox($option);
 		$checkbox->click();
@@ -109,6 +109,11 @@ class AdminAdditionalSettingsPage extends OwncloudPage {
 	 */
 	public function isSecureViewEnabled() {
 		$checkbox = $this->getSecureViewCheckbox();
+
+		if ($checkbox->hasAttribute('disabled')) {
+			throw new \Exception('Secure view is not allowed for this installation, checkbox is disabled (most probably license missing)');
+		}
+
 		return $checkbox->isChecked();
 	}
 

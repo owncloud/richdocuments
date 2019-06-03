@@ -607,7 +607,8 @@ class DocumentController extends Controller {
 
 				$hasWatermark = $share->getAttributes()->getAttribute('richdocuments', 'watermark');
 				if ($hasWatermark === true) {
-					// can print is not set or true
+					// watermarking enabled, add session-id to force private session with watermark
+					$sessionid = $share->getId();
 					$attributes = $attributes | WOPI::ATTR_HAS_WATERMARK;
 				}
 			} else {
