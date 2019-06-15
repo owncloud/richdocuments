@@ -91,4 +91,21 @@ class AppConfig {
 
 		return true;
 	}
+
+	/**
+	 * Check if encryption is enabled
+	 *
+	 * @return bool
+	 */
+	public function encryptionEnabled() {
+		if (!$this->appManager->isEnabledForUser('encryption') && !\getenv('CI')) {
+			return false;
+		}
+
+		if (!\OC::$server->getEncryptionManager()->isEnabled()) {
+			return false;
+		}
+
+		return true;
+	}
 }

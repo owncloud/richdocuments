@@ -849,7 +849,7 @@ class DocumentController extends Controller {
 			'UserId' => $res['editor'],
 			'UserFriendlyName' => $editor->getDisplayName(),
 			'UserCanWrite' => $canWrite,
-			'UserCanNotWriteRelative' => \OC::$server->getEncryptionManager()->isEnabled() ? true : false,
+			'UserCanNotWriteRelative' => $this->appConfig->encryptionEnabled(),
 			'PostMessageOrigin' => $res['server_host'],
 			'LastModifiedTime' => Helper::toISO8601($info->getMTime())
 		];
@@ -935,8 +935,12 @@ class DocumentController extends Controller {
 
 		$this->logoutUser();
 
-		// This is required to be able to read encrypted documents
-		\OC_User::setIncognitoMode(true);
+		if ($this->appConfig->encryptionEnabled()) {
+			// with encryption, change needs to be applied as unknown user
+			// this also means that changes wont be auditable
+			\OC_User::setIncognitoMode(true);
+		}
+
 		// This is required for reading encrypted files
 		\OC_Util::tearDownFS();
 		\OC_Util::setupFS($ownerid);
@@ -1049,8 +1053,12 @@ class DocumentController extends Controller {
 			'editor' => $res['editor'],
 			'owner' => $res['owner']]);
 
-		// To be able to make it work when server-side encryption is enabled
-		\OC_User::setIncognitoMode(true);
+		if ($this->appConfig->encryptionEnabled()) {
+			// with encryption, change needs to be applied as unknown user
+			// this also means that changes wont be auditable
+			\OC_User::setIncognitoMode(true);
+		}
+
 		// Setup the FS which is needed to emit hooks (versioning).
 		\OC_Util::tearDownFS();
 		if ($isPutRelative) {
