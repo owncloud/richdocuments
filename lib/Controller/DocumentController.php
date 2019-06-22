@@ -1018,6 +1018,11 @@ class DocumentController extends Controller {
 	}
 
 	private function putRelative($fileId, $token) {
+		if ($this->appConfig->encryptionEnabled()) {
+			$this->logger->debug('wopiPutFile(): Encryption unsupported with PutRelative.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
 
