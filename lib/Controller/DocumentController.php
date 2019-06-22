@@ -917,6 +917,10 @@ class DocumentController extends Controller {
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
+		$this->logger->info('wopiGetFile(): Path {path}.', [
+			'app' => $this->appName,
+			'path' => $file->getPath()]);
+
 		return new DownloadResponse($this->request, $file);
 	}
 
@@ -943,58 +947,38 @@ class DocumentController extends Controller {
 		if ($isPutRelative) {
 			return $this->putRelative($fileId, $token);
 		} else {
-			return $this->put($fileId, $token);
+			$row = new Db\Wopi();
+			$row->loadBy('token', $token);
+
+			$res = $row->getWopiForToken($token);
+			if ($res == false) {
+				$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
+				return new JSONResponse([], Http::STATUS_FORBIDDEN);
+			}
+
+			$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
+			if (!$canWrite) {
+				$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
+				return new JSONResponse([], Http::STATUS_FORBIDDEN);
+			}
+
+			// Retrieve wopi timestamp header
+			$wopiHeaderTime = $this->request->getHeader('X-LOOL-WOPI-Timestamp');
+			$this->logger->debug('wopiPutFile(): WOPI header timestamp: {wopiHeaderTime}', [
+				'app' => $this->appName,
+				'wopiHeaderTime' => $wopiHeaderTime
+			]);
+
+			return $this->put($fileId, $res['owner'], $res['editor'], $wopiHeaderTime);
 		}
 	}
 
-	private function put($fileId, $token) {
-		$row = new Db\Wopi();
-		$row->loadBy('token', $token);
-
-		$res = $row->getWopiForToken($token);
-		if ($res == false) {
-			$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
-			return new JSONResponse([], Http::STATUS_FORBIDDEN);
-		}
-
-		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
-		if (!$canWrite) {
-			$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
-			return new JSONResponse([], Http::STATUS_FORBIDDEN);
-		}
-
+	private function put($fileId, $owner, $editor, $wopiHeaderTime) {
 		// This call is made from loolwsd, so we need to initialize the
 		// session before we can make the user who opened the document
 		// login. This is necessary to make activity app register the
 		// change made to this file under this user's (editorid) name.
-		$this->loginUser($res['editor']);
-
-		// Set up the filesystem view for the owner (where the file actually is).
-		$userFolder = \OC::$server->getRootFolder()->getUserFolder($res['owner']);
-		$file = $userFolder->getById($fileId)[0];
-
-		$wopiHeaderTime = $this->request->getHeader('X-LOOL-WOPI-Timestamp');
-		$this->logger->debug('wopiPutFile(): WOPI header timestamp: {wopiHeaderTime}', [
-			'app' => $this->appName,
-			'wopiHeaderTime' => $wopiHeaderTime]);
-		if (!$wopiHeaderTime) {
-			$this->logger->debug('wopiPutFile(): X-LOOL-WOPI-Timestamp absent. Saving file.', ['app' => $this->appName]);
-		} elseif ($wopiHeaderTime != Helper::toISO8601($file->getMTime())) {
-			$this->logger->debug('wopiPutFile(): Document timestamp mismatch ! WOPI client says mtime {headerTime} but storage says {storageTime}', [
-				'app' => $this->appName,
-				'headerTime' => $wopiHeaderTime,
-				'storageTime' => Helper::toISO8601($file->getMtime())]);
-			// Tell WOPI client about this conflict.
-			return new JSONResponse(['LOOLStatusCode' => self::LOOL_STATUS_DOC_CHANGED], Http::STATUS_CONFLICT);
-		}
-
-		// Read the contents of the file from the POST body and store.
-		$content = \fopen('php://input', 'r');
-		$this->logger->debug('wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.', [
-			'app' => $this->appName,
-			'fileId' => $fileId,
-			'editor' => $res['editor'],
-			'owner' => $res['owner']]);
+		$this->loginUser($editor);
 
 		if ($this->appConfig->encryptionEnabled()) {
 			// with encryption, change needs to be applied as unknown user
@@ -1005,12 +989,41 @@ class DocumentController extends Controller {
 		// Setup the FS which is needed to emit hooks (versioning).
 		\OC_Util::tearDownFS();
 
-		\OC_Util::setupFS($res['owner']);
+		\OC_Util::setupFS($owner);
 
+		$file = $this->getFile($fileId, $owner);
+		if (!$file) {
+			$this->logger->warning('wopiCheckFileInfo(): File not found', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_NOT_FOUND);
+		}
+
+		// Handle wopiHeaderTime
+		if (!$wopiHeaderTime) {
+			$this->logger->debug('wopiPutFile(): X-LOOL-WOPI-Timestamp absent. Saving file.', ['app' => $this->appName]);
+		} elseif ($wopiHeaderTime != Helper::toISO8601($file->getMTime())) {
+			$this->logger->debug('wopiPutFile(): Document timestamp mismatch ! WOPI client says mtime {headerTime} but storage says {storageTime}', [
+				'app' => $this->appName,
+				'headerTime' => $wopiHeaderTime,
+				'storageTime' => Helper::toISO8601($file->getMtime())
+			]);
+			// Tell WOPI client about this conflict.
+			return new JSONResponse(['LOOLStatusCode' => self::LOOL_STATUS_DOC_CHANGED], Http::STATUS_CONFLICT);
+		}
+
+		// Read the contents of the file from the POST body and store.
+		$content = \fopen('php://input', 'r');
+		$this->logger->debug('wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'editor' => $editor,
+			'owner' => $owner]
+		);
 		$file->putContent($content);
+
 		$mtime = $file->getMtime();
 
 		$this->logoutUser();
+
 		return [
 			'status' => 'success',
 			'LastModifiedTime' => Helper::toISO8601($mtime)
