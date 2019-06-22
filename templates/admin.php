@@ -8,8 +8,8 @@ script('richdocuments', 'admin');
                 href="https://github.com/owncloud/richdocuments/wiki"></a>
 
     <br/>
-	<p style="max-width: 50em; color: red;"><?php if ($_['encryption_enabled'] === 'true') {
-	p($l->t("Encryption with master or user key is enabled, the changes made to the files by users will only be auditable within this app"));
+	<p style="max-width: 50em; color: red;"><?php if ($_['user_encryption_enabled'] === 'true') {
+	p($l->t("Encryption with user key is enabled (only supported is master key encryption). App requires priviledged access to the files, and user encryption enabled will result in limited functionality of the app."));
 } ?></p>
 	<label for="wopi_url"><?php p($l->t('Collabora Online server')) ?></label>
 	<input type="text" name="wopi_url" id="wopi_url" value="<?php p($_['wopi_url'])?>" style="width:300px;">

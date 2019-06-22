@@ -13,6 +13,7 @@ namespace OCA\Richdocuments;
 
 use OCP\App\IAppManager;
 use \OCP\IConfig;
+use \OCA\Encryption\Util;
 
 class AppConfig {
 	private $appName = 'richdocuments';
@@ -103,6 +104,23 @@ class AppConfig {
 		}
 
 		if (!\OC::$server->getEncryptionManager()->isEnabled()) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if encryption is enabled
+	 *
+	 * @return bool
+	 */
+	public function userEncryptionEnabled() {
+		if (!$this->encryptionEnabled()) {
+			return false;
+		}
+
+		if (!\OC::$server->query(Util::class)->isMasterKeyEnabled()) {
 			return false;
 		}
 
