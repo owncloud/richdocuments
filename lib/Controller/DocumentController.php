@@ -15,6 +15,7 @@ use \OC\Files\View;
 use OCA\Richdocuments\Db\Wopi;
 use \OCP\AppFramework\Controller;
 use \OCP\Constants;
+use OCP\Files\File;
 use \OCP\IRequest;
 use \OCP\IConfig;
 use \OCP\IL10N;
@@ -828,22 +829,18 @@ class DocumentController extends Controller {
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
-		// Login the user to see his mount locations
-		$this->loginUser($res['owner']);
-		$view = new View('/' . $res['owner'] . '/files');
-		$info = $view->getFileInfo($res['path']);
-		$this->logoutUser();
-		if (!$info) {
-			$this->logger->warning('wopiGetFile(): No valid info found', ['app' => $this->appName]);
+		$editor = \OC::$server->getUserManager()->get($res['editor']);
+
+		$file = $this->getFile($fileId, $editor->getUID());
+		if (!$file) {
+			$this->logger->warning('wopiCheckFileInfo(): File not found', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
-		$editor = \OC::$server->getUserManager()->get($res['editor']);
-
 		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
 		$result = [
-			'BaseFileName' => $info->getName(),
-			'Size' => $info->getSize(),
+			'BaseFileName' => $file->getName(),
+			'Size' => $file->getSize(),
 			'Version' => $version,
 			'OwnerId' => $res['owner'],
 			'UserId' => $res['editor'],
@@ -851,7 +848,7 @@ class DocumentController extends Controller {
 			'UserCanWrite' => $canWrite,
 			'UserCanNotWriteRelative' => $this->appConfig->encryptionEnabled(),
 			'PostMessageOrigin' => $res['server_host'],
-			'LastModifiedTime' => Helper::toISO8601($info->getMTime())
+			'LastModifiedTime' => Helper::toISO8601($file->getMTime())
 		];
 
 		// check if in review-only-mode
@@ -913,39 +910,14 @@ class DocumentController extends Controller {
 
 		//TODO: Support X-WOPIMaxExpectedSize header.
 		$res = $row->getWopiForToken($token);
-		$ownerid = $res['owner'];
 
-		// Login the user to see his mount locations
-		$this->loginUser($ownerid);
-		$view = new View('/' . $ownerid . '/files');
-		$info = $view->getFileInfo($res['path']);
-
-		if (!$info) {
-			$this->logger->warning('wopiCheckFileInfo(): No valid file info', ['app' => $this->appName]);
+		$file = $this->getFile($fileId, $res['editor']);
+		if (!$file) {
+			$this->logger->warning('wopiGetFile(): File not found', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
-		// If some previous version is requested, fetch it from Files_Version app
-		if ($version !== '0') {
-			\OCP\JSON::checkAppEnabled('files_versions');
 
-			$filename = '/files_versions/' . $res['path'] . '.v' . $version;
-		} else {
-			$filename = '/files' . $res['path'];
-		}
-
-		$this->logoutUser();
-
-		if ($this->appConfig->encryptionEnabled()) {
-			// with encryption, change needs to be applied as unknown user
-			// this also means that changes wont be auditable
-			\OC_User::setIncognitoMode(true);
-		}
-
-		// This is required for reading encrypted files
-		\OC_Util::tearDownFS();
-		\OC_Util::setupFS($ownerid);
-
-		return new DownloadResponse($this->request, $ownerid, $filename);
+		return new DownloadResponse($this->request, $file);
 	}
 
 	/**
@@ -1112,5 +1084,22 @@ class DocumentController extends Controller {
 	 */
 	public function listAll() {
 		return $this->prepareDocuments($this->storage->getDocuments());
+	}
+
+	/**
+	 * Get file for given file id and editor
+	 *
+	 * @param int $fileId
+	 * @param string $editor
+	 * @return null|\OCP\Files\File
+	 */
+	private function getFile($fileId, $editor) {
+		$userFolder = \OC::$server->getRootFolder()->getUserFolder($editor);
+
+		$files = $userFolder->getById($fileId);
+		if ($files && ($file = $files[0]) && $file instanceof File) {
+			return $file;
+		}
+		return null;
 	}
 }
