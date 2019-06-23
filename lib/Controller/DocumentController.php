@@ -944,7 +944,6 @@ class DocumentController extends Controller {
 		return $this->prepareDocuments($this->storage->getDocuments());
 	}
 
-
 	/**
 	 * Priviledged put to original (owner) file as editor
 	 * for given fileId
@@ -1083,23 +1082,23 @@ class DocumentController extends Controller {
 	 */
 	private function getFileHandle($fileId, $owner, $editor) {
 		if ($editor && $editor != '') {
-			// Make sure editor session is opened for registering activity over file handle
 			$user = \OC::$server->getUserManager()->get($editor);
-			$this->logger->debug('wopiPutFile(): Register session as ' . $editor, ['app' => $this->appName]);
-			if ($user) {
-				\OC::$server->getUserSession()->setUser($user);
-			} else {
+			if (!$user) {
 				$this->logger->warning('wopiPutFile(): No such user', ['app' => $this->appName]);
 				return null;
 			}
 
-			if ($this->appConfig->masterEncryptionEnabled()) {
+			// Make sure editor session is opened for registering activity over file handle
+			$this->logger->debug('wopiPutFile(): Register session as ' . $editor, ['app' => $this->appName]);
+			if (!$this->appConfig->encryptionEnabled()) {
+				// Set session for a user
+				\OC::$server->getUserSession()->setUser($user);
+			} elseif ($this->appConfig->masterEncryptionEnabled()) {
 				// With master encryption, decryption is based on master key (no user password needed)
 				// make sure audit/activity is triggered for editor session
+				\OC::$server->getUserSession()->setUser($user);
 				\OC_Hook::emit('OC_User', 'post_login', ['run' => true, 'uid' => $editor, 'password' => '']);
-			} else if ($this->appConfig->userEncryptionEnabled()) {
-				// With user encryption, user password is required
-				// for encryption/decryption/audit/activity except for incognito mode
+			} elseif ($this->appConfig->userEncryptionEnabled()) {
 				\OC_User::setIncognitoMode(true);
 			}
 		} else {
