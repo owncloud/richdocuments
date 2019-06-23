@@ -685,13 +685,6 @@ class DocumentController extends Controller {
 
 		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
 
-		if (!$currentUser) {
-			// if no user is authenticated and public link, use owner as granding access to file
-			$editorUid = '';
-		} else {
-			$editorUid = $currentUser;
-		}
-
 		$updateable = ($permissions & Constants::PERMISSION_UPDATE) === Constants::PERMISSION_UPDATE;
 		// If token is for some versioned file
 		if ($version !== '0') {
@@ -706,7 +699,7 @@ class DocumentController extends Controller {
 		}
 
 		$row = new Db\Wopi();
-		$token = $row->generateToken($fileId, $version, $attributes, $serverHost, $ownerUid, $editorUid);
+		$token = $row->generateToken($fileId, $version, $attributes, $serverHost, $ownerUid, $currentUser);
 
 		// Return the token.
 		$result = [
@@ -789,7 +782,7 @@ class DocumentController extends Controller {
 			$editorDisplayName = $editor->getDisplayName();
 			$editorEmail = $editor->getEMailAddress();
 		} else {
-			$editorId = $this->l10n->t('remote user');;
+			$editorId = $this->l10n->t('remote user');
 			$editorDisplayName = $this->l10n->t('remote user');
 			$editorEmail = null;
 		}

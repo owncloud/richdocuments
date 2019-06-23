@@ -31,8 +31,8 @@ class Wopi extends \OCA\Richdocuments\Db {
 
 	protected $tableName  = '`*PREFIX*richdocuments_wopi`';
 
-	protected $insertStatement  = 'INSERT INTO `*PREFIX*richdocuments_wopi` (`owner_uid`, `editor_uid`, `fileid`, `version`, `path`, `attributes`, `server_host`, `token`, `expiry`)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+	protected $insertStatement  = 'INSERT INTO `*PREFIX*richdocuments_wopi` (`owner_uid`, `editor_uid`, `fileid`, `version`, `attributes`, `server_host`, `token`, `expiry`)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
 
 	protected $loadStatement = 'SELECT * FROM `*PREFIX*richdocuments_wopi` WHERE `token`= ?';
 
@@ -66,7 +66,6 @@ class Wopi extends \OCA\Richdocuments\Db {
 			$editor,
 			$fileId,
 			$version,
-			'',
 			$attributes,
 			$serverHost,
 			$token,
