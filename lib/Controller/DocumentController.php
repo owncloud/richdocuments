@@ -669,15 +669,8 @@ class DocumentController extends Controller {
 		$owner = $this->getOwner($fileId);
 		$this->updateDocumentEncryptionAccessList($owner, $currentUser, $path);
 
-		$view = new \OC\Files\View('/' . $owner . '/files');
-		// Find the real path.
-		$path = $view->getPath($fileId);
-		if (!$view->is_file($path)) {
-			throw new \Exception('Invalid fileId.');
-		}
-
 		$row = new Db\Wopi();
-		$token = $row->generateToken($fileId, $path, $version, $attributes, $serverHost, $owner, $currentUser);
+		$token = $row->generateToken($fileId, $version, $attributes, $serverHost, $owner, $currentUser);
 
 		// Return the token.
 		$result = [
@@ -758,7 +751,7 @@ class DocumentController extends Controller {
 		}
 
 		$row = new Db\Wopi();
-		$token = $row->generateToken($fileId, $path, $version, $attributes, $serverHost, $ownerUid, $editorUid);
+		$token = $row->generateToken($fileId, $version, $attributes, $serverHost, $ownerUid, $editorUid);
 
 		// Return the token.
 		$result = [
@@ -944,24 +937,28 @@ class DocumentController extends Controller {
 			'token' => $token,
 			'wopiOverride' => $this->request->getHeader('X-WOPI-Override')]);
 
+		$row = new Db\Wopi();
+		$row->loadBy('token', $token);
+
+		$res = $row->getWopiForToken($token);
+		if ($res == false) {
+			$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
+		if (!$canWrite) {
+			$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
 		if ($isPutRelative) {
-			return $this->putRelative($fileId, $token);
+			// Retrieve suggested target
+			$suggested = $this->request->getHeader('X-WOPI-SuggestedTarget');
+			$suggested = \iconv('utf-7', 'utf-8', $suggested);
+
+			return $this->putRelative($fileId, $res['owner'], $res['editor'], $suggested);
 		} else {
-			$row = new Db\Wopi();
-			$row->loadBy('token', $token);
-
-			$res = $row->getWopiForToken($token);
-			if ($res == false) {
-				$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
-				return new JSONResponse([], Http::STATUS_FORBIDDEN);
-			}
-
-			$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
-			if (!$canWrite) {
-				$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
-				return new JSONResponse([], Http::STATUS_FORBIDDEN);
-			}
-
 			// Retrieve wopi timestamp header
 			$wopiHeaderTime = $this->request->getHeader('X-LOOL-WOPI-Timestamp');
 			$this->logger->debug('wopiPutFile(): WOPI header timestamp: {wopiHeaderTime}', [
@@ -1030,43 +1027,26 @@ class DocumentController extends Controller {
 		];
 	}
 
-	private function putRelative($fileId, $token) {
+	private function putRelative($fileId, $owner, $editor, $suggested) {
 		if ($this->appConfig->encryptionEnabled()) {
 			$this->logger->debug('wopiPutFile(): Encryption unsupported with PutRelative.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		$row = new Db\Wopi();
-		$row->loadBy('token', $token);
-
-		$res = $row->getWopiForToken($token);
-		if ($res == false) {
-			$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
-			return new JSONResponse([], Http::STATUS_FORBIDDEN);
-		}
-
-		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
-		if (!$canWrite) {
-			$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
-			return new JSONResponse([], Http::STATUS_FORBIDDEN);
-		}
 		// This call is made from loolwsd, so we need to initialize the
 		// session before we can make the user who opened the document
 		// login. This is necessary to make activity app register the
 		// change made to this file under this user's (editorid) name.
-		$this->loginUser($res['editor']);
+		$this->loginUser($editor);
 
 		// Set up the filesystem view for the owner (where the file actually is).
-		$userFolder = \OC::$server->getRootFolder()->getUserFolder($res['owner']);
+		$userFolder = \OC::$server->getRootFolder()->getUserFolder($owner);
 		$file = $userFolder->getById($fileId)[0];
 
 		// the new file needs to be installed in the current user dir
-		$userFolder = \OC::$server->getRootFolder()->getUserFolder($res['editor']);
+		$userFolder = \OC::$server->getRootFolder()->getUserFolder($editor);
 		$file = $userFolder->getById($fileId)[0];
-
-		$suggested = $this->request->getHeader('X-WOPI-SuggestedTarget');
-		$suggested = \iconv('utf-7', 'utf-8', $suggested);
-
+		
 		$path = '';
 		if ($suggested[0] === '.') {
 			$path = \dirname($file->getPath()) . '/New File' . $suggested;
@@ -1100,8 +1080,8 @@ class DocumentController extends Controller {
 		$this->logger->debug('wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
-			'editor' => $res['editor'],
-			'owner' => $res['owner']]);
+			'editor' => $editor,
+			'owner' => $owner]);
 
 		if ($this->appConfig->encryptionEnabled()) {
 			// with encryption, change needs to be applied as unknown user
@@ -1111,7 +1091,7 @@ class DocumentController extends Controller {
 
 		// Setup the FS which is needed to emit hooks (versioning).
 		\OC_Util::tearDownFS();
-		\OC_Util::setupFS($res['editor']);
+		\OC_Util::setupFS($editor);
 		$file->putContent($content);
 		$mtime = $file->getMtime();
 
@@ -1120,8 +1100,9 @@ class DocumentController extends Controller {
 		$row = new Wopi();
 		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 
+		// Continue editing
 		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
-		$wopiToken = $row->generateToken($file->getId(), $res['path'], 0, $attributes, $serverHost, $res['owner'], $res['editor']);
+		$wopiToken = $row->generateToken($file->getId(), 0, $attributes, $serverHost, $owner, $editor);
 
 		$wopi = 'index.php/apps/richdocuments/wopi/files/' . $file->getId() . '_' . $this->settings->getSystemValue('instanceid') . '?access_token=' . $wopiToken;
 		$url = \OC::$server->getURLGenerator()->getAbsoluteURL($wopi);
