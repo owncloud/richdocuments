@@ -85,51 +85,6 @@ class DocumentController extends Controller {
 		return null;
 	}
 
-	/**
-	 * Log the user with given $userid.
-	 * This function should only be used from public controller methods where no
-	 * existing session exists, for example, when loolwsd is directly calling a
-	 * public method with its own access token. After validating the access
-	 * token, and retrieving the correct user with help of access token, it can
-	 * be set as current user with help of this method.
-	 *
-	 * @param string $userid
-	 */
-	private function loginUser($userid) {
-		\OC_Util::tearDownFS();
-
-		$users = \OC::$server->getUserManager()->search($userid, 1, 0);
-		if (\count($users) > 0) {
-			$user = \array_shift($users);
-			if (\strcasecmp($user->getUID(), $userid) === 0) {
-				// clear the existing sessions, if any
-				\OC::$server->getSession()->close();
-
-				// initialize a dummy memory session
-				$session = new \OC\Session\Memory('');
-				// wrap it
-				$cryptoWrapper = \OC::$server->getSessionCryptoWrapper();
-				$session = $cryptoWrapper->wrapSession($session);
-				// set our session
-				\OC::$server->setSession($session);
-
-				\OC::$server->getUserSession()->setUser($user);
-			}
-		}
-
-		\OC_Util::setupFS();
-	}
-
-	/**
-	 * Log out the current user
-	 * This is helpful when we are artifically logged in as someone
-	 */
-	private function logoutUser() {
-		\OC_Util::tearDownFS();
-
-		\OC::$server->getSession()->close();
-	}
-
 	private function responseError($message, $hint = '') {
 		$errors = ['errors' => [['error' => $message, 'hint' => $hint]]];
 		$response = new TemplateResponse('', 'error', $errors, 'error');
@@ -822,14 +777,13 @@ class DocumentController extends Controller {
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
-		$editor = \OC::$server->getUserManager()->get($res['editor']);
-
-		$file = $this->getFile($fileId, $editor->getUID());
+		$file = $this->getFileHandle($fileId, $res['owner'], $res['editor']);
 		if (!$file) {
-			$this->logger->warning('wopiCheckFileInfo(): File not found', ['app' => $this->appName]);
+			$this->logger->warning('wopiCheckFileInfo(): Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
+		$editor = \OC::$server->getUserManager()->get($res['editor']);
 		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
 		$result = [
 			'BaseFileName' => $file->getName(),
@@ -904,16 +858,11 @@ class DocumentController extends Controller {
 		//TODO: Support X-WOPIMaxExpectedSize header.
 		$res = $row->getWopiForToken($token);
 
-		$file = $this->getFile($fileId, $res['editor']);
+		$file = $this->getFileHandle($fileId, $res['owner'], $res['editor']);
 		if (!$file) {
-			$this->logger->warning('wopiGetFile(): File not found', ['app' => $this->appName]);
+			$this->logger->warning('wopiGetFile(): Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
-
-		$this->logger->info('wopiGetFile(): Path {path}.', [
-			'app' => $this->appName,
-			'path' => $file->getPath()]);
-
 		return new DownloadResponse($this->request, $file);
 	}
 
@@ -970,147 +919,6 @@ class DocumentController extends Controller {
 		}
 	}
 
-	private function put($fileId, $owner, $editor, $wopiHeaderTime) {
-		// This call is made from loolwsd, so we need to initialize the
-		// session before we can make the user who opened the document
-		// login. This is necessary to make activity app register the
-		// change made to this file under this user's (editorid) name.
-		$this->loginUser($editor);
-
-		if ($this->appConfig->encryptionEnabled()) {
-			// with encryption, change needs to be applied as unknown user
-			// this also means that changes wont be auditable
-			\OC_User::setIncognitoMode(true);
-		}
-
-		// Setup the FS which is needed to emit hooks (versioning).
-		\OC_Util::tearDownFS();
-
-		\OC_Util::setupFS($owner);
-
-		$file = $this->getFile($fileId, $owner);
-		if (!$file) {
-			$this->logger->warning('wopiCheckFileInfo(): File not found', ['app' => $this->appName]);
-			return new JSONResponse([], Http::STATUS_NOT_FOUND);
-		}
-
-		// Handle wopiHeaderTime
-		if (!$wopiHeaderTime) {
-			$this->logger->debug('wopiPutFile(): X-LOOL-WOPI-Timestamp absent. Saving file.', ['app' => $this->appName]);
-		} elseif ($wopiHeaderTime != Helper::toISO8601($file->getMTime())) {
-			$this->logger->debug('wopiPutFile(): Document timestamp mismatch ! WOPI client says mtime {headerTime} but storage says {storageTime}', [
-				'app' => $this->appName,
-				'headerTime' => $wopiHeaderTime,
-				'storageTime' => Helper::toISO8601($file->getMtime())
-			]);
-			// Tell WOPI client about this conflict.
-			return new JSONResponse(['LOOLStatusCode' => self::LOOL_STATUS_DOC_CHANGED], Http::STATUS_CONFLICT);
-		}
-
-		// Read the contents of the file from the POST body and store.
-		$content = \fopen('php://input', 'r');
-		$this->logger->debug('wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.', [
-			'app' => $this->appName,
-			'fileId' => $fileId,
-			'editor' => $editor,
-			'owner' => $owner]
-		);
-		$file->putContent($content);
-
-		$mtime = $file->getMtime();
-
-		$this->logoutUser();
-
-		return [
-			'status' => 'success',
-			'LastModifiedTime' => Helper::toISO8601($mtime)
-		];
-	}
-
-	private function putRelative($fileId, $owner, $editor, $suggested) {
-		if ($this->appConfig->encryptionEnabled()) {
-			$this->logger->debug('wopiPutFile(): Encryption unsupported with PutRelative.', ['app' => $this->appName]);
-			return new JSONResponse([], Http::STATUS_FORBIDDEN);
-		}
-
-		// This call is made from loolwsd, so we need to initialize the
-		// session before we can make the user who opened the document
-		// login. This is necessary to make activity app register the
-		// change made to this file under this user's (editorid) name.
-		$this->loginUser($editor);
-
-		// Set up the filesystem view for the owner (where the file actually is).
-		$userFolder = \OC::$server->getRootFolder()->getUserFolder($owner);
-		$file = $userFolder->getById($fileId)[0];
-
-		// the new file needs to be installed in the current user dir
-		$userFolder = \OC::$server->getRootFolder()->getUserFolder($editor);
-		$file = $userFolder->getById($fileId)[0];
-		
-		$path = '';
-		if ($suggested[0] === '.') {
-			$path = \dirname($file->getPath()) . '/New File' . $suggested;
-		} elseif ($suggested[0] !== '/') {
-			$path = \dirname($file->getPath()) . '/' . $suggested;
-		} else {
-			$path = $userFolder->getPath() . $suggested;
-		}
-
-		if ($path === '') {
-			return [
-				'status' => 'error',
-				'message' => 'Cannot create the file'
-			];
-		}
-
-		$root = \OC::$server->getRootFolder();
-
-		// create the folder first
-		if (!$root->nodeExists(\dirname($path))) {
-			$root->newFolder(\dirname($path));
-		}
-
-		// create a unique new file
-		$path = $root->getNonExistingName($path);
-		$root->newFile($path);
-		$file = $root->get($path);
-
-		// Read the contents of the file from the POST body and store.
-		$content = \fopen('php://input', 'r');
-		$this->logger->debug('wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.', [
-			'app' => $this->appName,
-			'fileId' => $fileId,
-			'editor' => $editor,
-			'owner' => $owner]);
-
-		if ($this->appConfig->encryptionEnabled()) {
-			// with encryption, change needs to be applied as unknown user
-			// this also means that changes wont be auditable
-			\OC_User::setIncognitoMode(true);
-		}
-
-		// Setup the FS which is needed to emit hooks (versioning).
-		\OC_Util::tearDownFS();
-		\OC_Util::setupFS($editor);
-		$file->putContent($content);
-		$mtime = $file->getMtime();
-
-		// generate a token for the new file (the user still has to be
-		// logged in)
-		$row = new Wopi();
-		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
-
-		// Continue editing
-		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
-		$wopiToken = $row->generateToken($file->getId(), 0, $attributes, $serverHost, $owner, $editor);
-
-		$wopi = 'index.php/apps/richdocuments/wopi/files/' . $file->getId() . '_' . $this->settings->getSystemValue('instanceid') . '?access_token=' . $wopiToken;
-		$url = \OC::$server->getURLGenerator()->getAbsoluteURL($wopi);
-
-		$this->logoutUser();
-		return new JSONResponse([ 'Name' => $file->getName(), 'Url' => $url ], Http::STATUS_OK);
-	}
-
 	/**
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
@@ -1133,16 +941,175 @@ class DocumentController extends Controller {
 		return $this->prepareDocuments($this->storage->getDocuments());
 	}
 
+
 	/**
-	 * Get file for given file id and editor
+	 * Priviledged put to original (owner) file as editor
+	 * for given fileId
 	 *
-	 * @param int $fileId
-	 * @param string $editor
+	 * @param $fileId
+	 * @param $owner
+	 * @param $editor
+	 * @param $wopiHeaderTime
+	 * @return JSONResponse
+	 */
+	private function put($fileId, $owner, $editor, $wopiHeaderTime) {
+		$file = $this->getFileHandle($fileId, $owner, $editor);
+		if (!$file) {
+			$this->logger->warning('wopiPutFile(): Could not retrieve file', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_NOT_FOUND);
+		}
+
+		// Handle wopiHeaderTime
+		if (!$wopiHeaderTime) {
+			$this->logger->debug('wopiPutFile(): X-LOOL-WOPI-Timestamp absent. Saving file.', ['app' => $this->appName]);
+		} elseif ($wopiHeaderTime != Helper::toISO8601($file->getMTime())) {
+			$this->logger->debug('wopiPutFile(): Document timestamp mismatch ! WOPI client says mtime {headerTime} but storage says {storageTime}', [
+				'app' => $this->appName,
+				'headerTime' => $wopiHeaderTime,
+				'storageTime' => Helper::toISO8601($file->getMtime())
+			]);
+			// Tell WOPI client about this conflict.
+			return new JSONResponse(['LOOLStatusCode' => self::LOOL_STATUS_DOC_CHANGED], Http::STATUS_CONFLICT);
+		}
+
+		// Read the contents of the file from the POST body and store.
+		$content = \fopen('php://input', 'r');
+		$this->logger->debug('wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.', [
+				'app' => $this->appName,
+				'fileId' => $fileId,
+				'editor' => $editor,
+				'owner' => $owner]
+		);
+		$file->putContent($content);
+
+		$this->logger->warning('wopiPutFile(): mtime', ['app' => $this->appName]);
+
+		$mtime = $file->getMtime();
+
+		return new JSONResponse([
+			'status' => 'success',
+			'LastModifiedTime' => Helper::toISO8601($mtime)
+		], Http::STATUS_OK);
+	}
+
+	/**
+	 * Priviledged put relative to original (owner) file as editor
+	 * for given fileId
+	 *
+	 * @param $fileId
+	 * @param $owner
+	 * @param $editor
+	 * @param $suggested
+	 *
+	 * @return JSONResponse
+	 */
+	private function putRelative($fileId, $owner, $editor, $suggested) {
+		// Put relative is not supported with encryption enabled (wopiCheckInfo UserCanNotWriteRelative)
+		if ($this->appConfig->encryptionEnabled()) {
+			$this->logger->debug('wopiPutFile(): Encryption unsupported with PutRelative.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		$file = $this->getFileHandle($fileId, $owner, $editor);
+		if (!$file) {
+			$this->logger->warning('wopiPutFile(): Could not retrieve file', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_NOT_FOUND);
+		}
+
+		$root = \OC::$server->getRootFolder();
+
+		$path = '';
+		if ($suggested[0] === '.') {
+			$path = \dirname($file->getPath()) . '/New File' . $suggested;
+		} elseif ($suggested[0] !== '/') {
+			$path = \dirname($file->getPath()) . '/' . $suggested;
+		} else {
+			$path = $root->getUserFolder($editor)->getPath() . $suggested;
+		}
+
+		if ($path === '') {
+			return [
+				'status' => 'error',
+				'message' => 'Cannot create the file'
+			];
+		}
+
+		// create the folder first
+		if (!$root->nodeExists(\dirname($path))) {
+			$root->newFolder(\dirname($path));
+		}
+
+		// create a unique new file
+		$path = $root->getNonExistingName($path);
+		$file = $root->newFile($path);
+		$file = $this->getFileHandle($file->getId(), $owner, $editor);
+		if (!$file) {
+			$this->logger->warning('wopiCheckFileInfo(): Could not retrieve file', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_NOT_FOUND);
+		}
+
+		// Read the contents of the file from the POST body and store.
+		$content = \fopen('php://input', 'r');
+		$this->logger->debug('wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'editor' => $editor,
+			'owner' => $owner]
+		);
+
+		$file->putContent($content);
+		$mtime = $file->getMtime();
+
+		// generate a token for the new file
+		$row = new Wopi();
+		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
+
+		// Continue editing
+		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
+		$wopiToken = $row->generateToken($file->getId(), 0, $attributes, $serverHost, $owner, $editor);
+
+		$wopi = 'index.php/apps/richdocuments/wopi/files/' . $file->getId() . '_' . $this->settings->getSystemValue('instanceid') . '?access_token=' . $wopiToken;
+		$url = \OC::$server->getURLGenerator()->getAbsoluteURL($wopi);
+
+		return new JSONResponse([ 'Name' => $file->getName(), 'Url' => $url ], Http::STATUS_OK);
+	}
+
+	/**
+	 * Get priviledged access to original (owner) file handle as editor
+	 * for given fileId
+	 *
+	 * @param $fileId
+	 * @param $owner
+	 * @param $editor
+	 *
 	 * @return null|\OCP\Files\File
 	 */
-	private function getFile($fileId, $editor) {
-		$userFolder = \OC::$server->getRootFolder()->getUserFolder($editor);
+	private function getFileHandle($fileId, $owner, $editor) {
+		// Make sure editor session is opened for registering activity over file handle
+		$user = \OC::$server->getUserManager()->get($editor);
+		$this->logger->debug('wopiPutFile(): Register session as ' . $editor, ['app' => $this->appName]);
+		if ($user) {
+			\OC::$server->getUserSession()->setUser($user);
+		} else {
+			$this->logger->warning('wopiPutFile(): No such user', ['app' => $this->appName]);
+			return null;
+		}
 
+		if ($this->appConfig->masterEncryptionEnabled()) {
+			// With master encryption, decryption is based on master key (no user password needed)
+			// make sure audit/activity is triggered for editor session
+			\OC_Hook::emit('OC_User', 'post_login', ['run' => true, 'uid' => $editor, 'password' => '']);
+		} else if ($this->appConfig->userEncryptionEnabled()) {
+			// With user encryption, user password is required
+			// for encryption/decryption/audit/activity except for incognito mode
+			\OC_User::setIncognitoMode(true);
+		}
+
+		// Setup FS of original file file-handle to be able to generate
+		// file versions and write files with user session set for editor
+		\OC_Util::tearDownFS();
+		\OC_Util::setupFS($owner);
+		$userFolder = \OC::$server->getRootFolder()->getUserFolder($owner);
 		$files = $userFolder->getById($fileId);
 		if ($files && ($file = $files[0]) && $file instanceof File) {
 			return $file;

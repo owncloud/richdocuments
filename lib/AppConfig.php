@@ -111,16 +111,25 @@ class AppConfig {
 	}
 
 	/**
-	 * Check if encryption is enabled
+	 * Check if master encryption is enabled
 	 *
 	 * @return bool
 	 */
-	public function userEncryptionEnabled() {
+	public function masterEncryptionEnabled() {
 		if (!$this->encryptionEnabled()) {
 			return false;
 		}
 
-		if (!\OC::$server->query(Util::class)->isMasterKeyEnabled()) {
+		return \OC::$server->query(Util::class)->isMasterKeyEnabled();
+	}
+
+	/**
+	 * Check if user encryption is enabled
+	 *
+	 * @return bool
+	 */
+	public function userEncryptionEnabled() {
+		if (!$this->masterEncryptionEnabled()) {
 			return false;
 		}
 
