@@ -685,6 +685,13 @@ class DocumentController extends Controller {
 
 		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
 
+		if (!$currentUser) {
+			// if no user is authenticated and public link, use owner as granding access to file
+			$editorUid = '';
+		} else {
+			$editorUid = $currentUser;
+		}
+
 		$updateable = ($permissions & Constants::PERMISSION_UPDATE) === Constants::PERMISSION_UPDATE;
 		// If token is for some versioned file
 		if ($version !== '0') {
@@ -692,13 +699,6 @@ class DocumentController extends Controller {
 		}
 
 		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
-
-		if (!$currentUser) {
-			// if no user is authenticated and public link, use owner as granding access to file
-			$editorUid = $ownerUid;
-		} else {
-			$editorUid = $currentUser;
-		}
 
 		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
 		if ($updateable) {
@@ -783,15 +783,25 @@ class DocumentController extends Controller {
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
-		$editor = \OC::$server->getUserManager()->get($res['editor']);
+		if ($res['editor'] && $res['editor'] != '') {
+			$editor = \OC::$server->getUserManager()->get($res['editor']);
+			$editorId = $editor->getUID();
+			$editorDisplayName = $editor->getDisplayName();
+			$editorEmail = $editor->getEMailAddress();
+		} else {
+			$editorId = $this->l10n->t('remote user');;
+			$editorDisplayName = $this->l10n->t('remote user');
+			$editorEmail = null;
+		}
+
 		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
 		$result = [
 			'BaseFileName' => $file->getName(),
 			'Size' => $file->getSize(),
 			'Version' => $version,
 			'OwnerId' => $res['owner'],
-			'UserId' => $res['editor'],
-			'UserFriendlyName' => $editor->getDisplayName(),
+			'UserId' => $editorId,
+			'UserFriendlyName' => $editorDisplayName,
 			'UserCanWrite' => $canWrite,
 			'UserCanNotWriteRelative' => $this->appConfig->encryptionEnabled(),
 			'PostMessageOrigin' => $res['server_host'],
@@ -815,7 +825,7 @@ class DocumentController extends Controller {
 			if ($hasWatermark) {
 				$watermark = \str_replace(
 					'{viewer-email}',
-					$editor->getEMailAddress() === null ? $editor->getDisplayName() : $editor->getEMailAddress(),
+					$editorEmail === null ? $editorDisplayName : $editorEmail,
 					\OC::$server->getConfig()->getAppValue('richdocuments', 'watermark_text', '')
 				);
 				$result = \array_merge($result, [
@@ -1004,12 +1014,6 @@ class DocumentController extends Controller {
 	 * @return JSONResponse
 	 */
 	private function putRelative($fileId, $owner, $editor, $suggested) {
-		// Put relative is not supported with encryption enabled (wopiCheckInfo UserCanNotWriteRelative)
-		if ($this->appConfig->encryptionEnabled()) {
-			$this->logger->debug('wopiPutFile(): Encryption unsupported with PutRelative.', ['app' => $this->appName]);
-			return new JSONResponse([], Http::STATUS_FORBIDDEN);
-		}
-
 		$file = $this->getFileHandle($fileId, $owner, $editor);
 		if (!$file) {
 			$this->logger->warning('wopiPutFile(): Could not retrieve file', ['app' => $this->appName]);
@@ -1028,10 +1032,10 @@ class DocumentController extends Controller {
 		}
 
 		if ($path === '') {
-			return [
+			return new JSONResponse([
 				'status' => 'error',
 				'message' => 'Cannot create the file'
-			];
+			], Http::STATUS_BAD_REQUEST);
 		}
 
 		// create the folder first
@@ -1085,23 +1089,28 @@ class DocumentController extends Controller {
 	 * @return null|\OCP\Files\File
 	 */
 	private function getFileHandle($fileId, $owner, $editor) {
-		// Make sure editor session is opened for registering activity over file handle
-		$user = \OC::$server->getUserManager()->get($editor);
-		$this->logger->debug('wopiPutFile(): Register session as ' . $editor, ['app' => $this->appName]);
-		if ($user) {
-			\OC::$server->getUserSession()->setUser($user);
-		} else {
-			$this->logger->warning('wopiPutFile(): No such user', ['app' => $this->appName]);
-			return null;
-		}
+		if ($editor && $editor != '') {
+			// Make sure editor session is opened for registering activity over file handle
+			$user = \OC::$server->getUserManager()->get($editor);
+			$this->logger->debug('wopiPutFile(): Register session as ' . $editor, ['app' => $this->appName]);
+			if ($user) {
+				\OC::$server->getUserSession()->setUser($user);
+			} else {
+				$this->logger->warning('wopiPutFile(): No such user', ['app' => $this->appName]);
+				return null;
+			}
 
-		if ($this->appConfig->masterEncryptionEnabled()) {
-			// With master encryption, decryption is based on master key (no user password needed)
-			// make sure audit/activity is triggered for editor session
-			\OC_Hook::emit('OC_User', 'post_login', ['run' => true, 'uid' => $editor, 'password' => '']);
-		} else if ($this->appConfig->userEncryptionEnabled()) {
-			// With user encryption, user password is required
-			// for encryption/decryption/audit/activity except for incognito mode
+			if ($this->appConfig->masterEncryptionEnabled()) {
+				// With master encryption, decryption is based on master key (no user password needed)
+				// make sure audit/activity is triggered for editor session
+				\OC_Hook::emit('OC_User', 'post_login', ['run' => true, 'uid' => $editor, 'password' => '']);
+			} else if ($this->appConfig->userEncryptionEnabled()) {
+				// With user encryption, user password is required
+				// for encryption/decryption/audit/activity except for incognito mode
+				\OC_User::setIncognitoMode(true);
+			}
+		} else {
+			// Public link access
 			\OC_User::setIncognitoMode(true);
 		}
 
