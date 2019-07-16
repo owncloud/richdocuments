@@ -75,6 +75,23 @@ pipeline:
       matrix:
         TEST_SUITE: phpunit
 
+  webui-acceptance-tests:
+    image: owncloudci/php:${PHP_VERSION}
+    pull: true
+    environment:
+      - BROWSER=chrome
+      - SELENIUM_HOST=selenium
+      - SELENIUM_PORT=4444
+      - TEST_SERVER_URL=http://owncloud
+      - PLATFORM=Linux
+      - BEHAT_SUITE=${BEHAT_SUITE}
+      - MAILHOG_HOST=email
+    commands:
+      - make test-acceptance-webui
+    when:
+      matrix:
+        TEST_SUITE: web-acceptance
+
   phan:
     image: owncloudci/php:${PHP_VERSION}
     pull: true
@@ -265,4 +282,45 @@ matrix:
       DB_TYPE: mysql
       DB_NAME: owncloud
       NEED_CORE: true
+      NEED_INSTALL_APP: true
+
+    - PHP_VERSION: 7.2
+      OC_VERSION: daily-master-qa
+      TEST_SUITE: web-acceptance
+      BEHAT_SUITE: webUISecureView
+      DB_TYPE: mysql
+      DB_NAME: owncloud
+      NEED_CORE: true
+      NEED_SERVER: true
+      NEED_INSTALL_APP: true
+
+    #PHP 7.1 with core master
+    - PHP_VERSION: 7.1
+      OC_VERSION: daily-master-qa
+      TEST_SUITE: web-acceptance
+      BEHAT_SUITE: webUISecureView
+      DB_TYPE: mysql
+      DB_NAME: owncloud
+      NEED_CORE: true
+      NEED_SERVER: true
+      NEED_INSTALL_APP: true
+
+    - PHP_VERSION: 7.1
+      OC_VERSION: daily-stable10-qa
+      TEST_SUITE: web-acceptance
+      BEHAT_SUITE: webUISecureView
+      DB_TYPE: mysql
+      DB_NAME: owncloud
+      NEED_CORE: true
+      NEED_SERVER: true
+      NEED_INSTALL_APP: true
+
+    - PHP_VERSION: 7.0
+      OC_VERSION: daily-stable10-qa
+      TEST_SUITE: web-acceptance
+      BEHAT_SUITE: webUISecureView
+      DB_TYPE: mysql
+      DB_NAME: owncloud
+      NEED_CORE: true
+      NEED_SERVER: true
       NEED_INSTALL_APP: true

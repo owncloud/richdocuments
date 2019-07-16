@@ -1,0 +1,27 @@
+default:
+  autoload:
+    '': '%paths.base%/../features/bootstrap'
+
+  extensions:
+      jarnaiz\JUnitFormatter\JUnitFormatterExtension:
+          filename: report.xml
+          outputDir: '%paths.base%/../output/'
+
+  suites:
+    webUISecureView:
+      paths:
+        - '%paths.base%/../features/webUISecureView'
+      contexts:
+        - SecureViewContext:
+        - FeatureContext: &common_feature_context_params
+            baseUrl:  http://localhost:8080
+            adminUsername: admin
+            adminPassword: admin
+            regularUserPassword: 123456
+            ocPath: apps/testing/api/v1/occ
+        - OccContext:
+        - WebUIFilesContext:
+        - WebUIGeneralContext:
+        - WebUILoginContext:
+        - WebUISharingContext:
+
