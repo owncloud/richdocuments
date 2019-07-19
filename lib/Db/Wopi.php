@@ -31,8 +31,8 @@ class Wopi extends \OCA\Richdocuments\Db {
 
 	protected $tableName  = '`*PREFIX*richdocuments_wopi`';
 
-	protected $insertStatement  = 'INSERT INTO `*PREFIX*richdocuments_wopi` (`owner_uid`, `editor_uid`, `fileid`, `version`, `path`, `attributes`, `server_host`, `token`, `expiry`)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+	protected $insertStatement  = 'INSERT INTO `*PREFIX*richdocuments_wopi` (`owner_uid`, `editor_uid`, `fileid`, `version`, `attributes`, `server_host`, `token`, `expiry`)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
 
 	protected $loadStatement = 'SELECT * FROM `*PREFIX*richdocuments_wopi` WHERE `token`= ?';
 
@@ -40,7 +40,6 @@ class Wopi extends \OCA\Richdocuments\Db {
 	 * Generate token for document being shared with public link
 	 *
 	 * @param $fileId
-	 * @param $path
 	 * @param $version
 	 * @param $attributes
 	 * @param $serverHost
@@ -49,18 +48,17 @@ class Wopi extends \OCA\Richdocuments\Db {
 	 * @return string
 	 * @throws \Exception
 	 */
-	public function generateToken($fileId, $path, $version, $attributes, $serverHost, $owner, $editor) {
+	public function generateToken($fileId, $version, $attributes, $serverHost, $owner, $editor) {
 		$token = \OC::$server->getSecureRandom()->getMediumStrengthGenerator()->generate(32,
 			\OCP\Security\ISecureRandom::CHAR_LOWER . \OCP\Security\ISecureRandom::CHAR_UPPER .
 			\OCP\Security\ISecureRandom::CHAR_DIGITS);
 
-		\OC::$server->getLogger()->debug('generateFileToken(): Issuing token, editor: {editor}, file: {fileId}, version: {version}, owner: {owner}, path: {path}, token: {token}', [
+		\OC::$server->getLogger()->debug('generateFileToken(): Issuing token, editor: {editor}, file: {fileId}, version: {version}, owner: {owner}, token: {token}', [
 			'app' => self::appName,
 			'owner' => $owner,
 			'editor' => $editor,
 			'fileId' => $fileId,
 			'version' => $version,
-			'path' => $path,
 			'token' => $token ]);
 
 		$wopi = new \OCA\Richdocuments\Db\Wopi([
@@ -68,7 +66,6 @@ class Wopi extends \OCA\Richdocuments\Db {
 			$editor,
 			$fileId,
 			$version,
-			$path,
 			$attributes,
 			$serverHost,
 			$token,
@@ -110,7 +107,6 @@ class Wopi extends \OCA\Richdocuments\Db {
 		return [
 			'owner' => $row['owner_uid'],
 			'editor' => $row['editor_uid'],
-			'path' => $row['path'],
 			'attributes' => $row['attributes'],
 			'server_host' => $row['server_host']
 		];

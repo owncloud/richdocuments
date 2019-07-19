@@ -12,40 +12,27 @@
 namespace OCA\Richdocuments\Http;
 
 use \OCP\AppFramework\Http;
+use OCP\Files\File;
 use \OCP\IRequest;
 use \OC\Files\View;
 
 class DownloadResponse extends \OCP\AppFramework\Http\Response {
 	private $request;
-	private $view;
-	private $path;
+	private $file;
 	
 	/**
 	 * @param IRequest $request
-	 * @param string $user
-	 * @param string $path
+	 * @param File $file
 	 */
-	public function __construct(IRequest $request, $user, $path) {
+	public function __construct(IRequest $request, File $file) {
 		$this->request = $request;
-		$this->user = $user;
-		$this->path = $path;
-		
-		$this->view = new View('/' . $user);
-		if (!$this->view->file_exists($path)) {
-			$this->setStatus(Http::STATUS_NOT_FOUND);
-		}
+		$this->file = $file;
 	}
 	
 	public function render() {
-		if ($this->getStatus() === Http::STATUS_NOT_FOUND) {
-			return '';
-		}
-		$info = $this->view->getFileInfo($this->path);
-		$this->ETag = $info['etag'];
-
 		$data = [
-			'mimetype' => $info['mimetype'],
-			'content' => $this->view->file_get_contents($this->path)
+			'mimetype' => $this->file->getMimeType(),
+			'content' => $this->file->getContent()
 		];
 		$size = \strlen($data['content']);
 		
@@ -107,7 +94,7 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 	}
 	
 	protected function addContentDispositionHeader() {
-		$encodedName = \rawurlencode(\basename($this->path));
+		$encodedName = \rawurlencode($this->file->getName());
 		$isIE = \preg_match("/MSIE/", $this->request->server["HTTP_USER_AGENT"]);
 		if ($isIE) {
 			$this->addHeader(
