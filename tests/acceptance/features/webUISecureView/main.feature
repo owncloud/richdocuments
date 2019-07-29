@@ -64,7 +64,7 @@ Feature: Secure View
       | share_type             | 0              |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
-      | permissions            | 17             |
+      | permissions            | read,share     |
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
@@ -103,7 +103,7 @@ Feature: Secure View
       | share_type             | 0              |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
-      | permissions            | 17             |
+      | permissions            | read,share     |
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
@@ -143,7 +143,7 @@ Feature: Secure View
       | share_type             | 0              |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
-      | permissions            | 17             |
+      | permissions            | read,share     |
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
@@ -182,7 +182,7 @@ Feature: Secure View
       | share_type             | 0              |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
-      | permissions            | 17             |
+      | permissions            | read,share     |
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
@@ -221,7 +221,7 @@ Feature: Secure View
       | share_type             | 0              |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
-      | permissions            | 17             |
+      | permissions            | read,share     |
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
@@ -261,7 +261,7 @@ Feature: Secure View
       | share_type             | 0              |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
-      | permissions            | 17             |
+      | permissions            | read,share     |
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
@@ -342,7 +342,7 @@ Feature: Secure View
       | share_type             | 0              |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
-      | permissions            | 1              |
+      | permissions            | read           |
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
@@ -387,7 +387,7 @@ Feature: Secure View
       | share_type             | 3              |
       | file_source            | A_NUMBER       |
       | path                   | /a-folder      |
-      | permissions            | 1              |
+      | permissions            | read           |
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
