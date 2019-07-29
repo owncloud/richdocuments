@@ -61,7 +61,7 @@ Feature: Secure View
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
-      | share_type             | 0              |
+      | share_type             | user           |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
       | permissions            | read,share     |
@@ -100,7 +100,7 @@ Feature: Secure View
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
-      | share_type             | 0              |
+      | share_type             | user           |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
       | permissions            | read,share     |
@@ -140,7 +140,7 @@ Feature: Secure View
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
-      | share_type             | 0              |
+      | share_type             | user           |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
       | permissions            | read,share     |
@@ -179,7 +179,7 @@ Feature: Secure View
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
-      | share_type             | 0              |
+      | share_type             | user           |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
       | permissions            | read,share     |
@@ -218,7 +218,7 @@ Feature: Secure View
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
-      | share_type             | 0              |
+      | share_type             | user           |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
       | permissions            | read,share     |
@@ -258,7 +258,7 @@ Feature: Secure View
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
-      | share_type             | 0              |
+      | share_type             | user           |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
       | permissions            | read,share     |
@@ -300,7 +300,7 @@ Feature: Secure View
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
-      | share_type             | 0              |
+      | share_type             | user           |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
       | permissions            | 17             |
@@ -339,7 +339,7 @@ Feature: Secure View
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
-      | share_type             | 0              |
+      | share_type             | user           |
       | file_source            | A_NUMBER       |
       | path                   | /simple-folder |
       | permissions            | read           |
@@ -384,7 +384,7 @@ Feature: Secure View
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
-      | share_type             | 3              |
+      | share_type             | public_link    |
       | file_source            | A_NUMBER       |
       | path                   | /a-folder      |
       | permissions            | read           |
