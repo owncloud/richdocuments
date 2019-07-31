@@ -54,7 +54,7 @@ Feature: Secure View
     And user "user1" has been created with default attributes and without skeleton files
     And user "user0" has logged in using the webUI
     When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of "User One" for "simple-folder" using the webUI to
+    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
       | edit   | no |
     And user "user0" gets the info of the last share using the sharing API
     Then the fields of the last response should include
@@ -93,7 +93,7 @@ Feature: Secure View
     And user "user1" has been created with default attributes and without skeleton files
     And user "user0" has logged in using the webUI
     When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of "User One" for "simple-folder" using the webUI to
+    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
       | edit   | no |
     And user "user0" gets the info of the last share using the sharing API
     Then the fields of the last response should include
@@ -133,7 +133,7 @@ Feature: Secure View
     And user "user1" has been created with default attributes and without skeleton files
     And user "user0" has logged in using the webUI
     When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of "User One" for "simple-folder" using the webUI to
+    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
       | edit   | no |
     And user "user0" gets the info of the last share using the sharing API
     Then the fields of the last response should include
@@ -171,7 +171,7 @@ Feature: Secure View
     And user "user1" has been created with default attributes and without skeleton files
     And user "user0" has logged in using the webUI
     When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of "User One" for "simple-folder" using the webUI to
+    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
       | edit      | no |
       | watermark | no |
     And user "user0" gets the info of the last share using the sharing API
@@ -210,7 +210,7 @@ Feature: Secure View
     And user "user1" has been created with default attributes and without skeleton files
     And user "user0" has logged in using the webUI
     When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of "User One" for "simple-folder" using the webUI to
+    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
       | edit      | no |
       | print     | no |
     And user "user0" gets the info of the last share using the sharing API
@@ -249,7 +249,7 @@ Feature: Secure View
     And user "user1" has been created with default attributes and without skeleton files
     And user "user0" has logged in using the webUI
     When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of "User One" for "simple-folder" using the webUI to
+    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
       | edit      | no |
       | watermark | no |
       | print     | no |
@@ -290,7 +290,7 @@ Feature: Secure View
     And user "user2" has been created with default attributes and without skeleton files
     And user "user0" has logged in using the webUI
     When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of "User One" for "simple-folder" using the webUI to
+    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
       | edit      | no |
       | watermark | no |
     And the user re-logs in as "user1" using the webUI
@@ -330,7 +330,7 @@ Feature: Secure View
     And user "user1" has been created with default attributes and without skeleton files
     And user "user0" has logged in using the webUI
     When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of "User One" for "simple-folder" using the webUI to
+    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
       | edit      | no |
       | share     | no |
       | watermark | no |
@@ -374,7 +374,7 @@ Feature: Secure View
     And user "user0" has uploaded file with content "some content" to "/a-folder/randomfile.txt"
     And user "user0" has logged in using the webUI
     When the user shares folder "a-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of "User One" for "a-folder" using the webUI to
+    And the user sets the sharing permissions of user "User One" for "a-folder" using the webUI to
       | edit      | no |
       | watermark | no |
     And the user re-logs in as "user1" using the webUI
