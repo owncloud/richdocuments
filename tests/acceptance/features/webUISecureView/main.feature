@@ -70,7 +70,6 @@ Feature: Secure View
       | mail_send              | 0              |
       | uid_owner              | user0          |
       | file_parent            | A_NUMBER       |
-      | file_parent            | A_NUMBER       |
       | displayname_owner      | User Zero      |
       | share_with             | user1          |
       | share_with_displayname | User One       |
@@ -108,7 +107,6 @@ Feature: Secure View
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
       | uid_owner              | user0          |
-      | file_parent            | A_NUMBER       |
       | file_parent            | A_NUMBER       |
       | displayname_owner      | User Zero      |
       | share_with             | user1          |
@@ -149,7 +147,6 @@ Feature: Secure View
       | mail_send              | 0              |
       | uid_owner              | user0          |
       | file_parent            | A_NUMBER       |
-      | file_parent            | A_NUMBER       |
       | displayname_owner      | User Zero      |
       | share_with             | user1          |
       | share_with_displayname | User One       |
@@ -187,7 +184,6 @@ Feature: Secure View
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
       | uid_owner              | user0          |
-      | file_parent            | A_NUMBER       |
       | file_parent            | A_NUMBER       |
       | displayname_owner      | User Zero      |
       | share_with             | user1          |
@@ -227,7 +223,6 @@ Feature: Secure View
       | mail_send              | 0              |
       | uid_owner              | user0          |
       | file_parent            | A_NUMBER       |
-      | file_parent            | A_NUMBER       |
       | displayname_owner      | User Zero      |
       | share_with             | user1          |
       | share_with_displayname | User One       |
@@ -266,7 +261,6 @@ Feature: Secure View
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
       | uid_owner              | user0          |
-      | file_parent            | A_NUMBER       |
       | file_parent            | A_NUMBER       |
       | displayname_owner      | User Zero      |
       | share_with             | user1          |
@@ -309,7 +303,6 @@ Feature: Secure View
       | mail_send              | 0              |
       | uid_owner              | user1          |
       | file_parent            | A_NUMBER       |
-      | file_parent            | A_NUMBER       |
       | displayname_owner      | User One       |
       | share_with             | user2          |
       | share_with_displayname | User Two       |
@@ -348,7 +341,6 @@ Feature: Secure View
       | mail_send              | 0              |
       | uid_owner              | user0          |
       | file_parent            | A_NUMBER       |
-      | file_parent            | A_NUMBER       |
       | displayname_owner      | User Zero      |
       | share_with             | user1          |
       | share_with_displayname | User One       |
@@ -365,6 +357,7 @@ Feature: Secure View
     When the user re-logs in as "user1" using the webUI
     Then it should not be possible to share folder "simple-folder" using the webUI
 
+  @issue-3441
   Scenario: Admin enables secure view and user shares without edit permissions and watermark disabled, another user shares using public link
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "user0" has been created with default attributes and without skeleton files
@@ -398,3 +391,129 @@ Feature: Secure View
     And the additional sharing attributes for the response should be empty
     When the public accesses the last created public link using the webUI
     And file "randomfile.txt" should be listed on the webUI
+    When the public downloads file "randomfile.txt" using the webUI
+    Then the downloaded content should be "some content"
+
+  @issue-3441
+  Scenario: Admin enables secure view and user shares with download permissions, without edit permissions and watermark disabled, another user reshares
+    Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
+    And user "user0" has been created with default attributes and skeleton files
+    And user "user1" has been created with default attributes and without skeleton files
+    And user "user2" has been created with default attributes and without skeleton files
+    And user "user0" has logged in using the webUI
+    When the user shares folder "simple-folder" with user "User One" using the webUI
+    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
+      | edit        | no  |
+      | download    | yes |
+    And user "user0" gets the info of the last share using the sharing API
+    Then the fields of the last response should include
+      | item_type              | folder         |
+      | share_type             | user           |
+      | path                   | /simple-folder |
+      | permissions            | read, share    |
+      | uid_owner              | user0          |
+      | share_with             | user1          |
+    And the additional sharing attributes for the response should include
+      | scope         | key       | enabled |
+      | permissions   | download  | true    |
+    And the user re-logs in as "user1" using the webUI
+    When the user opens folder "simple-folder" using the webUI
+    Then the option to upload file should not be available on the webUI
+    And the option to rename file "lorem.txt" should not be available on the webUI
+    And it should not be possible to delete file "lorem.txt" using the webUI
+    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user1" with range "bytes=0-6" should be "This is"
+    When the user browses to the files page
+    And the user shares folder "simple-folder" with user "User Two" using the webUI
+    And user "user1" gets the info of the last share using the sharing API
+    Then the fields of the last response should include
+      | item_type              | folder         |
+      | share_type             | user           |
+      | file_source            | A_NUMBER       |
+      | path                   | /simple-folder |
+      | permissions            | read, share    |
+      | stime                  | A_NUMBER       |
+      | storage                | A_NUMBER       |
+      | mail_send              | 0              |
+      | uid_owner              | user1          |
+      | file_parent            | A_NUMBER       |
+      | displayname_owner      | User One       |
+      | share_with             | user2          |
+      | share_with_displayname | User Two       |
+    And the additional sharing attributes for the response should include
+      | scope         | key       | enabled |
+      | permissions   | download  | false   |
+      | richdocuments | watermark | true    |
+      | richdocuments | print     | true    |
+    And the user re-logs in as "user2" using the webUI
+    And the user opens folder "simple-folder" using the webUI
+    And the downloading of file "simple-folder/lorem.txt" for user "user2" should fail with error message
+    """
+    Access to this resource has been denied because it is in view-only mode.
+    """
+    And the option to upload file should not be available on the webUI
+    And the option to rename file "lorem.txt" should not be available on the webUI
+    And it should not be possible to delete file "lorem.txt" using the webUI
+
+  Scenario: Admin enables secure view and user shares without download, edit permissions and watermark disabled, another user reshares a subfolder
+    Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
+    And user "user0" has been created with default attributes and without skeleton files
+    And user "user1" has been created with default attributes and without skeleton files
+    And user "user2" has been created with default attributes and without skeleton files
+    And user "user0" has created folder "PARENT"
+    And user "user0" has created folder "/PARENT/CHILD"
+    And user "user0" has uploaded file with content "grand child content" to "PARENT/CHILD/grand-child.txt"
+    And user "user0" has logged in using the webUI
+    When the user shares folder "PARENT" with user "User One" using the webUI
+    And the user sets the sharing permissions of user "User One" for "PARENT" using the webUI to
+      | edit      | no |
+      | watermark | no |
+      | print     | no |
+    And user "user0" gets the info of the last share using the sharing API
+    Then the fields of the last response should include
+      | item_type              | folder         |
+      | share_type             | user           |
+      | path                   | /PARENT |
+      | permissions            | read, share    |
+      | uid_owner              | user0          |
+      | share_with             | user1          |
+    And the additional sharing attributes for the response should include
+      | scope         | key       | enabled |
+      | permissions   | download  | false   |
+      | richdocuments | watermark | false   |
+      | richdocuments | print     | false   |
+    When the user re-logs in as "user1" using the webUI
+    And the user opens folder "PARENT" using the webUI
+    Then the option to upload file should not be available on the webUI
+    And the option to rename folder "CHILD" should not be available on the webUI
+    And it should not be possible to delete file "CHILD" using the webUI
+    When the user shares folder "CHILD" with user "User Two" using the webUI
+    And the user opens folder "CHILD" using the webUI
+    And the option to rename file "grand-child.txt" should not be available on the webUI
+    And the downloading of file "PARENT/CHILD/grand-child.txt" for user "user1" should fail with error message
+    """
+    Access to this resource has been denied because it is in view-only mode.
+    """
+    And user "user1" gets the info of the last share using the sharing API
+    Then the fields of the last response should include
+      | item_type              | folder         |
+      | share_type             | user           |
+      | path                   | /PARENT/CHILD |
+      | permissions            | read, share    |
+      | mail_send              | 0              |
+      | uid_owner              | user1          |
+      | share_with             | user2          |
+    And the additional sharing attributes for the response should include
+      | scope         | key       | enabled |
+      | permissions   | download  | false   |
+      | richdocuments | watermark | true    |
+      | richdocuments | print     | true    |
+    When the user re-logs in as "user2" using the webUI
+    And the user opens folder "CHILD" using the webUI
+    Then the option to upload file should not be available on the webUI
+    And the option to rename file "grand-child.txt" should not be available on the webUI
+    And it should not be possible to delete file "grand-child.txt" using the webUI
+    And the downloading of file "CHILD/grand-child.txt" for user "user2" should fail with error message
+    """
+    Access to this resource has been denied because it is in view-only mode.
+    """
+
