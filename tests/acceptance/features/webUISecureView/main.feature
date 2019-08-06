@@ -357,7 +357,7 @@ Feature: Secure View
     When the user re-logs in as "user1" using the webUI
     Then it should not be possible to share folder "simple-folder" using the webUI
 
-  @issue-3441
+  @issue-enterprise-3441
   Scenario: Admin enables secure view and user shares without edit permissions and watermark disabled, another user shares using public link
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "user0" has been created with default attributes and without skeleton files
@@ -394,7 +394,7 @@ Feature: Secure View
     When the public downloads file "randomfile.txt" using the webUI
     Then the downloaded content should be "some content"
 
-  @issue-3441
+  @issue-enterprise-3441
   Scenario: Admin enables secure view and user shares with download permissions, without edit permissions and watermark disabled, another user reshares
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "user0" has been created with default attributes and skeleton files
