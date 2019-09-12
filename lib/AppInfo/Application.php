@@ -130,7 +130,7 @@ class Application extends App {
 				$container->getServer()->getEventDispatcher()->addListener(
 					'OCA\Files::loadAdditionalScripts',
 					function () {
-						\OCP\Util::addScript('richdocuments', 'viewer/attributes');
+						\OCP\Util::addScript('richdocuments', 'viewer/shareoptions');
 					}
 				);
 			}

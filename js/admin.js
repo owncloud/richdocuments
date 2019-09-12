@@ -341,10 +341,24 @@ var documentsSettings = {
 		});
 
 		$(document).on('change', '#secure_view_has_watermark_default_option_cb-richdocuments', function() {
+			var page = $(this).parent();
+			if (!this.checked) {
+				// to disable secure-view, print needs to be enabled
+				page.find('#secure_view_can_print_default_option_cb-richdocuments')
+					.prop('checked', true);
+				documentsSettings.saveCanPrintDefaultOption(true);
+			}
 			documentsSettings.saveHasWatermarkDefaultOption(this.checked);
 		});
 
 		$(document).on('change', '#secure_view_can_print_default_option_cb-richdocuments', function() {
+			var page = $(this).parent();
+			if (!this.checked) {
+				// to disable print, secure-view needs to be enabled
+				page.find('#secure_view_has_watermark_default_option_cb-richdocuments')
+					.prop('checked', true);
+				documentsSettings.saveHasWatermarkDefaultOption(true);
+			}
 			documentsSettings.saveCanPrintDefaultOption(this.checked);
 		});
 
