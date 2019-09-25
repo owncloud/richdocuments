@@ -43,9 +43,9 @@ config = {
 
 	'acceptance': {
 		'webUI': {
-			'suites': [
-				'webUISecureView',
-			],
+			'suites': {
+				'webUISecureView': 'webUISecV',
+			},
 			'phpVersions': [
 				'7.0',
 				'7.1',
@@ -58,6 +58,15 @@ config = {
 			],
 		},
 	},
+
+	'defaults': {
+		'acceptance': {
+			'servers': [
+				'daily-master-qa',
+				'10.3.0alpha2'
+			],
+		}
+	}
 }
 
 def main(ctx):
