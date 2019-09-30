@@ -1699,7 +1699,7 @@ depends_on:
 ---
 kind: pipeline
 type: docker
-name: webUISecV-10.3.0alpha2-chrome-mariadb10.2-php7.0
+name: webUISecV-10.3.0RC1-chrome-mariadb10.2-php7.0
 
 platform:
   os: linux
@@ -1721,7 +1721,7 @@ steps:
     db_type: mysql
     db_username: owncloud
     exclude: apps/richdocuments
-    version: 10.3.0alpha2
+    version: 10.3.0RC1
 
 - name: install-testrunner
   pull: always
@@ -1817,7 +1817,7 @@ depends_on:
 ---
 kind: pipeline
 type: docker
-name: webUISecV-10.3.0alpha2-chrome-mariadb10.2-php7.1
+name: webUISecV-10.3.0RC1-chrome-mariadb10.2-php7.1
 
 platform:
   os: linux
@@ -1839,7 +1839,7 @@ steps:
     db_type: mysql
     db_username: owncloud
     exclude: apps/richdocuments
-    version: 10.3.0alpha2
+    version: 10.3.0RC1
 
 - name: install-testrunner
   pull: always
@@ -1935,7 +1935,7 @@ depends_on:
 ---
 kind: pipeline
 type: docker
-name: webUISecV-10.3.0alpha2-chrome-mariadb10.2-php7.2
+name: webUISecV-10.3.0RC1-chrome-mariadb10.2-php7.2
 
 platform:
   os: linux
@@ -1957,7 +1957,7 @@ steps:
     db_type: mysql
     db_username: owncloud
     exclude: apps/richdocuments
-    version: 10.3.0alpha2
+    version: 10.3.0RC1
 
 - name: install-testrunner
   pull: always
@@ -2053,7 +2053,7 @@ depends_on:
 ---
 kind: pipeline
 type: docker
-name: webUISecV-10.3.0alpha2-chrome-mariadb10.2-php7.3
+name: webUISecV-10.3.0RC1-chrome-mariadb10.2-php7.3
 
 platform:
   os: linux
@@ -2075,7 +2075,7 @@ steps:
     db_type: mysql
     db_username: owncloud
     exclude: apps/richdocuments
-    version: 10.3.0alpha2
+    version: 10.3.0RC1
 
 - name: install-testrunner
   pull: always
@@ -2171,7 +2171,7 @@ depends_on:
 ---
 kind: pipeline
 type: docker
-name: webUISecV-10.3.0alpha2-firefox-mariadb10.2-php7.0
+name: webUISecV-10.3.0RC1-firefox-mariadb10.2-php7.0
 
 platform:
   os: linux
@@ -2193,7 +2193,7 @@ steps:
     db_type: mysql
     db_username: owncloud
     exclude: apps/richdocuments
-    version: 10.3.0alpha2
+    version: 10.3.0RC1
 
 - name: install-testrunner
   pull: always
@@ -2290,7 +2290,7 @@ depends_on:
 ---
 kind: pipeline
 type: docker
-name: webUISecV-10.3.0alpha2-firefox-mariadb10.2-php7.1
+name: webUISecV-10.3.0RC1-firefox-mariadb10.2-php7.1
 
 platform:
   os: linux
@@ -2312,7 +2312,7 @@ steps:
     db_type: mysql
     db_username: owncloud
     exclude: apps/richdocuments
-    version: 10.3.0alpha2
+    version: 10.3.0RC1
 
 - name: install-testrunner
   pull: always
@@ -2409,7 +2409,7 @@ depends_on:
 ---
 kind: pipeline
 type: docker
-name: webUISecV-10.3.0alpha2-firefox-mariadb10.2-php7.2
+name: webUISecV-10.3.0RC1-firefox-mariadb10.2-php7.2
 
 platform:
   os: linux
@@ -2431,7 +2431,7 @@ steps:
     db_type: mysql
     db_username: owncloud
     exclude: apps/richdocuments
-    version: 10.3.0alpha2
+    version: 10.3.0RC1
 
 - name: install-testrunner
   pull: always
@@ -2528,7 +2528,7 @@ depends_on:
 ---
 kind: pipeline
 type: docker
-name: webUISecV-10.3.0alpha2-firefox-mariadb10.2-php7.3
+name: webUISecV-10.3.0RC1-firefox-mariadb10.2-php7.3
 
 platform:
   os: linux
@@ -2550,7 +2550,7 @@ steps:
     db_type: mysql
     db_username: owncloud
     exclude: apps/richdocuments
-    version: 10.3.0alpha2
+    version: 10.3.0RC1
 
 - name: install-testrunner
   pull: always
@@ -2688,13 +2688,13 @@ depends_on:
 - webUISecV-master-firefox-mariadb10.2-php7.1
 - webUISecV-master-firefox-mariadb10.2-php7.2
 - webUISecV-master-firefox-mariadb10.2-php7.3
-- webUISecV-10.3.0alpha2-chrome-mariadb10.2-php7.0
-- webUISecV-10.3.0alpha2-chrome-mariadb10.2-php7.1
-- webUISecV-10.3.0alpha2-chrome-mariadb10.2-php7.2
-- webUISecV-10.3.0alpha2-chrome-mariadb10.2-php7.3
-- webUISecV-10.3.0alpha2-firefox-mariadb10.2-php7.0
-- webUISecV-10.3.0alpha2-firefox-mariadb10.2-php7.1
-- webUISecV-10.3.0alpha2-firefox-mariadb10.2-php7.2
-- webUISecV-10.3.0alpha2-firefox-mariadb10.2-php7.3
+- webUISecV-10.3.0RC1-chrome-mariadb10.2-php7.0
+- webUISecV-10.3.0RC1-chrome-mariadb10.2-php7.1
+- webUISecV-10.3.0RC1-chrome-mariadb10.2-php7.2
+- webUISecV-10.3.0RC1-chrome-mariadb10.2-php7.3
+- webUISecV-10.3.0RC1-firefox-mariadb10.2-php7.0
+- webUISecV-10.3.0RC1-firefox-mariadb10.2-php7.1
+- webUISecV-10.3.0RC1-firefox-mariadb10.2-php7.2
+- webUISecV-10.3.0RC1-firefox-mariadb10.2-php7.3
 
 ...
