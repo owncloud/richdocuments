@@ -34,3 +34,5 @@ The easiest way to integrate Collabora with development instance of ownCloud is 
     ```
 
 - Access Collabora Admin at `http://[your-host-public-ip]:9980/loleaflet/dist/admin/admin.html` e.g. `172.16.12.95`, and set in `Settings -> Admin -> Additional -> Collabora Online server -> http://[your-host-public-ip]:9980`
+
+Note: it is possible to use Collabora Online’s integration with re-compiled and/or re-branded backends.
