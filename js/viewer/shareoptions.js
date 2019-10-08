@@ -10,8 +10,10 @@ var RichdocumentsShareOptions = {
 	_shareOptionsTemplate: null,
 
 	/**
-	 * Extend ShareItemModel.addShare with richdocuments attributes. This
-	 * is triggered on click on call to updateShare from core or other app
+	 * Extend ShareItemModel.addShare with richdocuments attributes.
+	 *
+	 * Note: This should be triggered only by core or other apps on
+	 * call to addShare
 	 *
 	 * @param properties
 	 */
@@ -29,34 +31,33 @@ var RichdocumentsShareOptions = {
 
 			// set default attributes for secure-view / print
 			if (OC.appConfig.richdocuments.defaultShareAttributes.secureViewHasWatermark) {
-				// with secure view enabled, we need to remove edit permissions
+				// with secure view default, we need to remove edit permissions
 				extendedProperties.permissions = this._removePermission(extendedProperties.permissions, OC.PERMISSION_UPDATE);
 				extendedProperties.permissions = this._removePermission(extendedProperties.permissions, OC.PERMISSION_CREATE);
 				extendedProperties.permissions = this._removePermission(extendedProperties.permissions, OC.PERMISSION_DELETE);
 
-				// add secure view attributes
+				// disable download of the file from server
+				// but allow user to view the document in the editor (with watermarks)
 				extendedProperties.attributes = this._updateAttributes(
 					extendedProperties.attributes, "permissions", "download", false
 				);
 				extendedProperties.attributes = this._updateAttributes(
-					extendedProperties.attributes, "richdocuments", "watermark", true
+					extendedProperties.attributes, "richdocuments", "view-with-watermark", true
 				);
 
-				// get default value for printing
+				// allow/disallow user from printing the document in the editor
 				var canPrint = OC.appConfig.richdocuments.defaultShareAttributes.secureViewCanPrint;
 				extendedProperties.attributes = this._updateAttributes(
 					extendedProperties.attributes, "richdocuments", "print", canPrint
 				);
 			} else {
-				// disabled secure-view attributes
+				// with secure-view disabled do not add restriction on download, watermark and print
 				extendedProperties.attributes = this._updateAttributes(
-					extendedProperties.attributes, "permissions", "download", true
+					extendedProperties.attributes, "permissions", "download", null
 				);
 				extendedProperties.attributes = this._updateAttributes(
-					extendedProperties.attributes, "richdocuments", "watermark", false
+					extendedProperties.attributes, "richdocuments", "view-with-watermark", null
 				);
-
-				// without secure-view option enabled, print checkbox should not be visible
 				extendedProperties.attributes = this._updateAttributes(
 					extendedProperties.attributes, "richdocuments", "print", null
 				);
@@ -67,8 +68,10 @@ var RichdocumentsShareOptions = {
 	},
 
 	/**
-	 * Extend ShareItemModel.updateShare with richdocuments attributes. This is
-	 * triggered only on click on richdocuments attribute
+	 * Extend ShareItemModel.updateShare with richdocuments attributes.
+	 *
+	 * Note: This should be triggered only by core or other apps on change of
+	 * permissions or apps attributes
 	 *
 	 * @param shareId
 	 * @param properties
@@ -78,39 +81,26 @@ var RichdocumentsShareOptions = {
 		var updatedProperties = properties;
 		updatedProperties.attributes = properties.attributes || {};
 
-		// if resharing permission got enabled, disable attributes as not compatible
-		var canReshare = that._hasPermission(properties.permissions, OC.PERMISSION_SHARE);
-		if (canReshare) {
-			updatedProperties.attributes = that._updateAttributes(
-				updatedProperties.attributes, "permissions", "download", null
+		// if download permission got disabled, enable secure-view
+		// feature (allow viewing, but only with watermark)
+		var canDownloadAttr = that._getAttribute(properties.attributes, "permissions", "download");
+		if (canDownloadAttr && canDownloadAttr.enabled === false) {
+			updatedProperties.attributes = this._updateAttributes(
+				updatedProperties.attributes, "richdocuments", "view-with-watermark", true
 			);
-			updatedProperties.attributes = that._updateAttributes(
-				updatedProperties.attributes, "richdocuments", "watermark", null
-			);
-			updatedProperties.attributes = that._updateAttributes(
-				updatedProperties.attributes, "richdocuments", "print", null
+			updatedProperties.attributes = this._updateAttributes(
+				updatedProperties.attributes, "richdocuments", "print", false
 			);
 
 			return updatedProperties;
 		}
 
-		// if download permission got disabled, enable also secure-view
-		var canDownloadAttr = that._getAttribute(properties.attributes, "permissions", "download");
-		if (canDownloadAttr && canDownloadAttr.enabled === false) {
-			updatedProperties.attributes = this._updateAttributes(
-				updatedProperties.attributes, "richdocuments", "watermark", true
-			);
-			updatedProperties.attributes = this._updateAttributes(
-				updatedProperties.attributes, "richdocuments", "print", false
-			);
-		}
-
-		// otherwise on permission update, set always secure-view disabled
+		// otherwise on permission update, set always secure-view disabled (download allowed)
 		updatedProperties.attributes = this._updateAttributes(
-			updatedProperties.attributes, "permissions", "download", true
+			updatedProperties.attributes, "permissions", "download", null
 		);
-		updatedProperties.attributes = this._updateAttributes(
-			updatedProperties.attributes, "richdocuments", "watermark", false
+		updatedProperties.attributes = that._updateAttributes(
+			updatedProperties.attributes, "richdocuments", "view-with-watermark", null
 		);
 		updatedProperties.attributes = this._updateAttributes(
 			updatedProperties.attributes, "richdocuments", "print", null
@@ -162,18 +152,21 @@ var RichdocumentsShareOptions = {
 		var attributes = share.attributes || {};
 		var permissions = share.permissions || 1;
 
-		// update secure-view attributes
 		if (secureView === true) {
-			attributes = that._updateAttributes(
-				attributes, "permissions", "download", false
-			);
-			attributes = that._updateAttributes(
-				attributes, "richdocuments", "watermark", true
-			);
+			// if secure view option got enabled
+			// - disable edit/sharing
+			// - disable download, allow viewing but only with watermark
 			permissions = that._removePermission(permissions, OC.PERMISSION_UPDATE);
 			permissions = that._removePermission(permissions, OC.PERMISSION_CREATE);
 			permissions = that._removePermission(permissions, OC.PERMISSION_DELETE);
 			permissions = that._removePermission(permissions, OC.PERMISSION_SHARE);
+
+			attributes = that._updateAttributes(
+				attributes, "permissions", "download", false
+			);
+			attributes = that._updateAttributes(
+				attributes, "richdocuments", "view-with-watermark", true
+			);
 
 			if (secureViewPrint !== null) {
 				// if secure-view is enabled and print checkbox is filled, update print from checkbox
@@ -187,22 +180,15 @@ var RichdocumentsShareOptions = {
 					attributes, "richdocuments", "print", printDefault
 				);
 			}
-		} else if (secureView === false) {
-			attributes = that._updateAttributes(
-				attributes, "permissions", "download", true
-			);
-			attributes = that._updateAttributes(
-				attributes, "richdocuments", "watermark", false
-			);
-			attributes = that._updateAttributes(
-				attributes, "richdocuments", "print", null
-			);
 		} else {
+			// if secure view option got disabled
+			// - enable download
+			// - unset view-with-watermark and print as not available
 			attributes = that._updateAttributes(
 				attributes, "permissions", "download", null
 			);
 			attributes = that._updateAttributes(
-				attributes, "richdocuments", "watermark", null
+				attributes, "richdocuments", "view-with-watermark", null
 			);
 			attributes = that._updateAttributes(
 				attributes, "richdocuments", "print", null
@@ -239,31 +225,32 @@ var RichdocumentsShareOptions = {
 				var shareOptionsData = [];
 
 				var download = this._getAttribute(share.attributes, "permissions", "download");
-				var watermark = this._getAttribute(share.attributes, "richdocuments", "watermark");
+				var viewWithWatermark = this._getAttribute(share.attributes, "richdocuments", "view-with-watermark");
 				var print = this._getAttribute(share.attributes, "richdocuments", "print");
+				var secureViewEnabled = download !== null &&
+					download.enabled === false &&
+					viewWithWatermark.enabled === true;
 
-				// secure view means download not allowed, and watermarks set
-				if (download !== null && watermark !== null) {
+				// secure-view: download permission disabled, allow viewing but only with watermark
+				shareOptionsData.push({
+					cid: view.cid,
+					shareId: share.id,
+					shareWith: share.share_with,
+					name: "secure-view",
+					label: t('richdocuments', 'Secure View (with watermarks)'),
+					enabled: secureViewEnabled
+				});
+
+				// print can only be set when secure-view is enabled
+				if (secureViewEnabled && print !== null) {
 					shareOptionsData.push({
 						cid: view.cid,
 						shareId: share.id,
 						shareWith: share.share_with,
-						name: "secure-view",
-						label: t('richdocuments', 'Secure View (with watermarks)'),
-						enabled: (download.enabled === false && watermark.enabled === true)
+						name: "secure-view-print",
+						label: t('richdocuments', 'can print / export'),
+						enabled: print.enabled
 					});
-
-					// print can only be set when secure-view is enabled
-					if (download.enabled === false && watermark.enabled === true && print !== null) {
-						shareOptionsData.push({
-							cid: view.cid,
-							shareId: share.id,
-							shareWith: share.share_with,
-							name: "secure-view-print",
-							label: t('richdocuments', 'can print / export'),
-							enabled: print.enabled
-						});
-					}
 				}
 
 				$share.append(
@@ -378,6 +365,7 @@ OC.Plugins.register('OC.Share.ShareDialogView', {
 			// update for richdocuments attributes if not updated already
 			if (!options.hasOwnProperty('richdocumentsUpdatedShareProperties')) {
 				newProperties = RichdocumentsShareOptions.updateShareProperties(shareId, newProperties);
+
 				_.extend(newOptions, { richdocumentsUpdatedShareProperties: true });
 			}
 

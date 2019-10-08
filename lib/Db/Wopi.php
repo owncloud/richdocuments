@@ -22,10 +22,10 @@ class Wopi extends \OCA\Richdocuments\Db {
 	const TOKEN_LIFETIME_SECONDS = 1800;
 
 	const ATTR_CAN_VIEW = 0;
-	const ATTR_CAN_DOWNLOAD = 1;
-	const ATTR_CAN_PRINT = 2;
-	const ATTR_HAS_WATERMARK = 4;
-	const ATTR_CAN_UPDATE = 8;
+	const ATTR_CAN_UPDATE = 1;
+	const ATTR_CAN_EXPORT = 2;
+	const ATTR_CAN_PRINT = 4;
+	const ATTR_HAS_WATERMARK = 8;
 
 	const appName = 'richdocuments';
 
