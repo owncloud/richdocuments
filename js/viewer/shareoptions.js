@@ -350,8 +350,19 @@ var RichdocumentsShareOptions = {
 OC.Plugins.register('OC.Share.ShareDialogView', {
 
 	attach: function (view) {
-
+		if (_.isUndefined(view.model)) {
+			console.error("missing OC.Share.ShareItemModel");
+			return;
+		}
+		
 		RichdocumentsShareOptions.model = view.model;
+
+		// Register additional available share attributes
+		var mimetype = RichdocumentsShareOptions.model.getFileInfo().getMimeType();
+		var folderMimeType = 'httpd/unix-directory';
+		if ((!odfViewer.isSupportedMimeType(mimetype) && mimetype !== folderMimeType)) {
+			return;
+		}
 
 		// customize rendering of checkboxes
 		var baseRenderCall = view.render;
