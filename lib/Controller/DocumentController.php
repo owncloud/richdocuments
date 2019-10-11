@@ -344,7 +344,11 @@ class DocumentController extends Controller {
 		];
 
 		// Get doc index if possible
-		$docRetVal = $this->handleDocIndex($fileId, $shareToken, $this->uid);
+		try {
+			$docRetVal = $this->handleDocIndex($fileId, $shareToken, $this->uid);
+		} catch (\Exception $e) {
+			return $this->responseError($this->l10n->t('Collabora Online: Cannot open document.'), $e->getMessage());
+		}
 		$retVal = \array_merge($retVal, $docRetVal);
 
 		$response = new TemplateResponse('richdocuments', 'documents', $retVal);
@@ -366,6 +370,7 @@ class DocumentController extends Controller {
 	 * @param string|null $currentUser
 	 *
 	 * @return array
+	 * @throws \Exception
 	 */
 	private function handleDocIndex($fileId, $shareToken, $currentUser) {
 		if ($fileId === null && $shareToken === null) {
@@ -558,6 +563,8 @@ class DocumentController extends Controller {
 
 	/**
 	 * Generates and returns an access token for a given fileId.
+	 *
+	 * @throws \Exception
 	 */
 	private function getWopiInfoForAuthUser($fileId, $version, $currentUser) {
 		$this->logger->info('getWopiInfoForAuthUser(): Generating WOPI Token for file {fileId}, version {version}.', [
@@ -578,42 +585,53 @@ class DocumentController extends Controller {
 			$updatable = $this->isAllowedEditor($currentUser);
 		}
 
-		$sessionid = '0'; // default shared session
-		$attributes = WOPI::ATTR_CAN_VIEW;
-		if ($updatable) {
-			// Default editing attributes
-			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
-		} else {
-			// check if secure mode has been enabled for read only shares
-			$info = $view->getFileInfo($path);
-			$storage = $info->getStorage();
-			if ($storage->instanceOfStorage('\OCA\Files_Sharing\SharedStorage')) {
-				// Extract share attributes
-				/** @var \OCA\Files_Sharing\SharedStorage $storage */
-				$share = $storage->getShare();
+		// default shared session id
+		$sessionid = '0';
 
-				// Check download attribute
-				$canDownload = $share->getAttributes()->getAttribute('permissions', 'download');
-				if ($canDownload === null || $canDownload === true) {
-					// can print is not set or true
-					$attributes = $attributes | WOPI::ATTR_CAN_DOWNLOAD;
-				}
+		// get file info
+		$info = $view->getFileInfo($path);
+		$storage = $info->getStorage();
 
-				$canPrint = $share->getAttributes()->getAttribute('richdocuments', 'print');
-				if ($canPrint === null || $canPrint === true) {
-					// can print is not set or true
-					$attributes = $attributes | WOPI::ATTR_CAN_PRINT;
-				}
+		// check if secure mode feature has been enabled for shares
+		$secureModeEnabled = \OC::$server->getConfig()->getAppValue('richdocuments', 'secure_view_option') === 'true';
+		$isSharedFile = $storage->instanceOfStorage('\OCA\Files_Sharing\SharedStorage');
+		if ($isSharedFile && $secureModeEnabled) {
+			// Extract share attributes
+			/** @var \OCA\Files_Sharing\SharedStorage $storage */
+			$share = $storage->getShare();
+			$canDownload = $share->getAttributes()->getAttribute('permissions', 'download');
+			$viewWithWatermark = $share->getAttributes()->getAttribute('richdocuments', 'view-with-watermark');
+			$canPrint = $share->getAttributes()->getAttribute('richdocuments', 'print');
 
-				$hasWatermark = $share->getAttributes()->getAttribute('richdocuments', 'watermark');
-				if ($hasWatermark === true) {
-					// watermarking enabled, add session-id to force private session with watermark
-					$sessionid = $share->getId();
-					$attributes = $attributes | WOPI::ATTR_HAS_WATERMARK;
-				}
-			} else {
-				$attributes = $attributes | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
+			// restriction on view has been set to false, return forbidden
+			if ($viewWithWatermark === false) {
+				throw new \Exception($this->l10n->t('Insufficient file permissions.'));
 			}
+
+			$attributes = WOPI::ATTR_CAN_VIEW;
+
+			// can export file in editor if download is not set or true
+			if ($canDownload === null || $canDownload === true) {
+				$attributes = $attributes | WOPI::ATTR_CAN_EXPORT;
+			}
+
+			// can print from editor if print is not set or true
+			if ($canPrint === null || $canPrint === true) {
+				$attributes = $attributes | WOPI::ATTR_CAN_PRINT;
+			}
+
+			// restriction on view with watermarking enabled,
+			// add session-id to force private session with watermark
+			if ($viewWithWatermark === true) {
+				$sessionid = $share->getId();
+				$attributes = $attributes | WOPI::ATTR_HAS_WATERMARK;
+			}
+		} else {
+			$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_EXPORT | WOPI::ATTR_CAN_PRINT;
+		}
+
+		if ($updatable) {
+			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE;
 		}
 
 		$this->logger->debug('getWopiInfoForAuthUser(): File {fileid} is updatable? {updatable}', [
@@ -694,7 +712,7 @@ class DocumentController extends Controller {
 
 		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 
-		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
+		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_EXPORT | WOPI::ATTR_CAN_PRINT;
 		if ($updateable) {
 			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE;
 		}
@@ -802,39 +820,37 @@ class DocumentController extends Controller {
 			'LastModifiedTime' => Helper::toISO8601($file->getMTime())
 		];
 
-		// check if in review-only-mode
-		$secureMode = \OC::$server->getConfig()->getAppValue('richdocuments', 'secure_view_option') === 'true';
-		if ($secureMode) {
-			$canDownload = $res['attributes'] & WOPI::ATTR_CAN_DOWNLOAD;
-			if (!$canDownload) {
-				$result = \array_merge($result, [
-					'DisableExport' => true,
-					'HideExportOption' => true,
-					'HideSaveOption' => true, // dont show the §save to OC§ option as user cannot download file
-					'DisableCopy' => true, // disallow copying in document
-				]);
-			}
+		$canExport = $res['attributes'] & WOPI::ATTR_CAN_EXPORT;
+		$hasWatermark = $res['attributes'] & WOPI::ATTR_HAS_WATERMARK;
 
-			$hasWatermark = $res['attributes'] & WOPI::ATTR_HAS_WATERMARK;
-			if ($hasWatermark) {
-				$watermark = \str_replace(
-					'{viewer-email}',
-					$editorEmail === null ? $editorDisplayName : $editorEmail,
-					\OC::$server->getConfig()->getAppValue('richdocuments', 'watermark_text', '')
-				);
-				$result = \array_merge($result, [
-					'WatermarkText' => $watermark,
-				]);
-			}
-
-			$canPrint = $res['attributes'] & WOPI::ATTR_CAN_PRINT;
-			if (!$canPrint) {
-				$result = \array_merge($result, [
-					'DisablePrint' => true,
-					'HidePrintOption' => true,
-				]);
-			}
+		if (!$canExport) {
+			$result = \array_merge($result, [
+				'DisableExport' => true,
+				'HideExportOption' => true,
+				'HideSaveOption' => true, // dont show the §save to OC§ option as user cannot download file
+				'DisableCopy' => true, // disallow copying in document
+			]);
 		}
+
+		if ($hasWatermark) {
+			$watermark = \str_replace(
+				'{viewer-email}',
+				$editorEmail === null ? $editorDisplayName : $editorEmail,
+				\OC::$server->getConfig()->getAppValue('richdocuments', 'watermark_text', '')
+			);
+			$result = \array_merge($result, [
+				'WatermarkText' => $watermark,
+			]);
+		}
+
+		$canPrint = $res['attributes'] & WOPI::ATTR_CAN_PRINT;
+		if (!$canPrint) {
+			$result = \array_merge($result, [
+				'DisablePrint' => true,
+				'HidePrintOption' => true,
+			]);
+		}
+
 		$this->logger->debug("wopiCheckFileInfo(): Result: {result}", ['app' => $this->appName, 'result' => $result]);
 		return $result;
 	}

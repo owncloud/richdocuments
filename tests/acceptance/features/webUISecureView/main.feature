@@ -65,10 +65,10 @@ Feature: Secure View
       | share_with             | user1          |
       | share_with_displayname | User One       |
     And the additional sharing attributes for the response should include
-      | scope         | key       | enabled |
-      | permissions   | download  | false   |
-      | richdocuments | watermark | true    |
-      | richdocuments | print     | false   |
+      | scope         | key                 | enabled |
+      | permissions   | download            | false   |
+      | richdocuments | view-with-watermark | true    |
+      | richdocuments | print               | false   |
     And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user0" with range "bytes=0-17" should be "This is lorem text"
     And as "user1" file "simple-folder/lorem.txt" should exist
     But the downloading of file "simple-folder/lorem.txt" for user "user1" should fail with error message
@@ -102,10 +102,7 @@ Feature: Secure View
       | displayname_owner      | User Zero      |
       | share_with             | user1          |
       | share_with_displayname | User One       |
-    And the additional sharing attributes for the response should include
-      | scope         | key       | enabled |
-      | permissions   | download  | true    |
-      | richdocuments | watermark | false   |
+    And the additional sharing attributes for the response should be empty
     And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user0" with range "bytes=0-17" should be "This is lorem text"
     And as "user1" file "simple-folder/lorem.txt" should exist
     And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user1" with range "bytes=0-17" should be "This is lorem text"
@@ -138,10 +135,10 @@ Feature: Secure View
       | share_with             | user1          |
       | share_with_displayname | User One       |
     And the additional sharing attributes for the response should include
-      | scope         | key       | enabled |
-      | permissions   | download  | false   |
-      | richdocuments | watermark | true    |
-      | richdocuments | print     | true    |
+      | scope         | key                 | enabled |
+      | permissions   | download            | false   |
+      | richdocuments | view-with-watermark | true    |
+      | richdocuments | print               | true    |
     And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user0" with range "bytes=0-17" should be "This is lorem text"
     And as "user1" file "simple-folder/lorem.txt" should exist
     But the downloading of file "simple-folder/lorem.txt" for user "user1" should fail with error message
@@ -175,10 +172,7 @@ Feature: Secure View
       | displayname_owner      | User Zero      |
       | share_with             | user1          |
       | share_with_displayname | User One       |
-    And the additional sharing attributes for the response should include
-      | scope         | key       | enabled |
-      | permissions   | download  | true    |
-      | richdocuments | watermark | false   |
+    And the additional sharing attributes for the response should be empty
     And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user0" with range "bytes=0-17" should be "This is lorem text"
     And as "user1" file "simple-folder/lorem.txt" should exist
     And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user1" with range "bytes=0-17" should be "This is lorem text"
@@ -211,10 +205,10 @@ Feature: Secure View
       | share_with             | user1          |
       | share_with_displayname | User One       |
     And the additional sharing attributes for the response should include
-      | scope         | key       | enabled |
-      | permissions   | download  | false   |
-      | richdocuments | watermark | true    |
-      | richdocuments | print     | true    |
+      | scope         | key                 | enabled |
+      | permissions   | download            | false   |
+      | richdocuments | view-with-watermark | true    |
+      | richdocuments | print               | true    |
     And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user0" with range "bytes=0-17" should be "This is lorem text"
     And as "user1" file "simple-folder/lorem.txt" should exist
     But the downloading of file "simple-folder/lorem.txt" for user "user1" should fail with error message
@@ -250,10 +244,10 @@ Feature: Secure View
       | share_with             | user1          |
       | share_with_displayname | User One       |
     And the additional sharing attributes for the response should include
-      | scope         | key       | enabled |
-      | permissions   | download  | false   |
-      | richdocuments | watermark | true    |
-      | richdocuments | print     | false   |
+      | scope         | key                 | enabled |
+      | permissions   | download            | false   |
+      | richdocuments | view-with-watermark | true    |
+      | richdocuments | print               | false   |
     And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user0" with range "bytes=0-17" should be "This is lorem text"
     And as "user1" file "simple-folder/lorem.txt" should exist
     But the downloading of file "simple-folder/lorem.txt" for user "user1" should fail with error message
@@ -320,10 +314,10 @@ Feature: Secure View
       | share_with             | user2          |
       | share_with_displayname | User Two       |
     And the additional sharing attributes for the response should include
-      | scope         | key       | enabled |
-      | permissions   | download  | false   |
-      | richdocuments | watermark | true    |
-      | richdocuments | print     | false   |
+      | scope         | key                 | enabled |
+      | permissions   | download            | false   |
+      | richdocuments | view-with-watermark | true    |
+      | richdocuments | print               | false   |
     And the user sets the sharing permissions of user "User Two" for "simple-folder" using the webUI to
       | share        | yes |
     And user "user1" gets the info of the last share using the sharing API
