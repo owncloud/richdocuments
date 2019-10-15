@@ -87,7 +87,7 @@ script('richdocuments', 'admin');
 	p('hidden');
 } ?>" >
 		<p style="max-width: 50em;"><em><?php p($l->t('Set default share permissions for all users (available for shares without edit permission)')) ?></em></p>
-		<input type="checkbox" id="secure_view_can_print_default_option_cb-richdocuments" <?php p($_['secure_view_can_print_default'] === 'true' ? 'checked' : '') ?> />
+		<input type="checkbox" id="secure_view_can_print_default_option_cb-richdocuments" <?php p($_['secure_view_can_print_default'] === 'true' ? 'checked' : '')  ?> <?php p($_['secure_view_has_watermark_default'] === 'false' ? 'disabled' : '')  ?>  />
 		<label for="secure_view_can_print_default_option_cb-richdocuments"><?php p($l->t('can print/export')) ?></label>
 		<br/>
 		<input type="checkbox" id="secure_view_has_watermark_default_option_cb-richdocuments" <?php p($_['secure_view_has_watermark_default'] === 'true' ? 'checked' : '') ?> />
