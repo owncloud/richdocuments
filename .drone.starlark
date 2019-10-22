@@ -63,7 +63,7 @@ config = {
 		'acceptance': {
 			'servers': [
 				'daily-master-qa',
-				'10.3.0'
+				'latest'
 			],
 		}
 	}
