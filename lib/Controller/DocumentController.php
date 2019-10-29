@@ -1115,7 +1115,8 @@ class DocumentController extends Controller {
 				// make sure audit/activity is triggered for editor session
 				\OC::$server->getUserSession()->setUser($user);
 				\OC_Hook::emit('OC_User', 'post_login', ['run' => true, 'uid' => $editor, 'password' => '']);
-			} elseif ($this->appConfig->userEncryptionEnabled()) {
+			} else {
+				// other type of encryption is enabled e.g. user-key
 				\OC_User::setIncognitoMode(true);
 			}
 		} else {
