@@ -35,21 +35,29 @@ appstore:
 	mkdir -p $(sign_dir)
 	rsync -a \
 	--exclude=.git \
+	--exclude=.phan \
 	--exclude=build \
+	--exclude=.drone.starlark \
+	--exclude=.drone.yml \
 	--exclude=.gitignore \
-	--exclude=.travis.yml \
+	--exclude=.php_cs.cache \
+	--exclude=.php_cs.dist \
 	--exclude=.scrutinizer.yml \
 	--exclude=CONTRIBUTING.md \
 	--exclude=composer.json \
 	--exclude=composer.lock \
+	--exclude=l10n/.gitkeep \
 	--exclude=l10n/.tx \
 	--exclude=l10n/no-php \
 	--exclude=Makefile \
 	--exclude=nbproject \
 	--exclude=screenshots \
+	--exclude=phpcs.xml \
+	--exclude=phpstan.neon \
 	--exclude=phpunit*xml \
 	--exclude=tests \
 	--exclude=vendor/bin \
+	--exclude=vendor-bin \
 	$(project_dir) $(sign_dir)
 	@echo "Signing…"
 	$(occ) integrity:sign-app --privateKey=$(cert_dir)/$(app_name).key --certificate=$(cert_dir)/$(app_name).crt --path=$(sign_dir)/$(app_name)
@@ -102,6 +110,9 @@ $(bower_deps): $(BOWER)
 $(dist_dir)/$(app_name): $(composer_deps) $(bower_deps)
 	rm -Rf $@; mkdir -p $@
 	cp -R $(all_src) $@
+	rm -Rf $@/l10n/.gitkeep
+	rm -Rf $@/l10n/.tx
+	rm -Rf $@/l10n/no-php
 
 ifdef CAN_SIGN
 	$(sign) --path="$(dist_dir)/$(app_name)"
