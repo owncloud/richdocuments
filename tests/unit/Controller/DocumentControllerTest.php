@@ -55,7 +55,7 @@ class DocumentControllerTest extends \Test\TestCase {
 	 */
 	private $storage;
 
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->request = $this->createMock(IRequest::class);
 		$this->settings = $this->createMock(IConfig::class);

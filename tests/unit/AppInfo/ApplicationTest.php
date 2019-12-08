@@ -27,12 +27,12 @@ class ApplicationTest extends \Test\TestCase {
 	 */
 	private $app;
 
-	public function setUp() {
+	public function setUp(): void {
 		parent::setUp();
 		$this->app = new Application();
 	}
 
-	public function tearDown() {
+	public function tearDown(): void {
 		$this->app->getContainer()->getServer()->getConfig()->deleteAppValue('core', 'shareapi_allow_links');
 		OC_Hook::clear();
 		parent::tearDown();
