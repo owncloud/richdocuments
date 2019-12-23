@@ -39,6 +39,7 @@ Feature: Secure View
     Then the config key "secure_view_option" of app "richdocuments" should have value "true"
     And the config key "secure_view_has_watermark_default" of app "richdocuments" should have value "true"
 
+  @skipOnOcV10.3
   Scenario: Admin enables secure view, user shares without edit permissions with default secure view permissions set and resharing disabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "user0" has been created with default attributes and skeleton files
@@ -76,6 +77,7 @@ Feature: Secure View
     Access to this resource has been denied because it is in view-only mode.
     """
 
+  @skipOnOcV10.3
   Scenario: Admin enables secure view, disables secure-view default and user shares without edit permissions with default secure view permissions set and resharing disabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "secure_view_has_watermark_default" with value "false" in app "richdocuments"
@@ -107,6 +109,7 @@ Feature: Secure View
     And as "user1" file "simple-folder/lorem.txt" should exist
     And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user1" with range "bytes=0-17" should be "This is lorem text"
 
+  @skipOnOcV10.3
   Scenario: Admin enables secure view, enables secure-view default and enables print default and user shares without edit permissions with default secure view permissions set and resharing disabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "secure_view_has_watermark_default" with value "true" in app "richdocuments"
@@ -145,7 +148,8 @@ Feature: Secure View
     """
     Access to this resource has been denied because it is in view-only mode.
     """
-
+    
+  @skipOnOcV10.3
   Scenario: Admin enables secure view and user shares without edit permissions and with secure-view disabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "user0" has been created with default attributes and skeleton files
@@ -177,6 +181,7 @@ Feature: Secure View
     And as "user1" file "simple-folder/lorem.txt" should exist
     And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user1" with range "bytes=0-17" should be "This is lorem text"
 
+  @skipOnOcV10.3
   Scenario: Admin enables secure view and user shares without edit permissions and with secure view enabled and print enabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "user0" has been created with default attributes and skeleton files
@@ -216,6 +221,7 @@ Feature: Secure View
     Access to this resource has been denied because it is in view-only mode.
     """
 
+  @skipOnOcV10.3
   Scenario: Admin enables secure view and user shares without edit permissions and with secure view enabled and print disabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "user0" has been created with default attributes and skeleton files
@@ -255,6 +261,7 @@ Feature: Secure View
     Access to this resource has been denied because it is in view-only mode.
     """
 
+  @skipOnOcV10.3
   @issue-enterprise-3441
   Scenario: Admin enables secure view and user shares with reshare permission and no edit permission, secure-view is not available to be set for the share
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
@@ -285,8 +292,8 @@ Feature: Secure View
       | share_with_displayname | User One       |
     And the additional sharing attributes for the response should be empty
 
-  @issue-enterprise-3441
-  Scenario: Admin enables secure view and user with reshare permission and edit permission, in reshare secure-view enabled by default without share permission
+  @skipOnOcV10.3 @issue-enterprise-3441
+  Scenario: Reshare in secure-view is disabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "user0" has been created with default attributes and skeleton files
     And user "user1" has been created with default attributes and without skeleton files
@@ -306,34 +313,15 @@ Feature: Secure View
     And the additional sharing attributes for the response should be empty
     And the user re-logs in as "user1" using the webUI
     And the user shares folder "simple-folder" with user "User Two" using the webUI
-    And user "user1" gets the info of the last share using the sharing API
-    Then the fields of the last response should include
-      | path                   | /simple-folder |
-      | permissions            | read           |
-      | uid_owner              | user1          |
-      | share_with             | user2          |
-      | share_with_displayname | User Two       |
-    And the additional sharing attributes for the response should include
-      | scope         | key                 | enabled |
-      | permissions   | download            | false   |
-      | richdocuments | view-with-watermark | true    |
-      | richdocuments | print               | false   |
-    And the user sets the sharing permissions of user "User Two" for "simple-folder" using the webUI to
-      | share        | yes |
-    And user "user1" gets the info of the last share using the sharing API
-    Then the fields of the last response should include
-      | path                   | /simple-folder |
-      | permissions            | read,share     |
-      | uid_owner              | user1          |
-      | share_with             | user2          |
-      | share_with_displayname | User Two       |
-    And the additional sharing attributes for the response should be empty
+    Then a notification should be displayed on the webUI with the text 'Cannot set the requested share attributes for simple-folder'
+    And as "user2" folder "/simple-folder" should not exist
 
-  @issue-enterprise-3441
-  Scenario: Admin enables secure view and user shares without edit permissions, user tries to share with both secure-view and resharing enabled
+  @skipOnOcV10.3 @issue-enterprise-3441
+  Scenario: Reshare in secure-view is disabled for previous share even after share permission
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "user0" has been created with default attributes and skeleton files
     And user "user1" has been created with default attributes and without skeleton files
+    And user "user2" has been created with default attributes and without skeleton files
     And user "user0" has logged in using the webUI
     When the user shares folder "simple-folder" with user "User One" using the webUI
     And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
@@ -362,5 +350,7 @@ Feature: Secure View
       | share_with             | user1          |
       | share_with_displayname | User One       |
     And the additional sharing attributes for the response should be empty
-
+    But user "user1" should not be able to share file "simple-folder" with user "user2" using the sharing API
+    And the OCS status code should be "404"
+    And the HTTP status code should be "200"
 
