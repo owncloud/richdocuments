@@ -77,13 +77,17 @@ var RichdocumentsShareOptions = {
 	 * @param properties
 	 */
 	updateShareProperties: function(shareId, properties) {
-		var that = this;
+		if (_.isUndefined(properties.permissions) && _.isUndefined(properties.attributes)) {
+			// no attribute or permission change, ignore
+			return properties;
+		}
+
 		var updatedProperties = properties;
 		updatedProperties.attributes = properties.attributes || {};
 
 		// if download permission got disabled, enable secure-view
 		// feature (allow viewing, but only with watermark)
-		var canDownloadAttr = that._getAttribute(properties.attributes, "permissions", "download");
+		var canDownloadAttr = this._getAttribute(properties.attributes, "permissions", "download");
 		if (canDownloadAttr && canDownloadAttr.enabled === false) {
 			updatedProperties.attributes = this._updateAttributes(
 				updatedProperties.attributes, "richdocuments", "view-with-watermark", true
@@ -99,7 +103,7 @@ var RichdocumentsShareOptions = {
 		updatedProperties.attributes = this._updateAttributes(
 			updatedProperties.attributes, "permissions", "download", null
 		);
-		updatedProperties.attributes = that._updateAttributes(
+		updatedProperties.attributes = this._updateAttributes(
 			updatedProperties.attributes, "richdocuments", "view-with-watermark", null
 		);
 		updatedProperties.attributes = this._updateAttributes(

@@ -293,7 +293,7 @@ Feature: Secure View
     And the additional sharing attributes for the response should be empty
 
   @skipOnOcV10.3 @issue-enterprise-3441
-  Scenario: Reshare in secure-view is disabled
+  Scenario: When resharing a folder and secure-view is enabled by default, receiver has secure-view enabled by default
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "user0" has been created with default attributes and skeleton files
     And user "user1" has been created with default attributes and without skeleton files
@@ -313,8 +313,14 @@ Feature: Secure View
     And the additional sharing attributes for the response should be empty
     And the user re-logs in as "user1" using the webUI
     And the user shares folder "simple-folder" with user "User Two" using the webUI
-    Then a notification should be displayed on the webUI with the text 'Cannot set the requested share attributes for simple-folder'
-    And as "user2" folder "/simple-folder" should not exist
+    And user "user1" gets the info of the last share using the sharing API
+    Then the fields of the last response should include
+      | permissions            | read           |
+    And the additional sharing attributes for the response should include
+      | scope         | key                 | enabled |
+      | permissions   | download            | false   |
+      | richdocuments | view-with-watermark | true    |
+      | richdocuments | print               | false   |
 
   @skipOnOcV10.3 @issue-enterprise-3441
   Scenario: Reshare in secure-view is disabled for previous share even after share permission
