@@ -293,7 +293,7 @@ Feature: Secure View
     And the additional sharing attributes for the response should be empty
 
   @skipOnOcV10.3 @issue-enterprise-3441
-  Scenario: When reshare a file with secure-view enabled by default, receiver has secure-view enabled by default
+  Scenario: When resharing a folder and secure-view is enabled by default, receiver has secure-view enabled by default
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "user0" has been created with default attributes and skeleton files
     And user "user1" has been created with default attributes and without skeleton files
@@ -317,6 +317,7 @@ Feature: Secure View
     Then the fields of the last response should include
       | permissions            | read           |
     And the additional sharing attributes for the response should include
+      | scope         | key                 | enabled |
       | permissions   | download            | false   |
       | richdocuments | view-with-watermark | true    |
       | richdocuments | print               | false   |
