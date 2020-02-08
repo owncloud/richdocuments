@@ -497,7 +497,7 @@ steps:
 services:
 - name: oracle
   pull: always
-  image: deepdiver/docker-oracle-xe-11g:latest
+  image: owncloudci/oracle-xe:latest
   environment:
     ORACLE_DB: XE
     ORACLE_DISABLE_ASYNCH_IO: true
@@ -707,6 +707,7 @@ steps:
   image: owncloudci/php:7.1
   commands:
   - chown -R www-data /var/www/owncloud/server
+  - wait-for-it -t 600 server:80
 
 - name: acceptance-tests
   pull: always
@@ -742,12 +743,8 @@ services:
 - name: server
   pull: always
   image: owncloudci/php:7.1
-  command:
-  - /usr/local/bin/apachectl
-  - -e
-  - debug
-  - -D
-  - FOREGROUND
+  commands:
+  - /usr/local/bin/apachectl -e debug -D FOREGROUND
   environment:
     APACHE_WEBROOT: /var/www/owncloud/server
 
@@ -822,6 +819,7 @@ steps:
   image: owncloudci/php:7.2
   commands:
   - chown -R www-data /var/www/owncloud/server
+  - wait-for-it -t 600 server:80
 
 - name: acceptance-tests
   pull: always
@@ -857,12 +855,8 @@ services:
 - name: server
   pull: always
   image: owncloudci/php:7.2
-  command:
-  - /usr/local/bin/apachectl
-  - -e
-  - debug
-  - -D
-  - FOREGROUND
+  commands:
+  - /usr/local/bin/apachectl -e debug -D FOREGROUND
   environment:
     APACHE_WEBROOT: /var/www/owncloud/server
 
@@ -937,6 +931,7 @@ steps:
   image: owncloudci/php:7.3
   commands:
   - chown -R www-data /var/www/owncloud/server
+  - wait-for-it -t 600 server:80
 
 - name: acceptance-tests
   pull: always
@@ -972,12 +967,8 @@ services:
 - name: server
   pull: always
   image: owncloudci/php:7.3
-  command:
-  - /usr/local/bin/apachectl
-  - -e
-  - debug
-  - -D
-  - FOREGROUND
+  commands:
+  - /usr/local/bin/apachectl -e debug -D FOREGROUND
   environment:
     APACHE_WEBROOT: /var/www/owncloud/server
 
@@ -1052,6 +1043,7 @@ steps:
   image: owncloudci/php:7.1
   commands:
   - chown -R www-data /var/www/owncloud/server
+  - wait-for-it -t 600 server:80
 
 - name: acceptance-tests
   pull: always
@@ -1088,12 +1080,8 @@ services:
 - name: server
   pull: always
   image: owncloudci/php:7.1
-  command:
-  - /usr/local/bin/apachectl
-  - -e
-  - debug
-  - -D
-  - FOREGROUND
+  commands:
+  - /usr/local/bin/apachectl -e debug -D FOREGROUND
   environment:
     APACHE_WEBROOT: /var/www/owncloud/server
 
@@ -1168,6 +1156,7 @@ steps:
   image: owncloudci/php:7.2
   commands:
   - chown -R www-data /var/www/owncloud/server
+  - wait-for-it -t 600 server:80
 
 - name: acceptance-tests
   pull: always
@@ -1204,12 +1193,8 @@ services:
 - name: server
   pull: always
   image: owncloudci/php:7.2
-  command:
-  - /usr/local/bin/apachectl
-  - -e
-  - debug
-  - -D
-  - FOREGROUND
+  commands:
+  - /usr/local/bin/apachectl -e debug -D FOREGROUND
   environment:
     APACHE_WEBROOT: /var/www/owncloud/server
 
@@ -1284,6 +1269,7 @@ steps:
   image: owncloudci/php:7.3
   commands:
   - chown -R www-data /var/www/owncloud/server
+  - wait-for-it -t 600 server:80
 
 - name: acceptance-tests
   pull: always
@@ -1320,12 +1306,8 @@ services:
 - name: server
   pull: always
   image: owncloudci/php:7.3
-  command:
-  - /usr/local/bin/apachectl
-  - -e
-  - debug
-  - -D
-  - FOREGROUND
+  commands:
+  - /usr/local/bin/apachectl -e debug -D FOREGROUND
   environment:
     APACHE_WEBROOT: /var/www/owncloud/server
 
@@ -1400,6 +1382,7 @@ steps:
   image: owncloudci/php:7.1
   commands:
   - chown -R www-data /var/www/owncloud/server
+  - wait-for-it -t 600 server:80
 
 - name: acceptance-tests
   pull: always
@@ -1435,12 +1418,8 @@ services:
 - name: server
   pull: always
   image: owncloudci/php:7.1
-  command:
-  - /usr/local/bin/apachectl
-  - -e
-  - debug
-  - -D
-  - FOREGROUND
+  commands:
+  - /usr/local/bin/apachectl -e debug -D FOREGROUND
   environment:
     APACHE_WEBROOT: /var/www/owncloud/server
 
@@ -1515,6 +1494,7 @@ steps:
   image: owncloudci/php:7.2
   commands:
   - chown -R www-data /var/www/owncloud/server
+  - wait-for-it -t 600 server:80
 
 - name: acceptance-tests
   pull: always
@@ -1550,12 +1530,8 @@ services:
 - name: server
   pull: always
   image: owncloudci/php:7.2
-  command:
-  - /usr/local/bin/apachectl
-  - -e
-  - debug
-  - -D
-  - FOREGROUND
+  commands:
+  - /usr/local/bin/apachectl -e debug -D FOREGROUND
   environment:
     APACHE_WEBROOT: /var/www/owncloud/server
 
@@ -1630,6 +1606,7 @@ steps:
   image: owncloudci/php:7.3
   commands:
   - chown -R www-data /var/www/owncloud/server
+  - wait-for-it -t 600 server:80
 
 - name: acceptance-tests
   pull: always
@@ -1665,12 +1642,8 @@ services:
 - name: server
   pull: always
   image: owncloudci/php:7.3
-  command:
-  - /usr/local/bin/apachectl
-  - -e
-  - debug
-  - -D
-  - FOREGROUND
+  commands:
+  - /usr/local/bin/apachectl -e debug -D FOREGROUND
   environment:
     APACHE_WEBROOT: /var/www/owncloud/server
 
@@ -1745,6 +1718,7 @@ steps:
   image: owncloudci/php:7.1
   commands:
   - chown -R www-data /var/www/owncloud/server
+  - wait-for-it -t 600 server:80
 
 - name: acceptance-tests
   pull: always
@@ -1781,12 +1755,8 @@ services:
 - name: server
   pull: always
   image: owncloudci/php:7.1
-  command:
-  - /usr/local/bin/apachectl
-  - -e
-  - debug
-  - -D
-  - FOREGROUND
+  commands:
+  - /usr/local/bin/apachectl -e debug -D FOREGROUND
   environment:
     APACHE_WEBROOT: /var/www/owncloud/server
 
@@ -1861,6 +1831,7 @@ steps:
   image: owncloudci/php:7.2
   commands:
   - chown -R www-data /var/www/owncloud/server
+  - wait-for-it -t 600 server:80
 
 - name: acceptance-tests
   pull: always
@@ -1897,12 +1868,8 @@ services:
 - name: server
   pull: always
   image: owncloudci/php:7.2
-  command:
-  - /usr/local/bin/apachectl
-  - -e
-  - debug
-  - -D
-  - FOREGROUND
+  commands:
+  - /usr/local/bin/apachectl -e debug -D FOREGROUND
   environment:
     APACHE_WEBROOT: /var/www/owncloud/server
 
@@ -1977,6 +1944,7 @@ steps:
   image: owncloudci/php:7.3
   commands:
   - chown -R www-data /var/www/owncloud/server
+  - wait-for-it -t 600 server:80
 
 - name: acceptance-tests
   pull: always
@@ -2013,12 +1981,8 @@ services:
 - name: server
   pull: always
   image: owncloudci/php:7.3
-  command:
-  - /usr/local/bin/apachectl
-  - -e
-  - debug
-  - -D
-  - FOREGROUND
+  commands:
+  - /usr/local/bin/apachectl -e debug -D FOREGROUND
   environment:
     APACHE_WEBROOT: /var/www/owncloud/server
 
