@@ -2,7 +2,11 @@
 <info>
 	<id>richdocuments</id>
 	<name>Collabora Online</name>
-	<description>Collabora Online allows you to to work with all kinds of office documents directly in your browser. This application can connect to a Collabora Online (or other) server (WOPI-like Client). ownCloud is the WOPI Host. Please read the documentation to learn more about that.</description>
+	<description><![CDATA[Collabora Online allows you to to work with all kinds of office documents directly in your browser.
+
+This application can connect to a Collabora Online (or other) server (WOPI-like Client). ownCloud is the WOPI Host. Please read the documentation to learn more about that.
+
+You can also edit your documents off-line with the Collabora Office app from the **[Android](https://play.google.com/store/apps/details?id=com.collabora.libreoffice)** and **[iOS](https://apps.apple.com/us/app/collabora-office/id1440482071)** store.]]></description>
 	<summary>Edit office documents directly in your browser.</summary>
 	<licence>AGPL</licence>
 	<version>2.3.0</version>
