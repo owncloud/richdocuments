@@ -351,7 +351,7 @@ class DocumentController extends Controller {
 		}
 		$retVal = \array_merge($retVal, $docRetVal);
 
-		$response = new TemplateResponse('richdocuments', 'documents', $retVal);
+		$response = new TemplateResponse('richdocuments', 'documents', $retVal, 'base');
 		$policy = new ContentSecurityPolicy();
 		$policy->addAllowedFrameDomain($this->domainOnly($wopiRemote));
 		$policy->allowInlineScript(true);
