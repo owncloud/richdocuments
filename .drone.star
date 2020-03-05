@@ -59,7 +59,8 @@ config = {
 	'defaults': {
 		'acceptance': {
 			'servers': [
-				'daily-master-qa'
+				'daily-master-qa',
+				'latest'
 			],
 		}
 	}
