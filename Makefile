@@ -37,8 +37,7 @@ appstore:
 	--exclude=.git \
 	--exclude=.phan \
 	--exclude=build \
-	--exclude=.drone.starlark \
-	--exclude=.drone.yml \
+	--exclude=.drone.star \
 	--exclude=.gitignore \
 	--exclude=.php_cs.cache \
 	--exclude=.php_cs.dist \
