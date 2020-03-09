@@ -17,6 +17,23 @@ script('richdocuments', 'documents');
 script('files', 'file-upload');
 script('files', 'jquery.fileupload');
 ?>
+
+<?php if ($_['show_custom_header']): ?>
+	<div id="notification-container">
+		<div id="notification"></div>
+	</div>
+	<header role="banner">
+		<div id="header">
+			<a href="<?php print_unescaped(link_to('', 'index.php')); ?>" id="owncloud" tabindex="1">
+				<h1 class="logo-icon">
+					<?php print_unescaped($theme->getHTMLName()); ?>
+				</h1>
+			</a>
+			<div id="logo-claim" style="display:none;"><?php print_unescaped($theme->getLogoClaim()); ?></div>
+		</div>
+	</header>
+<?php endif; ?>
+
 <div id="documents-content">
 	<ul class="documentslist">
 		<li class="add-document">
