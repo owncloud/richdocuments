@@ -36,7 +36,8 @@ class HookHandler {
 				'secureViewHasWatermark' => \json_decode($richdocumentsConfig->getAppValue('secure_view_has_watermark_default')),
 				'secureViewCanPrint' => \json_decode($richdocumentsConfig->getAppValue('secure_view_can_print_default')),
 			],
-			'secureViewAllowed' => \json_decode($richdocumentsConfig->getAppValue('secure_view_option'))
+			'secureViewAllowed' => \json_decode($richdocumentsConfig->getAppValue('secure_view_option')),
+			'openInNewTab' => \json_decode($richdocumentsConfig->getAppValue('open_in_new_tab'))
 		];
 	}
 }
