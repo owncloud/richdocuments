@@ -877,6 +877,10 @@ class DocumentController extends Controller {
 
 		//TODO: Support X-WOPIMaxExpectedSize header.
 		$res = $row->getWopiForToken($token);
+		if ($res == false) {
+			$this->logger->debug('wopiGetFile(): getWopiForToken() failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
 
 		$file = $this->getFileHandle($fileId, $res['owner'], $res['editor']);
 		if (!$file) {
