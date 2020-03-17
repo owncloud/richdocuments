@@ -2,8 +2,10 @@
 /**
  * ownCloud - Richdocuments App
  *
- * @author Victor Dubiniuk
- * @copyright 2014 Victor Dubiniuk victor.dubiniuk@gmail.com
+ * @author Viktar Dubiniuk <dubiniuk@owncloud.com>
+ *
+ * @copyright Copyright (c) 2020, ownCloud GmbH
+ * @license AGPL-3.0
  *
  * This file is licensed under the Affero General Public License version 3 or
  * later.
@@ -20,6 +22,7 @@ use \OCA\Richdocuments\AppConfig;
 use OCP\IContainer;
 use OCP\IUser;
 use OCP\Share;
+use OCP\Util;
 
 class Application extends App {
 	public function __construct(array $urlParams = []) {
@@ -118,10 +121,7 @@ class Application extends App {
 			//Script for registering file actions
 			$container->getServer()->getEventDispatcher()->addListener(
 				'OCA\Files::loadAdditionalScripts',
-				function () {
-					\OCP\Util::addScript('richdocuments', 'viewer/viewer');
-					\OCP\Util::addStyle('richdocuments', 'viewer/odfviewer');
-				}
+				[$this, 'addViewerScripts']
 			);
 
 			$secureViewOption = $container->getServer()->getConfig()->getAppValue('richdocuments', 'secure_view_option');
@@ -130,7 +130,7 @@ class Application extends App {
 				$container->getServer()->getEventDispatcher()->addListener(
 					'OCA\Files::loadAdditionalScripts',
 					function () {
-						\OCP\Util::addScript('richdocuments', 'viewer/shareoptions');
+						Util::addScript('richdocuments', 'viewer/shareoptions');
 					}
 				);
 			}
@@ -145,10 +145,31 @@ class Application extends App {
 		}
 
 		if ($this->publicLinksAllowedToUseCollabora()) {
-			\OCP\Util::connectHook(Share::class, "share_link_access", \OCA\Richdocuments\HookHandler::class, "addViewerScripts");
+			Util::connectHook(Share::class, "share_link_access", $this, "addViewerScripts");
 		}
 
-		\OCP\Util::connectHook('\OCP\Config', 'js', \OCA\Richdocuments\HookHandler::class, 'addConfigScripts');
+		Util::connectHook('\OCP\Config', 'js', $this, 'addConfigScripts');
+	}
+
+	public function addViewerScripts() {
+		Util::addScript('richdocuments', 'viewer/viewer');
+		Util::addStyle('richdocuments', 'viewer/odfviewer');
+	}
+
+	/**
+	 * @param mixed $array passed by reference when dispatching \OCP\Config 'js' hook
+	 */
+	public function addConfigScripts($array) {
+		$appConfig = $this->getContainer()->query(AppConfig::class);
+		$array['array']['oc_appconfig']['richdocuments'] = [
+			'defaultShareAttributes' => [
+				// is secure view is enabled for read-only shares, user cannot download by default
+				'secureViewHasWatermark' => \json_decode($appConfig->getAppValue('secure_view_has_watermark_default')),
+				'secureViewCanPrint' => \json_decode($appConfig->getAppValue('secure_view_can_print_default')),
+			],
+			'secureViewAllowed' => \json_decode($appConfig->getAppValue('secure_view_option')),
+			'openInNewTab' => \json_decode($appConfig->getAppValue('open_in_new_tab'))
+		];
 	}
 
 	private function publicLinksAllowedToUseCollabora() {

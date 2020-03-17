@@ -2,8 +2,10 @@
 /**
  * ownCloud - Richdocuments App
  *
- * @author Victor Dubiniuk
- * @copyright 2015 Victor Dubiniuk victor.dubiniuk@gmail.com
+ * @author Viktar Dubiniuk <dubiniuk@owncloud.com>
+ *
+ * @copyright Copyright (c) 2020, ownCloud GmbH
+ * @license AGPL-3.0
  *
  * This file is licensed under the Affero General Public License version 3 or
  * later.
