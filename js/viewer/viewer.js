@@ -88,7 +88,12 @@ var odfViewer = {
 			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}', {file_id: fileId});
 		}
 
-		window.open(url,'_blank');
+		if (OC.appConfig.richdocuments.openInNewTab === true) {
+			window.open(url,'_blank');
+		} else {
+			window.location = url;
+		}
+
 	},
 
 	onView: function(filename, context) {

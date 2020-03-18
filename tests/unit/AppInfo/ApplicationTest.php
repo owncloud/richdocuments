@@ -86,7 +86,6 @@ class ApplicationTest extends \Test\TestCase {
 		$this->assertArrayHasKey("OCP\Share", $hooks);
 		$this->assertArrayHasKey("share_link_access", $hooks["OCP\Share"]);
 		$this->assertEquals("addViewerScripts", $hooks["OCP\Share"]["share_link_access"][0]["name"]);
-		$this->assertEquals("OCA\Richdocuments\HookHandler", $hooks["OCP\Share"]["share_link_access"][0]["class"]);
 	}
 
 	/**

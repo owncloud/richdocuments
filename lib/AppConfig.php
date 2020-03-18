@@ -2,8 +2,10 @@
 /**
  * ownCloud - Richdocuments App
  *
- * @author Victor Dubiniuk
- * @copyright 2015 Victor Dubiniuk victor.dubiniuk@gmail.com
+ * @author Viktar Dubiniuk <dubiniuk@owncloud.com>
+ *
+ * @copyright Copyright (c) 2020, ownCloud GmbH
+ * @license AGPL-3.0
  *
  * This file is licensed under the Affero General Public License version 3 or
  * later.
@@ -20,7 +22,8 @@ class AppConfig {
 		'wopi_url' => 'https://localhost:9980',
 		'secure_view_option' => 'false',
 		'secure_view_can_print_default' => 'false',
-		'secure_view_has_watermark_default' => 'true'
+		'secure_view_has_watermark_default' => 'true',
+		'open_in_new_tab' => 'true'
 	];
 
 	private $config;
