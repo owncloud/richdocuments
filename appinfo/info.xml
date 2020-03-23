@@ -26,4 +26,7 @@ You can also edit your documents off-line with the Collabora Office app from the
 	<screenshot>https://owncloud.com/wp-content/uploads/2016/07/code_v2_impress-1-1024x576.png</screenshot>
 	<ocsid>174727</ocsid>
 	<use-migrations>true</use-migrations>
+	<background-jobs>
+		<job>OCA\Richdocuments\BackgroundJob\CleanupExpiredWopiTokens</job>
+	</background-jobs>
 </info>

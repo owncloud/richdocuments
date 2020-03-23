@@ -79,10 +79,9 @@ class Wopi extends \OCA\Richdocuments\Db {
 		return $token;
 	}
 
-	/*
-	 * Given a token, validates it and
-	 * constructs and validates the path.
-	 * Returns the path, if valid, else false.
+	/**
+	 * @param string $token
+	 * @return array | false for invalid token
 	 */
 	public function getWopiForToken($token) {
 		$wopi = new Wopi();
@@ -90,18 +89,8 @@ class Wopi extends \OCA\Richdocuments\Db {
 		\OC::$server->getLogger()->debug('Loaded WOPI Token record: {row}.', [
 			'app' => self::appName,
 			'row' => $row ]);
-		if (\count($row) == 0) {
-			// Invalid token.
-			\http_response_code(401);
+		if (\count($row) == 0 || $row['expiry'] <= \time()) {
 			return false;
-		}
-
-		//TODO: validate.
-		if ($row['expiry'] > \time()) {
-			// Expired token!
-			//http_response_code(404);
-			//$wopi->deleteBy('id', $row['id']);
-			//return false;
 		}
 
 		return [
