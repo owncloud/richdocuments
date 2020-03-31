@@ -294,7 +294,7 @@ class DocumentController extends Controller {
 	public function index($fileId, $dir) {
 		// Normal editing and user/group share editing
 		// Parameter $dir is not used during indexing, but might be used by Document Server
-		return $this->handleIndex($fileId, null);
+		return $this->handleIndex($fileId, null, 'user');
 	}
 
 	/**
@@ -304,7 +304,7 @@ class DocumentController extends Controller {
 	 */
 	public function publicIndex($fileId, $shareToken) {
 		// Public share link (folder or file)
-		return $this->handleIndex($fileId, $shareToken);
+		return $this->handleIndex($fileId, $shareToken, 'base');
 	}
 
 	/**
@@ -315,9 +315,10 @@ class DocumentController extends Controller {
 	 *
 	 * @param string|null $fileId
 	 * @param string|null $shareToken
+	 * @param string $renderAs the template layout to be used
 	 * @return TemplateResponse
 	 */
-	private function handleIndex($fileId, $shareToken) {
+	private function handleIndex($fileId, $shareToken, $renderAs) {
 		// Handle general response
 		$wopiRemote = $this->getWopiUrl($this->isTester());
 		if (($parts = \parse_url($wopiRemote)) && isset($parts['scheme'], $parts['host'])) {
@@ -340,7 +341,8 @@ class DocumentController extends Controller {
 			'wopi_url' => $webSocket,
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
 			'instanceId' => $this->settings->getSystemValue('instanceid'),
-			'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot')
+			'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
+			'show_custom_header' => $renderAs === 'base'  // public link should show a customer header without buttons
 		];
 
 		// Get doc index if possible
@@ -351,7 +353,7 @@ class DocumentController extends Controller {
 		}
 		$retVal = \array_merge($retVal, $docRetVal);
 
-		$response = new TemplateResponse('richdocuments', 'documents', $retVal);
+		$response = new TemplateResponse('richdocuments', 'documents', $retVal, $renderAs);
 		$policy = new ContentSecurityPolicy();
 		$policy->addAllowedFrameDomain($this->domainOnly($wopiRemote));
 		$policy->allowInlineScript(true);
