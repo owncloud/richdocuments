@@ -47,7 +47,7 @@ abstract class Db {
 	
 	/**
 	 * Get single record by primary key
-	 * @param int $value primary key value
+	 * @param int|array $value primary key value
 	 * @return \OCA\Richdocuments\Db
 	 */
 	public function load($value) {
@@ -69,7 +69,7 @@ abstract class Db {
 	 * @param string $field for WHERE condition
 	 * @param mixed $value matching value(s)
 	 * @return \OCA\Richdocuments\Db
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function loadBy($field, $value) {
 		if (!\is_array($value)) {
@@ -80,7 +80,7 @@ abstract class Db {
 		if (!\is_array($data) || !\count($data)) {
 			$this->data = [];
 		} elseif (\count($data)!=1) {
-			throw new Exception('Duplicate ' . $value . ' for the filed ' . $field);
+			throw new \Exception('Duplicate [' . \implode(', ', $value) . '] for the filed ' . $field);
 		} else {
 			$this->data = $data[0];
 		}

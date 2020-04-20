@@ -66,7 +66,7 @@ class DocumentController extends Controller {
 	}
 
 	/**
-	 * @param \SimpleXMLElement $discovery_parsed
+	 * @param \SimpleXMLElement|null $discovery_parsed
 	 * @param string $mimetype
 	 */
 	private function getWopiSrcUrl($discovery_parsed, $mimetype) {
@@ -313,7 +313,7 @@ class DocumentController extends Controller {
 	 * - file in user folder (also shared by user/group) if fileId not null and shareToken is null
 	 * - public link (public file share or file in public folder share identified by fileId) if shareToken is not null
 	 *
-	 * @param string|null $fileId
+	 * @param string|int|null $fileId
 	 * @param string|null $shareToken
 	 * @param string $renderAs the template layout to be used
 	 * @return TemplateResponse
@@ -367,7 +367,7 @@ class DocumentController extends Controller {
 	 * - file in user folder if fileId and currently authenticated user are specified, and shareToken is null
 	 * - public link (public file share or file in public folder share identified by fileId) if shareToken is not null
 	 *
-	 * @param string|null $fileId
+	 * @param int|null $fileId
 	 * @param string|null $shareToken
 	 * @param string|null $currentUser
 	 *
@@ -592,6 +592,7 @@ class DocumentController extends Controller {
 
 		// get file info
 		$info = $view->getFileInfo($path);
+		/** @var \OCA\Files_Sharing\SharedStorage $storage */
 		$storage = $info->getStorage();
 
 		// check if secure mode feature has been enabled for shares
@@ -660,7 +661,7 @@ class DocumentController extends Controller {
 
 	/**
 	 * @param string $userId
-	 * @param string $fileId
+	 * @param string|int $fileId
 	 * @return null|array
 	 */
 	private function getDocumentByUserAuth($userId, $fileId) {
@@ -672,7 +673,7 @@ class DocumentController extends Controller {
 
 	/**
 	 * @param string $token
-	 * @param string $fileId
+	 * @param string|int $fileId
 	 * @return null|array
 	 */
 	private function getDocumentByShareToken($token, $fileId = null) {
@@ -971,13 +972,13 @@ class DocumentController extends Controller {
 	 * Priviledged put to original (owner) file as editor
 	 * for given fileId
 	 *
-	 * @param $fileId
-	 * @param $owner
-	 * @param $editor
-	 * @param $wopiHeaderTime
+	 * @param int $fileId
+	 * @param string $owner
+	 * @param string $editor
+	 * @param string $wopiHeaderTime
 	 * @return JSONResponse
 	 */
-	private function put($fileId, $owner, $editor, $wopiHeaderTime) {
+	private function put($fileId, string $owner, $editor, $wopiHeaderTime) {
 		$file = $this->getFileHandle($fileId, $owner, $editor);
 		if (!$file) {
 			$this->logger->warning('wopiPutFile(): Could not retrieve file', ['app' => $this->appName]);
@@ -1021,10 +1022,10 @@ class DocumentController extends Controller {
 	 * Priviledged put relative to original (owner) file as editor
 	 * for given fileId
 	 *
-	 * @param $fileId
-	 * @param $owner
-	 * @param $editor
-	 * @param $suggested
+	 * @param int $fileId
+	 * @param string $owner
+	 * @param string $editor
+	 * @param string $suggested
 	 *
 	 * @return JSONResponse
 	 */
@@ -1084,7 +1085,7 @@ class DocumentController extends Controller {
 		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 
 		// Continue editing
-		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_DOWNLOAD | WOPI::ATTR_CAN_PRINT;
+		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_PRINT;
 		$wopiToken = $row->generateToken($file->getId(), 0, $attributes, $serverHost, $owner, $editor);
 
 		$wopi = 'index.php/apps/richdocuments/wopi/files/' . $file->getId() . '_' . $this->settings->getSystemValue('instanceid') . '?access_token=' . $wopiToken;
@@ -1097,9 +1098,9 @@ class DocumentController extends Controller {
 	 * Get priviledged access to original (owner) file handle as editor
 	 * for given fileId
 	 *
-	 * @param $fileId
-	 * @param $owner
-	 * @param $editor
+	 * @param int $fileId
+	 * @param string $owner
+	 * @param string $editor
 	 *
 	 * @return null|\OCP\Files\File
 	 */
@@ -1136,8 +1137,8 @@ class DocumentController extends Controller {
 		\OC_Util::setupFS($owner);
 		$userFolder = \OC::$server->getRootFolder()->getUserFolder($owner);
 		$files = $userFolder->getById($fileId);
-		if ($files && ($file = $files[0]) && $file instanceof File) {
-			return $file;
+		if ($files !== [] && $files[0] instanceof File) {
+			return $files[0];
 		}
 		return null;
 	}

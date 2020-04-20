@@ -49,7 +49,7 @@ class SettingsController extends Controller {
 		return new TemplateResponse(
 			$this->appName,
 			'settings',
-			'blank'
+			['blank']
 		);
 	}
 

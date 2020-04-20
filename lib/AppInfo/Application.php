@@ -89,7 +89,7 @@ class Application extends App {
 		});
 		$container->registerService('UserId', function ($c) {
 			/** @var IContainer $c */
-			/** @var IUser $user */
+			/** @var IUser|null $user */
 			$user = $c->query('ServerContainer')->getUserSession()->getUser();
 			$uid = $user === null ? '' : $user->getUID();
 			return $uid;
@@ -179,6 +179,7 @@ class Application extends App {
 
 	private function isUserAllowedToUseCollabora() {
 		// no user -> no
+		/** @var \OCP\IUserSession|null $userSession */
 		$userSession = $this->getContainer()->getServer()->getUserSession();
 		if ($userSession === null || !$userSession->isLoggedIn()) {
 			return false;
