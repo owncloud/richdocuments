@@ -43,8 +43,7 @@ config = {
 				'webUISecureView': 'webUISecV',
 			},
 			'phpVersions': [
-				'7.2',
-				'7.3',
+				'7.4',
 			],
 			'browsers': [
 				'chrome',
@@ -1183,7 +1182,7 @@ def installCore(version, db, useBundledApp):
 		'image': 'owncloudci/core',
 		'pull': 'always',
 		'settings': {
-			'version': version,
+			'git_reference': 'php7.4-20200310',
 			'core_path': '/var/www/owncloud/server',
 			'db_type': dbType,
 			'db_name': database,
