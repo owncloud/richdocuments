@@ -80,7 +80,7 @@ abstract class Db {
 		if (!\is_array($data) || !\count($data)) {
 			$this->data = [];
 		} elseif (\count($data)!=1) {
-			throw new \Exception('Duplicate [' . \implode(', ', $value) . '] for the filed ' . $field);
+			throw new \Exception('Duplicate [' . \implode(', ', $value) . '] for the field ' . $field);
 		} else {
 			$this->data = $data[0];
 		}

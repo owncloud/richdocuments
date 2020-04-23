@@ -50,18 +50,18 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 				$parts = \explode('-', $range);
 
 				if ($parts[0]==='' && $parts[1]=='') {
-					$this->sendNotSatisfiable($size);
+					$this->sendRangeNotSatisfiable($size);
 				}
 				if ($parts[0]==='') {
-					$start = $size - \strlen($parts[1]);
+					$start = $size - (int)$parts[1];
 					$end = $size - 1;
 				} else {
 					$start = $parts[0];
-					$end = ($parts[1]==='') ? $size - 1 : \strlen($parts[1]);
+					$end = ($parts[1]==='') ? $size - 1 : (int)$parts[1];
 				}
 
 				if ($start > $end) {
-					$this->sendNotSatisfiable($size);
+					$this->sendRangeNotSatisfiable($size);
 				}
 
 				$buffer = \substr($data['content'], $start, $end - $start);

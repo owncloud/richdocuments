@@ -367,7 +367,7 @@ class DocumentController extends Controller {
 	 * - file in user folder if fileId and currently authenticated user are specified, and shareToken is null
 	 * - public link (public file share or file in public folder share identified by fileId) if shareToken is not null
 	 *
-	 * @param int|null $fileId
+	 * @param string|int|null $fileId
 	 * @param string|null $shareToken
 	 * @param string|null $currentUser
 	 *
@@ -969,7 +969,7 @@ class DocumentController extends Controller {
 	}
 
 	/**
-	 * Priviledged put to original (owner) file as editor
+	 * Privileged put to original (owner) file as editor
 	 * for given fileId
 	 *
 	 * @param int $fileId
@@ -978,7 +978,7 @@ class DocumentController extends Controller {
 	 * @param string $wopiHeaderTime
 	 * @return JSONResponse
 	 */
-	private function put($fileId, string $owner, $editor, $wopiHeaderTime) {
+	private function put($fileId, $owner, $editor, $wopiHeaderTime) {
 		$file = $this->getFileHandle($fileId, $owner, $editor);
 		if (!$file) {
 			$this->logger->warning('wopiPutFile(): Could not retrieve file', ['app' => $this->appName]);
@@ -1019,7 +1019,7 @@ class DocumentController extends Controller {
 	}
 
 	/**
-	 * Priviledged put relative to original (owner) file as editor
+	 * Privileged put relative to original (owner) file as editor
 	 * for given fileId
 	 *
 	 * @param int $fileId
@@ -1095,7 +1095,7 @@ class DocumentController extends Controller {
 	}
 
 	/**
-	 * Get priviledged access to original (owner) file handle as editor
+	 * Get privileged access to original (owner) file handle as editor
 	 * for given fileId
 	 *
 	 * @param int $fileId

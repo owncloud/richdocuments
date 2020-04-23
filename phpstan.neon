@@ -5,3 +5,4 @@ parameters:
     - %currentWorkingDirectory%/appinfo/Migrations/*.php
     - %currentWorkingDirectory%/appinfo/routes.php
   ignoreErrors:
+    - '#Access to an undefined property OCP\\IRequest::\$post.#'
