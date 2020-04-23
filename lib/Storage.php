@@ -104,6 +104,7 @@ class Storage {
 
 		// If type of fileId is a string, then it
 		// doesn't work for shared documents, lets cast to int everytime
+		/** @var \OCP\Files\Node|null $document */
 		$document = $root->getById((int)$fileId)[0];
 		if ($document === null) {
 			return $this->reportError('Document for the fileId ' . $fileId . 'not found');
@@ -161,8 +162,10 @@ class Storage {
 
 			$node = $share->getNode();
 			if ($node->getType() == FileInfo::TYPE_FILE) {
+				/** @var \OCP\Files\Node|null $document */
 				$document = $node;
 			} elseif ($node->getType() == FileInfo::TYPE_FOLDER && $fileId !== null) {
+				/** @var \OCP\Files\Node|null $document */
 				$document = $node->getById($fileId)[0];
 			} else {
 				return $this->reportError('Cannot retrieve metadata for the node ' . $node->getPath());

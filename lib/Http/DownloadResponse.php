@@ -28,7 +28,10 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 		$this->request = $request;
 		$this->file = $file;
 	}
-	
+
+	/**
+	 * @return string|null
+	 */
 	public function render() {
 		$data = [
 			'mimetype' => $this->file->getMimeType(),
@@ -47,18 +50,18 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 				$parts = \explode('-', $range);
 
 				if ($parts[0]==='' && $parts[1]=='') {
-					$this->sendNotSatisfiable($size);
+					$this->sendRangeNotSatisfiable($size);
 				}
 				if ($parts[0]==='') {
-					$start = $size - $parts[1];
+					$start = $size - (int)$parts[1];
 					$end = $size - 1;
 				} else {
 					$start = $parts[0];
-					$end = ($parts[1]==='') ? $size - 1 : $parts[1];
+					$end = ($parts[1]==='') ? $size - 1 : (int)$parts[1];
 				}
 
 				if ($start > $end) {
-					$this->sendNotSatisfiable($size);
+					$this->sendRangeNotSatisfiable($size);
 				}
 
 				$buffer = \substr($data['content'], $start, $end - $start);
@@ -78,7 +81,7 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 		
 		$this->addHeader('Content-Type', $data['mimetype']);
 		$this->addContentDispositionHeader();
-		$this->addHeader('Content-Length', $size);
+		$this->addHeader('Content-Length', (string)$size);
 
 		return $data['content'];
 	}

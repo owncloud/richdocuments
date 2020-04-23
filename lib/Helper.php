@@ -60,7 +60,7 @@ class Helper {
 	 */
 	public static function toISO8601($time) {
 		// TODO: Be more precise and don't ignore milli, micro seconds ?
-		$datetime = DateTime::createFromFormat('U', $time, new DateTimeZone('UTC'));
+		$datetime = DateTime::createFromFormat('U', (string)$time, new DateTimeZone('UTC'));
 		if ($datetime) {
 			return $datetime->format('Y-m-d\TH:i:s.u\Z');
 		}
@@ -94,7 +94,7 @@ class Helper {
 	}
 
 	public static function getRandomColor() {
-		$str = \dechex(\floor(\rand(0, 16777215)));
+		$str = \dechex((int)\floor(\rand(0, 16777215)));
 		return '#' . \str_pad($str, 6, "0", STR_PAD_LEFT);
 	}
 
@@ -192,9 +192,9 @@ class Helper {
 		$dG *= 255;
 		$dB *= 255;
 
-		$dR = \str_pad(\dechex(\round($dR)), 2, "0", STR_PAD_LEFT);
-		$dG = \str_pad(\dechex(\round($dG)), 2, "0", STR_PAD_LEFT);
-		$dB = \str_pad(\dechex(\round($dB)), 2, "0", STR_PAD_LEFT);
+		$dR = \str_pad(\dechex((int)\round($dR)), 2, "0", STR_PAD_LEFT);
+		$dG = \str_pad(\dechex((int)\round($dG)), 2, "0", STR_PAD_LEFT);
+		$dB = \str_pad(\dechex((int)\round($dB)), 2, "0", STR_PAD_LEFT);
 		return $dR.$dG.$dB;
 	}
 }

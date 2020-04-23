@@ -1,3 +1,8 @@
 parameters:
+  inferPrivatePropertyTypeFromConstructor: true
   bootstrap: %currentWorkingDirectory%/../../lib/base.php
+  excludes_analyse:
+    - %currentWorkingDirectory%/appinfo/Migrations/*.php
+    - %currentWorkingDirectory%/appinfo/routes.php
   ignoreErrors:
+    - '#Access to an undefined property OCP\\IRequest::\$post.#'

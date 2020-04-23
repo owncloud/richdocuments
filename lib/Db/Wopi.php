@@ -39,12 +39,12 @@ class Wopi extends \OCA\Richdocuments\Db {
 	/**
 	 * Generate token for document being shared with public link
 	 *
-	 * @param $fileId
-	 * @param $version
-	 * @param $attributes
-	 * @param $serverHost
-	 * @param $owner
-	 * @param $editor
+	 * @param int $fileId
+	 * @param int $version
+	 * @param int $attributes
+	 * @param string $serverHost
+	 * @param string $owner
+	 * @param string $editor
 	 * @return string
 	 * @throws \Exception
 	 */

@@ -18,6 +18,8 @@ config = {
 		},
 	},
 
+	'phpstan': True,
+
 	'javascript': False,
 
 	'phpunit': {
