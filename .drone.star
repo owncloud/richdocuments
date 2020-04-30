@@ -49,23 +49,32 @@ config = {
 			'phpVersions': [
 				'7.2',
 				'7.3',
+			],
+			'browsers': [
+				'chrome',
+				'firefox'
+			],
+			'servers': [
+				'daily-master-qa',
+				'latest'
+			],
+		},
+		'webUI74': {
+			'suites': {
+				'webUISecureView': 'webUISecV',
+			},
+			'phpVersions': [
 				'7.4',
 			],
 			'browsers': [
 				'chrome',
 				'firefox'
 			],
-		},
-	},
-
-	'defaults': {
-		'acceptance': {
 			'servers': [
 				'daily-master-qa',
-				'latest'
 			],
-		}
-	}
+		},
+	},
 }
 
 def main(ctx):
