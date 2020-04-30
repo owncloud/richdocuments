@@ -1,9 +1,4 @@
 {
-  "config": {
-    "platform": {
-      "php": "7.1"
-    }
-  },
   "require": {
     "phpstan/phpstan": "^0.12"
   }
