@@ -14,6 +14,7 @@ config = {
 			'phpVersions': [
 				'7.2',
 				'7.3',
+				'7.4',
 			],
 		},
 	},
@@ -31,6 +32,7 @@ config = {
 		'reducedDatabases' : {
 			'phpVersions': [
 				'7.3',
+				'7.4',
 			],
 			'databases': [
 				'mysql:5.5',
@@ -52,17 +54,27 @@ config = {
 				'chrome',
 				'firefox'
 			],
-		},
-	},
-
-	'defaults': {
-		'acceptance': {
 			'servers': [
 				'daily-master-qa',
 				'latest'
 			],
-		}
-	}
+		},
+		'webUI74': {
+			'suites': {
+				'webUISecureView': 'webUISecV',
+			},
+			'phpVersions': [
+				'7.4',
+			],
+			'browsers': [
+				'chrome',
+				'firefox'
+			],
+			'servers': [
+				'daily-master-qa',
+			],
+		},
+	},
 }
 
 def main(ctx):
@@ -295,7 +307,7 @@ def phan():
 		return pipelines
 
 	default = {
-		'phpVersions': ['7.2', '7.3'],
+		'phpVersions': ['7.2', '7.3', '7.4'],
 	}
 
 	if 'defaults' in config:
@@ -546,7 +558,7 @@ def phptests(testType):
 	errorFound = False
 
 	default = {
-		'phpVersions': ['7.2', '7.3'],
+		'phpVersions': ['7.2', '7.3', '7.4'],
 		'databases': [
 			'sqlite', 'mariadb:10.2', 'mysql:5.5', 'mysql:5.7', 'postgres:9.4', 'oracle'
 		],
