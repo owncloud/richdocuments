@@ -77,7 +77,7 @@ OC.L10N.register(
     "Use Canonical webroot" : "Usar a raíz web canónica",
     "Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance." : "Raíz web canónica, no caso de que haxa múltiples, para que use Collabora. Proporcione a que teña menos restricións. Ex.: Use a raíz web sen «shibboleth» se se accede a esta instancia tanto dende raíces web con «shibboleth» como sen «shibboleth». Pode ignorar este axuste se só se emprega unha raíz web para acceder a esta instancia.",
     "Use Menu option" : "Use a opción Menú",
-    "Enable Secure View (requires Enterprise edition)" : "Activar a vista segura (require a edición empresarial)",
+    "Enable Secure View (requires Enterprise edition)" : "Activar a vista segura (require a edición Empresarial)",
     "Enable Secure View" : "Activar a vista segura",
     "Set default share permissions for all users (available for shares without edit permission)" : "Establecer os permisos de compartición predeterminados para todos os usuarios (dispoñíbeis para compartir sen permiso de edición)",
     "can print/export" : "pode imprimirse/exportarse",
