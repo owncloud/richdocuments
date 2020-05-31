@@ -42,13 +42,13 @@ Feature: Secure View
   @skipOnOcV10.3
   Scenario: Admin enables secure view, user shares without edit permissions with default secure view permissions set and resharing disabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
-    And user "user0" has been created with default attributes and skeleton files
-    And user "user1" has been created with default attributes and without skeleton files
-    And user "user0" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
-      | edit   | no |
-    And user "user0" gets the info of the last share using the sharing API
+    And user "Alice" has been created with default attributes and skeleton files
+    And user "Brian" has been created with default attributes and without skeleton files
+    And user "Alice" has logged in using the webUI
+    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
+    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+      | edit | no |
+    And user "Alice" gets the info of the last share using the sharing API
     Then the fields of the last response should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
@@ -60,19 +60,19 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | user0          |
+      | uid_owner              | Alice          |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | User Zero      |
-      | share_with             | user1          |
-      | share_with_displayname | User One       |
+      | displayname_owner      | Alice Hansen   |
+      | share_with             | Brian          |
+      | share_with_displayname | Brian Murphy   |
     And the additional sharing attributes for the response should include
       | scope         | key                 | enabled |
       | permissions   | download            | false   |
       | richdocuments | view-with-watermark | true    |
       | richdocuments | print               | false   |
-    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user0" with range "bytes=0-17" should be "This is lorem text"
-    And as "user1" file "simple-folder/lorem.txt" should exist
-    But the downloading of file "simple-folder/lorem.txt" for user "user1" should fail with error message
+    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "Alice" with range "bytes=0-17" should be "This is lorem text"
+    And as "Brian" file "simple-folder/lorem.txt" should exist
+    But the downloading of file "simple-folder/lorem.txt" for user "Brian" should fail with error message
     """
     Access to this resource has been denied because it is in view-only mode.
     """
@@ -81,13 +81,13 @@ Feature: Secure View
   Scenario: Admin enables secure view, disables secure-view default and user shares without edit permissions with default secure view permissions set and resharing disabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "secure_view_has_watermark_default" with value "false" in app "richdocuments"
-    And user "user0" has been created with default attributes and skeleton files
-    And user "user1" has been created with default attributes and without skeleton files
-    And user "user0" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
-      | edit   | no |
-    And user "user0" gets the info of the last share using the sharing API
+    And user "Alice" has been created with default attributes and skeleton files
+    And user "Brian" has been created with default attributes and without skeleton files
+    And user "Alice" has logged in using the webUI
+    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
+    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+      | edit | no |
+    And user "Alice" gets the info of the last share using the sharing API
     Then the fields of the last response should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
@@ -99,28 +99,28 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | user0          |
+      | uid_owner              | Alice          |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | User Zero      |
-      | share_with             | user1          |
-      | share_with_displayname | User One       |
+      | displayname_owner      | Alice Hansen   |
+      | share_with             | Brian          |
+      | share_with_displayname | Brian Murphy   |
     And the additional sharing attributes for the response should be empty
-    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user0" with range "bytes=0-17" should be "This is lorem text"
-    And as "user1" file "simple-folder/lorem.txt" should exist
-    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user1" with range "bytes=0-17" should be "This is lorem text"
+    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "Alice" with range "bytes=0-17" should be "This is lorem text"
+    And as "Brian" file "simple-folder/lorem.txt" should exist
+    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "Brian" with range "bytes=0-17" should be "This is lorem text"
 
   @skipOnOcV10.3
   Scenario: Admin enables secure view, enables secure-view default and enables print default and user shares without edit permissions with default secure view permissions set and resharing disabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "secure_view_has_watermark_default" with value "true" in app "richdocuments"
     And the administrator has added config key "secure_view_can_print_default" with value "true" in app "richdocuments"
-    And user "user0" has been created with default attributes and skeleton files
-    And user "user1" has been created with default attributes and without skeleton files
-    And user "user0" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
-      | edit   | no |
-    And user "user0" gets the info of the last share using the sharing API
+    And user "Alice" has been created with default attributes and skeleton files
+    And user "Brian" has been created with default attributes and without skeleton files
+    And user "Alice" has logged in using the webUI
+    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
+    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+      | edit | no |
+    And user "Alice" gets the info of the last share using the sharing API
     Then the fields of the last response should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
@@ -132,34 +132,34 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | user0          |
+      | uid_owner              | Alice          |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | User Zero      |
-      | share_with             | user1          |
-      | share_with_displayname | User One       |
+      | displayname_owner      | Alice Hansen   |
+      | share_with             | Brian          |
+      | share_with_displayname | Brian Murphy   |
     And the additional sharing attributes for the response should include
       | scope         | key                 | enabled |
       | permissions   | download            | false   |
       | richdocuments | view-with-watermark | true    |
       | richdocuments | print               | true    |
-    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user0" with range "bytes=0-17" should be "This is lorem text"
-    And as "user1" file "simple-folder/lorem.txt" should exist
-    But the downloading of file "simple-folder/lorem.txt" for user "user1" should fail with error message
+    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "Alice" with range "bytes=0-17" should be "This is lorem text"
+    And as "Brian" file "simple-folder/lorem.txt" should exist
+    But the downloading of file "simple-folder/lorem.txt" for user "Brian" should fail with error message
     """
     Access to this resource has been denied because it is in view-only mode.
     """
-    
+
   @skipOnOcV10.3
   Scenario: Admin enables secure view and user shares without edit permissions and with secure-view disabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
-    And user "user0" has been created with default attributes and skeleton files
-    And user "user1" has been created with default attributes and without skeleton files
-    And user "user0" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
+    And user "Alice" has been created with default attributes and skeleton files
+    And user "Brian" has been created with default attributes and without skeleton files
+    And user "Alice" has logged in using the webUI
+    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
+    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
       | edit        | no |
       | secure-view | no |
-    And user "user0" gets the info of the last share using the sharing API
+    And user "Alice" gets the info of the last share using the sharing API
     Then the fields of the last response should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
@@ -171,28 +171,28 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | user0          |
+      | uid_owner              | Alice          |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | User Zero      |
-      | share_with             | user1          |
-      | share_with_displayname | User One       |
+      | displayname_owner      | Alice Hansen   |
+      | share_with             | Brian          |
+      | share_with_displayname | Brian Murphy   |
     And the additional sharing attributes for the response should be empty
-    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user0" with range "bytes=0-17" should be "This is lorem text"
-    And as "user1" file "simple-folder/lorem.txt" should exist
-    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user1" with range "bytes=0-17" should be "This is lorem text"
+    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "Alice" with range "bytes=0-17" should be "This is lorem text"
+    And as "Brian" file "simple-folder/lorem.txt" should exist
+    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "Brian" with range "bytes=0-17" should be "This is lorem text"
 
   @skipOnOcV10.3
   Scenario: Admin enables secure view and user shares without edit permissions and with secure view enabled and print enabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
-    And user "user0" has been created with default attributes and skeleton files
-    And user "user1" has been created with default attributes and without skeleton files
-    And user "user0" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
+    And user "Alice" has been created with default attributes and skeleton files
+    And user "Brian" has been created with default attributes and without skeleton files
+    And user "Alice" has logged in using the webUI
+    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
+    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
       | edit        | no  |
       | secure-view | yes |
       | print       | yes |
-    And user "user0" gets the info of the last share using the sharing API
+    And user "Alice" gets the info of the last share using the sharing API
     Then the fields of the last response should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
@@ -204,19 +204,19 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | user0          |
+      | uid_owner              | Alice          |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | User Zero      |
-      | share_with             | user1          |
-      | share_with_displayname | User One       |
+      | displayname_owner      | Alice Hansen   |
+      | share_with             | Brian          |
+      | share_with_displayname | Brian Murphy   |
     And the additional sharing attributes for the response should include
       | scope         | key                 | enabled |
       | permissions   | download            | false   |
       | richdocuments | view-with-watermark | true    |
       | richdocuments | print               | true    |
-    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user0" with range "bytes=0-17" should be "This is lorem text"
-    And as "user1" file "simple-folder/lorem.txt" should exist
-    But the downloading of file "simple-folder/lorem.txt" for user "user1" should fail with error message
+    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "Alice" with range "bytes=0-17" should be "This is lorem text"
+    And as "Brian" file "simple-folder/lorem.txt" should exist
+    But the downloading of file "simple-folder/lorem.txt" for user "Brian" should fail with error message
     """
     Access to this resource has been denied because it is in view-only mode.
     """
@@ -224,15 +224,15 @@ Feature: Secure View
   @skipOnOcV10.3
   Scenario: Admin enables secure view and user shares without edit permissions and with secure view enabled and print disabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
-    And user "user0" has been created with default attributes and skeleton files
-    And user "user1" has been created with default attributes and without skeleton files
-    And user "user0" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
+    And user "Alice" has been created with default attributes and skeleton files
+    And user "Brian" has been created with default attributes and without skeleton files
+    And user "Alice" has logged in using the webUI
+    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
+    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
       | edit        | no  |
       | secure-view | yes |
       | print       | no  |
-    And user "user0" gets the info of the last share using the sharing API
+    And user "Alice" gets the info of the last share using the sharing API
     Then the fields of the last response should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
@@ -244,19 +244,19 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | user0          |
+      | uid_owner              | Alice          |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | User Zero      |
-      | share_with             | user1          |
-      | share_with_displayname | User One       |
+      | displayname_owner      | Alice Hansen   |
+      | share_with             | Brian          |
+      | share_with_displayname | Brian Murphy   |
     And the additional sharing attributes for the response should include
       | scope         | key                 | enabled |
       | permissions   | download            | false   |
       | richdocuments | view-with-watermark | true    |
       | richdocuments | print               | false   |
-    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "user0" with range "bytes=0-17" should be "This is lorem text"
-    And as "user1" file "simple-folder/lorem.txt" should exist
-    But the downloading of file "simple-folder/lorem.txt" for user "user1" should fail with error message
+    And the downloaded content when downloading file "simple-folder/lorem.txt" for user "Alice" with range "bytes=0-17" should be "This is lorem text"
+    And as "Brian" file "simple-folder/lorem.txt" should exist
+    But the downloading of file "simple-folder/lorem.txt" for user "Brian" should fail with error message
     """
     Access to this resource has been denied because it is in view-only mode.
     """
@@ -265,15 +265,15 @@ Feature: Secure View
   @issue-enterprise-3441
   Scenario: Admin enables secure view and user shares with reshare permission and no edit permission, secure-view is not available to be set for the share
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
-    And user "user0" has been created with default attributes and skeleton files
-    And user "user1" has been created with default attributes and without skeleton files
-    And user "user2" has been created with default attributes and without skeleton files
-    And user "user0" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
-      | edit         | no |
-      | share        | yes |
-    And user "user0" gets the info of the last share using the sharing API
+    And user "Alice" has been created with default attributes and skeleton files
+    And user "Brian" has been created with default attributes and without skeleton files
+    And user "Carol" has been created with default attributes and without skeleton files
+    And user "Alice" has logged in using the webUI
+    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
+    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+      | edit  | no  |
+      | share | yes |
+    And user "Alice" gets the info of the last share using the sharing API
     Then the fields of the last response should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
@@ -285,37 +285,37 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | user0          |
+      | uid_owner              | Alice          |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | User Zero      |
-      | share_with             | user1          |
-      | share_with_displayname | User One       |
+      | displayname_owner      | Alice Hansen   |
+      | share_with             | Brian          |
+      | share_with_displayname | Brian Murphy   |
     And the additional sharing attributes for the response should be empty
 
   @skipOnOcV10.3 @issue-enterprise-3441
   Scenario: When resharing a folder and secure-view is enabled by default, receiver has secure-view enabled by default
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
-    And user "user0" has been created with default attributes and skeleton files
-    And user "user1" has been created with default attributes and without skeleton files
-    And user "user2" has been created with default attributes and without skeleton files
-    And user "user0" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
-      | edit         | yes |
-      | share        | yes |
-    And user "user0" gets the info of the last share using the sharing API
+    And user "Alice" has been created with default attributes and skeleton files
+    And user "Brian" has been created with default attributes and without skeleton files
+    And user "Carol" has been created with default attributes and without skeleton files
+    And user "Alice" has logged in using the webUI
+    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
+    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+      | edit  | yes |
+      | share | yes |
+    And user "Alice" gets the info of the last share using the sharing API
     Then the fields of the last response should include
       | path                   | /simple-folder |
-      | uid_owner              | user0          |
+      | uid_owner              | Alice          |
       | permissions            | all            |
-      | share_with             | user1          |
-      | share_with_displayname | User One       |
+      | share_with             | Brian          |
+      | share_with_displayname | Brian Murphy   |
     And the additional sharing attributes for the response should be empty
-    And the user re-logs in as "user1" using the webUI
-    And the user shares folder "simple-folder" with user "User Two" using the webUI
-    And user "user1" gets the info of the last share using the sharing API
+    And the user re-logs in as "Brian" using the webUI
+    And the user shares folder "simple-folder" with user "Carol King" using the webUI
+    And user "Brian" gets the info of the last share using the sharing API
     Then the fields of the last response should include
-      | permissions            | read           |
+      | permissions | read |
     And the additional sharing attributes for the response should include
       | scope         | key                 | enabled |
       | permissions   | download            | false   |
@@ -325,20 +325,20 @@ Feature: Secure View
   @skipOnOcV10.3 @issue-enterprise-3441
   Scenario: Reshare in secure-view is disabled for previous share even after share permission
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
-    And user "user0" has been created with default attributes and skeleton files
-    And user "user1" has been created with default attributes and without skeleton files
-    And user "user2" has been created with default attributes and without skeleton files
-    And user "user0" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "User One" using the webUI
-    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
+    And user "Alice" has been created with default attributes and skeleton files
+    And user "Brian" has been created with default attributes and without skeleton files
+    And user "Carol" has been created with default attributes and without skeleton files
+    And user "Alice" has logged in using the webUI
+    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
+    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
       | edit        | no  |
       | secure-view | yes |
-    When the user re-logs in as "user1" using the webUI
+    When the user re-logs in as "Brian" using the webUI
     Then it should not be possible to share folder "simple-folder" using the webUI
-    When the user re-logs in as "user0" using the webUI
-    And the user sets the sharing permissions of user "User One" for "simple-folder" using the webUI to
-      | share       | yes |
-    And user "user0" gets the info of the last share using the sharing API
+    When the user re-logs in as "Alice" using the webUI
+    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+      | share | yes |
+    And user "Alice" gets the info of the last share using the sharing API
     Then the fields of the last response should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
@@ -350,13 +350,12 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | user0          |
+      | uid_owner              | Alice          |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | User Zero      |
-      | share_with             | user1          |
-      | share_with_displayname | User One       |
+      | displayname_owner      | Alice Hansen   |
+      | share_with             | Brian          |
+      | share_with_displayname | Brian Murphy   |
     And the additional sharing attributes for the response should be empty
-    But user "user1" should not be able to share file "simple-folder" with user "user2" using the sharing API
+    But user "Brian" should not be able to share file "simple-folder" with user "Carol" using the sharing API
     And the OCS status code should be "404"
     And the HTTP status code should be "200"
-
