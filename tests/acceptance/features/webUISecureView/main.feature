@@ -45,11 +45,11 @@ Feature: Secure View
     And user "Alice" has been created with default attributes and skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
-    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+    When the user shares folder "simple-folder" with user "Brian" using the webUI
+    And the user sets the sharing permissions of user "Brian" for "simple-folder" using the webUI to
       | edit | no |
     And user "Alice" gets the info of the last share using the sharing API
-    Then the fields of the last response should include
+    Then the fields of the last response to user "Alice" sharing with user "Brian" should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
@@ -60,11 +60,11 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | Alice          |
+      | uid_owner              | %username%     |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | Alice Hansen   |
-      | share_with             | Brian          |
-      | share_with_displayname | Brian Murphy   |
+      | displayname_owner      | %displayname%  |
+      | share_with             | %username%     |
+      | share_with_displayname | %displayname%  |
     And the additional sharing attributes for the response should include
       | scope         | key                 | enabled |
       | permissions   | download            | false   |
@@ -84,11 +84,11 @@ Feature: Secure View
     And user "Alice" has been created with default attributes and skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
-    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+    When the user shares folder "simple-folder" with user "Brian" using the webUI
+    And the user sets the sharing permissions of user "Brian" for "simple-folder" using the webUI to
       | edit | no |
     And user "Alice" gets the info of the last share using the sharing API
-    Then the fields of the last response should include
+    Then the fields of the last response to user "Alice" sharing with user "Brian" should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
@@ -99,11 +99,11 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | Alice          |
+      | uid_owner              | %username%     |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | Alice Hansen   |
-      | share_with             | Brian          |
-      | share_with_displayname | Brian Murphy   |
+      | displayname_owner      | %displayname%  |
+      | share_with             | %username%     |
+      | share_with_displayname | %displayname%  |
     And the additional sharing attributes for the response should be empty
     And the downloaded content when downloading file "simple-folder/lorem.txt" for user "Alice" with range "bytes=0-17" should be "This is lorem text"
     And as "Brian" file "simple-folder/lorem.txt" should exist
@@ -117,11 +117,11 @@ Feature: Secure View
     And user "Alice" has been created with default attributes and skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
-    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+    When the user shares folder "simple-folder" with user "Brian" using the webUI
+    And the user sets the sharing permissions of user "Brian" for "simple-folder" using the webUI to
       | edit | no |
     And user "Alice" gets the info of the last share using the sharing API
-    Then the fields of the last response should include
+    Then the fields of the last response to user "Alice" sharing with user "Brian" should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
@@ -132,11 +132,11 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | Alice          |
+      | uid_owner              | %username%     |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | Alice Hansen   |
-      | share_with             | Brian          |
-      | share_with_displayname | Brian Murphy   |
+      | displayname_owner      | %displayname%  |
+      | share_with             | %username%     |
+      | share_with_displayname | %displayname%  |
     And the additional sharing attributes for the response should include
       | scope         | key                 | enabled |
       | permissions   | download            | false   |
@@ -155,12 +155,12 @@ Feature: Secure View
     And user "Alice" has been created with default attributes and skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
-    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+    When the user shares folder "simple-folder" with user "Brian" using the webUI
+    And the user sets the sharing permissions of user "Brian" for "simple-folder" using the webUI to
       | edit        | no |
       | secure-view | no |
     And user "Alice" gets the info of the last share using the sharing API
-    Then the fields of the last response should include
+    Then the fields of the last response to user "Alice" sharing with user "Brian" should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
@@ -171,11 +171,11 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | Alice          |
+      | uid_owner              | %username%     |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | Alice Hansen   |
-      | share_with             | Brian          |
-      | share_with_displayname | Brian Murphy   |
+      | displayname_owner      | %displayname%  |
+      | share_with             | %username%     |
+      | share_with_displayname | %displayname%  |
     And the additional sharing attributes for the response should be empty
     And the downloaded content when downloading file "simple-folder/lorem.txt" for user "Alice" with range "bytes=0-17" should be "This is lorem text"
     And as "Brian" file "simple-folder/lorem.txt" should exist
@@ -187,13 +187,13 @@ Feature: Secure View
     And user "Alice" has been created with default attributes and skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
-    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+    When the user shares folder "simple-folder" with user "Brian" using the webUI
+    And the user sets the sharing permissions of user "Brian" for "simple-folder" using the webUI to
       | edit        | no  |
       | secure-view | yes |
       | print       | yes |
     And user "Alice" gets the info of the last share using the sharing API
-    Then the fields of the last response should include
+    Then the fields of the last response to user "Alice" sharing with user "Brian" should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
@@ -204,11 +204,11 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | Alice          |
+      | uid_owner              | %username%     |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | Alice Hansen   |
-      | share_with             | Brian          |
-      | share_with_displayname | Brian Murphy   |
+      | displayname_owner      | %displayname%  |
+      | share_with             | %username%     |
+      | share_with_displayname | %displayname%  |
     And the additional sharing attributes for the response should include
       | scope         | key                 | enabled |
       | permissions   | download            | false   |
@@ -227,13 +227,13 @@ Feature: Secure View
     And user "Alice" has been created with default attributes and skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
-    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+    When the user shares folder "simple-folder" with user "Brian" using the webUI
+    And the user sets the sharing permissions of user "Brian" for "simple-folder" using the webUI to
       | edit        | no  |
       | secure-view | yes |
       | print       | no  |
     And user "Alice" gets the info of the last share using the sharing API
-    Then the fields of the last response should include
+    Then the fields of the last response to user "Alice" sharing with user "Brian" should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
@@ -244,11 +244,11 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | Alice          |
+      | uid_owner              | %username%     |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | Alice Hansen   |
-      | share_with             | Brian          |
-      | share_with_displayname | Brian Murphy   |
+      | displayname_owner      | %displayname%  |
+      | share_with             | %username%     |
+      | share_with_displayname | %displayname%  |
     And the additional sharing attributes for the response should include
       | scope         | key                 | enabled |
       | permissions   | download            | false   |
@@ -269,12 +269,12 @@ Feature: Secure View
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Carol" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
-    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+    When the user shares folder "simple-folder" with user "Brian" using the webUI
+    And the user sets the sharing permissions of user "Brian" for "simple-folder" using the webUI to
       | edit  | no  |
       | share | yes |
     And user "Alice" gets the info of the last share using the sharing API
-    Then the fields of the last response should include
+    Then the fields of the last response to user "Alice" sharing with user "Brian" should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
@@ -285,11 +285,11 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | Alice          |
+      | uid_owner              | %username%     |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | Alice Hansen   |
-      | share_with             | Brian          |
-      | share_with_displayname | Brian Murphy   |
+      | displayname_owner      | %displayname%  |
+      | share_with             | %username%     |
+      | share_with_displayname | %displayname%  |
     And the additional sharing attributes for the response should be empty
 
   @skipOnOcV10.3 @issue-enterprise-3441
@@ -299,22 +299,22 @@ Feature: Secure View
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Carol" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
-    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+    When the user shares folder "simple-folder" with user "Brian" using the webUI
+    And the user sets the sharing permissions of user "Brian" for "simple-folder" using the webUI to
       | edit  | yes |
       | share | yes |
     And user "Alice" gets the info of the last share using the sharing API
-    Then the fields of the last response should include
+    Then the fields of the last response to user "Alice" sharing with user "Brian" should include
       | path                   | /simple-folder |
-      | uid_owner              | Alice          |
+      | uid_owner              | %username%     |
       | permissions            | all            |
-      | share_with             | Brian          |
-      | share_with_displayname | Brian Murphy   |
+      | share_with             | %username%     |
+      | share_with_displayname | %displayname%  |
     And the additional sharing attributes for the response should be empty
     And the user re-logs in as "Brian" using the webUI
-    And the user shares folder "simple-folder" with user "Carol King" using the webUI
+    And the user shares folder "simple-folder" with user "Carol" using the webUI
     And user "Brian" gets the info of the last share using the sharing API
-    Then the fields of the last response should include
+    Then the fields of the last response to user "Brian" should include
       | permissions | read |
     And the additional sharing attributes for the response should include
       | scope         | key                 | enabled |
@@ -329,17 +329,17 @@ Feature: Secure View
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Carol" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
-    When the user shares folder "simple-folder" with user "Brian Murphy" using the webUI
-    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+    When the user shares folder "simple-folder" with user "Brian" using the webUI
+    And the user sets the sharing permissions of user "Brian" for "simple-folder" using the webUI to
       | edit        | no  |
       | secure-view | yes |
     When the user re-logs in as "Brian" using the webUI
     Then it should not be possible to share folder "simple-folder" using the webUI
     When the user re-logs in as "Alice" using the webUI
-    And the user sets the sharing permissions of user "Brian Murphy" for "simple-folder" using the webUI to
+    And the user sets the sharing permissions of user "Brian" for "simple-folder" using the webUI to
       | share | yes |
     And user "Alice" gets the info of the last share using the sharing API
-    Then the fields of the last response should include
+    Then the fields of the last response to user "Alice" sharing with user "Brian" should include
       | id                     | A_NUMBER       |
       | item_type              | folder         |
       | item_source            | A_NUMBER       |
@@ -350,11 +350,11 @@ Feature: Secure View
       | stime                  | A_NUMBER       |
       | storage                | A_NUMBER       |
       | mail_send              | 0              |
-      | uid_owner              | Alice          |
+      | uid_owner              | %username%     |
       | file_parent            | A_NUMBER       |
-      | displayname_owner      | Alice Hansen   |
-      | share_with             | Brian          |
-      | share_with_displayname | Brian Murphy   |
+      | displayname_owner      | %displayname%  |
+      | share_with             | %username%     |
+      | share_with_displayname | %displayname%  |
     And the additional sharing attributes for the response should be empty
     But user "Brian" should not be able to share file "simple-folder" with user "Carol" using the sharing API
     And the OCS status code should be "404"
