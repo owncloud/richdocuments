@@ -1,5 +1,6 @@
 { "translations": {
     "Saving..." : "Po ruhet …",
+    "Saved watermark" : "U ruajt watermark-u",
     "None" : "Asnjë",
     "All" : "Krejt",
     "Failed to load the document, please contact your administrator." : "S’u arrit të ngarkohej dokumenti, ju lutemi, lidhuni me përgjegjësin tuaj.",
@@ -23,6 +24,7 @@
     "Invalid name, '\\', '/', '<', '>', ':', '\"', '|', '?' and '*' are not allowed." : "Emër i pavlefshëm, '\\', '/', '<', '>', ':', '\"', '|', '?' dhe '*' nuk lejohen.",
     "\"{name}\" is an invalid file name." : "\"{name}\" është emër i pavlefshëm kartele.",
     "Failed to open " : "S’u arrit të hapej",
+    "Secure View (with watermarks)" : "Parje e Sigurt (me watermark-ë)",
     "can print / export" : "mund të shtypë / eksportojë",
     "Edit" : "Përpunoni",
     "Document" : "Dokument",
@@ -77,6 +79,7 @@
     "Enable Secure View" : "Aktivizo Parje të Sigurt",
     "Set default share permissions for all users (available for shares without edit permission)" : "Caktoni parazgjedhje lejesh ndarjesh me të tjerët për krejt përdoruesit (e vlefshme për ndarje pa leje përpunimi)",
     "can print/export" : "mund të shtypë/eksportojë",
+    "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "Caktoni tekst watermark-u për Parje të Sigurt. Për ta përfshirë dinamikisht adresën email të përdoruesit, përdorni ndryshoren {viewer-email}. Për ta ruajtur, klikoni jashtë fushës së teksteve.",
     "Strictly confidential. Only for " : "Rreptësisht i rezervuar. Vetëm për",
     "New Document" : "Dokument i Ri",
     "New Spreadsheet" : "Fletëllogaritje e Re",
