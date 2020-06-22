@@ -11,12 +11,26 @@ script('richdocuments', 'admin');
 	<p style="max-width: 50em; color: red;"><?php if ($_['encryption_enabled'] === 'true' && $_['masterkey_encryption_enabled'] !== 'true') {
 	p($l->t("Enabled encryption type will result in limited functionality of the app. App requires privileged access to the files, and the only currently supported type is master key encryption."));
 } ?></p>
-	<label for="wopi_url"><?php p($l->t('Collabora Online server')) ?></label>
-	<input type="text" name="wopi_url" id="wopi_url" value="<?php p($_['wopi_url'])?>" style="width:300px;">
-	<br/><em><?php p($l->t('URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client.')) ?></em>
-	<br/><button type="button" id="wopi_apply"><?php p($l->t('Apply')) ?></button>
-	<span id="documents-admin-msg" class="msg"></span>
-    <br/>
+
+	<input type="radio" class="own-server-enable" id="own-server-enable-richdocuments" name="serverType"/>
+    <label for="own-server-enable"><?php p($l->t('Use your own server')) ?></label><br/>
+	<p id="own-server-section" style="padding-left: 28px;" class="indent">
+		<label for="wopi_url" style="padding-right: 5px;"><?php p($l->t('Collabora Online server:')) ?></label>
+		<input type="text" name="wopi_url" id="wopi_url" value="<?php p($_['wopi_url'])?>" style="width:300px;">
+		<br/><em><?php p($l->t('URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client.')) ?></em>
+		<br/><button type="button" id="wopi_apply"><?php p($l->t('Apply')) ?></button>
+		<span id="documents-admin-msg" class="msg"></span>
+		<br/>
+    </p>
+
+	<input type="radio" class="builtin-server-enable" id="builtin-server-enable-richdocuments" name="serverType"/>
+    <label for="builtin-server-enable"><?php p($l->t('Use the built-in CODE - Collabora Online Development Edition')) ?></label><br/>
+	<p id="builtin-server-section" style="padding-left: 28px;" class="indent">
+        <em><?php p($l->t('Easy to install, for home use or small groups. A bit slower than a standalone server and without the advanced scalability features.')) ?></em><br/>
+
+        <button type="button" id="builtin_server_apply"><?php p($l->t('Apply')) ?></button>
+        <span id="builtin-documents-admin-msg" class="msg"></span>
+    </p>
 
     <input type="checkbox" class="test-server-enable" id="test_server_enable-richdocuments" />
     <label for="test-server-enable"><?php p($l->t('Enable test server for specific groups')) ?></label><br/>

@@ -27,16 +27,41 @@ var documentsSettings = {
 	},
 
 	save : function() {
-		$('#wopi_apply').attr('disabled', true);
 		var data = {
 			wopi_url  : $('#wopi_url').val().replace(/\/$/, '')
 		};
 
-		OC.msg.startAction('#documents-admin-msg', t('richdocuments', 'Saving...'));
+		if ($('#builtin-server-enable-richdocuments').is(':checked')) {
+			data = {
+				wopi_url  : window.location.protocol + '//' + window.location.host + OC.filePath('richdocumentscode', '', '') + 'proxy.php?req='
+			};
+			$('#builtin_server_apply').attr('disabled', true);
+			OC.msg.startAction('#builtin-documents-admin-msg', t('richdocuments', 'Saving...'));
+		}
+		else {
+			$('#wopi_apply').attr('disabled', true);
+			OC.msg.startAction('#documents-admin-msg', t('richdocuments', 'Saving...'));
+		}
+
 		$.post(
 			OC.filePath('richdocuments', 'ajax', 'admin.php'),
 			data,
 			documentsSettings.afterSave
+		);
+	},
+
+	saveBuiltinServer : function() {
+		var data = {
+			wopi_url  : window.location.protocol + '//' + window.location.host + OC.filePath('richdocumentscode', '', '') + 'proxy.php?req='
+		};
+
+		$('#builtin_server_apply').attr('disabled', true);
+		OC.msg.startAction('#builtin-documents-admin-msg', t('richdocuments', 'Saving...'));
+
+		$.post(
+			OC.filePath('richdocuments', 'ajax', 'admin.php'),
+			data,
+			documentsSettings.afterSaveBuiltinServer
 		);
 	},
 
@@ -148,6 +173,11 @@ var documentsSettings = {
 		OC.msg.finishedAction('#documents-admin-msg', response);
 	},
 
+	afterSaveBuiltinServer : function(response){
+		$('#builtin_server_apply').attr('disabled', false);
+		OC.msg.finishedAction('#builtin-documents-admin-msg', response);
+	},
+
 	initEditGroups: function() {
 		var groups = $('#edit_group_select').val();
 		if (groups !== '') {
@@ -185,12 +215,25 @@ var documentsSettings = {
 		}
 	},
 
+	initBuiltinCODEOption: function() {
+		var wopi_url = $(document).find('#wopi_url').val();
+		var CODEURL = window.location.protocol + '//' + window.location.host + OC.filePath('richdocumentscode', '', '') + 'proxy.php?req=';
+
+		if (wopi_url !== '' && CODEURL === wopi_url) {
+			$('.builtin-server-enable').attr('checked', 'checked');
+		} else {
+			$('.own-server-enable').attr('checked', 'checked');
+		}
+	},
+
 	initialize: function() {
 		documentsSettings.initEditGroups();
 		documentsSettings.initTestWopiServer();
 		documentsSettings.initExternalApps();
+		documentsSettings.initBuiltinCODEOption();
 
 		$('#wopi_apply').on('click', documentsSettings.save);
+		$('#builtin_server_apply').on('click', documentsSettings.saveBuiltinServer);
 
 		$(document).on('change', '.test-server-enable', function() {
 			var page = $(this).parent();
