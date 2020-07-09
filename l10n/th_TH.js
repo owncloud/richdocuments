@@ -87,7 +87,7 @@ OC.L10N.register(
     "New Spreadsheet" : "สเปรดชีตใหม่",
     "New Presentation" : "งานนำเสนอใหม่",
     "Upload (max. %s)" : "อัปโหลด (สูงสุด %s)",
-    "Upload" : "อัปโหลด",
+    "Upload" : "อัปโหลดไฟล์",
     "Wrong password. Please retry." : "รหัสผ่านไม่ถูกต้อง โปรดลองอีกครั้ง",
     "Password" : "รหัสผ่าน",
     "OK" : "ตกลง",
