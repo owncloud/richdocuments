@@ -30,6 +30,7 @@ OC.L10N.register(
     "Spreadsheet" : "Regneark",
     "Presentation" : "Presentasjon",
     "Could not create file" : "Klarte ikke å opprette fil",
+    "View/Edit in Collabora" : "Vis/rediger i Collabora",
     "Office" : "Office",
     "Please contact the \"%s\" administrator." : "Vennligst kontakt administratoren for \"%s\".",
     "Please ask your administrator to check the Collabora Online server setting. The exact error message was: " : "Vennligst be administratoren sjekke innstillingen for Collabora Online på serveren. Eksakt feilmelding var:",
