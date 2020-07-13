@@ -157,8 +157,15 @@ class DocumentController extends Controller {
 			$contact_admin = $this->l10n->t('Please contact the "%s" administrator.', [$wopiRemote]);
 
 			try {
-				$wopiClient = \OC::$server->getHTTPClientService()->newClient();
-				$discovery = $wopiClient->get($wopiDiscovery)->getBody();
+				// If we are sending query to built-in CODE server, we avoid using IClint::get() method
+				// because of an encoding issue in guzzle: https://github.com/guzzle/guzzle/issues/1758
+				if (strpos($wopiDiscovery, 'proxy.php') === false) {
+					$wopiClient = \OC::$server->getHTTPClientService()->newClient();
+					$discovery = $wopiClient->get($wopiDiscovery)->getBody();
+				}
+				else {
+					$discovery = file_get_contents($wopiDiscovery);
+				}
 			} catch (\Exception $e) {
 				$error_message = $e->getMessage();
 				if (\preg_match('/^cURL error ([0-9]*):/', $error_message, $matches)) {
