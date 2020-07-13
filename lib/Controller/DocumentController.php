@@ -157,7 +157,7 @@ class DocumentController extends Controller {
 			$contact_admin = $this->l10n->t('Please contact the "%s" administrator.', [$wopiRemote]);
 
 			try {
-				// If we are sending query to built-in CODE server, we avoid using IClint::get() method
+				// If we are sending query to built-in CODE server, we avoid using IClient::get() method
 				// because of an encoding issue in guzzle: https://github.com/guzzle/guzzle/issues/1758
 				if (strpos($wopiDiscovery, 'proxy.php') === false) {
 					$wopiClient = \OC::$server->getHTTPClientService()->newClient();
