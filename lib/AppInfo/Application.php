@@ -68,7 +68,8 @@ class Application extends App {
 			$appManager = $c->query('ServerContainer')->getAppManager();
 			return new AppConfig(
 				$c->query('CoreConfig'),
-				$appManager
+				$appManager,
+				$c->query('LicenseManager')
 			);
 		});
 

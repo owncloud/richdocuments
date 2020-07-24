@@ -13,6 +13,7 @@
 
 namespace OCA\Richdocuments;
 
+use OC\License\LicenseManager;
 use OCP\App\IAppManager;
 use \OCP\IConfig;
 
@@ -28,10 +29,12 @@ class AppConfig {
 
 	private $config;
 	private $appManager;
+	private $licenseManager;
 
-	public function __construct(IConfig $config, IAppManager $appManager) {
+	public function __construct(IConfig $config, IAppManager $appManager, LicenseManager $licenseManager) {
 		$this->config = $config;
 		$this->appManager = $appManager;
+		$this->licenseManager = $licenseManager;
 	}
 
 	/**
@@ -86,7 +89,7 @@ class AppConfig {
 	 * @return bool
 	 */
 	public function enterpriseFeaturesEnabled() {
-		if (!$this->appManager->isEnabledForUser('enterprise_key') && !\getenv('CI')) {
+		if (!$this->licenseManager->checkLicenseFor($this->appName)) {
 			return false;
 		}
 

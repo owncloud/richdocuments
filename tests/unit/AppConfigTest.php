@@ -12,6 +12,7 @@
  */
 namespace OCA\Richdocuments\Tests;
 
+use OC\License\LicenseManager;
 use OCA\Richdocuments\AppConfig;
 use OCP\App\IAppManager;
 use OCP\IConfig;
@@ -27,17 +28,36 @@ class AppConfigTest extends TestCase {
 	/** @var AppConfig */
 	private $appConfig;
 
+	/** @var LicenseManager */
+	private $licenseManager;
+
 	protected function setUp(): void {
 		parent::setUp();
 		$this->config = $this->createMock(IConfig::class);
 		$this->appManager = $this->createMock(IAppManager::class);
-		$this->appConfig = new AppConfig($this->config, $this->appManager);
+		$this->licenseManager = $this->createMock(LicenseManager::class);
+		$this->appConfig = new AppConfig($this->config, $this->appManager, $this->licenseManager);
 	}
 
 	public function testOpenInNewtabDefault() {
 		$this->config->method('getAppValue')
 			->willReturn('true');
+		$this->licenseManager->method('checkLicenseFor')
+			->willReturn(true);
 		$value = $this->appConfig->getAppValue('open_in_new_tab');
+		$enterpriseEdition = $this->appConfig->enterpriseFeaturesEnabled();
 		$this->assertEquals('true', $value);
+		$this->assertEquals(true, $enterpriseEdition);
+	}
+
+	public function testSecureViewDisabled() {
+		$this->config->method('getAppValue')
+			->willReturn('true');
+		$this->licenseManager->method('checkLicenseFor')
+			->willReturn(false);
+		$value = $this->appConfig->getAppValue('open_in_new_tab');
+		$enterpriseEdition = $this->appConfig->enterpriseFeaturesEnabled();
+		$this->assertEquals('true', $value);
+		$this->assertEquals(false, $enterpriseEdition);
 	}
 }

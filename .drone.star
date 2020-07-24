@@ -56,7 +56,6 @@ config = {
 			],
 			'servers': [
 				'daily-master-qa',
-				'latest'
 			],
 		},
 		'webUI74': {
