@@ -12,7 +12,7 @@
  */
 namespace OCA\Richdocuments\Tests;
 
-use OC\License\LicenseManager;
+use OCP\License\ILicenseManager;
 use OCA\Richdocuments\AppConfig;
 use OCP\App\IAppManager;
 use OCP\IConfig;
@@ -28,14 +28,14 @@ class AppConfigTest extends TestCase {
 	/** @var AppConfig */
 	private $appConfig;
 
-	/** @var LicenseManager */
+	/** @var ILicenseManager */
 	private $licenseManager;
 
 	protected function setUp(): void {
 		parent::setUp();
 		$this->config = $this->createMock(IConfig::class);
 		$this->appManager = $this->createMock(IAppManager::class);
-		$this->licenseManager = $this->createMock(LicenseManager::class);
+		$this->licenseManager = $this->createMock(ILicenseManager::class);
 		$this->appConfig = new AppConfig($this->config, $this->appManager, $this->licenseManager);
 	}
 

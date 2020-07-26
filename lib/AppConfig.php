@@ -13,9 +13,9 @@
 
 namespace OCA\Richdocuments;
 
-use OC\License\LicenseManager;
+use OCP\License\ILicenseManager;
 use OCP\App\IAppManager;
-use \OCP\IConfig;
+use OCP\IConfig;
 
 class AppConfig {
 	private $appName = 'richdocuments';
@@ -31,7 +31,7 @@ class AppConfig {
 	private $appManager;
 	private $licenseManager;
 
-	public function __construct(IConfig $config, IAppManager $appManager, LicenseManager $licenseManager) {
+	public function __construct(IConfig $config, IAppManager $appManager, ILicenseManager $licenseManager) {
 		$this->config = $config;
 		$this->appManager = $appManager;
 		$this->licenseManager = $licenseManager;

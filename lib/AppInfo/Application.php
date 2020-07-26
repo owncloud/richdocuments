@@ -65,11 +65,14 @@ class Application extends App {
 
 		$container->registerService('AppConfig', function ($c) {
 			/** @var IContainer $c */
+			$coreConfig = $c->query('CoreConfig');
 			$appManager = $c->query('ServerContainer')->getAppManager();
+			$licenseManager = $c->query('ServerContainer')->getLicenseManager();
+
 			return new AppConfig(
-				$c->query('CoreConfig'),
+				$coreConfig,
 				$appManager,
-				$c->query('LicenseManager')
+				$licenseManager
 			);
 		});
 
