@@ -356,6 +356,6 @@ Feature: Secure View
       | share_with             | %username%     |
       | share_with_displayname | %displayname%  |
     And the additional sharing attributes for the response should be empty
-    But user "Brian" should not be able to share file "simple-folder" with user "Carol" using the sharing API
+    But user "Brian" should not be able to share folder "simple-folder" with user "Carol" using the sharing API
     And the OCS status code should be "404"
     And the HTTP status code should be "200"
