@@ -21,7 +21,7 @@ OC.L10N.register(
     "Save" : "Guardar",
     "No connection to server. Trying to reconnect." : "No hay conexión con el servidor. Intentando reconectar.",
     "Loading documents..." : "Cargando documentos...",
-    "'.' is an invalid file name." : "«.» no es un nombre de archivo válido.",
+    "'.' is an invalid file name." : "'.' no es un nombre de archivo válido.",
     "File name cannot be empty." : "El nombre de archivo no puede estar vacío.",
     "Invalid name, '\\', '/', '<', '>', ':', '\"', '|', '?' and '*' are not allowed." : "Nombre no válido: los caracteres «\\», «/», «<», «>», «:», «», «|» «?» y «*» no están permitidos ",
     "\"{name}\" is an invalid file name." : "«{name}» no es un nombre de archivo válido.",
