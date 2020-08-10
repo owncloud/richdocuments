@@ -5,26 +5,30 @@ Feature: Secure View
   So that users can share files with very restricted access to documents
 
   Scenario: Admin enables the secure view through webUI
-    Given the administrator has browsed to the admin additional settings page
+    Given the administrator has added config key "isEEActive" with value "yes" in app "richdocuments"
+    And the administrator has browsed to the admin additional settings page
     When the administrator enables secure view using the webUI
     Then the config key "secure_view_option" of app "richdocuments" should have value "true"
 
   Scenario: Admin enables the secure view, enabled print permissions through webUI
-    Given the administrator has browsed to the admin additional settings page
+    Given the administrator has added config key "isEEActive" with value "yes" in app "richdocuments"
+    And the administrator has browsed to the admin additional settings page
     When the administrator enables secure view using the webUI
     And the administrator enables print permission in secure view using the webUI
     Then the config key "secure_view_option" of app "richdocuments" should have value "true"
     And the config key "secure_view_can_print_default" of app "richdocuments" should have value "true"
 
   Scenario: Admin enables the secure view, disables secure-view permissions through webUI
-    Given the administrator has browsed to the admin additional settings page
+    Given the administrator has added config key "isEEActive" with value "yes" in app "richdocuments"
+    And the administrator has browsed to the admin additional settings page
     When the administrator enables secure view using the webUI
     And the administrator disables watermark permission in secure view using the webUI
     Then the config key "secure_view_option" of app "richdocuments" should have value "true"
     And the config key "secure_view_has_watermark_default" of app "richdocuments" should have value "false"
 
   Scenario: Admin enables the secure view using occ command, disables print default and enables it again through webUI
-    Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
+    Given the administrator has added config key "isEEActive" with value "yes" in app "richdocuments"
+    And the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "secure_view_can_print_default" with value "false" in app "richdocuments"
     And the administrator has browsed to the admin additional settings page
     When the administrator enables print permission in secure view using the webUI
@@ -32,7 +36,8 @@ Feature: Secure View
     And the config key "secure_view_can_print_default" of app "richdocuments" should have value "true"
 
   Scenario: Admin enables the secure view using occ command, disables secure-view default and enables it again through webUI
-    Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
+    Given the administrator has added config key "isEEActive" with value "yes" in app "richdocuments"
+    And the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "secure_view_has_watermark_default" with value "false" in app "richdocuments"
     And the administrator has browsed to the admin additional settings page
     When the administrator enables watermark permission in secure view using the webUI
@@ -41,7 +46,8 @@ Feature: Secure View
 
   @skipOnOcV10.3
   Scenario: Admin enables secure view, user shares without edit permissions with default secure view permissions set and resharing disabled
-    Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
+    Given the administrator has added config key "isEEActive" with value "yes" in app "richdocuments"
+    And the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "Alice" has been created with default attributes and skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
@@ -79,7 +85,8 @@ Feature: Secure View
 
   @skipOnOcV10.3
   Scenario: Admin enables secure view, disables secure-view default and user shares without edit permissions with default secure view permissions set and resharing disabled
-    Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
+    Given the administrator has added config key "isEEActive" with value "yes" in app "richdocuments"
+    And the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "secure_view_has_watermark_default" with value "false" in app "richdocuments"
     And user "Alice" has been created with default attributes and skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
@@ -111,7 +118,8 @@ Feature: Secure View
 
   @skipOnOcV10.3
   Scenario: Admin enables secure view, enables secure-view default and enables print default and user shares without edit permissions with default secure view permissions set and resharing disabled
-    Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
+    Given the administrator has added config key "isEEActive" with value "yes" in app "richdocuments"
+    And the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "secure_view_has_watermark_default" with value "true" in app "richdocuments"
     And the administrator has added config key "secure_view_can_print_default" with value "true" in app "richdocuments"
     And user "Alice" has been created with default attributes and skeleton files
@@ -151,7 +159,8 @@ Feature: Secure View
 
   @skipOnOcV10.3
   Scenario: Admin enables secure view and user shares without edit permissions and with secure-view disabled
-    Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
+    Given the administrator has added config key "isEEActive" with value "yes" in app "richdocuments"
+    And the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "Alice" has been created with default attributes and skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
@@ -183,7 +192,8 @@ Feature: Secure View
 
   @skipOnOcV10.3
   Scenario: Admin enables secure view and user shares without edit permissions and with secure view enabled and print enabled
-    Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
+    Given the administrator has added config key "isEEActive" with value "yes" in app "richdocuments"
+    And the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "Alice" has been created with default attributes and skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
@@ -223,7 +233,8 @@ Feature: Secure View
 
   @skipOnOcV10.3
   Scenario: Admin enables secure view and user shares without edit permissions and with secure view enabled and print disabled
-    Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
+    Given the administrator has added config key "isEEActive" with value "yes" in app "richdocuments"
+    And the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "Alice" has been created with default attributes and skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
@@ -264,7 +275,8 @@ Feature: Secure View
   @skipOnOcV10.3
   @issue-enterprise-3441
   Scenario: Admin enables secure view and user shares with reshare permission and no edit permission, secure-view is not available to be set for the share
-    Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
+    Given the administrator has added config key "isEEActive" with value "yes" in app "richdocuments"
+    And the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "Alice" has been created with default attributes and skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Carol" has been created with default attributes and without skeleton files
@@ -294,7 +306,8 @@ Feature: Secure View
 
   @skipOnOcV10.3 @issue-enterprise-3441
   Scenario: When resharing a folder and secure-view is enabled by default, receiver has secure-view enabled by default
-    Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
+    Given the administrator has added config key "isEEActive" with value "yes" in app "richdocuments"
+    And the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "Alice" has been created with default attributes and skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Carol" has been created with default attributes and without skeleton files
@@ -324,7 +337,8 @@ Feature: Secure View
 
   @skipOnOcV10.3 @issue-enterprise-3441
   Scenario: Reshare in secure-view is disabled for previous share even after share permission
-    Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
+    Given the administrator has added config key "isEEActive" with value "yes" in app "richdocuments"
+    And the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And user "Alice" has been created with default attributes and skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Carol" has been created with default attributes and without skeleton files
