@@ -89,7 +89,19 @@ class AppConfig {
 	 * @return bool
 	 */
 	public function enterpriseFeaturesEnabled() {
-		if (!$this->licenseManager->checkLicenseFor($this->appName)) {
+		$isEnterprise = $this->config->getAppValue($this->appName, 'isEEActive', null);
+		if ($isEnterprise === null) {
+			// app not marked as EE -> return false without doing anything more
+			return false;
+		}
+
+		$isEnterprise = \filter_var($isEnterprise, FILTER_VALIDATE_BOOLEAN);
+		if (!$isEnterprise || !$this->licenseManager->checkLicenseFor($this->appName)) {
+			// if not marked as enterprise, no need to check the license:
+			// explicitly mark the app as non-enterprise and remove the secure view.
+			// if marked as enterprise, we need to verify the license
+			$this->config->setAppValue($this->appName, 'isEEActive', 'no');
+			$this->config->setAppValue($this->appName, 'secure_view_option', 'false');
 			return false;
 		}
 
