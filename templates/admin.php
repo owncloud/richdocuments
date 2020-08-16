@@ -81,7 +81,8 @@ script('richdocuments', 'admin');
 	p($l->t('Enable Secure View (requires Enterprise edition)'));
 	print_unescaped('</em>');
 } else {
-	p($l->t('Enable Secure View'));
+	//FIXME: in 10.6 we wont need to warn about requring enterprise edition, but just disable checkbox
+	p($l->t('Enable Secure View (requires Enterprise edition)'));
 }?></label>
 	<div id="enable-share-attributes-defaults" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
 	p('hidden');
