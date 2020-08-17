@@ -51,13 +51,10 @@ class AppConfigTest extends TestCase {
 	}
 
 	public function testSecureViewDisabled() {
-		$this->config->method('getAppValue')
-			->willReturn('true');
-		$this->licenseManager->method('checkLicenseFor')
-			->willReturn(false);
-		$value = $this->appConfig->getAppValue('open_in_new_tab');
+		// TODO: This is currently aligned with the changes at the moment.
+		// we've decided to release secure_view as community in this version
+		// until a new core release fixes the problem with the license.
 		$enterpriseEdition = $this->appConfig->enterpriseFeaturesEnabled();
-		$this->assertEquals('true', $value);
-		$this->assertEquals(false, $enterpriseEdition);
+		$this->assertEquals(true, $enterpriseEdition);
 	}
 }

@@ -89,21 +89,12 @@ class AppConfig {
 	 * @return bool
 	 */
 	public function enterpriseFeaturesEnabled() {
-		$isEnterprise = $this->config->getAppValue($this->appName, 'isEEActive', null);
-		if ($isEnterprise === null) {
-			// app not marked as EE -> return false without doing anything more
-			return false;
-		}
-
-		$isEnterprise = \filter_var($isEnterprise, FILTER_VALIDATE_BOOLEAN);
-		if (!$isEnterprise || !$this->licenseManager->checkLicenseFor($this->appName)) {
-			// if not marked as enterprise, no need to check the license:
-			// explicitly mark the app as non-enterprise and remove the secure view.
-			// if marked as enterprise, we need to verify the license
-			$this->config->setAppValue($this->appName, 'isEEActive', 'no');
-			$this->config->setAppValue($this->appName, 'secure_view_option', 'false');
-			return false;
-		}
+		/**
+		 * FIXME: this needs to be changed when 10.6 is released with license fix
+		 *
+		 * We need here to check for version \OC_Util::getVersion() (if this fix is going to be only richdocuments patch release),
+		 * and do $this->licenseManager->checkLicenseFor($this->appName, $options)
+		 */
 
 		return true;
 	}
