@@ -88,14 +88,11 @@ class AppConfig {
 	 * @return bool
 	 */
 	public function enterpriseFeaturesEnabled() {
-		/**
-		 * FIXME: this needs to be changed when 10.6 is released with license fix
-		 *
-		 * We need here to check for version \OC_Util::getVersion() (if this fix is going to be only richdocuments patch release),
-		 * and do $this->licenseManager->checkLicenseFor($this->appName, $options)
-		 */
-
-		return true;
+		$options = [
+			'startGracePeriod' => false,
+			'disableApp' => false,
+		];
+		return $this->licenseManager->checkLicenseFor($this->appName, $options);
 	}
 
 	/**
