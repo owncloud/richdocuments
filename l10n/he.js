@@ -78,7 +78,6 @@ OC.L10N.register(
     "Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance." : "Webroot Canonical, אם קיימים מרובים, לשימוש של Collabora. מספק את החיבור שאם פחות מגבלות. לדוגמה: משתמש ב- webroot שלא עבר אימות Shibboleth אם ניגשים למופע מסויים מ- webroot אחד שעבר אימות ואחד נוסף שלא עבר אימות Shibboleth . ניתן להתעלם מהגדרה זו אם רק webroot אחד משמש לגישה למופע זה.",
     "Use Menu option" : "שימוש באפשרות מהתפריט",
     "Enable Secure View (requires Enterprise edition)" : "מאפשר תצוגה מאובטחת (מחייב גרסת ארגונים)",
-    "Enable Secure View" : "מאפשר תצוגה מאובטחת",
     "Set default share permissions for all users (available for shares without edit permission)" : "קובע הרשאות שיתוף ברירת מחדל לכל המשתמשים (קיים עבור שיתופים ללא הרשאות עריכה)",
     "can print/export" : "ניתן להדפסה/יצוא",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "מגדיר טקסט כחתימת מים לתצוגה מאובטחת. להכללת כתובת הדואר האלקטרוני של המשתמש בצורה דינמית, יש להשתמש במשתנה {viewer-email}. לשמירה יש להקליק מחוץ לשדה הטקסט.",

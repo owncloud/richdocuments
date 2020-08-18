@@ -76,7 +76,6 @@
     "Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance." : "Regelkonformes Web-Stammverzeichnis zur Nutzung von Collabora, falls mehrere existieren. Geben Sie dasjenige mit den wenigsten Restriktionen an. Zum Beispiel: Benutzen Sie Web-Stammverzeichnisse ohne Shibboleth, wenn diese Instanz gleichzeitig von Stammverzeichnissen zugegriffen werden soll die sowohl Shibboleth enthalten, als auch solche ohne. Sie können diese Einstellung ignorieren wenn nur ein Stammverzeichnis benutzt wird, um auf diese Instanz zuzugreifen.",
     "Use Menu option" : "Menü-Option aktivieren",
     "Enable Secure View (requires Enterprise edition)" : "Secure View aktivieren (benötigt Enterprise Edition)",
-    "Enable Secure View" : "Secure View aktivieren",
     "Set default share permissions for all users (available for shares without edit permission)" : "Default-Berechtigungen für alle Benutzer setzen",
     "can print/export" : "kann drucken/exportieren",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "Wasserzeichen-Text für Secure View einstellen. Um die E-Mail-Adresse des Nutzers dynamisch einzufügen, nutze die {viewer-email}-Variable. Außerhalb des Textfelds klicken, um zu speichern.",

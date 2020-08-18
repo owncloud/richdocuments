@@ -76,7 +76,6 @@
     "Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance." : "Canonical webroot, birden fazla olması durumunda Collabora'nın kullanması içindir. En az kısıtlamayı sağlamalısınız. Örn: Bu örneğe hem shibbolized hem de non-shibbolized webroots tarafından erişiliyorsa, shibbolized webroot kullanın. Bu örneğe erişmek için yalnızca bir webroot kullanılıyorsa bu ayarı yoksayabilirsiniz.",
     "Use Menu option" : "Menü seçeneğini kullan",
     "Enable Secure View (requires Enterprise edition)" : "Güvenli Görünümü Etkinleştir (Kurumsal sürüm gerektirir)",
-    "Enable Secure View" : "Güvenli Görünümü Etkinleştir",
     "Set default share permissions for all users (available for shares without edit permission)" : "Tüm kullanıcılar için varsayılan paylaşım izinlerini ayarla (düzenleme izni olmayan paylaşımlar için kullanılabilir)",
     "can print/export" : "yazdırılabilir/dışa aktarılabilir",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "Güvenli Görünüm için filigran metnini ayarlayın. Kullanıcı e-posta adresini dinamik olarak dahil etmek için {viewer-email} değişkenini kullanın. Kaydetmek için metin alanının dışını tıklayın.",
