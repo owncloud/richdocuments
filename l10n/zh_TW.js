@@ -76,6 +76,8 @@ OC.L10N.register(
     "Use Canonical webroot" : "使用 Canonical webroot",
     "Use Menu option" : "使用選單選項",
     "Enable Secure View (requires Enterprise edition)" : "啟用安全檢視 (需要 Enterprise 版本)",
+    "can print/export" : "可以打印/匯出",
+    "Strictly confidential. Only for " : "嚴格保密。只為",
     "New Document" : "新增文件",
     "New Spreadsheet" : "新增試算表",
     "New Presentation" : "新增簡報",
