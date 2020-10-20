@@ -52,23 +52,31 @@ class AppConfigTest extends TestCase {
 
 	public function enterpriseFeaturesEnabledProvider() {
 		return [
-			[true, true],
-			[false, false],
+			[true, 'false', true],
+			[false, 'false', false],
+			[true, 'true', true],
+			[false, 'true', true],
 		];
 	}
 
 	/**
 	 * @dataProvider enterpriseFeaturesEnabledProvider
 	 */
-	public function testEnterpriseFeaturesEnabled($licenseCheckReturn, $expectedResult) {
+	public function testEnterpriseFeaturesEnabled($licenseCheckReturn, $gracePeriodFlag, $expectedResult) {
+		$this->config->expects($this->once())
+			->method('getAppValue')
+			->with('richdocuments', 'start_grace_period', 'false')
+			->willReturn($gracePeriodFlag);
+
+		$gracePeriodFlagBool = \filter_var($gracePeriodFlag, FILTER_VALIDATE_BOOLEAN);
 		$options = [
-			'startGracePeriod' => false,
+			'startGracePeriod' => $gracePeriodFlagBool,
 			'disableApp' => false,
 		];
 		$this->licenseManager->expects($this->once())
 			->method('checkLicenseFor')
 			->with('richdocuments', $options)
-			->willReturn($licenseCheckReturn);
+			->willReturn($licenseCheckReturn || $gracePeriodFlagBool);  // license or grace period active
 
 		$this->assertSame($expectedResult, $this->appConfig->enterpriseFeaturesEnabled());
 	}
