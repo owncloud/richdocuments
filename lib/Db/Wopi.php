@@ -19,7 +19,7 @@ namespace OCA\Richdocuments\Db;
 
 class Wopi extends \OCA\Richdocuments\Db {
 	// Tokens expire after this many seconds (not defined by WOPI specs).
-	const TOKEN_LIFETIME_SECONDS = 1800;
+	const TOKEN_LIFETIME_SECONDS = 36000;
 
 	const ATTR_CAN_VIEW = 0;
 	const ATTR_CAN_UPDATE = 1;
