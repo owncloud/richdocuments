@@ -12,11 +12,6 @@
 
 namespace OCA\Richdocuments\Db;
 
-/**
- * @method string generateToken()
- * @method string getWopiForToken()
- */
-
 class Wopi extends \OCA\Richdocuments\Db {
 	// Tokens expire after this many seconds (not defined by WOPI specs).
 	const TOKEN_LIFETIME_SECONDS = 36000;
@@ -45,13 +40,14 @@ class Wopi extends \OCA\Richdocuments\Db {
 	 * @param string $serverHost
 	 * @param string $owner
 	 * @param string $editor
-	 * @return string
+	 * @return array
 	 * @throws \Exception
 	 */
 	public function generateToken($fileId, $version, $attributes, $serverHost, $owner, $editor) {
-		$token = \OC::$server->getSecureRandom()->getMediumStrengthGenerator()->generate(32,
+		$token = \OC::$server->getSecureRandom()->generate(32,
 			\OCP\Security\ISecureRandom::CHAR_LOWER . \OCP\Security\ISecureRandom::CHAR_UPPER .
 			\OCP\Security\ISecureRandom::CHAR_DIGITS);
+		$token_ttl = \time() + self::TOKEN_LIFETIME_SECONDS;
 
 		\OC::$server->getLogger()->debug('generateFileToken(): Issuing token, editor: {editor}, file: {fileId}, version: {version}, owner: {owner}, token: {token}', [
 			'app' => self::appName,
@@ -69,14 +65,19 @@ class Wopi extends \OCA\Richdocuments\Db {
 			$attributes,
 			$serverHost,
 			$token,
-			\time() + self::TOKEN_LIFETIME_SECONDS
+			$token_ttl
 		]);
 
 		if (!$wopi->insert()) {
 			throw new \Exception('Failed to add wopi token into database');
 		}
 
-		return $token;
+		// we store access_token_ttl as second,
+		// but wopi clients expect millisecond
+		return [
+			'access_token' => $token,
+			'access_token_ttl' => $token_ttl * 1000
+		];
 	}
 
 	/**
@@ -89,7 +90,7 @@ class Wopi extends \OCA\Richdocuments\Db {
 		\OC::$server->getLogger()->debug('Loaded WOPI Token record: {row}.', [
 			'app' => self::appName,
 			'row' => $row ]);
-		if (\count($row) == 0 || $row['expiry'] <= \time()) {
+		if (!isset($row['expiry']) || $row['expiry'] <= \time()) {
 			return false;
 		}
 

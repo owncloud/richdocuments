@@ -435,7 +435,8 @@ class DocumentController extends Controller {
 			'instanceId' => $doc['instanceid'],
 			'version' => $doc['version'],
 			'sessionId' => $wopiInfo['sessionid'],
-			'token' => $wopiInfo['token'],
+			'access_token' => $wopiInfo['access_token'],
+			'access_token_ttl' => $wopiInfo['access_token_ttl'],
 			'urlsrc' => $doc['urlsrc'],
 			'path' => $doc['path']
 		];
@@ -657,12 +658,13 @@ class DocumentController extends Controller {
 		$this->updateDocumentEncryptionAccessList($owner, $currentUser, $path);
 
 		$row = new Db\Wopi();
-		$token = $row->generateToken($fileId, $version, $attributes, $serverHost, $owner, $currentUser);
+		$tokenArray = $row->generateToken($fileId, $version, $attributes, $serverHost, $owner, $currentUser);
 
 		// Return the token.
 		$result = [
 			'status' => 'success',
-			'token' => $token,
+			'access_token' => $tokenArray['access_token'],
+			'access_token_ttl' => $tokenArray['access_token_ttl'],
 			'sessionid' => $sessionid
 		];
 		$this->logger->debug('getWopiInfoForAuthUser(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
@@ -731,12 +733,13 @@ class DocumentController extends Controller {
 		}
 
 		$row = new Db\Wopi();
-		$token = $row->generateToken($fileId, $version, $attributes, $serverHost, $ownerUid, $currentUser);
+		$tokenArray = $row->generateToken($fileId, $version, $attributes, $serverHost, $ownerUid, $currentUser);
 
 		// Return the token.
 		$result = [
 			'status' => 'success',
-			'token' => $token,
+			'access_token' => $tokenArray['access_token'],
+			'access_token_ttl' => $tokenArray['access_token_ttl'],
 			'sessionid' => '0' // default shared session
 		];
 		$this->logger->debug('getWopiInfoForPublicLink(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
@@ -1096,9 +1099,9 @@ class DocumentController extends Controller {
 
 		// Continue editing
 		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_PRINT;
-		$wopiToken = $row->generateToken($file->getId(), 0, $attributes, $serverHost, $owner, $editor);
+		$tokenArray = $row->generateToken($file->getId(), 0, $attributes, $serverHost, $owner, $editor);
 
-		$wopi = 'index.php/apps/richdocuments/wopi/files/' . $file->getId() . '_' . $this->settings->getSystemValue('instanceid') . '?access_token=' . $wopiToken;
+		$wopi = 'index.php/apps/richdocuments/wopi/files/' . $file->getId() . '_' . $this->settings->getSystemValue('instanceid') . '?access_token=' . $tokenArray['access_token'];
 		$url = \OC::$server->getURLGenerator()->getAbsoluteURL($wopi);
 
 		return new JSONResponse([ 'Name' => $file->getName(), 'Url' => $url ], Http::STATUS_OK);

@@ -5,7 +5,8 @@
 	 var rd_permissions = '<?php p($_['permissions']) ?>';
 	 var rd_title = '<?php p($_['title']) ?>';
 	 var rd_fileId = '<?php p($_['fileId']) ?>';
-	 var rd_token = '<?php p($_['token']) ?>';
+	 var rd_access_token = '<?php p($_['access_token']) ?>';
+	 var rd_access_token_ttl = '<?php p($_['access_token_ttl']) ?>';
 	 var rd_urlsrc = '<?php p($_['urlsrc']) ?>';
 	 var rd_path = '<?php p($_['path']) ?>';
 	 var rd_canonical_webroot = '<?php p($_['canonical_webroot']) ?>';

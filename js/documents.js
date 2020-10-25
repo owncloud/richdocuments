@@ -265,11 +265,14 @@ var documentsMain = {
 			    "&permission=readonly";
 
 			// access_token - must be passed via a form post
-			var access_token = encodeURIComponent(documentsMain.token);
+			var access_token = encodeURIComponent(documentsMain.accessToken);
+			var access_token_ttl = encodeURIComponent(documentsMain.accessTokenTtl);
 
-			// form to post the access token for WOPISrc
+			// form to post the access token and access_token_ttl for WOPISrc
 			var form = '<form id="loleafletform_viewer" name="loleafletform_viewer" target="loleafletframe_viewer" action="' + urlsrc + '" method="post">' +
-			    '<input name="access_token" value="' + access_token + '" type="hidden"/></form>';
+			    '<input name="access_token" value="' + access_token + '" type="hidden"/>' +
+			    '<input name="access_token_ttl" value="' + access_token_ttl + '" type="hidden"/>' +
+			    '</form>';
 
 			// iframe that contains the Collabora Online Viewer
 			var frame = '<iframe id="loleafletframe_viewer" name= "loleafletframe_viewer" style="width:100%;height:100%;position:absolute;"/>';
@@ -460,11 +463,14 @@ var documentsMain = {
 			}
 
 			// access_token - must be passed via a form post
-			var access_token = encodeURIComponent(rd_token);
+			var access_token = encodeURIComponent(documentsMain.accessToken);
+			var access_token_ttl = encodeURIComponent(documentsMain.accessTokenTtl);
 
-			// form to post the access token for WOPISrc
+			// form to post the access token and access_token_ttl for WOPISrc
 			var form = '<form id="loleafletform" name="loleafletform" target="loleafletframe" action="' + urlsrc + '" method="post">' +
-			    '<input name="access_token" value="' + access_token + '" type="hidden"/></form>';
+			    '<input name="access_token" value="' + access_token + '" type="hidden"/>' +
+			    '<input name="access_token_ttl" value="' + access_token_ttl + '" type="hidden"/>' +
+			    '</form>';
 
 			// iframe that contains the Collabora Online
 			var frame = '<iframe id="loleafletframe" name= "loleafletframe" allowfullscreen style="width:100%;height:100%;position:absolute;" onload="this.contentWindow.focus()"/>';
@@ -665,7 +671,8 @@ var documentsMain = {
 	initSession: function() {
 		documentsMain.urlsrc = rd_urlsrc;
 		documentsMain.fullPath = rd_path;
-		documentsMain.token = rd_token;
+		documentsMain.accessToken = rd_access_token;
+		documentsMain.accessTokenTtl = rd_access_token_ttl;
 
 		$(documentsMain.toolbar).appendTo('#header');
 
