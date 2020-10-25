@@ -75,7 +75,7 @@ class DocumentController extends Controller {
 		}
 
 		$result = $discovery_parsed->xpath(\sprintf('/wopi-discovery/net-zone/app[@name=\'%s\']/action', $mimetype));
-		if ($result && \count($result) > 0) {
+		if (($result !== false) && (\count($result) > 0)) {
 			return [
 				'urlsrc' => (string)$result[0]['urlsrc'],
 				'action' => (string)$result[0]['name']
