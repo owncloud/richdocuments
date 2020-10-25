@@ -20,6 +20,8 @@ namespace OCA\Richdocuments\Db;
 class Wopi extends \OCA\Richdocuments\Db {
 	// Tokens expire after this many seconds (not defined by WOPI specs).
 	const TOKEN_LIFETIME_SECONDS = 36000;
+	// If the expiry is closer than this time, it will be refreshed.
+	const TOKEN_REFRESH_THRESHOLD_SECONDS = 3600;
 
 	const ATTR_CAN_VIEW = 0;
 	const ATTR_CAN_UPDATE = 1;
@@ -93,11 +95,28 @@ class Wopi extends \OCA\Richdocuments\Db {
 			return false;
 		}
 
+		if ($row['expiry'] - self::TOKEN_REFRESH_THRESHOLD_SECONDS <= \time()) {
+			$this->refreshTokenExpiry($token);
+		}
+
 		return [
 			'owner' => $row['owner_uid'],
 			'editor' => $row['editor_uid'],
 			'attributes' => $row['attributes'],
 			'server_host' => $row['server_host']
 		];
+	}
+
+	/**
+	 * Refresh token life time
+	 *
+	 * @param string $token
+	 * @return boolean
+	 */
+	protected function refreshTokenExpiry($token) {
+		$count = \OC::$server->getDatabaseConnection()->executeUpdate('UPDATE `*PREFIX*richdocuments_wopi` SET `expiry` = ? WHERE `token` = ?',
+			[\time() + self::TOKEN_LIFETIME_SECONDS, $token]
+		);
+		return $count > 0;
 	}
 }
