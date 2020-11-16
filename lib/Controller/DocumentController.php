@@ -168,7 +168,7 @@ class DocumentController extends Controller {
 			} catch (\Exception $e) {
 				$error_message = $e->getMessage();
 
-				$this->logger->debug('getDiscovery(): Encountered error {error}', ['app' => $this->appName, 'error' => $error_message ]);
+				$this->logger->error('Collabora Online: Encountered error {error}', ['app' => $this->appName, 'error' => $error_message ]);
 				if (\preg_match('/^cURL error ([0-9]*):/', $error_message, $matches)) {
 					$admin_check = $this->l10n->t('Please ask your administrator to check the Collabora Online server setting. The exact error message was: ') . $error_message;
 
