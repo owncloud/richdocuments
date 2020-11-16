@@ -167,6 +167,8 @@ class DocumentController extends Controller {
 				}
 			} catch (\Exception $e) {
 				$error_message = $e->getMessage();
+
+				$this->logger->debug('getDiscovery(): Encountered error {error}', ['app' => $this->appName, 'error' => $error_message ]);
 				if (\preg_match('/^cURL error ([0-9]*):/', $error_message, $matches)) {
 					$admin_check = $this->l10n->t('Please ask your administrator to check the Collabora Online server setting. The exact error message was: ') . $error_message;
 
@@ -180,6 +182,8 @@ class DocumentController extends Controller {
 						throw new ResponseException($this->l10n->t('Collabora Online: Cannot resolve the host "%s".', [$wopiRemote]), $admin_check);
 					case '7':
 						throw new ResponseException($this->l10n->t('Collabora Online: Cannot connect to the host "%s".', [$wopiRemote]), $admin_check);
+					case '35':
+						throw new ResponseException($this->l10n->t('Collabora Online: SSL/TLS handshake failed with the host "%s".', [$wopiRemote]), $admin_check);
 					case '60':
 						throw new ResponseException($this->l10n->t('Collabora Online: SSL certificate is not installed.'), $this->l10n->t('Please ask your administrator to add ca-chain.cert.pem to the ca-bundle.crt, for example "cat /etc/loolwsd/ca-chain.cert.pem >> <server-installation>/resources/config/ca-bundle.crt" . The exact error message was: ') . $error_message);
 					}
