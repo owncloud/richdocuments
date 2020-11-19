@@ -49,7 +49,8 @@ class Application extends App {
 				$c->query('UserId'),
 				$c->query('ICacheFactory'),
 				$c->query('Logger'),
-				$storage
+				$storage,
+				$c->query('OCP\App\IAppManager')
 			);
 		});
 		$container->registerService('SettingsController', function ($c) {
@@ -141,10 +142,11 @@ class Application extends App {
 
 			if (\class_exists('\OC\Files\Type\TemplateManager')) {
 				$manager = \OC_Helper::getFileTemplateManager();
+				$appPath = \OC::$server->getAppManager()->getAppPath('richdocuments');
 
-				$manager->registerTemplate('application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'apps/richdocuments/assets/docxtemplate.docx');
-				$manager->registerTemplate('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'apps/richdocuments/assets/xlsxtemplate.xlsx');
-				$manager->registerTemplate('application/vnd.openxmlformats-officedocument.presentationml.presentation', 'apps/richdocuments/assets/pptxtemplate.pptx');
+				$manager->registerTemplate('application/vnd.openxmlformats-officedocument.wordprocessingml.document', $appPath . '/assets/docxtemplate.docx');
+				$manager->registerTemplate('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', $appPath . '/assets/xlsxtemplate.xlsx');
+				$manager->registerTemplate('application/vnd.openxmlformats-officedocument.presentationml.presentation', $appPath . '/assets/pptxtemplate.pptx');
 			}
 		}
 
