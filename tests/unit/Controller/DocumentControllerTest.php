@@ -11,6 +11,7 @@
 namespace OCA\Richdocuments\Tests\Controller;
 
 use \OCA\Richdocuments\Controller\DocumentController;
+use OCP\App\IAppManager;
 use \OCP\IRequest;
 use \OCP\IConfig;
 use \OCA\Richdocuments\AppConfig;
@@ -18,6 +19,7 @@ use \OCP\IL10N;
 use \OCP\ICacheFactory;
 use \OCP\ILogger;
 use \OCA\Richdocuments\Storage;
+use phpDocumentor\Reflection\Types\This;
 
 /**
  * Class DocumentControllerTest
@@ -54,6 +56,14 @@ class DocumentControllerTest extends \Test\TestCase {
 	 * @var Storage
 	 */
 	private $storage;
+	/**
+	 * @var IAppManager
+	 */
+	private $appMAnager;
+	/**
+	 * @var DocumentController
+	 */
+	private $documentController;
 
 	public function setUp(): void {
 		parent::setUp();
@@ -64,10 +74,8 @@ class DocumentControllerTest extends \Test\TestCase {
 		$this->cache = $this->createMock(ICacheFactory::class);
 		$this->logger = $this->createMock(ILogger::class);
 		$this->storage = $this->createMock(Storage::class);
-	}
-
-	public function testConstructor() {
-		$documentController = new DocumentController(
+		$this->appMAnager = $this->createMock(IAppManager::class);
+		$this->documentController = new DocumentController(
 			'richdocuments',
 			$this->request,
 			$this->settings,
@@ -76,8 +84,12 @@ class DocumentControllerTest extends \Test\TestCase {
 			'test',
 			$this->cache,
 			$this->logger,
-			$this->storage
+			$this->storage,
+			$this->appMAnager
 		);
-		$this->assertInstanceOf(DocumentController::class, $documentController);
+	}
+
+	public function testConstructor() {
+		$this->assertInstanceOf(DocumentController::class, $this->documentController);
 	}
 }

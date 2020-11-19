@@ -13,6 +13,7 @@ namespace OCA\Richdocuments\Controller;
 
 use \OC\Files\View;
 use OCA\Richdocuments\Db\Wopi;
+use OCP\App\IAppManager;
 use \OCP\AppFramework\Controller;
 use \OCP\Constants;
 use OCP\Files\File;
@@ -41,6 +42,7 @@ class DocumentController extends Controller {
 	private $cache;
 	private $logger;
 	private $storage;
+	private $appManager;
 	const ODT_TEMPLATE_PATH = '/assets/odttemplate.odt';
 
 	// Signifies LOOL that document has been changed externally in this storage
@@ -54,7 +56,8 @@ class DocumentController extends Controller {
 								$uid,
 								ICacheFactory $cache,
 								ILogger $logger,
-								Storage $storage) {
+								Storage $storage,
+								IAppManager $appManager) {
 		parent::__construct($appName, $request);
 		$this->uid = $uid;
 		$this->l10n = $l10n;
@@ -63,6 +66,7 @@ class DocumentController extends Controller {
 		$this->cache = $cache->create($appName);
 		$this->logger = $logger;
 		$this->storage = $storage;
+		$this->appManager = $appManager;
 	}
 
 	/**
@@ -443,9 +447,9 @@ class DocumentController extends Controller {
 	 * @NoAdminRequired
 	 */
 	public function create() {
-		$mimetype = $this->request->post['mimetype'];
-		$filename = $this->request->post['filename'];
-		$dir = $this->request->post['dir'];
+		$mimetype = $this->request->getParam('mimetype');
+		$filename = $this->request->getParam('filename');
+		$dir = $this->request->getParam('dir');
 
 		$view = new View('/' . $this->uid . '/files');
 		if (!$dir) {
@@ -488,7 +492,7 @@ class DocumentController extends Controller {
 		}
 
 		if (!$content) {
-			$content = \file_get_contents(\dirname(__DIR__) . self::ODT_TEMPLATE_PATH);
+			$content = \file_get_contents($this->appManager->getAppPath($this->appName) . self::ODT_TEMPLATE_PATH);
 		}
 
 		$discovery_parsed = null;
