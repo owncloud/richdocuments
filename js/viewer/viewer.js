@@ -53,15 +53,15 @@ var odfViewer = {
 			mime = odfViewer.supportedMimes[i];
 			OCA.Files.fileActions.registerAction(
 				{
+					name: "Richdocuments",
 					actionHandler: odfViewer.onEdit,
 					displayName: t('richdocuments', 'Open in Collabora'),
 					iconClass: 'icon-rename',
 					permissions: 	OC.PERMISSION_UPDATE | OC.PERMISSION_READ,
-					mime: mime,
-					name: "Richdocuments"
+					mime: mime
 				}
 			);
-			OCA.Files.fileActions.setDefault(mime, 'Edit');
+			OCA.Files.fileActions.setDefault(mime, 'Richdocuments');
 		}
 
 	},
