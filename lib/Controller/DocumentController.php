@@ -18,6 +18,7 @@ use \OCP\AppFramework\Controller;
 use \OCP\Constants;
 use OCP\Files\File;
 use OCP\IGroupManager;
+use OCP\Files\NotPermittedException;
 use \OCP\IRequest;
 use \OCP\IConfig;
 use \OCP\IL10N;
@@ -828,9 +829,19 @@ class DocumentController extends Controller {
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
+		// make sure file can be read when checking file info
 		$file = $this->getFileHandle($fileId, $res['owner'], $res['editor']);
 		if (!$file) {
-			$this->logger->warning('wopiCheckFileInfo(): Could not retrieve file', ['app' => $this->appName]);
+			$this->logger->error('wopiCheckFileInfo(): Could not retrieve file', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_NOT_FOUND);
+		}
+
+		// trigger read operation while checking file info for user
+		// after acquiring the token
+		try {
+			$file->fopen('rb');
+		} catch (NotPermittedException $e) {
+			$this->logger->error('wopiCheckFileInfo(): Could not open file - {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
@@ -926,6 +937,7 @@ class DocumentController extends Controller {
 			$this->logger->warning('wopiGetFile(): Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
+
 		return new DownloadResponse($this->request, $file);
 	}
 
