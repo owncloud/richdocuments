@@ -28,7 +28,6 @@ OC.L10N.register(
     "Failed to open " : "Produciuse un fallo ao abrir",
     "Secure View (with watermarks)" : "Vista segura (con marcas de auga)",
     "can print / export" : "pode imprimirse/exportarse",
-    "Edit" : "Editar",
     "Document" : "Documento",
     "Spreadsheet" : "Folla de cálculo",
     "Presentation" : "Presentación",

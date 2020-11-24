@@ -22,7 +22,6 @@ OC.L10N.register(
     "Invalid name, '\\', '/', '<', '>', ':', '\"', '|', '?' and '*' are not allowed." : "Ugyldigt navn, '\\', '/', '<', '>', ':' | '?', '\"', '', og '*' er ikke tilladt.",
     "\"{name}\" is an invalid file name." : "'{name}' er et ugyldigt filnavn.",
     "Failed to open " : "Kunne ikke åbnes",
-    "Edit" : "Redigér",
     "Document" : "Dokument",
     "Spreadsheet" : "Regneark",
     "Presentation" : "Præsentation",

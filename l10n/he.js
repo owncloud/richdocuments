@@ -28,7 +28,6 @@ OC.L10N.register(
     "Failed to open " : "פתיחת המסמך נכשלה",
     "Secure View (with watermarks)" : "תצוגה מאובטחת (על בסיס סימני מים)",
     "can print / export" : "ניתן להדפיס / ליצא",
-    "Edit" : "עריכה",
     "Document" : "מסמך",
     "Spreadsheet" : "גיליון נתונים",
     "Presentation" : "מצגת",

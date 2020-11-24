@@ -22,7 +22,6 @@ OC.L10N.register(
     "Invalid name, '\\', '/', '<', '>', ':', '\"', '|', '?' and '*' are not allowed." : "Ongeldige naam, ‘\\’, ‘/’, ‘<’, ‘>’, ‘:’, ‘\"’, ‘|’, ‘?’ en ‘*’ is ontoelaatbaar.",
     "\"{name}\" is an invalid file name." : "“{name}” is ’n ongeldige lêernaam.",
     "Failed to open " : "Kon nie open nie",
-    "Edit" : "Wysig",
     "Document" : "Dokument",
     "Spreadsheet" : "Sigblad",
     "Presentation" : "Aanbieding",

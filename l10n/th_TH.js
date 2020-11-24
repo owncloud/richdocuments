@@ -28,7 +28,6 @@ OC.L10N.register(
     "Failed to open " : "ไม่สามารถเปิด",
     "Secure View (with watermarks)" : "ดูแบบปลอดภัย (พร้อมลายน้ำ)",
     "can print / export" : "สามารถ พิมพ์/ส่งออก",
-    "Edit" : "แก้ไข",
     "Document" : "เอกสาร",
     "Spreadsheet" : "สเปรดชีต",
     "Presentation" : "งานนำเสนอ",

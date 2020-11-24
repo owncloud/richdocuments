@@ -21,7 +21,6 @@
     "Invalid name, '\\', '/', '<', '>', ':', '\"', '|', '?' and '*' are not allowed." : "Neplatný název, znaky '\\', '/', '<', '>', ':', '\"', '|', '?' a '*' nejsou povoleny.",
     "\"{name}\" is an invalid file name." : "\"{name}\" je neplatným názvem souboru.",
     "Failed to open " : "Selhalo otevření",
-    "Edit" : "Upravit",
     "Document" : "Dokument",
     "Spreadsheet" : "Tabulka",
     "Presentation" : "Prezentace",

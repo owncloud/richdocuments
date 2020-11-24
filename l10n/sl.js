@@ -22,7 +22,6 @@ OC.L10N.register(
     "Invalid name, '\\', '/', '<', '>', ':', '\"', '|', '?' and '*' are not allowed." : "Neveljavno ime; znaki '\\', '/', '<', '>', ':', '\"', '|', '?' in '*' niso dovoljeni.",
     "\"{name}\" is an invalid file name." : "\"{name}\" je neveljavno ime datoteke.",
     "Failed to open " : "Odpiranje je spodletelo.",
-    "Edit" : "Uredi",
     "Document" : "Dokument",
     "Spreadsheet" : "Preglednica",
     "Presentation" : "Predstavitev",

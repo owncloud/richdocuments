@@ -27,7 +27,6 @@ OC.L10N.register(
     "\"{name}\" is an invalid file name." : "Το \"{name}\" δεν είναι έγκυρο όνομα αρχείου.",
     "Failed to open " : "Αποτυχία ανοίγματος ",
     "can print / export" : "δυνατότητα εκτύπωσης / εξαγωγής",
-    "Edit" : "Επεξεργασία",
     "Document" : "Έγγραφο",
     "Spreadsheet" : "Λογιστικό φύλλο",
     "Presentation" : "Παρουσίαση",

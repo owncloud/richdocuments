@@ -28,7 +28,6 @@ OC.L10N.register(
     "Failed to open " : "無法開啟",
     "Secure View (with watermarks)" : "安全檢視 (有浮水印)",
     "can print / export" : "能列印 / 匯出",
-    "Edit" : "編輯",
     "Document" : "文件",
     "Spreadsheet" : "試算表",
     "Presentation" : "簡報",

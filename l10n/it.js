@@ -25,7 +25,6 @@ OC.L10N.register(
     "Invalid name, '\\', '/', '<', '>', ':', '\"', '|', '?' and '*' are not allowed." : "Nome non valido, '\\', '/', '<', '>', ':', '\"', '|', '?' e '*' non sono consentiti.",
     "\"{name}\" is an invalid file name." : "\"{name}\" non è un nome file valido.",
     "Failed to open " : "Apertura non riuscita",
-    "Edit" : "Modifica",
     "Document" : "Documento",
     "Spreadsheet" : "Foglio elettronico",
     "Presentation" : "Presentazione",

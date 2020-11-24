@@ -23,7 +23,6 @@
     "Invalid name, '\\', '/', '<', '>', ':', '\"', '|', '?' and '*' are not allowed." : "폴더 이름이 올바르지 않습니다. 이름에 문자 '\\', '/', '<', '>', ':', '\"', '|', '? ', '*'는 사용할 수 없습니다.",
     "\"{name}\" is an invalid file name." : "\"{name}\"은(는) 잘못된 파일 이름입니다.",
     "Failed to open " : "열 수 없음",
-    "Edit" : "편집",
     "Document" : "문서",
     "Spreadsheet" : "스프레드시트",
     "Presentation" : "프레젠테이션",

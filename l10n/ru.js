@@ -28,7 +28,6 @@ OC.L10N.register(
     "Failed to open " : "Не удалось открыть ",
     "Secure View (with watermarks)" : "Безопасный просмотр (с водяными знаками)",
     "can print / export" : "можно печатать / экспортировать",
-    "Edit" : "Редактировать",
     "Document" : "Документ",
     "Spreadsheet" : "Таблица",
     "Presentation" : "Презентация",

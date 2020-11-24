@@ -25,7 +25,6 @@ OC.L10N.register(
     "Invalid name, '\\', '/', '<', '>', ':', '\"', '|', '?' and '*' are not allowed." : "Ógilt nafn, táknin '\\', '/', '<', '>', ':', '\"', '|', '?' og '*' eru ekki leyfð.",
     "\"{name}\" is an invalid file name." : "\"{name}\" er ógilt skráarheiti.",
     "Failed to open " : "Mistókst að opna ",
-    "Edit" : "Breyta",
     "Document" : "Skjal",
     "Spreadsheet" : "Töflureiknisskjal",
     "Presentation" : "Kynning",

@@ -20,7 +20,6 @@
     "Invalid name, '\\', '/', '<', '>', ':', '\"', '|', '?' and '*' are not allowed." : "無効な名前、'\\', '/', '<', '>', ':', '\"', '|', '?', '*' は使用できません。",
     "\"{name}\" is an invalid file name." : "\"{name}\" は無効なファイル名です。",
     "Failed to open " : "オープンに失敗",
-    "Edit" : "編集",
     "Document" : "ドキュメント",
     "Spreadsheet" : "スプレッドシート",
     "Presentation" : "プレゼンテーション",

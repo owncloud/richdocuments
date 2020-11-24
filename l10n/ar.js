@@ -28,7 +28,6 @@ OC.L10N.register(
     "Failed to open " : "فشل فتح ",
     "Secure View (with watermarks)" : "عرض آمن (بعلامات مائية)",
     "can print / export" : "لا يمكن الطباعة / تصدير",
-    "Edit" : "تحرير",
     "Document" : "مستند",
     "Spreadsheet" : "جدول بيانات",
     "Presentation" : "عرض تقديمي",

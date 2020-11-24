@@ -28,7 +28,6 @@ OC.L10N.register(
     "Failed to open " : "S’u arrit të hapej",
     "Secure View (with watermarks)" : "Parje e Sigurt (me watermark-ë)",
     "can print / export" : "mund të shtypë / eksportojë",
-    "Edit" : "Përpunoni",
     "Document" : "Dokument",
     "Spreadsheet" : "Fletëllogaritje",
     "Presentation" : "Paraqitje",

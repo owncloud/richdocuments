@@ -23,7 +23,6 @@
     "Invalid name, '\\', '/', '<', '>', ':', '\"', '|', '?' and '*' are not allowed." : "Érvénytelen elnevezés. Ezek a karakterek nem használhatók: '\\', '/', '<', '>', ':', '\"', '|', '?' és '*'",
     "\"{name}\" is an invalid file name." : "\"{name}\" érvénytelen, mint fájlnév.",
     "Failed to open " : "A megnyitás sikertelen",
-    "Edit" : "Szerkesztés",
     "Document" : "Dokumentum",
     "Spreadsheet" : "Táblázat",
     "Presentation" : "Prezentáció",

@@ -28,7 +28,6 @@ OC.L10N.register(
     "Failed to open " : "Açılamadı",
     "Secure View (with watermarks)" : "Güvenli Görünüm (filigranlı)",
     "can print / export" : "yazdırılabilir / dışa aktarılabilir",
-    "Edit" : "Düzenle",
     "Document" : "Belge",
     "Spreadsheet" : "Çalışma Sayfası",
     "Presentation" : "Sunum",
