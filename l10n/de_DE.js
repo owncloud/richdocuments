@@ -28,6 +28,7 @@ OC.L10N.register(
     "Failed to open " : "Fehler beim Öffnen",
     "Secure View (with watermarks)" : "Sichere Ansicht (mit Wasserzeichen)",
     "can print / export" : "kann drucken / exportieren",
+    "Open in Collabora" : "In Collabora öffnen",
     "Document" : "Dokument",
     "Spreadsheet" : "Kalkulationstabelle",
     "Presentation" : "Präsentation",
