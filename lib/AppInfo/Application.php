@@ -50,7 +50,9 @@ class Application extends App {
 				$c->query('ICacheFactory'),
 				$c->query('Logger'),
 				$storage,
-				$c->query('OCP\App\IAppManager')
+				$c->query('OCP\App\IAppManager'),
+				$c->query('ServerContainer')->getGroupManager(),
+				$c->query('ServerContainer')->getUserManager()
 			);
 		});
 		$container->registerService('SettingsController', function ($c) {

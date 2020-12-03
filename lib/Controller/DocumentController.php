@@ -17,6 +17,7 @@ use OCP\App\IAppManager;
 use \OCP\AppFramework\Controller;
 use \OCP\Constants;
 use OCP\Files\File;
+use OCP\IGroupManager;
 use \OCP\IRequest;
 use \OCP\IConfig;
 use \OCP\IL10N;
@@ -33,6 +34,7 @@ use \OCA\Richdocuments\Helper;
 use \OCA\Richdocuments\Storage;
 use \OCA\Richdocuments\Http\DownloadResponse;
 use \OCA\Richdocuments\Http\ResponseException;
+use OCP\IUserManager;
 
 class DocumentController extends Controller {
 	private $uid;
@@ -43,6 +45,14 @@ class DocumentController extends Controller {
 	private $logger;
 	private $storage;
 	private $appManager;
+	/**
+	 * @var IGroupManager
+	 */
+	private $groupManager;
+	/**
+	 * @var IUserManager
+	 */
+	private $userManager;
 	const ODT_TEMPLATE_PATH = '/assets/odttemplate.odt';
 
 	// Signifies LOOL that document has been changed externally in this storage
@@ -57,7 +67,9 @@ class DocumentController extends Controller {
 								ICacheFactory $cache,
 								ILogger $logger,
 								Storage $storage,
-								IAppManager $appManager) {
+								IAppManager $appManager,
+								IGroupManager $groupManager,
+								IUserManager $userManager) {
 		parent::__construct($appName, $request);
 		$this->uid = $uid;
 		$this->l10n = $l10n;
@@ -67,6 +79,8 @@ class DocumentController extends Controller {
 		$this->logger = $logger;
 		$this->storage = $storage;
 		$this->appManager = $appManager;
+		$this->groupManager = $groupManager;
+		$this->userManager = $userManager;
 	}
 
 	/**
@@ -127,7 +141,7 @@ class DocumentController extends Controller {
 		$testgroups = \array_filter(\explode('|', $this->appConfig->getAppValue('test_server_groups')));
 		$this->logger->debug('Testgroups are {testgroups}', [ 'app' => $this->appName, 'testgroups' => $testgroups ]);
 		foreach ($testgroups as $testgroup) {
-			$test = \OC::$server->getGroupManager()->get($testgroup);
+			$test = $this->groupManager->get($testgroup);
 			if ($test !== null && \sizeof($test->searchUsers($uid)) > 0) {
 				$this->logger->debug('User {user} found in {group}', ['app' => $this->appName, 'user' => $uid, 'group' => $testgroup ]);
 				$tester = true;
@@ -550,10 +564,15 @@ class DocumentController extends Controller {
 		$editGroups = \array_filter(\explode('|', $this->appConfig->getAppValue('edit_groups')));
 		$isAllowed = true;
 		if (\count($editGroups) > 0) {
+			$editor = $this->userManager->get($editorUid);
+			if (!$editor) {
+				return false;
+			}
+
 			$isAllowed = false;
 			foreach ($editGroups as $editGroup) {
-				$editorGroup = \OC::$server->getGroupManager()->get($editGroup);
-				if ($editorGroup !== null && \sizeof($editorGroup->searchUsers($editorUid)) > 0) {
+				$editorGroup = $this->groupManager->get($editGroup);
+				if ($editorGroup !== null && $editorGroup->inGroup($editor)) {
 					$this->logger->debug("Editor {editor} is in edit group {group}", [
 						'app' => $this->appName,
 						'editor' => $editorUid,
@@ -812,7 +831,7 @@ class DocumentController extends Controller {
 		}
 
 		if ($res['editor'] && $res['editor'] != '') {
-			$editor = \OC::$server->getUserManager()->get($res['editor']);
+			$editor = $this->userManager->get($res['editor']);
 			$editorId = $editor->getUID();
 			$editorDisplayName = $editor->getDisplayName();
 			$editorEmail = $editor->getEMailAddress();
@@ -1119,7 +1138,7 @@ class DocumentController extends Controller {
 	 */
 	private function getFileHandle($fileId, $owner, $editor) {
 		if ($editor && $editor != '') {
-			$user = \OC::$server->getUserManager()->get($editor);
+			$user = $this->userManager->get($editor);
 			if (!$user) {
 				$this->logger->warning('wopiPutFile(): No such user', ['app' => $this->appName]);
 				return null;
