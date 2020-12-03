@@ -12,6 +12,7 @@ namespace OCA\Richdocuments\Tests\Controller;
 
 use \OCA\Richdocuments\Controller\DocumentController;
 use OCP\App\IAppManager;
+use OCP\IGroupManager;
 use \OCP\IRequest;
 use \OCP\IConfig;
 use \OCA\Richdocuments\AppConfig;
@@ -19,6 +20,7 @@ use \OCP\IL10N;
 use \OCP\ICacheFactory;
 use \OCP\ILogger;
 use \OCA\Richdocuments\Storage;
+use OCP\IUserManager;
 use phpDocumentor\Reflection\Types\This;
 
 /**
@@ -59,7 +61,15 @@ class DocumentControllerTest extends \Test\TestCase {
 	/**
 	 * @var IAppManager
 	 */
-	private $appMAnager;
+	private $appManager;
+	/**
+	 * @var IGroupManager
+	 */
+	private $groupManager;
+	/**
+	 * @var IUserManager
+	 */
+	private $userManager;
 	/**
 	 * @var DocumentController
 	 */
@@ -74,7 +84,9 @@ class DocumentControllerTest extends \Test\TestCase {
 		$this->cache = $this->createMock(ICacheFactory::class);
 		$this->logger = $this->createMock(ILogger::class);
 		$this->storage = $this->createMock(Storage::class);
-		$this->appMAnager = $this->createMock(IAppManager::class);
+		$this->appManager = $this->createMock(IAppManager::class);
+		$this->groupManager = $this->createMock(IGroupManager::class);
+		$this->userManager = $this->createMock(IUserManager::class);
 		$this->documentController = new DocumentController(
 			'richdocuments',
 			$this->request,
@@ -85,7 +97,9 @@ class DocumentControllerTest extends \Test\TestCase {
 			$this->cache,
 			$this->logger,
 			$this->storage,
-			$this->appMAnager
+			$this->appManager,
+			$this->groupManager,
+			$this->userManager
 		);
 	}
 
