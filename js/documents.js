@@ -470,6 +470,7 @@ var documentsMain = {
 			var form = '<form id="loleafletform" name="loleafletform" target="loleafletframe" action="' + urlsrc + '" method="post">' +
 			    '<input name="access_token" value="' + access_token + '" type="hidden"/>' +
 			    '<input name="access_token_ttl" value="' + access_token_ttl + '" type="hidden"/>' +
+			    '<input name="css_variables" value="' + generateCSSVarTokens() + '" type="hidden"/>' +
 			    '</form>';
 
 			// iframe that contains the Collabora Online
@@ -824,6 +825,11 @@ var documentsMain = {
 };
 
 //init
+var generateCSSVarTokens = function() {
+	var headerBg = $('#header').css('background-color');
+	return '--co-primary-element=' + headerBg + ';';
+};
+
 var Files = Files || {
 	// FIXME: copy/pasted from Files.isFileNameValid, needs refactor into core
 	isFileNameValid:function (name) {
