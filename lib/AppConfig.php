@@ -20,7 +20,6 @@ use OCP\IConfig;
 class AppConfig {
 	private $appName = 'richdocuments';
 	private $defaults = [
-		'wopi_url' => 'https://localhost:9980',
 		'secure_view_option' => 'false',
 		'secure_view_can_print_default' => 'false',
 		'secure_view_has_watermark_default' => 'true',

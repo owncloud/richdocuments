@@ -12,27 +12,15 @@ The easiest way to integrate Collabora with development instance of ownCloud is 
 - Start Collabora Server with default settings
 
     ```
-    $ docker run -t -d \
-    -p 9980:9980 \
-    -e "username=admin" \
-    -e "password=admin" \
-    --name collabora \
-    --cap-add MKNOD \
-    collabora/code
+    $ docker run -t -d -p 9980:9980 -e "extra_params=--o:ssl.enable=false" -e "username=admin" -e "password=admin" --name collabora --cap-add MKNOD collabora/code:4.2.5.3
     ```
 
-- Update Collabora Server docker and modify SSL settings
+- Access Collabora Admin at `http://[your-host-public-ip]:9980/loleaflet/dist/admin/admin.html` e.g. `172.16.12.95`,
 
-    ```
-    $ docker exec -it collabora /bin/bash -c "apt-get -y update && apt-get -y install xmlstarlet && xmlstarlet ed --inplace -u \"/config/ssl/enable\" -v false /etc/loolwsd/loolwsd.xml && xmlstarlet ed --inplace -u \"/config/ssl/termination\" -v false /etc/loolwsd/loolwsd.xml"
-    ```
+- Set in `Settings -> Admin -> Additional -> Collabora Online server -> http://[your-host-public-ip]:9980`
 
-- Restart updated docker, wait 30 seconds and retrieve IP of the server
+### Installation
 
-    ```
-    $ docker restart collabora
-    ```
+NOTE: Collabora server needs to be reachable from ownCloud server, and Collabora server needs to be able to reach ownCloud server
 
-- Access Collabora Admin at `http://[your-host-public-ip]:9980/loleaflet/dist/admin/admin.html` e.g. `172.16.12.95`, and set in `Settings -> Admin -> Additional -> Collabora Online server -> http://[your-host-public-ip]:9980`
-
-Note: it is possible to use Collabora Online’s integration with re-compiled and/or re-branded backends.
+NOTE: it is possible to use Collabora Online’s integration with re-compiled and/or re-branded backends.

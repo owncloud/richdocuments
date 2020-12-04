@@ -12,7 +12,7 @@ script('richdocuments', 'admin');
 	p($l->t("Enabled encryption type will result in limited functionality of the app. App requires privileged access to the files, and the only currently supported type is master key encryption."));
 } ?></p>
 	<label for="wopi_url"><?php p($l->t('Collabora Online server')) ?></label>
-	<input type="text" name="wopi_url" id="wopi_url" value="<?php p($_['wopi_url'])?>" style="width:300px;">
+	<input type="text" name="wopi_url" id="wopi_url" value="<?php p($_['wopi_url'])?>" placeholder="https://localhost:9980" style="width:300px;">
 	<br/><em><?php p($l->t('URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client.')) ?></em>
 	<br/><button type="button" id="wopi_apply"><?php p($l->t('Apply')) ?></button>
 	<span id="documents-admin-msg" class="msg"></span>

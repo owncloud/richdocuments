@@ -180,7 +180,7 @@ var odfViewer = {
 							if (response && response.status === 'success'){
 								FileList.add(response.data, {animate: true, scrollTo: true});
 							} else {
-								OC.dialogs.alert(response.data.message, t('core', 'Could not create file'));
+								OC.dialogs.alert(response.message, t('core', 'Could not create file'));
 							}
 						}
 					);
