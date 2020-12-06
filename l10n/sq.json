@@ -39,6 +39,7 @@
     "Collabora Online: Malformed URL \"%s\"." : "Collabora Online: URL \"%s\" e keqformuar.",
     "Collabora Online: Cannot resolve the host \"%s\"." : "Collabora Online: S’kapet dot streha \"%s\".",
     "Collabora Online: Cannot connect to the host \"%s\"." : "Collabora Online: S’lidhet dot te streha \"%s\".",
+    "Collabora Online: SSL/TLS handshake failed with the host \"%s\"." : "Collabora Online: Duarshtrëngimi SSL/TLS me strehën \"%s\" dështoi.",
     "Collabora Online: SSL certificate is not installed." : "Collabora Online: S’ka dëshmi SSL të instaluar.",
     "Please ask your administrator to add ca-chain.cert.pem to the ca-bundle.crt, for example \"cat /etc/loolwsd/ca-chain.cert.pem >> <server-installation>/resources/config/ca-bundle.crt\" . The exact error message was: " : "Ju lutemi, kërkojini përgjegjësit tuaj të shtojë ca-chain.cert.pem te ca-bundle.crt, për shembull \"cat /etc/loolwsd/ca-chain.cert.pem >> <server-installation>/resources/config/ca-bundle.crt\" . Mesazhi i gabimit qe pikërisht: ",
     "Collabora Online unknown error: " : "Gabim i panjohur i Collabora Online: ",

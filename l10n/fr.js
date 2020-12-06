@@ -2,6 +2,7 @@ OC.L10N.register(
     "richdocuments",
     {
     "Saving..." : "Enregistrement...",
+    "Saved watermark" : " Filigrane sauvegardé ",
     "None" : "Aucun",
     "All" : "Tout",
     "Failed to load the document, please contact your administrator." : "Echec lors du chargement du document, merci de contacter votre administrateur.",
@@ -65,6 +66,7 @@ OC.L10N.register(
     "Use OOXML by default for new files" : "Utiliser OOXML par défaut pour les nouveaux fichiers",
     "Enable access for external apps" : "Activer l'accès par des applications externes",
     "Add" : "Ajouter",
+    "Strictly confidential. Only for " : "Strictement confidentiel. Seulement pour",
     "New Document" : "Nouveau document",
     "New Spreadsheet" : "Nouvelle feuille de calcul",
     "New Presentation" : "Nouvelle présentation",

@@ -41,6 +41,7 @@ OC.L10N.register(
     "Collabora Online: Malformed URL \"%s\"." : "Collabora Online: URL con formato incorrecto «%s».",
     "Collabora Online: Cannot resolve the host \"%s\"." : "Collabora Online: Non é posíbel resolver a máquina «%s».",
     "Collabora Online: Cannot connect to the host \"%s\"." : "Collabora Online: Non é posíbel conectar coa máquina «%s».",
+    "Collabora Online: SSL/TLS handshake failed with the host \"%s\"." : "Collabora Online: fallou o desafío mútuo SSL/TLS co anfitrión «%s».",
     "Collabora Online: SSL certificate is not installed." : "Collabora Online: Non está instalado o certificado SSL.",
     "Please ask your administrator to add ca-chain.cert.pem to the ca-bundle.crt, for example \"cat /etc/loolwsd/ca-chain.cert.pem >> <server-installation>/resources/config/ca-bundle.crt\" . The exact error message was: " : "Pídalle ao seu administrador que engada ca-chain.cert.pem a ca-bundle.crt, por exemplo: «cat /etc/loolwsd/ca-chain.cert.pem >><server-installation> /resources/config/ca-bundle.crt». Exactamente a mensaxe de erro foi:",
     "Collabora Online unknown error: " : "Produciuse un erro descoñecido no Collabora Online:",
