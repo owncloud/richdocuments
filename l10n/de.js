@@ -41,6 +41,7 @@ OC.L10N.register(
     "Collabora Online: Malformed URL \"%s\"." : "Collabora Online: Falsch formartierte URL \"%s\".",
     "Collabora Online: Cannot resolve the host \"%s\"." : "Collabora Online: Host \"%s\" kann nicht aufgelöst werden.",
     "Collabora Online: Cannot connect to the host \"%s\"." : "Collabora Online: Zum Host \"%s\" kann keine Verbindung aufgebaut werden.",
+    "Collabora Online: SSL/TLS handshake failed with the host \"%s\"." : "Collabora Online: SSL/TLS-Handshake mit dem Host \"%s\" fehlgeschlagen.",
     "Collabora Online: SSL certificate is not installed." : "Collabora Online: SSL-Zertifikat ist nicht installiert.",
     "Please ask your administrator to add ca-chain.cert.pem to the ca-bundle.crt, for example \"cat /etc/loolwsd/ca-chain.cert.pem >> <server-installation>/resources/config/ca-bundle.crt\" . The exact error message was: " : "Bitte kontaktiere deinen Administrator. Es scheint als würde etwas mit dem Zertifikat nicht stimmen. Ein Lösungsansatz kann das hinzufügen von ca-chain.cert.pem zum ownCloud ca-bundle.crt mittels des Befehls \"cat /etc/loolwsd/ca-chain.cert.pem >> <server-installation>/resources/config/ca-bundle.crt\" sein. Die genaue Fehlermeldung war:",
     "Collabora Online unknown error: " : "Collabora Online unbekannter Fehler: ",
