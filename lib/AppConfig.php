@@ -23,7 +23,8 @@ class AppConfig {
 		'secure_view_option' => 'false',
 		'secure_view_can_print_default' => 'false',
 		'secure_view_has_watermark_default' => 'true',
-		'open_in_new_tab' => 'true'
+		'open_in_new_tab' => 'true',
+		'start_grace_period' => 'false',
 	];
 
 	private $config;
@@ -88,14 +89,13 @@ class AppConfig {
 	 * @return bool
 	 */
 	public function enterpriseFeaturesEnabled() {
-		/**
-		 * FIXME: this needs to be changed when 10.6 is released with license fix
-		 *
-		 * We need here to check for version \OC_Util::getVersion() (if this fix is going to be only richdocuments patch release),
-		 * and do $this->licenseManager->checkLicenseFor($this->appName, $options)
-		 */
-
-		return true;
+		$startGracePeriod = $this->getAppValue('start_grace_period');
+		$startGracePeriod = \filter_var($startGracePeriod, FILTER_VALIDATE_BOOLEAN);
+		$options = [
+			'startGracePeriod' => $startGracePeriod,
+			'disableApp' => false,
+		];
+		return $this->licenseManager->checkLicenseFor($this->appName, $options);
 	}
 
 	/**

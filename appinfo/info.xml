@@ -9,7 +9,7 @@ This application can connect to a Collabora Online (or other) server (WOPI-like 
 You can also edit your documents off-line with the Collabora Office app from the **[Android](https://play.google.com/store/apps/details?id=com.collabora.libreoffice)** and **[iOS](https://apps.apple.com/us/app/collabora-office/id1440482071)** store.]]></description>
 	<summary>Edit office documents directly in your browser.</summary>
 	<licence>AGPL</licence>
-	<version>2.4.1</version>
+	<version>2.4.2</version>
 	<author>Collabora Productivity based on work of Frank Karlitschek, Victor Dubiniuk</author>
 	<bugs>https://github.com/owncloud/richdocuments/issues</bugs>
 	<repository type="git">https://github.com/owncloud/richdocuments.git</repository>
@@ -19,7 +19,7 @@ You can also edit your documents off-line with the Collabora Office app from the
 		<prevent_group_restriction/>
 	</types>
 	<dependencies>
-		<owncloud min-version="10.5" max-version="10" />
+		<owncloud min-version="10.6" max-version="10" />
 	</dependencies>
 	<screenshot>https://owncloud.com/wp-content/uploads/2016/07/code_v2_writer-1-1024x576.png</screenshot>
 	<screenshot>https://owncloud.com/wp-content/uploads/2016/07/code_v2_calc-1-1024x576.png</screenshot>

@@ -50,11 +50,34 @@ class AppConfigTest extends TestCase {
 		$this->assertEquals(true, $enterpriseEdition);
 	}
 
-	public function testSecureViewDisabled() {
-		// TODO: This is currently aligned with the changes at the moment.
-		// we've decided to release secure_view as community in this version
-		// until a new core release fixes the problem with the license.
-		$enterpriseEdition = $this->appConfig->enterpriseFeaturesEnabled();
-		$this->assertEquals(true, $enterpriseEdition);
+	public function enterpriseFeaturesEnabledProvider() {
+		return [
+			[true, 'false', true],
+			[false, 'false', false],
+			[true, 'true', true],
+			[false, 'true', true],
+		];
+	}
+
+	/**
+	 * @dataProvider enterpriseFeaturesEnabledProvider
+	 */
+	public function testEnterpriseFeaturesEnabled($licenseCheckReturn, $gracePeriodFlag, $expectedResult) {
+		$this->config->expects($this->once())
+			->method('getAppValue')
+			->with('richdocuments', 'start_grace_period', 'false')
+			->willReturn($gracePeriodFlag);
+
+		$gracePeriodFlagBool = \filter_var($gracePeriodFlag, FILTER_VALIDATE_BOOLEAN);
+		$options = [
+			'startGracePeriod' => $gracePeriodFlagBool,
+			'disableApp' => false,
+		];
+		$this->licenseManager->expects($this->once())
+			->method('checkLicenseFor')
+			->with('richdocuments', $options)
+			->willReturn($licenseCheckReturn || $gracePeriodFlagBool);  // license or grace period active
+
+		$this->assertSame($expectedResult, $this->appConfig->enterpriseFeaturesEnabled());
 	}
 }
