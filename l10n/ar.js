@@ -78,6 +78,7 @@ OC.L10N.register(
     "Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance." : "webroot المتعارف عليه، في حالة وجود مجموعة متعددة، لاستخدام Collabora. قدِّم واحدًا بأقل القيود الممكنة. على سبيل المثال: استخدم webroot غير المخصص في حالة الوصول إلى هذا المثيل من قِبل webroot المخصص وغير المخصص. يمكنك تجاهل هذا الإعداد إذا تم استخدام webroot واحد فقط للوصول إلى هذا المثيل.",
     "Use Menu option" : "استخدام خيار القائمة",
     "Enable Secure View (requires Enterprise edition)" : "تمكين العرض الآمن (يتطلب إصدار Enterprise)",
+    "Enable Secure View" : "تمكين العرض الآمن",
     "Set default share permissions for all users (available for shares without edit permission)" : "تعيين أذونات المشاركة الافتراضية لجميع المستخدمين (متوفر للمشاركات دون إذن تحرير)",
     "can print/export" : "لا يمكن الطباعة/التصدير",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "عيِّن نص علامة مائية للعرض الآمن. لإدخال عنوان البريد الإلكتروني للمستخدم ديناميكيًا، استخدم المتغير {viewer-email}. وانقر خارج خانة النص للحفظ.",

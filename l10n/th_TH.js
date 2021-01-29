@@ -79,6 +79,7 @@ OC.L10N.register(
     "Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance." : "ไม่ต้องใช้การตั้งค่านี้หากท่านมีเพียงเว็บรูทเดียวสำหรับเข้าถึงอินสแตนซ์นี้ Canonical เป็นเว็บรูทใช้ในกรณีที่มีหลายเว็บรูท เช่นใช้เว็บรูท non-shibbolized ถ้าอินสแตนซ์นี้เข้าถึงได้ทั้ง shibbolized และ non-shibbolized",
     "Use Menu option" : "ใช้ตัวเลือกเมนู",
     "Enable Secure View (requires Enterprise edition)" : "เปิดใช้งานมุมมองที่ปลอดภัย (ต้องการเวอร์ชันองค์กร)",
+    "Enable Secure View" : "เปิดใช้งานมุมมองที่ปลอดภัย",
     "Set default share permissions for all users (available for shares without edit permission)" : "ตั้งค่าการอนุญาตเริ่มต้นสำหรับผู้ใช้ทุกคน (สำหรับการแชร์โดยไม่แก้ไขสิทธิ์)",
     "can print/export" : "สามารถ พิมพ์/ส่งออก",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "ตั้งค่าข้อความลายน้ำสำหรับ Secure View หากต้องการรวมที่อยู่อีเมลของผู้ใช้แบบไดนามิกให้ใช้ตัวแปร {viewer-email} คลิกนอกกล่องข้อความเพื่อบันทึก",
