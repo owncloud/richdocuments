@@ -77,6 +77,7 @@ OC.L10N.register(
     "Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance." : "WebRoot canonico, en caso de multiples instancias, usar el que tenga menos restricciones de uso. Ej: Usar el webroot que no use simbolos.\nSe puede ignorar esta opción si solo se usa un webroot para acceder a esta instancia",
     "Use Menu option" : "Usar Opciones del Menu",
     "Enable Secure View (requires Enterprise edition)" : "Activar Vista Segura (necesita  una edición Enterprise)",
+    "Enable Secure View" : "Activar Vista Segura",
     "Set default share permissions for all users (available for shares without edit permission)" : "Establece los permisos de compartir predeterminados para todos los usuarios (disponible para aquellos compartidos sin permisos de edición)",
     "can print/export" : "puede imprimir/exportar",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "Establezca marcas de agua de texto para la Vista Segura. Para incluir la dirección de correo electrónico del usuario dinámicamente, utilice la variable [viewer-email]. Haga clic afuera del campo texto para guardar.",
