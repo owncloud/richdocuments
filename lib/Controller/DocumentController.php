@@ -25,6 +25,7 @@ use \OCP\IL10N;
 use \OCP\AppFramework\Http\ContentSecurityPolicy;
 use \OCP\AppFramework\Http;
 use \OCP\AppFramework\Http\JSONResponse;
+use \OCP\AppFramework\Http\RedirectResponse;
 use \OCP\AppFramework\Http\TemplateResponse;
 use \OCP\ICacheFactory;
 use \OCP\ILogger;
@@ -36,6 +37,8 @@ use \OCA\Richdocuments\Storage;
 use \OCA\Richdocuments\Http\DownloadResponse;
 use \OCA\Richdocuments\Http\ResponseException;
 use OCP\IUserManager;
+
+use OCA\Federation\TrustedServers;
 
 class DocumentController extends Controller {
 	private $uid;
@@ -337,6 +340,88 @@ class DocumentController extends Controller {
 	}
 
 	/**
+	 * Check if server is trusted
+	 *
+	 * @param string $remote a remote url
+	 * @return bool indicating if given remote is trusted server
+	 */
+	private function isTrustedServer($remote) {
+		$trustedServers = null;
+
+		try {
+			$trustedServers = \OC::$server->query(\OCA\Federation\TrustedServers::class);
+		} catch (QueryException $e) {
+			$this->logger->warning("Cannot load trusted servers.");
+		}
+
+		if ($trustedServers !== null && $trustedServers->isTrustedServer($remote)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the wopiSrc Url from a remote server.
+	 *
+	 * @param string $remote a remote
+	 * @return string with the wopi src Url
+	 */
+	private function getRemoteWopiSrc($remote) {
+		if (\strpos($remote, 'http://') === false && \strpos($remote, 'https://') === false) {
+			$remote = 'https://' . $remote;
+		}
+
+		if (!$this->isTrustedServer($remote)) {
+			$this->logger->info("Server {server} is not trusted.", ["server" => $remote]);
+			return '';
+		}
+
+		try {
+			$getWopiSrcUrl = $remote . '/ocs/v2.php/apps/richdocuments/api/v1/federation?format=json';
+			$client = \OC::$server->getHTTPClientService()->newClient();
+			$response = $client->get($getWopiSrcUrl, ['timeout' => 5]);
+			$data = \json_decode($response->getBody(), true);
+			$wopiSrc = $data['ocs']['data']['wopi_url'];
+			return $wopiSrc;
+		} catch (\Throwable $e) {
+			$this->logger->info('Cannot get the wopiSrc of remote server: ' . $remote, ['exception' => $e]);
+		}
+
+		return '';
+	}
+
+	/**
+	 * Get the Url of the collabora document on a federated server.
+	 *
+	 * @param File $file a remote file
+	 * @return string with the Url to the given resource
+	 */
+	private function getRemoteFileUrl($file) {
+		$remote = $file->getStorage()->getRemote();
+		$remoteWopiSrc = $this->getRemoteWopiSrc($remote);
+
+		if (!empty($remoteWopiSrc)) {
+			$version = '0'; // FIXME
+			$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
+			$wopi = $this->getWopiInfoForAuthUser($file->getId(), $version, $this->uid);
+
+			$url = \rtrim($remote, '/') . '/index.php/apps/richdocuments/remote' .
+				'?shareToken=' . $file->getStorage()->getToken() .
+				'&remoteServer=' . $serverHost .
+				'&remoteServerToken=' . $wopi['access_token'];
+
+			if (!empty($file->getInternalPath())) {
+				$url .= '&filePath=' . $file->getInternalPath();
+			}
+
+			return $url;
+		}
+
+		return '';
+	}
+
+	/**
 	 * Get collabora document template for:
 	 * - the base template if both fileId and shareToken are null
 	 * - file in user folder (also shared by user/group) if fileId not null and shareToken is null
@@ -348,6 +433,22 @@ class DocumentController extends Controller {
 	 * @return TemplateResponse
 	 */
 	private function handleIndex($fileId, $shareToken, $renderAs) {
+		$userFolder = \OC::$server->getRootFolder()->getUserFolder($this->uid);
+		$file = $userFolder->getById((int)$fileId)[0];
+		if ($file) {
+			$isFederatedShare = $file->getStorage()->instanceOfStorage('OCA\Files_Sharing\External\Storage');
+			if ($isFederatedShare) {
+				$remoteFileUrl = $this->getRemoteFileUrl($file);
+				if (!empty($remoteFileUrl)) {
+					$response = new RedirectResponse($remoteFileUrl);
+					$response->addHeader('X-Frame-Options', 'ALLOW');
+					return $response;
+				} else {
+					$this->logger->warning("File {fileid} is a remote file but returned Url is empty", ["fileid" => $fileId]);
+				}
+			}
+		}
+
 		// Handle general response
 		$wopiRemote = $this->getWopiUrl($this->isTester());
 		if (($parts = \parse_url($wopiRemote)) && isset($parts['scheme'], $parts['host'])) {
