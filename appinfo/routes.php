@@ -28,5 +28,8 @@ $application->registerRoutes($this, [
 		//settings
 		['name' => 'settings#setSettings', 'url' => 'ajax/admin.php', 'verb' => 'POST'],
 		['name' => 'settings#getSettings', 'url' => 'ajax/settings.php', 'verb' => 'GET'],
+	],
+	'ocs' => [
+		['name' => 'Federation#getWopiUrl', 'url' => '/api/v1/federation', 'verb' => 'GET'],
 	]
 ]);
