@@ -808,4 +808,185 @@ class DocumentController extends Controller {
 			'status' => 'success', 'documents' => $documents
 		];
 	}
+
+	/**
+	 * Check if server is trusted
+	 *
+	 * @param string $remote a remote url
+	 * @return bool indicating if given remote is trusted server
+	 */
+	private function isTrustedServer($remote) {
+		$trustedServers = null;
+
+		try {
+			$trustedServers = \OC::$server->query(\OCA\Federation\TrustedServers::class);
+		} catch (QueryException $e) {
+			$this->logger->warning("Cannot load trusted servers.");
+		}
+
+		if ($trustedServers !== null && $trustedServers->isTrustedServer($remote)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the wopiSrc Url from a remote server.
+	 *
+	 * @param string $remote a remote
+	 * @return string with the wopi src Url
+	 */
+	private function getRemoteWopiSrc($remote) {
+		if (\strpos($remote, 'http://') === false && \strpos($remote, 'https://') === false) {
+			$remote = 'https://' . $remote;
+		}
+
+		if (!$this->isTrustedServer($remote)) {
+			$this->logger->info("Server {server} is not trusted.", ["server" => $remote]);
+			return '';
+		}
+
+		try {
+			$getWopiSrcUrl = $remote . '/ocs/v2.php/apps/richdocuments/api/v1/federation?format=json';
+			$client = \OC::$server->getHTTPClientService()->newClient();
+			$response = $client->get($getWopiSrcUrl, ['timeout' => 5]);
+			$data = \json_decode($response->getBody(), true);
+			$wopiSrc = $data['ocs']['data']['wopi_url'];
+			return $wopiSrc;
+		} catch (\Throwable $e) {
+			$this->logger->info('Cannot get the wopiSrc of remote server: ' . $remote, ['exception' => $e]);
+		}
+
+		return '';
+	}
+
+	/**
+	 * Get the Url of the collabora document on a federated server.
+	 *
+	 * @param Node $file a remote file
+	 * @return string with the Url to the given resource
+	 */
+	private function getRemoteFileUrl($file) {
+		/** @var ExternalStorage $storage */
+		$storage = $file->getStorage();
+
+		$remote = $storage->getRemote();
+		$remoteWopiSrc = $this->getRemoteWopiSrc($remote);
+
+		if (!empty($remoteWopiSrc)) {
+			$version = '0'; // FIXME
+			$serverHost = \OC::$server->getURLGenerator()->getAbsoluteURL('/');
+			$wopi = $this->getWopiInfoForAuthUser($file->getId(), $version, $this->uid);
+
+			$url = \rtrim($remote, '/') . '/index.php/apps/richdocuments/remote' .
+				'?shareToken=' . $storage->getToken() .
+				'&remoteServer=' . $serverHost .
+				'&remoteServerToken=' . $wopi['access_token'];
+
+			if (!empty($file->getInternalPath())) {
+				$url .= '&filePath=' . $file->getInternalPath();
+			}
+
+			return $url;
+		}
+
+		return '';
+	}
+	
+	/**
+	* @PublicPage
+	* @NoCSRFRequired
+	*
+	* @param string $shareToken share token for a requested resource
+	* @param string $remoteServer addres of a remote server
+	* @param string $remoteServerToken wopi access token from a remote server
+	* @param string $filePath path to the file if shareToken points to the shared folder
+	* @return TemplateResponse
+	*/
+	public function remote($shareToken, $remoteServer, $remoteServerToken, $filePath = null) {
+		try {
+			$share = $this->shareManager->getShareByToken($shareToken);
+			$isFolderShare = $share->getNodeType() == 'folder' && $filePath;
+			if ($share->getNodeType() == 'file' || $isFolderShare === true) {
+				if ($isFolderShare) {
+					$folder = $share->getNode();
+					$file = $folder->get($filePath);
+					$fileId = $file->getId();
+				} else {
+					$fileId = $share->getNodeId();
+				}
+
+				$remoteWopiInfo = $this->getRemoteWopiInfo($remoteServer, $remoteServerToken);
+				if ($remoteWopiInfo === null) {
+					$params = ['errors' => [['error' => 'Failed to get information from remote server ' . $remoteServer]]];
+					return new TemplateResponse('core', 'error', $params, 'guest');
+				}
+
+				$doc = $this->getDocumentByShareToken($shareToken, $fileId);
+				if ($doc == null) {
+					$this->logger->warning("Null returned for document with fileid {fileid}", ["fileid" => $fileId]);
+					return new TemplateResponse('core', '404', [], 'guest');
+				}
+
+				$permissions = $share->getPermissions();
+				if (!$remoteWopiInfo['canwrite']) {
+					$permissions = $permissions & ~ Constants::PERMISSION_UPDATE;
+				}
+
+				if (\strpos($remoteServer, 'http://') === false && \strpos($remoteServer, 'https://') === false) {
+					$remoteServer = 'https://' . $remoteServer;
+				}
+				$currentUser = $remoteWopiInfo['editorUid'] . '@' . $remoteServer;
+
+				$wopiInfo = $this->getWopiInfoForRemoteShare($share, $doc['fileid'], $doc['version'], $doc['path'], $permissions, $currentUser, $doc['owner']);
+
+				// FIXME: In public links allow max 100MB
+				$maxUploadFilesize = 100000000;
+
+				$wopiRemote = $this->getWopiUrl($this->isTester());
+				$webSocket = $this->getWebSocket($wopiRemote);
+				if ($webSocket == null) {
+					return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', [$wopiRemote]), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
+				}
+
+				$docIndex = [
+					'enable_previews' => $this->settings->getSystemValue('enable_previews', true),
+					'wopi_url' => $webSocket,
+					'doc_format' => $this->appConfig->getAppValue('doc_format'),
+					'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
+					'show_custom_header' => true,  // public link should show a customer header without buttons
+
+					'permissions' => $permissions,
+					'uploadMaxFilesize' => $maxUploadFilesize,
+					'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
+					'title' => $doc['name'],
+					'fileId' => $doc['fileid'],
+					'instanceId' => $doc['instanceid'],
+					'version' => $doc['version'],
+					'sessionId' => $wopiInfo['sessionid'],
+					'access_token' => $wopiInfo['access_token'],
+					'access_token_ttl' => $wopiInfo['access_token_ttl'],
+					'urlsrc' => $doc['urlsrc'],
+					'path' => $doc['path']
+				];
+
+				$response = new TemplateResponse('richdocuments', 'documents', $docIndex, 'empty');
+				$response->addHeader('X-Frame-Options', 'ALLOW');
+
+				$policy = new ContentSecurityPolicy();
+				$policy->addAllowedFrameDomain($this->domainOnly($wopiRemote));
+				$policy->allowInlineScript(true);
+				$response->setContentSecurityPolicy($policy);
+
+				return $response;
+			}
+		} catch (\Throwable $e) {
+			$this->logger->warning('Failed to open shared resource', ['app' => $this->appName]);
+			$params = ['errors' => [['error' => $e->getMessage()]]];
+			return new TemplateResponse('core', 'error', $params, 'guest');
+		}
+
+		return new TemplateResponse('core', '403', [], 'guest');
+	}
 }
