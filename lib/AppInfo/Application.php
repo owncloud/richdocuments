@@ -52,7 +52,8 @@ class Application extends App {
 				$storage,
 				$c->query('OCP\App\IAppManager'),
 				$c->query('ServerContainer')->getGroupManager(),
-				$c->query('ServerContainer')->getUserManager()
+				$c->query('ServerContainer')->getUserManager(),
+				$c->query('ServerContainer')->getShareManager()
 			);
 		});
 		$container->registerService('SettingsController', function ($c) {

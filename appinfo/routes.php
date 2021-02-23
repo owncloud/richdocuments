@@ -16,6 +16,7 @@ $application->registerRoutes($this, [
 	'routes' => [
 		//documents
 		['name' => 'document#index', 'url' => 'index', 'verb' => 'GET'],
+		['name' => 'document#remote', 'url' => 'remote', 'verb' => 'GET'],
 		['name' => 'document#create', 'url' => 'ajax/documents/create', 'verb' => 'POST'],
 		['name' => 'document#listAll', 'url' => 'ajax/documents/list', 'verb' => 'GET'],
 		["name" => 'document#publicIndex', "url" => "public", "verb" => "GET"],
@@ -31,5 +32,6 @@ $application->registerRoutes($this, [
 	],
 	'ocs' => [
 		['name' => 'Federation#getWopiUrl', 'url' => '/api/v1/federation', 'verb' => 'GET'],
+		['name' => 'Federation#getRemoteWopiInfo', 'url' => '/api/v1/federation', 'verb' => 'POST'],
 	]
 ]);

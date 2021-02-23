@@ -76,7 +76,8 @@ $.widget('oc.documentGrid', {
 	},
 
 	_load : function (fileId){
-		if (fileId){
+		var isRemoteFile = getURLParameter('shareToken');
+		if (fileId || isRemoteFile){
 			documentsMain.initSession();
 			return null;
 		}

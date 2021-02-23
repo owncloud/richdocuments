@@ -11,6 +11,7 @@
 
 namespace OCA\Richdocuments\Controller;
 
+use \OCA\Richdocuments\Db\Wopi;
 use \OCP\AppFramework\OCSController;
 use \OCP\AppFramework\Http\DataResponse;
 use \OCP\IConfig;
@@ -37,5 +38,33 @@ class FederationController extends OCSController {
 		$headers = ['X-Frame-Options' => 'ALLOW'];
 		$response = new DataResponse(['data' => $data], 200, $headers);
 		return $response;
+	}
+
+	/**
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 *
+	 * Wopi info of a remote accessing a file
+	 *
+	 * @param $token access token provided by remote server
+	 * @return DataResponse
+	 */
+	public function getRemoteWopiInfo($token) {
+		$row = new Wopi();
+		$row->loadBy('token', $token);
+		$wopi = $row->getWopiForToken($token);
+
+		if ($wopi == false) {
+			$code = 404;
+			$data = null;
+		} else {
+			$code = 200;
+			$data = [
+				'editorUid' => $wopi['editor'],
+				'canwrite' => $wopi['attributes'] | Wopi::ATTR_CAN_UPDATE
+			];
+		}
+
+		return new DataResponse(['data' => $data], $code);
 	}
 }
