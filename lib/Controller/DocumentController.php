@@ -898,6 +898,58 @@ class DocumentController extends Controller {
 	}
 
 	/**
+	 * Generates and returns an access token for a given fileId.
+	 */
+	private function getWopiInfoForRemoteShare($share, $fileId, $version, $path, $permissions, $currentUser, $ownerUid) {
+		$this->logger->info('getWopiInfoForPublicLink(): Generating WOPI Token for file {fileId}, version {version}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'version' => $version ]);
+
+		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
+
+		$updateable = ($permissions & Constants::PERMISSION_UPDATE) === Constants::PERMISSION_UPDATE;
+		// If token is for some versioned file
+		if ($version !== '0') {
+			$updateable = false;
+		}
+
+		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
+		$sessionid = '0'; // default shared session
+
+		// check if secure mode feature has been enabled for shares
+		$secureModeEnabled = \OC::$server->getConfig()->getAppValue('richdocuments', 'secure_view_option') === 'true';
+
+		if ($secureModeEnabled && $share->getAttributes()) {
+			$attributes = $this->getAttributesForSecureShare($share);
+
+			// add session-id to force private session with watermark
+			if ($attributes & WOPI::ATTR_HAS_WATERMARK) {
+				$sessionid = $share->getId();
+			}
+		} else {
+			$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_EXPORT | WOPI::ATTR_CAN_PRINT;
+		}
+
+		if ($updateable) {
+			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE;
+		}
+
+		$row = new Db\Wopi();
+		$tokenArray = $row->generateToken($fileId, $version, $attributes, $serverHost, $ownerUid, $currentUser);
+
+		// Return the token.
+		$result = [
+			'status' => 'success',
+			'access_token' => $tokenArray['access_token'],
+			'access_token_ttl' => $tokenArray['access_token_ttl'],
+			'sessionid' => $sessionid
+		];
+		$this->logger->debug('getWopiInfoForPublicLink(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
+		return $result;
+	}
+
+	/**
 	 * @NoCSRFRequired
 	 * @PublicPage
 	 * Generates and returns an access token and urlsrc for a given fileId
@@ -1385,7 +1437,7 @@ class DocumentController extends Controller {
 					$permissions = $permissions & ~ Constants::PERMISSION_UPDATE;
 				}
 
-				$wopiInfo = $this->getWopiInfoForPublicLink($doc['fileid'], $doc['version'], $doc['path'], $permissions, $currentUser, $doc['owner']);
+				$wopiInfo = $this->getWopiInfoForRemoteShare($share, $doc['fileid'], $doc['version'], $doc['path'], $permissions, $currentUser, $doc['owner']);
 
 				// FIXME: In public links allow max 100MB
 				$maxUploadFilesize = 100000000;
