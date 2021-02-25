@@ -1411,13 +1411,21 @@ class DocumentController extends Controller {
 	* @param string $shareToken share token for a requested resource
 	* @param string $remoteServer addres of a remote server
 	* @param string $remoteServerToken wopi access token from a remote server
+	* @param string $filePath path to the file if shareToken points to the shared folder
 	* @return TemplateResponse
 	*/
-	public function remote($shareToken, $remoteServer, $remoteServerToken) {
+	public function remote($shareToken, $remoteServer, $remoteServerToken, $filePath = null) {
 		try {
 			$share = $this->shareManager->getShareByToken($shareToken);
-			if ($share->getNodeType() == 'file') {
-				$fileId = $share->getNodeId();
+			$isFolderShare = $share->getNodeType() == 'folder' && $filePath;
+			if ($share->getNodeType() == 'file' || $isFolderShare === true) {
+				if ($isFolderShare) {
+					$folder = $share->getNode();
+					$file = $folder->get($filePath);
+					$fileId = $file->getId();
+				} else {
+					$fileId = $share->getNodeId();
+				}
 				$currentUser = $this->uid;
 
 				$remoteWopiInfo = $this->getRemoteWopiInfo($remoteServer, $remoteServerToken);
