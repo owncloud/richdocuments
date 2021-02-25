@@ -21,6 +21,7 @@ use \OCP\ICacheFactory;
 use \OCP\ILogger;
 use \OCA\Richdocuments\Storage;
 use OCP\IUserManager;
+use OCP\Share\IManager;
 use phpDocumentor\Reflection\Types\This;
 
 /**
@@ -74,6 +75,10 @@ class DocumentControllerTest extends \Test\TestCase {
 	 * @var DocumentController
 	 */
 	private $documentController;
+	/**
+	 * @var IManager
+	 */
+	private $shareManager;
 
 	public function setUp(): void {
 		parent::setUp();
@@ -87,6 +92,7 @@ class DocumentControllerTest extends \Test\TestCase {
 		$this->appManager = $this->createMock(IAppManager::class);
 		$this->groupManager = $this->createMock(IGroupManager::class);
 		$this->userManager = $this->createMock(IUserManager::class);
+		$this->shareManager = $this->createMock(IManager::class);
 		$this->documentController = new DocumentController(
 			'richdocuments',
 			$this->request,
@@ -99,7 +105,8 @@ class DocumentControllerTest extends \Test\TestCase {
 			$this->storage,
 			$this->appManager,
 			$this->groupManager,
-			$this->userManager
+			$this->userManager,
+			$this->shareManager
 		);
 	}
 

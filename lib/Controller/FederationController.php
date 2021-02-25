@@ -46,7 +46,7 @@ class FederationController extends OCSController {
 	 *
 	 * Wopi info of a remote accessing a file
 	 *
-	 * @param $token access token provided by remote server
+	 * @param string $token access token provided by remote server
 	 * @return DataResponse
 	 */
 	public function getRemoteWopiInfo($token) {

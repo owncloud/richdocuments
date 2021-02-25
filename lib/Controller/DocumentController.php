@@ -15,8 +15,10 @@ use \OC\Files\View;
 use OCA\Richdocuments\Db\Wopi;
 use OCP\App\IAppManager;
 use \OCP\AppFramework\Controller;
+use \OCP\AppFramework\QueryException;
 use \OCP\Constants;
 use OCP\Files\File;
+use OCP\Files\Node;
 use OCP\IGroupManager;
 use OCP\Files\NotPermittedException;
 use \OCP\IRequest;
@@ -38,6 +40,8 @@ use \OCA\Richdocuments\Http\DownloadResponse;
 use \OCA\Richdocuments\Http\ResponseException;
 use OCP\IUserManager;
 use OCP\Share\IManager;
+use OCP\Share\IShare;
+use OCA\Files_Sharing\External\Storage as ExternalStorage;
 
 use OCA\Federation\TrustedServers;
 
@@ -398,11 +402,14 @@ class DocumentController extends Controller {
 	/**
 	 * Get the Url of the collabora document on a federated server.
 	 *
-	 * @param File $file a remote file
+	 * @param Node $file a remote file
 	 * @return string with the Url to the given resource
 	 */
 	private function getRemoteFileUrl($file) {
-		$remote = $file->getStorage()->getRemote();
+		/** @var ExternalStorage $storage */
+		$storage = $file->getStorage();
+
+		$remote = $storage->getRemote();
 		$remoteWopiSrc = $this->getRemoteWopiSrc($remote);
 
 		if (!empty($remoteWopiSrc)) {
@@ -411,7 +418,7 @@ class DocumentController extends Controller {
 			$wopi = $this->getWopiInfoForAuthUser($file->getId(), $version, $this->uid);
 
 			$url = \rtrim($remote, '/') . '/index.php/apps/richdocuments/remote' .
-				'?shareToken=' . $file->getStorage()->getToken() .
+				'?shareToken=' . $storage->getToken() .
 				'&remoteServer=' . $serverHost .
 				'&remoteServerToken=' . $wopi['access_token'];
 
@@ -451,12 +458,12 @@ class DocumentController extends Controller {
 	 * @param string|int|null $fileId
 	 * @param string|null $shareToken
 	 * @param string $renderAs the template layout to be used
-	 * @return TemplateResponse
+	 * @return TemplateResponse|RedirectResponse
 	 */
 	private function handleIndex($fileId, $shareToken, $renderAs) {
 		$userFolder = \OC::$server->getRootFolder()->getUserFolder($this->uid);
 		$file = $userFolder->getById((int)$fileId)[0];
-		if ($file) {
+		if ($file != null) {
 			$isFederatedShare = $file->getStorage()->instanceOfStorage('OCA\Files_Sharing\External\Storage');
 			if ($isFederatedShare) {
 				$remoteFileUrl = $this->getRemoteFileUrl($file);
@@ -1383,7 +1390,7 @@ class DocumentController extends Controller {
 	*
 	* @param string $remote addres of a remote server
 	* @param string $remoteToken wopi access token from a remote server
-	* @return array with additional wopi information
+	* @return array|null with additional wopi information
 	*/
 	private function getRemoteWopiInfo($remote, $remoteToken) {
 		if (!$this->isTrustedServer($remote)) {
@@ -1473,7 +1480,6 @@ class DocumentController extends Controller {
 					'enable_previews' => $this->settings->getSystemValue('enable_previews', true),
 					'wopi_url' => $webSocket,
 					'doc_format' => $this->appConfig->getAppValue('doc_format'),
-					'instanceId' => $this->settings->getSystemValue('instanceid'),
 					'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
 					'show_custom_header' => true,  // public link should show a customer header without buttons
 
@@ -1501,8 +1507,8 @@ class DocumentController extends Controller {
 
 				return $response;
 			}
-		} catch (Throwable $e) {
-			$this->logger->warn('Failed to open shared resource', ['app' => $this->appName]);
+		} catch (\Throwable $e) {
+			$this->logger->warning('Failed to open shared resource', ['app' => $this->appName]);
 			$params = ['errors' => [['error' => $e->getMessage()]]];
 			return new TemplateResponse('core', 'error', $params, 'guest');
 		}
