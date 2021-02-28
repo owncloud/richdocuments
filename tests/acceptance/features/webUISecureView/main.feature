@@ -48,7 +48,7 @@ Feature: Secure View
   Scenario: Admin enables secure view, user shares without edit permissions with default secure view permissions set and resharing disabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "start_grace_period" with value "true" in app "richdocuments"
-    And user "Alice" has been created with default attributes and skeleton files
+    And user "Alice" has been created with default attributes and large skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
     When the user shares folder "simple-folder" with user "Brian" using the webUI
@@ -88,7 +88,7 @@ Feature: Secure View
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "secure_view_has_watermark_default" with value "false" in app "richdocuments"
     And the administrator has added config key "start_grace_period" with value "true" in app "richdocuments"
-    And user "Alice" has been created with default attributes and skeleton files
+    And user "Alice" has been created with default attributes and large skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
     When the user shares folder "simple-folder" with user "Brian" using the webUI
@@ -122,7 +122,7 @@ Feature: Secure View
     And the administrator has added config key "secure_view_has_watermark_default" with value "true" in app "richdocuments"
     And the administrator has added config key "secure_view_can_print_default" with value "true" in app "richdocuments"
     And the administrator has added config key "start_grace_period" with value "true" in app "richdocuments"
-    And user "Alice" has been created with default attributes and skeleton files
+    And user "Alice" has been created with default attributes and large skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
     When the user shares folder "simple-folder" with user "Brian" using the webUI
@@ -161,7 +161,7 @@ Feature: Secure View
   Scenario: Admin enables secure view and user shares without edit permissions and with secure-view disabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "start_grace_period" with value "true" in app "richdocuments"
-    And user "Alice" has been created with default attributes and skeleton files
+    And user "Alice" has been created with default attributes and large skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
     When the user shares folder "simple-folder" with user "Brian" using the webUI
@@ -194,7 +194,7 @@ Feature: Secure View
   Scenario: Admin enables secure view and user shares without edit permissions and with secure view enabled and print enabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "start_grace_period" with value "true" in app "richdocuments"
-    And user "Alice" has been created with default attributes and skeleton files
+    And user "Alice" has been created with default attributes and large skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
     When the user shares folder "simple-folder" with user "Brian" using the webUI
@@ -235,7 +235,7 @@ Feature: Secure View
   Scenario: Admin enables secure view and user shares without edit permissions and with secure view enabled and print disabled
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "start_grace_period" with value "true" in app "richdocuments"
-    And user "Alice" has been created with default attributes and skeleton files
+    And user "Alice" has been created with default attributes and large skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
     When the user shares folder "simple-folder" with user "Brian" using the webUI
@@ -277,7 +277,7 @@ Feature: Secure View
   Scenario: Admin enables secure view and user shares with reshare permission and no edit permission, secure-view is not available to be set for the share
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "start_grace_period" with value "true" in app "richdocuments"
-    And user "Alice" has been created with default attributes and skeleton files
+    And user "Alice" has been created with default attributes and large skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Carol" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
@@ -308,7 +308,7 @@ Feature: Secure View
   Scenario: When resharing a folder and secure-view is enabled by default, receiver has secure-view enabled by default
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "start_grace_period" with value "true" in app "richdocuments"
-    And user "Alice" has been created with default attributes and skeleton files
+    And user "Alice" has been created with default attributes and large skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Carol" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
@@ -339,7 +339,7 @@ Feature: Secure View
   Scenario: Reshare in secure-view is disabled for previous share even after share permission
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
     And the administrator has added config key "start_grace_period" with value "true" in app "richdocuments"
-    And user "Alice" has been created with default attributes and skeleton files
+    And user "Alice" has been created with default attributes and large skeleton files
     And user "Brian" has been created with default attributes and without skeleton files
     And user "Carol" has been created with default attributes and without skeleton files
     And user "Alice" has logged in using the webUI
