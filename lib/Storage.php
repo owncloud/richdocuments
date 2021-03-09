@@ -177,7 +177,7 @@ class Storage {
 
 			// Retrieve user folder for the file to be able to get relative path
 			$owner = $share->getShareOwner();
-			if (is_null($owner)) {
+			if ($owner === null) {
    			 	$owner = $document->getOwner()->getUID();
 			}
 			$root = \OC::$server->getRootFolder()->getUserFolder($owner);
