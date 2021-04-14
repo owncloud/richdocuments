@@ -176,11 +176,11 @@ class Storage {
 			}
 
 			// Retrieve user folder for the file to be able to get relative path
-			$owner = $document->getOwner()->getUID();
+			$owner = $share->getShareOwner();
 			$root = \OC::$server->getRootFolder()->getUserFolder($owner);
 
 			$ret = [];
-			$ret['owner'] = $document->getOwner()->getUID();
+			$ret['owner'] = $owner;
 			$ret['permissions'] = $share->getPermissions();
 			$ret['updateable'] = $document->isUpdateable();
 			$ret['mimetype'] = $document->getMimeType();
