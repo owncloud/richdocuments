@@ -37,6 +37,8 @@ use \OCA\Richdocuments\Http\DownloadResponse;
 use \OCA\Richdocuments\Http\ResponseException;
 use OCP\IUserManager;
 
+use Symfony\Component\EventDispatcher\GenericEvent;
+
 class DocumentController extends Controller {
 	private $uid;
 	private $l10n;
@@ -843,6 +845,9 @@ class DocumentController extends Controller {
 		} catch (NotPermittedException $e) {
 			$this->logger->error('wopiCheckFileInfo(): Could not open file - {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
+		} catch (Exception $e) {
+			$this->logger->error('wopiCheckFileInfo(): Unexpected Exception - {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
+			return new JSONResponse([], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
 		if ($res['editor'] && $res['editor'] != '') {
@@ -1169,9 +1174,12 @@ class DocumentController extends Controller {
 				// With master encryption, decryption is based on master key (no user password needed)
 				// make sure audit/activity is triggered for editor session
 				\OC::$server->getUserSession()->setUser($user);
-				\OC_Hook::emit('OC_User', 'post_login', ['run' => true, 'uid' => $editor, 'password' => '']);
+
+				// emit login event	to allow decryption of files via master key
+				$afterEvent = new GenericEvent(null, ['loginType' => 'password', 'user' => $user, 'uid' => $user->getUID(), 'password' => '']);
+				\OC::$server->getEventDispatcher()->dispatch($afterEvent, 'user.afterlogin');
 			} else {
-				// other type of encryption is enabled e.g. user-key
+				// other type of encryption is enabled (e.g. user-key) that does not allow to decrypt files without incognito access to files
 				\OC_User::setIncognitoMode(true);
 			}
 		} else {
