@@ -4,14 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] -
+
+## Fixed
+
+-
+
 ## [2.5.0] - 2021-04-28
 
-### Changed 
+### Changed
 
 - In OC10.7 we changed the logic for encryption events -  [#392](https://github.com/owncloud/richdocuments/pull/392)
 - Improved auditing capabilities for access via Collabora - [#371](https://github.com/owncloud/richdocuments/pull/371)
 - Changes to allow opening documents explicitly with Collabora - [#370](https://github.com/owncloud/richdocuments/pull/370)
-- Let wopi client decide the actions when token about to expire 
+- Let wopi client decide the actions when token about to expire
 - Translation updates
 - Library updates
 
@@ -23,7 +29,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [2.4.1] - 2020-10-19
 
-### Changed 
+### Changed
 - Add warning for secure view regarding license
 - Translation updates
 
