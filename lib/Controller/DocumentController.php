@@ -671,13 +671,14 @@ class DocumentController extends Controller {
 		}
 
 		if ($updatable) {
-			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE;
+			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE & WOPI::ATTR_CAN_UPDATE;
 		}
 
 		$enforceSecureView = \filter_var($this->request->getParam('enforceSecureView', false), FILTER_VALIDATE_BOOLEAN);
 
 		if ($enforceSecureView) {
-			$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_EXPORT | WOPI::ATTR_CAN_PRINT | WOPI::ATTR_HAS_WATERMARK;
+			$attributes = $attributes | WOPI::ATTR_HAS_WATERMARK;
+			$attributes &= ~WOPI::ATTR_CAN_UPDATE;
 		}
 
 		$this->logger->debug('getWopiInfoForAuthUser(): File {fileid} is updatable? {updatable}', [
