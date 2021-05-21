@@ -62,18 +62,18 @@ var odfViewer = {
 				}
 			);
 
-			//TODO: check by config if active
-			OCA.Files.fileActions.registerAction(
-				{
-					name: "RichdocumentsSecureView",
-					actionHandler: odfViewer.onEditSecureView,
-					displayName: t('richdocuments', 'Open in Collabora with Secure View'),
-					iconClass: 'icon-rename',
-					permissions: OC.PERMISSION_UPDATE | OC.PERMISSION_READ,
-					mime: mime
-				}
-			);
-
+			if(OC.appConfig.richdocuments && OC.appConfig.richdocuments.secureViewAllowed === true){
+				OCA.Files.fileActions.registerAction(
+					{
+						name: "RichdocumentsSecureView",
+						actionHandler: odfViewer.onEditSecureView,
+						displayName: t('richdocuments', 'Open in Collabora with Secure View'),
+						iconClass: 'icon-rename',
+						permissions: OC.PERMISSION_UPDATE | OC.PERMISSION_READ,
+						mime: mime
+					}
+				);
+			}
 
 			OCA.Files.fileActions.setDefault(mime, 'Richdocuments');
 		}
