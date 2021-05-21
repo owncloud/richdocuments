@@ -125,7 +125,6 @@ var odfViewer = {
 		} else {
 			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}&enforceSecureView={enforceSecureView}', {file_id: fileId, enforceSecureView: "true" });
 		}
-		console.log(url);
 		if (OC.appConfig.richdocuments.openInNewTab === true) {
 			window.open(url,'_blank');
 		} else {
