@@ -62,7 +62,11 @@ var odfViewer = {
 				}
 			);
 
-			if(OC.appConfig.richdocuments && OC.appConfig.richdocuments.secureViewAllowed === true){
+			if(OC.appConfig.richdocuments &&
+				OC.appConfig.richdocuments.secureViewAllowed === true &&
+				OC.appConfig.richdocuments.defaultShareAttributes &&
+				OC.appConfig.richdocuments.defaultShareAttributes.secureViewHasWatermark === true
+			){
 				OCA.Files.fileActions.registerAction(
 					{
 						name: "RichdocumentsSecureView",
