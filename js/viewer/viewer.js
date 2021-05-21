@@ -61,6 +61,20 @@ var odfViewer = {
 					mime: mime
 				}
 			);
+
+			//TODO: check by config if active
+			OCA.Files.fileActions.registerAction(
+				{
+					name: "RichdocumentsSecureView",
+					actionHandler: odfViewer.onEditSecureView,
+					displayName: t('richdocuments', 'Open in Collabora with Secure View'),
+					iconClass: 'icon-rename',
+					permissions: OC.PERMISSION_UPDATE | OC.PERMISSION_READ,
+					mime: mime
+				}
+			);
+
+
 			OCA.Files.fileActions.setDefault(mime, 'Richdocuments');
 		}
 
@@ -90,6 +104,28 @@ var odfViewer = {
 			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}', {file_id: fileId});
 		}
 
+		if (OC.appConfig.richdocuments.openInNewTab === true) {
+			window.open(url,'_blank');
+		} else {
+			window.location = url;
+		}
+
+	},
+
+	onEditSecureView : function(fileName, context){
+		var fileId = context.$file.attr('data-id');
+		var fileDir = context.dir;
+
+		var url;
+		if ($("#isPublic").val()) {
+			// Generate url for click on file in public share folder
+			url = OC.generateUrl("apps/richdocuments/public?fileId={file_id}&shareToken={shareToken}&enforceSecureView={enforceSecureView}", { file_id: fileId, shareToken: encodeURIComponent($("#sharingToken").val()), enforceSecureView: "true" });
+		} else if (fileDir) {
+			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}&dir={dir}&enforceSecureView={enforceSecureView}', { file_id: fileId, dir: fileDir, enforceSecureView: "true" });
+		} else {
+			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}&enforceSecureView={enforceSecureView}', {file_id: fileId, enforceSecureView: "true" });
+		}
+		console.log(url);
 		if (OC.appConfig.richdocuments.openInNewTab === true) {
 			window.open(url,'_blank');
 		} else {

@@ -674,6 +674,10 @@ class DocumentController extends Controller {
 			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE;
 		}
 
+		if($this->request->getParam('enforceSecureView', false) === 'true'){
+			$attributes = WOPI::ATTR_HAS_WATERMARK;
+		}
+
 		$this->logger->debug('getWopiInfoForAuthUser(): File {fileid} is updatable? {updatable}', [
 			'app' => $this->appName,
 			'fileid' => $fileId,
