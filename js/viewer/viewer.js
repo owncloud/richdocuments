@@ -72,7 +72,7 @@ var odfViewer = {
 						name: "RichdocumentsSecureView",
 						actionHandler: odfViewer.onEditSecureView,
 						displayName: t('richdocuments', 'Open in Collabora with Secure View'),
-						iconClass: 'icon-rename',
+						iconClass: 'icon-lock-closed',
 						permissions: OC.PERMISSION_UPDATE | OC.PERMISSION_READ,
 						mime: mime
 					}
