@@ -674,7 +674,9 @@ class DocumentController extends Controller {
 			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE;
 		}
 
-		if($this->request->getParam('enforceSecureView', false) === 'true'){
+		$enforceSecureView = \filter_var($this->request->getParam('enforceSecureView', false), FILTER_VALIDATE_BOOLEAN);
+
+		if ($enforceSecureView) {
 			$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_EXPORT | WOPI::ATTR_CAN_PRINT | WOPI::ATTR_HAS_WATERMARK;
 		}
 
