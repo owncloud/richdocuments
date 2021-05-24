@@ -45,56 +45,39 @@ var odfViewer = {
 		return (odfViewer.supportedMimes.indexOf(mimetype) !== -1);
 	},
 
-	register : function(){
-		var i,
-		    mime;
+	register : function() {
+		for (var i = 0; i < odfViewer.supportedMimes.length; ++i) {
+			var mime = odfViewer.supportedMimes[i];
 
-		for (i = 0; i < odfViewer.supportedMimes.length; ++i) {
-			mime = odfViewer.supportedMimes[i];
-			OCA.Files.fileActions.registerAction(
-				{
-					name: "Richdocuments",
-					actionHandler: odfViewer.onEdit,
+			if(!$("#isPublic").val() &&
+					OC.appConfig.richdocuments &&
+					OC.appConfig.richdocuments.secureViewAllowed === true &&
+					OC.appConfig.richdocuments.secureViewOpenActionDefault === true) {
+				OCA.Files.fileActions.registerAction({
+					name: 'RichdocumentsSecureView',
+					actionHandler: odfViewer.onOpenWithSecureView,
+					displayName: t('richdocuments', 'Open in Collabora with Secure View'),
+					iconClass: 'icon-lock-closed',
+					permissions: OC.PERMISSION_READ,
+					mime: mime
+				});
+				OCA.Files.fileActions.setDefault(mime, 'RichdocumentsSecureView');
+			} else {
+				OCA.Files.fileActions.registerAction({
+					name: 'Richdocuments',
+					actionHandler: odfViewer.onOpen,
 					displayName: t('richdocuments', 'Open in Collabora'),
 					iconClass: 'icon-rename',
-					permissions: 	OC.PERMISSION_UPDATE | OC.PERMISSION_READ,
+					permissions: OC.PERMISSION_READ,
 					mime: mime
-				}
-			);
-
-			if(OC.appConfig.richdocuments &&
-				OC.appConfig.richdocuments.secureViewAllowed === true &&
-				OC.appConfig.richdocuments.defaultShareAttributes &&
-				OC.appConfig.richdocuments.defaultShareAttributes.secureViewHasWatermark === true
-			){
-				OCA.Files.fileActions.registerAction(
-					{
-						name: "RichdocumentsSecureView",
-						actionHandler: odfViewer.onEditSecureView,
-						displayName: t('richdocuments', 'Open in Collabora with Secure View'),
-						iconClass: 'icon-lock-closed',
-						permissions: OC.PERMISSION_UPDATE | OC.PERMISSION_READ,
-						mime: mime
-					}
-				);
+				});
+				OCA.Files.fileActions.setDefault(mime, 'Richdocuments');
 			}
-
-			OCA.Files.fileActions.setDefault(mime, 'Richdocuments');
 		}
 
 	},
 
-	dispatch : function(filename){
-		if (this.isSupportedMimeType(OCA.Files.fileActions.getCurrentMimeType())
-			&& OCA.Files.fileActions.getCurrentPermissions() & OC.PERMISSION_UPDATE
-		){
-			odfViewer.onEdit(filename);
-		} else {
-			odfViewer.onView(filename);
-		}
-	},
-
-	onEdit : function(fileName, context){
+	onOpen : function(fileName, context){
 		var fileId = context.$file.attr('data-id');
 		var fileDir = context.dir;
 
@@ -116,15 +99,12 @@ var odfViewer = {
 
 	},
 
-	onEditSecureView : function(fileName, context){
+	onOpenWithSecureView : function(fileName, context){
 		var fileId = context.$file.attr('data-id');
 		var fileDir = context.dir;
 
 		var url;
-		if ($("#isPublic").val()) {
-			// Generate url for click on file in public share folder
-			url = OC.generateUrl("apps/richdocuments/public?fileId={file_id}&shareToken={shareToken}&enforceSecureView={enforceSecureView}", { file_id: fileId, shareToken: encodeURIComponent($("#sharingToken").val()), enforceSecureView: "true" });
-		} else if (fileDir) {
+		if (fileDir) {
 			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}&dir={dir}&enforceSecureView={enforceSecureView}', { file_id: fileId, dir: fileDir, enforceSecureView: "true" });
 		} else {
 			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}&enforceSecureView={enforceSecureView}', {file_id: fileId, enforceSecureView: "true" });
@@ -135,17 +115,6 @@ var odfViewer = {
 			window.location = url;
 		}
 
-	},
-
-	onView: function(filename, context) {
-	    var attachTo = odfViewer.isDocuments ? '#documents-content' : '#controls';
-
-	    FileList.setViewerMode(true);
-	},
-
-	onClose: function() {
-		FileList.setViewerMode(false);
-		$('#loleafletframe').remove();
 	},
 
 	registerFilesMenu: function(response) {
@@ -228,7 +197,31 @@ var odfViewer = {
 		})(OCA);
 
 		OC.Plugins.register('OCA.Files.NewFileMenu', OCA.FilesLOMenu);
-	}
+	},
+
+	dispatch : function(filename){
+		// FIXME: deprecated?
+		if (this.isSupportedMimeType(OCA.Files.fileActions.getCurrentMimeType())
+			&& OCA.Files.fileActions.getCurrentPermissions() & OC.PERMISSION_UPDATE
+		){
+			odfViewer.onOpen(filename);
+		} else {
+			odfViewer.onView(filename);
+		}
+	},
+
+	onView: function(filename, context) {
+		// FIXME: deprecated?
+	    var attachTo = odfViewer.isDocuments ? '#documents-content' : '#controls';
+
+	    FileList.setViewerMode(true);
+	},
+
+	onClose: function() {
+		// FIXME: deprecated?
+		FileList.setViewerMode(false);
+		$('#loleafletframe').remove();
+	},
 };
 
 $(document).ready(function() {

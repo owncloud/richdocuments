@@ -120,6 +120,13 @@ var documentsSettings = {
 		);
 	},
 
+	saveSecureViewOpenActionDefault: function(value) {
+		$.post(
+			OC.filePath('richdocuments', 'ajax', 'admin.php'),
+			{ 'secure_view_open_action_default': value }
+		);
+	},
+
 	saveCanPrintDefaultOption: function(value) {
 		$.post(
 			OC.filePath('richdocuments', 'ajax', 'admin.php'),
@@ -338,6 +345,11 @@ var documentsSettings = {
 				var val = $('#secure-view-watermark').val();
 				documentsSettings.saveWatermarkText(val);
 			}
+		});
+
+		$(document).on('change', '#enable_secure_view_open_action_default_cb-richdocuments', function() {
+			var page = $(this).parent();
+			documentsSettings.saveSecureViewOpenActionDefault(this.checked);
 		});
 
 		$(document).on('change', '#secure_view_has_watermark_default_option_cb-richdocuments', function() {
