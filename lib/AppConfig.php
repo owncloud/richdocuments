@@ -21,7 +21,7 @@ class AppConfig {
 	private $appName = 'richdocuments';
 	private $defaults = [
 		'secure_view_option' => 'false',
-		'secure_view_open_action_default' => 'true',
+		'secure_view_open_action_default' => 'false',
 		'secure_view_can_print_default' => 'false',
 		'secure_view_has_watermark_default' => 'true',
 		'open_in_new_tab' => 'true',
