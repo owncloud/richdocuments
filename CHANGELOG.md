@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 -
 
+## [2.6.0] - 2021-05-31
+
+### Changed 
+
+- Introduced "Open documents in Secure View with watermark by default" setting - [#400](https://github.com/owncloud/richdocuments/pull/400) - [#402](https://github.com/owncloud/richdocuments/pull/402)
+- Library updates
+
+
 ## [2.5.0] - 2021-04-28
 
 ### Changed
