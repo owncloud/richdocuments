@@ -70,6 +70,7 @@ class SettingsController extends Controller {
 				'masterkey_encryption_enabled' => $this->appConfig->masterEncryptionEnabled() ? 'true' : 'false',
 				'secure_view_allowed' => $this->appConfig->enterpriseFeaturesEnabled() ? 'true' : 'false',
 				'secure_view_option' => $this->appConfig->getAppValue('secure_view_option'),
+				'secure_view_open_action_default' => $this->appConfig->getAppValue('secure_view_open_action_default'),
 				'secure_view_has_watermark_default' => $this->appConfig->getAppValue('secure_view_has_watermark_default'),
 				'secure_view_can_print_default' => $this->appConfig->getAppValue('secure_view_can_print_default'),
 				'watermark_text' => $this->appConfig->getAppValue('watermark_text')
@@ -78,7 +79,7 @@ class SettingsController extends Controller {
 		);
 	}
 
-	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option, $secure_view_option, $secure_view_can_print_default, $secure_view_has_watermark_default, $watermark_text) {
+	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option, $secure_view_option, $secure_view_open_action_default, $secure_view_can_print_default, $secure_view_has_watermark_default, $watermark_text) {
 		$message = $this->l10n->t('Saved');
 
 		if ($wopi_url !== null) {
@@ -120,6 +121,10 @@ class SettingsController extends Controller {
 
 		if ($secure_view_option !== null) {
 			$this->appConfig->setAppValue('secure_view_option', $secure_view_option);
+		}
+
+		if ($secure_view_open_action_default !== null) {
+			$this->appConfig->setAppValue('secure_view_open_action_default', $secure_view_open_action_default);
 		}
 
 		if ($secure_view_can_print_default !== null) {

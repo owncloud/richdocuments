@@ -8,6 +8,22 @@ Collabora Online for ownCloud provides collaborating editing functions for text 
 
 See also: https://owncloud.com/collabora/collaborative-editing/
 
+### Configuration
+
+- Set WOPI Server URL
+
+    ```
+    $ occ config:app:set richdocuments wopi_url --value [your-host-public-ip]:8098 
+    ```
+
+- Enable/Disable Secure View and set its settings
+
+    ```
+    $ occ config:app:set richdocuments secure_view_option --value true
+    $ occ config:app:set richdocuments watermark_text --value "Restricted to {viewer-email}" 
+    $ occ config:app:set richdocuments secure_view_open_action_default --value true
+    ```
+
 ### Developing
 
 The easiest way to integrate Collabora with development instance of ownCloud is by disabling SSL for Collabora.
@@ -15,12 +31,13 @@ The easiest way to integrate Collabora with development instance of ownCloud is 
 - Start Collabora Server with default settings
 
     ```
-    $ docker run -t -d -p 9980:9980 -e "extra_params=--o:ssl.enable=false" -e "username=admin" -e "password=admin" --name collabora --cap-add MKNOD collabora/code:4.2.5.3
+    $ docker run -t -d -p 9980:9980 -e "extra_params=--o:ssl.enable=false" -e "username=admin" -e "password=admin" --name collabora --cap-add MKNOD collabora/code:6.4.8.6
     ```
 
 - Access Collabora Admin at `http://[your-host-public-ip]:9980/loleaflet/dist/admin/admin.html` e.g. `172.16.12.95`,
 
 - Set in `Settings -> Admin -> Additional -> Collabora Online server -> http://[your-host-public-ip]:9980`
+
 
 ### Installation
 

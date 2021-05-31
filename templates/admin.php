@@ -83,6 +83,14 @@ script('richdocuments', 'admin');
 } else {
 	p($l->t('Enable Secure View'));
 }?></label>
+	<div id="enable-open-action-with-secure-view-default" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
+	p('hidden');
+} ?>" >
+		<p style="max-width: 50em;"><em><?php p($l->t('Settings')) ?></em></p>
+		<input type="checkbox" id="enable_secure_view_open_action_default_cb-richdocuments" <?php p($_['secure_view_open_action_default'] === 'true' ? 'checked' : '') ?> />
+		<label for="enable_secure_view_open_action_default_cb-richdocuments"><?php p($l->t('Open documents in Secure View with watermark by default')) ?></label>
+	</div>
+	<br/>
 	<div id="enable-share-attributes-defaults" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
 	p('hidden');
 } ?>" >

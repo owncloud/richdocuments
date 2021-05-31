@@ -627,24 +627,40 @@ class DocumentController extends Controller {
 		// default shared session id
 		$sessionid = '0';
 
-		// get file info
+		// get file info and storage
 		$info = $view->getFileInfo($path);
-		/** @var \OCA\Files_Sharing\SharedStorage $storage */
 		$storage = $info->getStorage();
 
-		// check if secure mode feature has been enabled for shares
+		// check if secure mode feature has been enabled for share/file
 		$secureModeEnabled = \OC::$server->getConfig()->getAppValue('richdocuments', 'secure_view_option') === 'true';
-		$isSharedFile = $storage->instanceOfStorage('\OCA\Files_Sharing\SharedStorage');
-		if ($isSharedFile && $secureModeEnabled) {
-			// Extract share attributes
-			/** @var \OCA\Files_Sharing\SharedStorage $storage */
-			$share = $storage->getShare();
-			$canDownload = $share->getAttributes()->getAttribute('permissions', 'download');
-			$viewWithWatermark = $share->getAttributes()->getAttribute('richdocuments', 'view-with-watermark');
-			$canPrint = $share->getAttributes()->getAttribute('richdocuments', 'print');
+		$isSharedFile = $info->getStorage()->instanceOfStorage('\OCA\Files_Sharing\SharedStorage');
+		$enforceSecureView = \filter_var($this->request->getParam('enforceSecureView', false), FILTER_VALIDATE_BOOLEAN);
+		if ($secureModeEnabled) {
+			if ($isSharedFile) {
+				// handle shares
+				/** @var \OCA\Files_Sharing\SharedStorage $storage */
+				$share = $storage->getShare();
+				$canDownload = $share->getAttributes()->getAttribute('permissions', 'download');
+				$viewWithWatermark = $share->getAttributes()->getAttribute('richdocuments', 'view-with-watermark');
+				$canPrint = $share->getAttributes()->getAttribute('richdocuments', 'print');
+				// if view with watermark enforce user-private secure session with dedicated sessionid
+				$sessionid = $viewWithWatermark === true ? $share->getId() : '0';
+			} else {
+				// handle files
+				$canDownload = true;
+				$viewWithWatermark = false;
+				$canPrint = true;
+			}
+			
+			if ($enforceSecureView) {
+				// handle enforced secure view watermark
+				// but preserve other permissions like print/download/edit
+				$viewWithWatermark = true;
+			}
 
 			// restriction on view has been set to false, return forbidden
-			if ($viewWithWatermark === false) {
+			// as there is no supported way of opening this document
+			if ($canDownload === false && $viewWithWatermark === false) {
 				throw new \Exception($this->l10n->t('Insufficient file permissions.'));
 			}
 
@@ -660,10 +676,8 @@ class DocumentController extends Controller {
 				$attributes = $attributes | WOPI::ATTR_CAN_PRINT;
 			}
 
-			// restriction on view with watermarking enabled,
-			// add session-id to force private session with watermark
+			// restriction on view with watermarking enabled
 			if ($viewWithWatermark === true) {
-				$sessionid = $share->getId();
 				$attributes = $attributes | WOPI::ATTR_HAS_WATERMARK;
 			}
 		} else {

@@ -176,6 +176,7 @@ class Application extends App {
 				'secureViewCanPrint' => \json_decode($appConfig->getAppValue('secure_view_can_print_default')),
 			],
 			'secureViewAllowed' => \json_decode($appConfig->getAppValue('secure_view_option')),
+			'secureViewOpenActionDefault' => \json_decode($appConfig->getAppValue('secure_view_open_action_default')),
 			'openInNewTab' => \json_decode($appConfig->getAppValue('open_in_new_tab'))
 		];
 	}
