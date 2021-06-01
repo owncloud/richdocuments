@@ -80,6 +80,7 @@ OC.L10N.register(
     "Use Menu option" : "ใช้ตัวเลือกเมนู",
     "Enable Secure View (requires Enterprise edition)" : "เปิดใช้งานมุมมองที่ปลอดภัย (ต้องการเวอร์ชันองค์กร)",
     "Enable Secure View" : "เปิดใช้งานมุมมองที่ปลอดภัย",
+    "Settings" : "ตั้งค่า",
     "Set default share permissions for all users (available for shares without edit permission)" : "ตั้งค่าการอนุญาตเริ่มต้นสำหรับผู้ใช้ทุกคน (สำหรับการแชร์โดยไม่แก้ไขสิทธิ์)",
     "can print/export" : "สามารถ พิมพ์/ส่งออก",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "ตั้งค่าข้อความลายน้ำสำหรับ Secure View หากต้องการรวมที่อยู่อีเมลของผู้ใช้แบบไดนามิกให้ใช้ตัวแปร {viewer-email} คลิกนอกกล่องข้อความเพื่อบันทึก",

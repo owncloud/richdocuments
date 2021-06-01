@@ -78,6 +78,7 @@
     "Use Menu option" : "使用選單選項",
     "Enable Secure View (requires Enterprise edition)" : "啟用安全檢視 (需要 Enterprise 版本)",
     "Enable Secure View" : "啟用安全檢視",
+    "Settings" : "設定",
     "Set default share permissions for all users (available for shares without edit permission)" : "為所有用戶設置默認分享權限（可用的於未經編輯權限的共享）",
     "can print/export" : "可以打印/匯出",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "設置安全視圖的水印文本。 要動態包含使用者電子郵件位址，請使用{viewer-email}變量。 在文本字段外部單擊以儲存。",

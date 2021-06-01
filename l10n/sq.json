@@ -78,6 +78,7 @@
     "Use Menu option" : "Përdor mundësinë Menu",
     "Enable Secure View (requires Enterprise edition)" : "Aktivizoni Parje të Sigurt (lyp versionin Enterprise)",
     "Enable Secure View" : "Aktivizo Parje të Sigurt",
+    "Settings" : "Rregullime",
     "Set default share permissions for all users (available for shares without edit permission)" : "Caktoni parazgjedhje lejesh ndarjesh me të tjerët për krejt përdoruesit (e vlefshme për ndarje pa leje përpunimi)",
     "can print/export" : "mund të shtypë/eksportojë",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "Caktoni tekst watermark-u për Parje të Sigurt. Për ta përfshirë dinamikisht adresën email të përdoruesit, përdorni ndryshoren {viewer-email}. Për ta ruajtur, klikoni jashtë fushës së teksteve.",

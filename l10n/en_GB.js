@@ -78,6 +78,7 @@ OC.L10N.register(
     "Use Menu option" : "Use Menu option",
     "Enable Secure View (requires Enterprise edition)" : "Enable Secure View (requires Enterprise edition)",
     "Enable Secure View" : "Enable Secure View",
+    "Settings" : "Settings",
     "Set default share permissions for all users (available for shares without edit permission)" : "Set default share permissions for all users (available for shares without edit permission)",
     "can print/export" : "can print/export",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save.",

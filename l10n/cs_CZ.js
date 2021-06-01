@@ -62,6 +62,7 @@ OC.L10N.register(
     "Enable edit for specific groups" : "Povolit úpravy pouze vybraným skupinám",
     "Use OOXML by default for new files" : "Použít OOXML jako výchozí pro nové soubory",
     "Add" : "Přidat",
+    "Settings" : "Nastavení",
     "New Document" : "Nový dokument",
     "New Spreadsheet" : "Nová tabulka",
     "New Presentation" : "Nová prezentace",

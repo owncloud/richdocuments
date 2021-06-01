@@ -66,6 +66,7 @@ OC.L10N.register(
     "Use OOXML by default for new files" : "Utilizza OOXML in modo predefinito per i nuovi file",
     "Enable access for external apps" : "Abilita accesso per app esterne",
     "Add" : "Aggiungi",
+    "Settings" : "Impostazioni",
     "New Document" : "Nuovo documento",
     "New Spreadsheet" : "Nuovo foglio elettronico",
     "New Presentation" : "Nuova presentazione",

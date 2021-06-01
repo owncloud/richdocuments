@@ -65,6 +65,7 @@ OC.L10N.register(
     "Use OOXML by default for new files" : "Alapértelmezetten OOXML használata új fájlokhoz",
     "Enable access for external apps" : "Hozzáférés engedélyezése külső alkalmazásokhoz",
     "Add" : "Hozzáadás",
+    "Settings" : "Beállítások",
     "New Document" : "Új dokumentum",
     "New Spreadsheet" : "Új munkafüzet",
     "New Presentation" : "Új bemutató",

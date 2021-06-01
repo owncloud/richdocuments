@@ -78,6 +78,7 @@
     "Use Menu option" : "שימוש באפשרות מהתפריט",
     "Enable Secure View (requires Enterprise edition)" : "מאפשר תצוגה מאובטחת (מחייב גרסת ארגונים)",
     "Enable Secure View" : "מאפשר תצוגה מאובטחת",
+    "Settings" : "הגדרות",
     "Set default share permissions for all users (available for shares without edit permission)" : "קובע הרשאות שיתוף ברירת מחדל לכל המשתמשים (קיים עבור שיתופים ללא הרשאות עריכה)",
     "can print/export" : "ניתן להדפסה/יצוא",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "מגדיר טקסט כחתימת מים לתצוגה מאובטחת. להכללת כתובת הדואר האלקטרוני של המשתמש בצורה דינמית, יש להשתמש במשתנה {viewer-email}. לשמירה יש להקליק מחוץ לשדה הטקסט.",

@@ -78,6 +78,7 @@ OC.L10N.register(
     "Use Menu option" : "Menü seçeneğini kullan",
     "Enable Secure View (requires Enterprise edition)" : "Güvenli Görünümü Etkinleştir (Kurumsal sürüm gerektirir)",
     "Enable Secure View" : "Güvenli Görünümü Etkinleştir",
+    "Settings" : "Ayarlar",
     "Set default share permissions for all users (available for shares without edit permission)" : "Tüm kullanıcılar için varsayılan paylaşım izinlerini ayarla (düzenleme izni olmayan paylaşımlar için kullanılabilir)",
     "can print/export" : "yazdırılabilir/dışa aktarılabilir",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "Güvenli Görünüm için filigran metnini ayarlayın. Kullanıcı e-posta adresini dinamik olarak dahil etmek için {viewer-email} değişkenini kullanın. Kaydetmek için metin alanının dışını tıklayın.",

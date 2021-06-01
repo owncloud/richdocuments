@@ -73,6 +73,7 @@
     "Use Menu option" : "Χρήση επιλογής Μενού",
     "Enable Secure View (requires Enterprise edition)" : "Ενεργοποίηση ασφαλούς προβολής (απαιτεί Εταιρική έκδοση)",
     "Enable Secure View" : "Ενεργοποίηση ασφαλούς προβολής",
+    "Settings" : "Ρυθμίσεις",
     "Set default share permissions for all users (available for shares without edit permission)" : "Ορισμός προεπιλεγμένων δικαιωμάτων κοινής χρήσης για όλους τους χρήστες (διαθέσιμο για κοινόχρηστα χωρίς δικαίωμα επεξεργασίας)",
     "can print/export" : "μπορεί να γίνει εκτύπωση/εξαγωγή",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "Ορισμός κειμένου ως υδατόσημο για Ασφαλή προβολή. Για να συμπεριλάβετε τη διεύθυνση ηλεκτρονικού ταχυδρομείου χρήστη δυναμικά, χρησιμοποιήστε τη μεταβλητή {viewer-email}. Κάντε κλικ έξω από το πεδίο κειμένου για αποθήκευση.",

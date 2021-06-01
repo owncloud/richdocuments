@@ -80,6 +80,7 @@ OC.L10N.register(
     "Use Menu option" : "Использовать пункт меню",
     "Enable Secure View (requires Enterprise edition)" : "Разрешить безопасный просмотр (требуется Enterprise edition)",
     "Enable Secure View" : "Разрешить безопасный просмотр",
+    "Settings" : "Настройки",
     "Set default share permissions for all users (available for shares without edit permission)" : "Установить разрешения общего доступа по умолчанию для всех пользователей (доступно для общего доступа без разрешения на правку)",
     "can print/export" : "можно печатать/экспортировать",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "Установить водяной знак для Безопасного Просмотра. Чтобы динамически включать адрес почты пользователя, используйте переменную {viewer-email}. Для сохранения кликните за пределами текстового поля.",

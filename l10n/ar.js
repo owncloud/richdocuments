@@ -79,6 +79,7 @@ OC.L10N.register(
     "Use Menu option" : "استخدام خيار القائمة",
     "Enable Secure View (requires Enterprise edition)" : "تمكين العرض الآمن (يتطلب إصدار Enterprise)",
     "Enable Secure View" : "تمكين العرض الآمن",
+    "Settings" : "الإعدادات",
     "Set default share permissions for all users (available for shares without edit permission)" : "تعيين أذونات المشاركة الافتراضية لجميع المستخدمين (متوفر للمشاركات دون إذن تحرير)",
     "can print/export" : "لا يمكن الطباعة/التصدير",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "عيِّن نص علامة مائية للعرض الآمن. لإدخال عنوان البريد الإلكتروني للمستخدم ديناميكيًا، استخدم المتغير {viewer-email}. وانقر خارج خانة النص للحفظ.",

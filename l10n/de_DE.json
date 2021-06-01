@@ -78,6 +78,7 @@
     "Use Menu option" : "Benutze Menüoptionen",
     "Enable Secure View (requires Enterprise edition)" : "Secure View aktivieren (benötigt Enterprise Edition)",
     "Enable Secure View" : "Secure View aktivieren",
+    "Settings" : "Einstellungen",
     "Set default share permissions for all users (available for shares without edit permission)" : "Default-Berechtigungen für alle Nutzer setzen",
     "can print/export" : "kann drucken/exportieren",
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save." : "Wasserzeichen-Text für Secure View einstellen. Um die E-Mail-Adresse des Nutzers dynamisch einzufügen, verwenden Sie die {viewer-email}-Variable. Klicken Sie außerhalb des Textfeldes, um zu speichern.",

@@ -69,6 +69,7 @@ OC.L10N.register(
     "Use Canonical webroot" : "Bruk kanonisk web-rot",
     "Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance." : "Kanonisk web-rot, i tilfelle det finnes flere, som Collabora skal bruke. Oppgi den med færrest begrensninger. F.eks: Bruk web-roten uten Shibboleth hvis instansen aksesseres både med og uten Shibboleth på ulike web-røtter. Du kan ignorere denne innstillingen hvis instansen aksesseres på kun én web-rot.",
     "Use Menu option" : "Bruk menyalternativet",
+    "Settings" : "Innstillinger",
     "New Document" : "Nytt dokument",
     "New Spreadsheet" : "Nytt regneark",
     "New Presentation" : "Ny presentasjon",
