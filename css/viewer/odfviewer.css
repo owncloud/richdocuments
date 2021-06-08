@@ -20,3 +20,7 @@
 .icon-filetype-presentation{
   background-image: url('../../../../core/img/filetypes/x-office-presentation.svg');
 }
+
+.icon-richdocuments-open {
+  background-image: url("../../img/app-dark.svg");
+}

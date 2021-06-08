@@ -67,7 +67,7 @@ var odfViewer = {
 					name: 'Richdocuments',
 					actionHandler: odfViewer.onOpen,
 					displayName: t('richdocuments', 'Open in Collabora'),
-					iconClass: 'icon-rename',
+					iconClass: 'icon-richdocuments-open',
 					permissions: OC.PERMISSION_READ,
 					mime: mime
 				});
