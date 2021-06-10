@@ -1075,7 +1075,7 @@ class DocumentController extends Controller {
 		);
 		$file->putContent($content);
 
-		$this->logger->warning('wopiPutFile(): mtime', ['app' => $this->appName]);
+		$this->logger->debug('wopiPutFile(): mtime', ['app' => $this->appName]);
 
 		$mtime = $file->getMtime();
 
