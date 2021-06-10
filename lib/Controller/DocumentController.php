@@ -426,7 +426,7 @@ class DocumentController extends Controller {
 
 		// Update permissions
 		$permissions = $doc['permissions'];
-		if (!($doc['action'] === 'edit')) {
+		if (!($doc['action'] === 'edit') && !($doc['action'] === 'view_comment')) {
 			$permissions = $permissions & ~\OCP\Constants::PERMISSION_UPDATE;
 		}
 
