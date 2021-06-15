@@ -16,7 +16,7 @@ use \DateTime;
 use \DateTimeZone;
 
 class Helper {
-	const APP_ID = 'richdocuments';
+	public const APP_ID = 'richdocuments';
 
 	/**
 	 * Parse document id to retrieve fileid, instanceid, version and sessionid

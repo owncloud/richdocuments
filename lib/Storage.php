@@ -76,14 +76,14 @@ class Storage {
 		$documents = $this->processDocuments($rawDocuments);
 
 		$list = \array_filter(
-				$documents,
-				function ($item) {
-					//filter Deleted
-					if (\strpos($item['path'], '_trashbin')===0) {
-						return false;
-					}
-					return true;
+			$documents,
+			function ($item) {
+				//filter Deleted
+				if (\strpos($item['path'], '_trashbin')===0) {
+					return false;
 				}
+				return true;
+			}
 		);
 
 		return $list;
