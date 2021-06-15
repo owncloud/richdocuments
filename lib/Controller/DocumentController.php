@@ -17,6 +17,7 @@ use OCP\App\IAppManager;
 use \OCP\AppFramework\Controller;
 use \OCP\Constants;
 use OCP\Files\File;
+use OCP\Files\InvalidPathException;
 use OCP\IGroupManager;
 use OCP\Files\NotPermittedException;
 use \OCP\IRequest;
@@ -477,6 +478,7 @@ class DocumentController extends Controller {
 		$dir = $this->request->getParam('dir');
 
 		$view = new View('/' . $this->uid . '/files');
+
 		if (!$dir) {
 			$dir = '/';
 		}
@@ -508,6 +510,15 @@ class DocumentController extends Controller {
 			$path = Helper::getNewFileName($view, $dir . '/' . $basename);
 		} else {
 			$path = $dir . '/' . $filename;
+		}
+
+		try {
+			$view->verifyPath($path, $filename);
+		} catch (InvalidPathException $e) {
+			return [
+				'status' => 'error',
+				'message' => $this->l10n->t('Invalid filename'),
+			];
 		}
 
 		$content = '';
@@ -1103,6 +1114,7 @@ class DocumentController extends Controller {
 	 */
 	private function putRelative($fileId, $owner, $editor, $suggested) {
 		$file = $this->getFileHandle($fileId, $owner, $editor);
+
 		if (!$file) {
 			$this->logger->warning('wopiPutFile(): Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
@@ -1129,6 +1141,16 @@ class DocumentController extends Controller {
 		// create the folder first
 		if (!$root->nodeExists(\dirname($path))) {
 			$root->newFolder(\dirname($path));
+		}
+
+		try {
+			$view = new View('/' . $this->uid . '/files');
+			$view->verifyPath($path, $suggested);
+		} catch (InvalidPathException $e) {
+			return new JSONResponse([
+				'status' => 'error',
+				'message' => $this->l10n->t('Invalid filename'),
+			], Http::STATUS_BAD_REQUEST);
 		}
 
 		// create a unique new file
