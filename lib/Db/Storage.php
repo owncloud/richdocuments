@@ -17,9 +17,9 @@ namespace OCA\Richdocuments\Db;
  */
 
 class Storage extends \OCA\Richdocuments\Db {
-	const appName = 'richdocuments';
+	public const appName = 'richdocuments';
 
-	const documentShowLimit = 30;
+	public const documentShowLimit = 30;
 
 	protected $tableName  = '`*PREFIX*filecache`';
 

@@ -14,15 +14,15 @@ namespace OCA\Richdocuments\Db;
 
 class Wopi extends \OCA\Richdocuments\Db {
 	// Tokens expire after this many seconds (not defined by WOPI specs).
-	const TOKEN_LIFETIME_SECONDS = 36000;
+	public const TOKEN_LIFETIME_SECONDS = 36000;
 
-	const ATTR_CAN_VIEW = 0;
-	const ATTR_CAN_UPDATE = 1;
-	const ATTR_CAN_EXPORT = 2;
-	const ATTR_CAN_PRINT = 4;
-	const ATTR_HAS_WATERMARK = 8;
+	public const ATTR_CAN_VIEW = 0;
+	public const ATTR_CAN_UPDATE = 1;
+	public const ATTR_CAN_EXPORT = 2;
+	public const ATTR_CAN_PRINT = 4;
+	public const ATTR_HAS_WATERMARK = 8;
 
-	const appName = 'richdocuments';
+	public const appName = 'richdocuments';
 
 	protected $tableName  = '`*PREFIX*richdocuments_wopi`';
 
@@ -44,9 +44,11 @@ class Wopi extends \OCA\Richdocuments\Db {
 	 * @throws \Exception
 	 */
 	public function generateToken($fileId, $version, $attributes, $serverHost, $owner, $editor) {
-		$token = \OC::$server->getSecureRandom()->generate(32,
+		$token = \OC::$server->getSecureRandom()->generate(
+			32,
 			\OCP\Security\ISecureRandom::CHAR_LOWER . \OCP\Security\ISecureRandom::CHAR_UPPER .
-			\OCP\Security\ISecureRandom::CHAR_DIGITS);
+			\OCP\Security\ISecureRandom::CHAR_DIGITS
+		);
 		$token_ttl = \time() + self::TOKEN_LIFETIME_SECONDS;
 
 		\OC::$server->getLogger()->debug('generateFileToken(): Issuing token, editor: {editor}, file: {fileId}, version: {version}, owner: {owner}, token: {token}', [

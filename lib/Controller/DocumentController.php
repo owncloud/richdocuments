@@ -56,23 +56,25 @@ class DocumentController extends Controller {
 	 * @var IUserManager
 	 */
 	private $userManager;
-	const ODT_TEMPLATE_PATH = '/assets/odttemplate.odt';
+	public const ODT_TEMPLATE_PATH = '/assets/odttemplate.odt';
 
 	// Signifies LOOL that document has been changed externally in this storage
-	const LOOL_STATUS_DOC_CHANGED = 1010;
+	public const LOOL_STATUS_DOC_CHANGED = 1010;
 
-	public function __construct($appName,
-								IRequest $request,
-								IConfig $settings,
-								AppConfig $appConfig,
-								IL10N $l10n,
-								$uid,
-								ICacheFactory $cache,
-								ILogger $logger,
-								Storage $storage,
-								IAppManager $appManager,
-								IGroupManager $groupManager,
-								IUserManager $userManager) {
+	public function __construct(
+		$appName,
+		IRequest $request,
+		IConfig $settings,
+		AppConfig $appConfig,
+		IL10N $l10n,
+		$uid,
+		ICacheFactory $cache,
+		ILogger $logger,
+		Storage $storage,
+		IAppManager $appManager,
+		IGroupManager $groupManager,
+		IUserManager $userManager
+	) {
 		parent::__construct($appName, $request);
 		$this->uid = $uid;
 		$this->l10n = $l10n;
@@ -361,7 +363,8 @@ class DocumentController extends Controller {
 				"%s%s%s",
 				$webSocketProtocol,
 				$parts['host'],
-				isset($parts['port']) ? ":" . $parts['port'] : "");
+				isset($parts['port']) ? ":" . $parts['port'] : ""
+			);
 		} else {
 			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', [$wopiRemote]), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
 		}
@@ -1067,7 +1070,9 @@ class DocumentController extends Controller {
 
 		// Read the contents of the file from the POST body and store.
 		$content = \fopen('php://input', 'r');
-		$this->logger->debug('wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.', [
+		$this->logger->debug(
+			'wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.',
+			[
 				'app' => $this->appName,
 				'fileId' => $fileId,
 				'editor' => $editor,
@@ -1137,7 +1142,9 @@ class DocumentController extends Controller {
 
 		// Read the contents of the file from the POST body and store.
 		$content = \fopen('php://input', 'r');
-		$this->logger->debug('wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.', [
+		$this->logger->debug(
+			'wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.',
+			[
 			'app' => $this->appName,
 			'fileId' => $fileId,
 			'editor' => $editor,

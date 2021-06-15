@@ -101,13 +101,13 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 		$isIE = \preg_match("/MSIE/", $this->request->server["HTTP_USER_AGENT"]);
 		if ($isIE) {
 			$this->addHeader(
-					'Content-Disposition',
-					'attachment; filename="' . $encodedName . '"'
+				'Content-Disposition',
+				'attachment; filename="' . $encodedName . '"'
 			);
 		} else {
 			$this->addHeader(
-					'Content-Disposition',
-					'attachment; filename*=UTF-8\'\'' . $encodedName . '; filepath="' . $encodedName . '"'
+				'Content-Disposition',
+				'attachment; filename*=UTF-8\'\'' . $encodedName . '; filepath="' . $encodedName . '"'
 			);
 		}
 	}

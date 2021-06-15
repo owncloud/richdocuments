@@ -44,8 +44,8 @@ class AdminAdditionalSettingsPage extends OwncloudPage {
 	protected $idSuffix = '_default_option_cb-richdocuments';
 	protected $idPrefix = 'secure_view_';
 
-	const CAN_PRINT = 'can_print';
-	const HAS_WATERMARK = 'has_watermark';
+	public const CAN_PRINT = 'can_print';
+	public const HAS_WATERMARK = 'has_watermark';
 
 	/**
 	 * Toggle status of the secure view checkbox
@@ -155,7 +155,8 @@ class AdminAdditionalSettingsPage extends OwncloudPage {
 	) {
 		$this->waitForAjaxCallsToStartAndFinish($session);
 		$this->waitTillXpathIsVisible(
-			$this->additionalPanelXpath, $timeout_msec
+			$this->additionalPanelXpath,
+			$timeout_msec
 		);
 	}
 }
