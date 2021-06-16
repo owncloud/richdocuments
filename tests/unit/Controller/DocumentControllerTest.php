@@ -21,10 +21,11 @@ use \OCP\ICacheFactory;
 use \OCP\ILogger;
 use \OCA\Richdocuments\Storage;
 use OCP\IUserManager;
-use phpDocumentor\Reflection\Types\This;
 
 /**
  * Class DocumentControllerTest
+ *
+ * @group DB
  *
  * @package OCA\Richdocuments\Tests\Controller
  */
@@ -105,5 +106,43 @@ class DocumentControllerTest extends \Test\TestCase {
 
 	public function testConstructor() {
 		$this->assertInstanceOf(DocumentController::class, $this->documentController);
+	}
+
+	/**
+	 * Tests different filenames on create
+	 *
+	 * @dataProvider invalidFilenameProvider
+	 * @param $filename string
+	 */
+	public function testCreateWithInvalidFilename(string $filename) {
+		$dir = "/";
+		$mimetype = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+		$this->request->expects($this->at(0))->method('getParam')
+			->with('mimetype')
+			->willReturn($mimetype);
+
+		$this->request->expects($this->at(1))->method('getParam')
+			->with('filename')
+			->willReturn($filename);
+
+		$this->request->expects($this->at(2))->method('getParam')
+			->with('dir')
+			->willReturn($dir);
+
+		$this->assertEquals(
+			$this->documentController->create(),
+			[
+			'status' => 'error',
+			'message' => $this->l10n->t('Invalid filename'),
+		]
+		);
+	}
+
+	public function invalidFilenameProvider(): array {
+		return [
+			["filename with\t tab"],
+			["filename with / slash"]
+		];
 	}
 }
