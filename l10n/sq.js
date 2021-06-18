@@ -57,6 +57,7 @@ OC.L10N.register(
     "New Document.docx" : "Dokument.docx i ri",
     "New Spreadsheet.xlsx" : "Fletëllogaritje.xlsx e re",
     "New Presentation.pptx" : "Prezantim.pptx i ri",
+    "Invalid filename" : "Emër kartele i pavlefshëm",
     "Can't create document" : "S’krijohet dot dokumenti",
     "Insufficient file permissions." : "Leje të pamjaftueshme mbi kartela.",
     "remote user" : "përdorues i largët",
