@@ -57,6 +57,7 @@ OC.L10N.register(
     "New Document.docx" : "Neues Dokument.docx",
     "New Spreadsheet.xlsx" : "Neue Tabelle.xlsx",
     "New Presentation.pptx" : "Neue Präsentation.pptx",
+    "Invalid filename" : "Ungültiger Dateiname",
     "Can't create document" : "Dokument kann nicht erstellt werden",
     "Insufficient file permissions." : "Nicht ausreichende Dateiberechtigungen",
     "remote user" : "Entfernter Benutzer",
