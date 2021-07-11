@@ -19,7 +19,7 @@ use \OC\Files\View;
 class DownloadResponse extends \OCP\AppFramework\Http\Response {
 	private $request;
 	private $file;
-	
+
 	/**
 	 * @param IRequest $request
 	 * @param File $file
@@ -38,13 +38,13 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 			'content' => $this->file->getContent()
 		];
 		$size = \strlen($data['content']);
-		
+
 		if (isset($this->request->server['HTTP_RANGE']) && $this->request->server['HTTP_RANGE'] !== null) {
 			$isValidRange = \preg_match('/^bytes=\d*-\d*(,\d*-\d*)*$/', $this->request->server['HTTP_RANGE']);
 			if (!$isValidRange) {
 				return $this->sendRangeNotSatisfiable($size);
 			}
-			
+
 			$ranges = \explode(',', \substr($this->request->server['HTTP_RANGE'], 6));
 			foreach ($ranges as $range) {
 				$parts = \explode('-', $range);
@@ -68,7 +68,7 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 				$md5Sum = \md5($buffer);
 
 				// send the headers and data
-				$this->addHeader('Content-Length', $end - $start);
+				$this->addHeader('Content-Length', (string) ($end - $start));
 				$this->addHeader('Content-md5', $md5Sum);
 				$this->addHeader('Accept-Ranges', 'bytes');
 				$this->addHeader('Content-Range', 'bytes ' . $start . '-' . ($end) . '/' . $size);
@@ -78,14 +78,14 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 				return $buffer;
 			}
 		}
-		
+
 		$this->addHeader('Content-Type', $data['mimetype']);
 		$this->addContentDispositionHeader();
 		$this->addHeader('Content-Length', (string)$size);
 
 		return $data['content'];
 	}
-	
+
 	/**
 	 * Send 416 if we can't satisfy the requested ranges
 	 * @param integer $filesize
@@ -95,7 +95,7 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 		$this->addHeader('Content-Range', 'bytes */' . $filesize); // Required in 416.
 		return '';
 	}
-	
+
 	protected function addContentDispositionHeader() {
 		$encodedName = \rawurlencode($this->file->getName());
 		$isIE = \preg_match("/MSIE/", $this->request->server["HTTP_USER_AGENT"]);
