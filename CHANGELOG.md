@@ -6,15 +6,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased] -
 
-## Fixed
-
--
 
 ## [2.6.0] - 2021-05-31
+
+## Fixed
+
+- Only verify path if filename is given, additional log error - [#418](https://github.com/owncloud/richdocuments/pull/418)
+- Don't log warning message on PUT in favour of debug - [#407](https://github.com/owncloud/richdocuments/pull/407)
+- Prevent documents with tabs in filenames / or any other invalid chars from being created - [enterprise#4628](https://github.com/owncloud/enterprise/issues/4628)
 
 ### Changed 
 
 - Introduced "Open documents in Secure View with watermark by default" setting - [#400](https://github.com/owncloud/richdocuments/pull/400) - [#402](https://github.com/owncloud/richdocuments/pull/402)
+- Enable comments on PDFs - [#404](https://github.com/owncloud/richdocuments/pull/404)
+- Use app icon for Open in Collabora action - [#406](https://github.com/owncloud/richdocuments/pull/406)
+
+
 - Library updates
 
 
@@ -49,6 +56,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
 [Unreleased]: https://github.com/owncloud/guests/compare/v2.5.0...master
+[2.6.0]: https://github.com/owncloud/guests/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/owncloud/guests/compare/v2.4.1...v2.5.0
 [2.4.1]: https://github.com/owncloud/guests/compare/v2.4.0...v2.4.1
 [2.4.0]: https://github.com/owncloud/guests/compare/v2.2.0...v2.4.0
