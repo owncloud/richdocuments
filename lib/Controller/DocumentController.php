@@ -512,13 +512,16 @@ class DocumentController extends Controller {
 			$path = $dir . '/' . $filename;
 		}
 
-		try {
-			$view->verifyPath($path, $filename);
-		} catch (InvalidPathException $e) {
-			return [
-				'status' => 'error',
-				'message' => $this->l10n->t('Invalid filename'),
-			];
+		if ($filename !== null) {
+			try {
+				$view->verifyPath($path, $filename);
+			} catch (InvalidPathException $e) {
+				$this->logger->error('Collabora Online: Encountered error {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
+				return [
+					'status' => 'error',
+					'message' => $this->l10n->t('Invalid filename'),
+				];
+			}
 		}
 
 		$content = '';
