@@ -57,6 +57,7 @@ OC.L10N.register(
     "New Document.docx" : "เอกสารใหม่.docx",
     "New Spreadsheet.xlsx" : "สเปรดชีตใหม่.xlsx",
     "New Presentation.pptx" : "งานนำเสนอใหม่.pptx",
+    "Invalid filename" : "ชื่อไฟล์ไม่ถูกต้อง",
     "Can't create document" : "ไม่สามารถสร้างเอกสารได้",
     "Insufficient file permissions." : "การอนุญาตไฟล์ไม่เพียงพอ",
     "remote user" : "รีโมทของผู้ใช้",
