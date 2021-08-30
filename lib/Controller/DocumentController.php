@@ -470,6 +470,23 @@ class DocumentController extends Controller {
 	}
 
 	/**
+	 * Accessed from external-apps such as new owncloud web front-end
+	 * It returns the information to load the document from the fileId.
+	 * @NoAdminRequired
+	 * @CORS
+	 * @NoCSRFRequired
+	 */
+	public function getDocumentIndex($fileId) {
+		try {
+			$docRetVal = $this->handleDocIndex($fileId, null, \OC_User::getUser());
+			$docRetVal["locale"] = \strtolower(\str_replace('_', '-', $this->settings->getUserValue(\OC_User::getUser(), 'core', 'lang', 'en')));
+		} catch (\Exception $e) {
+			return $e->getMessage();
+		}
+		return new JSONResponse($docRetVal);
+	}
+
+	/**
 	 * @NoAdminRequired
 	 */
 	public function create() {
