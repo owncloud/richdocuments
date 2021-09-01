@@ -726,7 +726,15 @@ class DocumentController extends Controller {
 			'app' => $this->appName,
 			'fileid' => $fileId,
 			'updatable' => $updatable ]);
-		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
+		$origin = $this->request->getHeader('ORIGIN');
+		$serverHost = null;
+		if ($origin == null) {
+			$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
+		} else {
+			// COOL needs to know postMessageOrigin -- in case it's an external app like ownCloud Web
+			// origin will be different therefore postMessages needs to target $origin instead of serverHost
+			$serverHost = $origin;
+		}
 
 		$owner = $this->getOwner($fileId);
 		$this->updateDocumentEncryptionAccessList($owner, $currentUser, $path);
