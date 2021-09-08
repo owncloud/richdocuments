@@ -1141,6 +1141,8 @@ class DocumentController extends Controller {
 	 * @return JSONResponse
 	 */
 	private function putRelative($fileId, $owner, $editor, $suggested) {
+		$token = $this->request->getParam('access_token');
+
 		$file = $this->getFileHandle($fileId, $owner, $editor);
 
 		if (!$file) {
@@ -1204,12 +1206,17 @@ class DocumentController extends Controller {
 		$file->putContent($content);
 		$mtime = $file->getMtime();
 
-		// generate a token for the new file
+		// we should preserve the original PostMessageOrigin
+		// otherwise this will change it to serverHost after save-as
+		// then we can no longer know the outer frame's origin.
 		$row = new Wopi();
-		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
+		$row->loadBy('token', $token);
+		$res = $row->getWopiForToken($token);
+		$serverHost = $res['server_host'] ? $res['server_host'] : $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 
 		// Continue editing
 		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_PRINT;
+		// generate a token for the new file
 		$tokenArray = $row->generateToken($file->getId(), 0, $attributes, $serverHost, $owner, $editor);
 
 		$wopi = 'index.php/apps/richdocuments/wopi/files/' . $file->getId() . '_' . $this->settings->getSystemValue('instanceid') . '?access_token=' . $tokenArray['access_token'];
