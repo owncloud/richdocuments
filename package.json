@@ -1,0 +1,26 @@
+{
+  "name": "richdocuments",
+  "version": "1.0.0",
+  "main": "richdocuments.js",
+  "scripts": {
+    "build": "rollup -c",
+    "serve": "DEV=true rollup -c -w"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.13.10",
+    "@erquhart/rollup-plugin-node-builtins": "^2.1.5",
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "axios": "^0.21.1",
+    "rollup": "^2.42.2",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-vue": "^5.1.9",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "dependencies": {
+    "rollup-plugin-serve": "^1.1.0",
+    "vuex": "^3.2.0"
+  }
+}

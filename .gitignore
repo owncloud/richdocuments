@@ -19,3 +19,4 @@ vendor-bin/**/composer.lock
 
 # Generated from .drone.star
 .drone.yml
+node_modules
