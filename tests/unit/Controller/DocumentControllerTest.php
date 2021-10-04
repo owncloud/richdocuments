@@ -118,17 +118,19 @@ class DocumentControllerTest extends \Test\TestCase {
 		$dir = "/";
 		$mimetype = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-		$this->request->expects($this->at(0))->method('getParam')
-			->with('mimetype')
-			->willReturn($mimetype);
-
-		$this->request->expects($this->at(1))->method('getParam')
-			->with('filename')
-			->willReturn($filename);
-
-		$this->request->expects($this->at(2))->method('getParam')
-			->with('dir')
-			->willReturn($dir);
+		$this->request
+			->expects($this->exactly(3))
+			->method('getParam')
+			->withConsecutive(
+				['mimetype'],
+				['filename'],
+				['dir'],
+			)
+			->willReturnOnConsecutiveCalls(
+				$mimetype,
+				$filename,
+				$dir,
+			);
 
 		$this->assertEquals(
 			$this->documentController->create(),
