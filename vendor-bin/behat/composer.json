@@ -17,6 +17,6 @@
         "symfony/translation": "^4.4",
         "sabre/xml": "^2.2",
         "guzzlehttp/guzzle": "^6.5",
-        "phpunit/phpunit": "^8.5"
+        "phpunit/phpunit": "^9.5"
     }
 }
