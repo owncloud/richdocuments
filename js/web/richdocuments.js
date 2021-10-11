@@ -2996,26 +2996,19 @@ define(function () { 'use strict';
             //
             var script = {
               data: () => ({
-                mode: "edit",
-                fileId: null,
-                filePath: null,
                 fileName: null,
                 hideSaveAs: true
               }),
 
-              created() {
-                this.mode = this.$route.params.mode;
-                this.fileId = this.$route.params.fileId;
-                this.filePath = this.$route.params.filePath;
-              },
+              created() {},
 
               methods: { ...mapActions(["showMessage"]),
 
                 messageDisplay(desc, status = "danger", title = "") {
                   this.showMessage({
-                    title: title,
-                    desc: desc,
-                    status: status,
+                    title,
+                    desc,
+                    status,
                     autoClose: {
                       enabled: true
                     }
@@ -3027,14 +3020,13 @@ define(function () { 'use strict';
                 },
 
                 confirmSaveAs(value) {
-                  if (value) {
-                    let frame = document.getElementById('loleafletframe');
-                    this.WOPIPostMessage(frame, 'Action_SaveAs', {
-                      'Filename': value,
-                      'Notify': true
-                    });
-                    this.hideSaveAs = true;
-                  }
+                  if (!value) return;
+                  let frame = document.getElementById("loleafletframe");
+                  this.WOPIPostMessage(frame, "Action_SaveAs", {
+                    Filename: value,
+                    Notify: true
+                  });
+                  this.hideSaveAs = true;
                 },
 
                 onRequestClose() {
@@ -3053,14 +3045,13 @@ define(function () { 'use strict';
                 },
 
                 WOPIPostMessage(iframe, msgId, values) {
-                  if (iframe) {
-                    var msg = {
-                      'MessageId': msgId,
-                      'SendTime': Date.now(),
-                      'Values': values
-                    };
-                    iframe.contentWindow.postMessage(JSON.stringify(msg), '*');
-                  }
+                  if (iframe) return;
+                  var msg = {
+                    MessageId: msgId,
+                    SendTime: Date.now(),
+                    Values: values
+                  };
+                  iframe.contentWindow.postMessage(JSON.stringify(msg), "*");
                 },
 
                 // where we get document url from owncloud api
@@ -3069,7 +3060,7 @@ define(function () { 'use strict';
                     method: "GET",
                     url: this.configuration.server + "index.php/apps/richdocuments/ajax/documents/index/" + this.fileId,
                     headers: {
-                      "Authorization": "Bearer " + this.getToken
+                      Authorization: "Bearer " + this.getToken
                     }
                   }).then(response => {
                     return response.data;
@@ -3077,30 +3068,28 @@ define(function () { 'use strict';
                 },
 
                 generateWOPISrc(documentInfo) {
-                  var documentId = documentInfo.fileId + "_" + documentInfo.instanceId + "_" + documentInfo.version + "_" + documentInfo.sessionId;
+                  const documentId = [documentInfo.fileId, documentInfo.instanceId, documentInfo.version, documentInfo.sessionId].join('_');
                   return this.configuration.server + `index.php/apps/richdocuments/wopi/files/${documentId}`;
                 },
 
                 generateDocUrlSrc(docFile) {
                   let wopiSrc = encodeURIComponent(this.generateWOPISrc(docFile));
-                  let urlsrc = docFile.urlsrc + "WOPISrc=" + wopiSrc + "&title=" + encodeURIComponent(docFile.title) + "&lang=" + docFile.locale.replace('_', '-');
-                  if (this.mode == "edit") urlsrc += "&closebutton=1";else urlsrc += "&permission=readonly";
+                  let urlsrc = docFile.urlsrc + "WOPISrc=" + wopiSrc + "&title=" + encodeURIComponent(docFile.title) + "&lang=" + docFile.locale.replace("_", "-") + "&closebutton=1";
                   return urlsrc;
                 },
 
                 showEditor(docFile, urlsrc) {
-                  let formHTML = '<form id="loleafletform" name="loleafletform" target="loleafletframe" action="' + urlsrc + '" method="post">' + '<input name="access_token" value="' + docFile.access_token + '" type="hidden"/>' + '<input name="access_token_ttl" value="' + docFile.access_token_ttl + '" type="hidden"/>' + '<input name="postmessage_origin" value="' + window.location.origin + '" type="hidden"/>' + '</form>';
+                  let formHTML = '<form id="loleafletform" name="loleafletform" target="loleafletframe" action="' + urlsrc + '" method="post">' + '<input name="access_token" value="' + docFile.access_token + '" type="hidden"/>' + '<input name="access_token_ttl" value="' + docFile.access_token_ttl + '" type="hidden"/>' + '<input name="postmessage_origin" value="' + window.location.origin + '" type="hidden"/>' + "</form>";
                   let frameHTML = '<iframe id="loleafletframe" name= "loleafletframe" allowfullscreen style="width:100%;height:100%;position:absolute;" onload="this.contentWindow.focus()"/>';
-                  let mainContainer = document.getElementById('mainContainer');
-                  mainContainer.insertAdjacentHTML('beforeend', formHTML);
-                  mainContainer.insertAdjacentHTML('beforeend', frameHTML);
-                  let loleafletForm = document.getElementById('loleafletform');
-                  let frame = document.getElementById('loleafletframe');
+                  let mainContainer = document.getElementById("mainContainer");
+                  mainContainer.insertAdjacentHTML("beforeend", formHTML);
+                  mainContainer.insertAdjacentHTML("beforeend", frameHTML);
+                  let loleafletForm = document.getElementById("loleafletform");
+                  let frame = document.getElementById("loleafletframe");
                   let that = this;
 
                   frame.onload = function () {
-                    window.addEventListener('message', function (e) {
-                      if (that.mode !== "edit") return;
+                    window.addEventListener("message", function (e) {
                       let msg, msgId, deprecated, args;
 
                       try {
@@ -3112,7 +3101,7 @@ define(function () { 'use strict';
                         msgId = e.data;
                       }
 
-                      if (msgId === 'UI_Close' || msgId === 'close'
+                      if (msgId === "UI_Close" || msgId === "close"
                       /* deprecated */
                       ) {
                         // If a postmesage API is deprecated, we must ignore it and wait for the standard postmessage
@@ -3121,15 +3110,15 @@ define(function () { 'use strict';
                         that.onRequestClose();
                       }
 
-                      if (msgId === 'UI_SaveAs') {
+                      if (msgId === "UI_SaveAs") {
                         that.hideSaveAs = false;
-                      } else if (msgId === 'Action_Save_Resp') {
+                      } else if (msgId === "Action_Save_Resp") {
                         if (args && args.success && args.fileName) {
                           that.fileName = args.fileName;
                         }
                       }
                     });
-                    that.WOPIPostMessage(frame, 'Host_PostmessageReady', {});
+                    that.WOPIPostMessage(frame, "Host_PostmessageReady", {});
                   };
 
                   loleafletForm.submit();
@@ -3137,7 +3126,20 @@ define(function () { 'use strict';
 
               },
               computed: { ...mapGetters(["getToken", "configuration", "apps"]),
-                ...mapGetters("Files", ["currentFolder"])
+                ...mapGetters("Files", ["currentFolder"]),
+
+                mode() {
+                  return this.$route.params.mode || 'edit';
+                },
+
+                fileId() {
+                  return this.$route.params.fileId;
+                },
+
+                filePath() {
+                  return this.$route.params.filePath;
+                }
+
               },
 
               async mounted() {
@@ -3147,7 +3149,7 @@ define(function () { 'use strict';
                   let urlsrc = this.generateDocUrlSrc(docFile);
                   this.showEditor(docFile, urlsrc);
                 } catch (error) {
-                  this.showMessage(error);
+                  this.messageDisplay(error);
                   this.onRequestClose();
                 }
               }
@@ -3324,7 +3326,7 @@ define(function () { 'use strict';
               /* style */
               const __vue_inject_styles__ = function (inject) {
                 if (!inject) return
-                inject("data-v-5d67ce89_0", { source: "\n#app {\n    width: 100%;\n}\n#app > iframe {\n    position: absolute;\n}\n", map: {"version":3,"sources":["/home/mertt/builds/collabora/integrations/richdocuments-owncloud/js/web/editor.vue"],"names":[],"mappings":";AA4LA;IACA,WAAA;AACA;AACA;IACA,kBAAA;AACA","file":"editor.vue","sourcesContent":["<template>\n  <main>\n    <div id=\"app\">\n        <oc-modal\n        title=\"Save As\"\n        :button-cancel-text=\"$gettext('Cancel')\"\n        :button-confirm-text=\"$gettext('Save')\"\n        :has-input=\"true\"\n        :input-label=\"$gettext('New filename')\"\n        :input-description=\"$gettext('Please enter filename to which this document should be stored.')\"\n        :input-value=\"fileName\"\n        class=\"oc-mb-l uk-position-absolute\"\n        v-on:cancel=\"cancelSaveAs\"\n        v-on:confirm=\"confirmSaveAs\"\n        :hidden=\"hideSaveAs\"\n        />\n        <div id=\"mainContainer\" />\n    </div>\n  </main>\n</template>\n\n<script>\nimport { mapActions, mapGetters } from \"vuex\"\nimport axios from \"axios\"\n\nexport default {\n    data: () => ({\n        mode: \"edit\",\n        fileId: null,\n        filePath: null,\n        fileName: null,\n        hideSaveAs: true,\n    }),\n\n    created() {\n        this.mode = this.$route.params.mode;\n        this.fileId = this.$route.params.fileId;\n        this.filePath = this.$route.params.filePath;\n    },\n\n    methods: {\n        ...mapActions([\"showMessage\"]),\n\n        messageDisplay(desc, status = \"danger\", title = \"\") {\n            this.showMessage({\n                title: title,\n                desc: desc,\n                status: status,\n                autoClose: {\n                    enabled: true\n                }\n            })\n        },\n\n        cancelSaveAs() {\n            this.hideSaveAs = true;\n        },\n\n        confirmSaveAs(value) {\n            if (value) {\n                let frame = document.getElementById('loleafletframe');\n                this.WOPIPostMessage(frame, 'Action_SaveAs', {'Filename': value, 'Notify': true});\n                this.hideSaveAs = true;\n            }\n        },\n\n        onRequestClose() {\n            let params = {item: null};\n            if (this.currentFolder) {\n                params.item = this.currentFolder.path;\n            }\n\n            this.$router.push({name: \"files-personal\", params});\n        },\n\n        WOPIPostMessage(iframe, msgId, values) {\n            if (iframe) {\n                var msg = {\n                    'MessageId': msgId,\n                    'SendTime': Date.now(),\n                    'Values': values\n                };\n\n                iframe.contentWindow.postMessage(JSON.stringify(msg), '*');\n            }\n\t    },\n\n        // where we get document url from owncloud api\n        async getDocumentFileInfo() {\n            return axios({\n                        method: \"GET\",\n                        url: this.configuration.server + \"index.php/apps/richdocuments/ajax/documents/index/\" + this.fileId,\n                        headers: {\n                            \"Authorization\": \"Bearer \" + this.getToken\n                        }\n                    })\n                    .then(response => {\n                        return response.data;\n                    })\n        },\n\n        generateWOPISrc(documentInfo) {\n            var documentId = documentInfo.fileId + \"_\" +\n            documentInfo.instanceId + \"_\" +\n            documentInfo.version + \"_\" +\n            documentInfo.sessionId;\n            return this.configuration.server + `index.php/apps/richdocuments/wopi/files/${documentId}`;\n        },\n\n        generateDocUrlSrc(docFile) {\n            let wopiSrc = encodeURIComponent(this.generateWOPISrc(docFile));\n            let urlsrc = docFile.urlsrc +\n            \"WOPISrc=\" + wopiSrc +\n            \"&title=\" + encodeURIComponent(docFile.title) +\n            \"&lang=\" + docFile.locale.replace('_', '-');\n            if (this.mode == \"edit\")\n                urlsrc += \"&closebutton=1\";\n            else\n                urlsrc += \"&permission=readonly\";\n            return urlsrc;\n        },\n\n        showEditor(docFile, urlsrc) {\n            let formHTML = '<form id=\"loleafletform\" name=\"loleafletform\" target=\"loleafletframe\" action=\"' + urlsrc + '\" method=\"post\">' +\n\t\t\t    '<input name=\"access_token\" value=\"' + docFile.access_token + '\" type=\"hidden\"/>' +\n\t\t\t    '<input name=\"access_token_ttl\" value=\"' + docFile.access_token_ttl + '\" type=\"hidden\"/>' +\n\t\t\t    '<input name=\"postmessage_origin\" value=\"' + window.location.origin + '\" type=\"hidden\"/>' +\n\t\t\t    '</form>';\n            let frameHTML = '<iframe id=\"loleafletframe\" name= \"loleafletframe\" allowfullscreen style=\"width:100%;height:100%;position:absolute;\" onload=\"this.contentWindow.focus()\"/>';\n\t\t\tlet mainContainer = document.getElementById('mainContainer');\n            mainContainer.insertAdjacentHTML('beforeend', formHTML);\n            mainContainer.insertAdjacentHTML('beforeend', frameHTML);\n            let loleafletForm = document.getElementById('loleafletform');\n            let frame = document.getElementById('loleafletframe');\n            let that = this;\n            frame.onload = function () {\n                window.addEventListener('message', function(e) {\n                    if (that.mode !== \"edit\")\n                        return;\n                    let msg, msgId, deprecated, args;\n\t\t\t\t\ttry {\n\t\t\t\t\t\tmsg = JSON.parse(e.data);\n\t\t\t\t\t\tmsgId = msg.MessageId;\n\t\t\t\t\t\targs = msg.Values;\n\t\t\t\t\t\tdeprecated = !!args.Deprecated;\n\t\t\t\t\t} catch(exc) {\n\t\t\t\t\t\tmsgId = e.data;\n\t\t\t\t\t}\n                    if (msgId === 'UI_Close' || msgId === 'close' /* deprecated */) {\n\t\t\t\t\t\t// If a postmesage API is deprecated, we must ignore it and wait for the standard postmessage\n\t\t\t\t\t\t// (or it might already have been fired)\n\t\t\t\t\t\tif (deprecated)\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\tthat.onRequestClose();\n\t\t\t\t\t}\n                    if (msgId === 'UI_SaveAs') {\n                        that.hideSaveAs = false;\n                    } else if (msgId === 'Action_Save_Resp' ) {\n                        if (args && args.success && args.fileName) {\n                            that.fileName = args.fileName;\n                        }\n                    }\n                });\n                that.WOPIPostMessage(frame, 'Host_PostmessageReady', {});\n            };\n            loleafletForm.submit();\n        }\n    },\n\n    computed: {\n        ...mapGetters([\"getToken\", \"configuration\", \"apps\"]),\n        ...mapGetters(\"Files\", [\"currentFolder\"]),\n    },\n\n    async mounted() {\n        try {\n            let docFile = await this.getDocumentFileInfo();\n            this.fileName = docFile.title;\n            let urlsrc = this.generateDocUrlSrc(docFile);\n            this.showEditor(docFile, urlsrc);\n        } catch (error) {\n            this.showMessage(error);\n            this.onRequestClose();\n        }\n    }\n}\n</script>\n<style>\n    #app {\n        width: 100%;\n    }\n    #app > iframe {\n        position: absolute;\n    }\n</style>"]}, media: undefined });
+                inject("data-v-8dd5fae2_0", { source: "\n#app {\n    width: 100%;\n}\n#app > iframe {\n    position: absolute;\n}\n", map: {"version":3,"sources":["/home/mertt/builds/collabora/integrations/owncloud/richdocuments/js/web/editor.vue"],"names":[],"mappings":";AAkMA;IACA,WAAA;AACA;AACA;IACA,kBAAA;AACA","file":"editor.vue","sourcesContent":["<template>\n    <main>\n        <div id=\"app\">\n            <oc-modal\n                title=\"Save As\"\n                :button-cancel-text=\"$gettext('Cancel')\"\n                :button-confirm-text=\"$gettext('Save')\"\n                :has-input=\"true\"\n                :input-label=\"$gettext('New filename')\"\n                :input-description=\"\n                    $gettext(\n                        'Please enter filename to which this document should be stored.'\n                    )\n                \"\n                :input-value=\"fileName\"\n                class=\"oc-mb-l uk-position-absolute\"\n                v-on:cancel=\"cancelSaveAs\"\n                v-on:confirm=\"confirmSaveAs\"\n                :hidden=\"hideSaveAs\"\n            />\n            <div id=\"mainContainer\" />\n        </div>\n    </main>\n</template>\n\n<script>\nimport { mapActions, mapGetters } from \"vuex\";\nimport axios from \"axios\";\n\nexport default {\n    data: () => ({\n        fileName: null,\n        hideSaveAs: true,\n    }),\n\n    created() {\n    },\n\n    methods: {\n        ...mapActions([\"showMessage\"]),\n\n        messageDisplay(desc, status = \"danger\", title = \"\") {\n            this.showMessage({\n                title,\n                desc,\n                status,\n                autoClose: {\n                    enabled: true,\n                },\n            });\n        },\n\n        cancelSaveAs() {\n            this.hideSaveAs = true;\n        },\n\n        confirmSaveAs(value) {\n            if (!value) return;\n            let frame = document.getElementById(\"loleafletframe\");\n            this.WOPIPostMessage(frame, \"Action_SaveAs\", {\n                Filename: value,\n                Notify: true,\n            });\n            this.hideSaveAs = true;\n        },\n\n        onRequestClose() {\n            let params = { item: null };\n            if (this.currentFolder) {\n                params.item = this.currentFolder.path;\n            }\n\n            this.$router.push({ name: \"files-personal\", params });\n        },\n\n        WOPIPostMessage(iframe, msgId, values) {\n            if (iframe) return;\n            var msg = {\n                MessageId: msgId,\n                SendTime: Date.now(),\n                Values: values,\n            };\n            iframe.contentWindow.postMessage(JSON.stringify(msg), \"*\");\n        },\n\n        // where we get document url from owncloud api\n        async getDocumentFileInfo() {\n            return axios({\n                method: \"GET\",\n                url:\n                    this.configuration.server +\n                    \"index.php/apps/richdocuments/ajax/documents/index/\" +\n                    this.fileId,\n                headers: {\n                    Authorization: \"Bearer \" + this.getToken,\n                },\n            }).then((response) => {\n                return response.data;\n            });\n        },\n\n        generateWOPISrc(documentInfo) {\n            const documentId = [documentInfo.fileId, documentInfo.instanceId, documentInfo.version, documentInfo.sessionId].join('_');\n            return (\n                this.configuration.server +\n                `index.php/apps/richdocuments/wopi/files/${documentId}`\n            );\n        },\n\n        generateDocUrlSrc(docFile) {\n            let wopiSrc = encodeURIComponent(this.generateWOPISrc(docFile));\n            let urlsrc = docFile.urlsrc +\n                \"WOPISrc=\" + wopiSrc +\n                \"&title=\" + encodeURIComponent(docFile.title) +\n                \"&lang=\" + docFile.locale.replace(\"_\", \"-\") +\n                \"&closebutton=1\";\n            return urlsrc;\n        },\n\n        showEditor(docFile, urlsrc) {\n            let formHTML = '<form id=\"loleafletform\" name=\"loleafletform\" target=\"loleafletframe\" action=\"' + urlsrc +'\" method=\"post\">' +\n                '<input name=\"access_token\" value=\"' + docFile.access_token + '\" type=\"hidden\"/>' +\n                '<input name=\"access_token_ttl\" value=\"' + docFile.access_token_ttl + '\" type=\"hidden\"/>' +\n                '<input name=\"postmessage_origin\" value=\"' + window.location.origin + '\" type=\"hidden\"/>' +\n                \"</form>\";\n            let frameHTML = '<iframe id=\"loleafletframe\" name= \"loleafletframe\" allowfullscreen style=\"width:100%;height:100%;position:absolute;\" onload=\"this.contentWindow.focus()\"/>';\n            let mainContainer = document.getElementById(\"mainContainer\");\n            mainContainer.insertAdjacentHTML(\"beforeend\", formHTML);\n            mainContainer.insertAdjacentHTML(\"beforeend\", frameHTML);\n            let loleafletForm = document.getElementById(\"loleafletform\");\n            let frame = document.getElementById(\"loleafletframe\");\n            let that = this;\n            frame.onload = function () {\n                window.addEventListener(\"message\", function (e) {\n                    let msg, msgId, deprecated, args;\n                    try {\n                        msg = JSON.parse(e.data);\n                        msgId = msg.MessageId;\n                        args = msg.Values;\n                        deprecated = !!args.Deprecated;\n                    } catch (exc) {\n                        msgId = e.data;\n                    }\n                    if (\n                        msgId === \"UI_Close\" ||\n                        msgId === \"close\" /* deprecated */\n                    ) {\n                        // If a postmesage API is deprecated, we must ignore it and wait for the standard postmessage\n                        // (or it might already have been fired)\n                        if (deprecated) return;\n                        that.onRequestClose();\n                    }\n                    if (msgId === \"UI_SaveAs\") {\n                        that.hideSaveAs = false;\n                    } else if (msgId === \"Action_Save_Resp\") {\n                        if (args && args.success && args.fileName) {\n                            that.fileName = args.fileName;\n                        }\n                    }\n                });\n                that.WOPIPostMessage(frame, \"Host_PostmessageReady\", {});\n            };\n            loleafletForm.submit();\n        },\n    },\n\n    computed: {\n        ...mapGetters([\"getToken\", \"configuration\", \"apps\"]),\n        ...mapGetters(\"Files\", [\"currentFolder\"]),\n        mode() {\n            return this.$route.params.mode || 'edit';\n        },\n        fileId() {\n            return this.$route.params.fileId;\n        },\n        filePath() {\n            return this.$route.params.filePath;\n        }\n    },\n\n    async mounted() {\n        try {\n            let docFile = await this.getDocumentFileInfo();\n            this.fileName = docFile.title;\n            let urlsrc = this.generateDocUrlSrc(docFile);\n            this.showEditor(docFile, urlsrc);\n        } catch (error) {\n            this.messageDisplay(error);\n            this.onRequestClose();\n        }\n    },\n};\n</script>\n<style>\n#app {\n    width: 100%;\n}\n#app > iframe {\n    position: absolute;\n}\n</style>"]}, media: undefined });
 
               };
               /* scoped */
@@ -3378,12 +3380,12 @@ define(function () { 'use strict';
 
                   icon: "x-office-document"
                 },
-                routes: ["files-personal", "files-favorites", "files-shared-with-others", "files-shared-with-me", "files-public-list"]
+                routes: ["files-personal"]
               }, {
                 extension: "docx",
                 routeName: "richdocuments-editor",
                 newTab: true,
-                routes: ["files-personal", "files-favorites", "files-shared-with-others", "files-shared-with-me", "files-public-list"]
+                routes: ["files-personal"]
               }, {
                 extension: "ods",
                 routeName: "richdocuments-editor",
@@ -3395,12 +3397,12 @@ define(function () { 'use strict';
 
                   icon: "x-office-spreadsheet"
                 },
-                routes: ["files-personal", "files-favorites", "files-shared-with-others", "files-shared-with-me", "files-public-list"]
+                routes: ["files-personal"]
               }, {
                 extension: "xlsx",
                 routeName: "richdocuments-editor",
                 newTab: true,
-                routes: ["files-personal", "files-favorites", "files-shared-with-others", "files-shared-with-me", "files-public-list"]
+                routes: ["files-personal"]
               }, {
                 extension: "odp",
                 routeName: "richdocuments-editor",
@@ -3412,12 +3414,12 @@ define(function () { 'use strict';
 
                   icon: "x-office-presentation"
                 },
-                routes: ["files-personal", "files-favorites", "files-shared-with-others", "files-shared-with-me", "files-public-list"]
+                routes: ["files-personal"]
               }, {
                 extension: "pptx",
                 routeName: "richdocuments-editor",
                 newTab: true,
-                routes: ["files-personal", "files-favorites", "files-shared-with-others", "files-shared-with-me", "files-public-list"]
+                routes: ["files-personal"]
               }]
             };
             var app = {

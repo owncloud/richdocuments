@@ -29,17 +29,11 @@ import axios from "axios";
 
 export default {
     data: () => ({
-        mode: "edit",
-        fileId: null,
-        filePath: null,
         fileName: null,
         hideSaveAs: true,
     }),
 
     created() {
-        this.mode = this.$route.params.mode;
-        this.fileId = this.$route.params.fileId;
-        this.filePath = this.$route.params.filePath;
     },
 
     methods: {
@@ -47,9 +41,9 @@ export default {
 
         messageDisplay(desc, status = "danger", title = "") {
             this.showMessage({
-                title: title,
-                desc: desc,
-                status: status,
+                title,
+                desc,
+                status,
                 autoClose: {
                     enabled: true,
                 },
@@ -61,14 +55,13 @@ export default {
         },
 
         confirmSaveAs(value) {
-            if (value) {
-                let frame = document.getElementById("loleafletframe");
-                this.WOPIPostMessage(frame, "Action_SaveAs", {
-                    Filename: value,
-                    Notify: true,
-                });
-                this.hideSaveAs = true;
-            }
+            if (!value) return;
+            let frame = document.getElementById("loleafletframe");
+            this.WOPIPostMessage(frame, "Action_SaveAs", {
+                Filename: value,
+                Notify: true,
+            });
+            this.hideSaveAs = true;
         },
 
         onRequestClose() {
@@ -81,15 +74,13 @@ export default {
         },
 
         WOPIPostMessage(iframe, msgId, values) {
-            if (iframe) {
-                var msg = {
-                    MessageId: msgId,
-                    SendTime: Date.now(),
-                    Values: values,
-                };
-
-                iframe.contentWindow.postMessage(JSON.stringify(msg), "*");
-            }
+            if (iframe) return;
+            var msg = {
+                MessageId: msgId,
+                SendTime: Date.now(),
+                Values: values,
+            };
+            iframe.contentWindow.postMessage(JSON.stringify(msg), "*");
         },
 
         // where we get document url from owncloud api
@@ -109,14 +100,7 @@ export default {
         },
 
         generateWOPISrc(documentInfo) {
-            var documentId =
-                documentInfo.fileId +
-                "_" +
-                documentInfo.instanceId +
-                "_" +
-                documentInfo.version +
-                "_" +
-                documentInfo.sessionId;
+            const documentId = [documentInfo.fileId, documentInfo.instanceId, documentInfo.version, documentInfo.sessionId].join('_');
             return (
                 this.configuration.server +
                 `index.php/apps/richdocuments/wopi/files/${documentId}`
@@ -183,6 +167,15 @@ export default {
     computed: {
         ...mapGetters(["getToken", "configuration", "apps"]),
         ...mapGetters("Files", ["currentFolder"]),
+        mode() {
+            return this.$route.params.mode || 'edit';
+        },
+        fileId() {
+            return this.$route.params.fileId;
+        },
+        filePath() {
+            return this.$route.params.filePath;
+        }
     },
 
     async mounted() {
@@ -192,7 +185,7 @@ export default {
             let urlsrc = this.generateDocUrlSrc(docFile);
             this.showEditor(docFile, urlsrc);
         } catch (error) {
-            this.showMessage(error);
+            this.messageDisplay(error);
             this.onRequestClose();
         }
     },

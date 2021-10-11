@@ -28,11 +28,7 @@ const appInfo = {
             icon: "x-office-document"
           },
           routes: [
-            "files-personal",
-            "files-favorites",
-            "files-shared-with-others",
-            "files-shared-with-me",
-            "files-public-list"
+            "files-personal"
           ]
         },
         {
@@ -40,11 +36,7 @@ const appInfo = {
           routeName: "richdocuments-editor",
           newTab: true,
           routes: [
-            "files-personal",
-            "files-favorites",
-            "files-shared-with-others",
-            "files-shared-with-me",
-            "files-public-list"
+            "files-personal"
           ]
         },
         {
@@ -58,11 +50,7 @@ const appInfo = {
             icon: "x-office-spreadsheet"
           },
           routes: [
-            "files-personal",
-            "files-favorites",
-            "files-shared-with-others",
-            "files-shared-with-me",
-            "files-public-list"
+            "files-personal"
           ]
         },
         {
@@ -70,11 +58,7 @@ const appInfo = {
           routeName: "richdocuments-editor",
           newTab: true,
           routes: [
-            "files-personal",
-            "files-favorites",
-            "files-shared-with-others",
-            "files-shared-with-me",
-            "files-public-list"
+            "files-personal"
           ]
         },
         {
@@ -88,11 +72,7 @@ const appInfo = {
             icon: "x-office-presentation"
           },
           routes: [
-            "files-personal",
-            "files-favorites",
-            "files-shared-with-others",
-            "files-shared-with-me",
-            "files-public-list"
+            "files-personal"
           ]
         },
         {
@@ -100,11 +80,7 @@ const appInfo = {
           routeName: "richdocuments-editor",
           newTab: true,
           routes: [
-            "files-personal",
-            "files-favorites",
-            "files-shared-with-others",
-            "files-shared-with-me",
-            "files-public-list"
+            "files-personal"
           ]
         }
       ]
