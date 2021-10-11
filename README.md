@@ -44,3 +44,38 @@ The easiest way to integrate Collabora with development instance of ownCloud is 
 NOTE: Collabora server needs to be reachable from ownCloud server, and Collabora server needs to be able to reach ownCloud server
 
 NOTE: it is possible to use Collabora Online’s integration with re-compiled and/or re-branded backends.
+
+## Installing connector for ownCloud Web
+
+You will need:
+* [ownCloud server](https://owncloud.com/download-server/#owncloud-server) with ownCloud Web (it can be compiled from source code or installed from the [official marketplace](https://marketplace.owncloud.com/apps/web)).
+* Official ownCloud Collabora Online integration app. You can install it from the [ownCloud marketplace](https://marketplace.owncloud.com/apps/richdocuments).
+
+To enable work within ownCloud web, register the connector in the ownCloud Web config.json:
+
+* If you installed ownCloud Web from the official marketplace, the path is `<owncloud-root-catalog>/config/config.json`
+* If you compiled it from source code yourself using [this instruction](https://owncloud.dev/clients/web/backend-oc10/#running-web), the path is `<owncloud-web-root-catalog>/config/config.json`.
+
+To register the connector, use these lines:
+
+```
+"external_apps": [
+    {
+        "id": "richdocuments",
+        "path": "http(s)://<owncloud-10-server-address>/index.php/apps/richdocuments/js/richdocuments.js",
+    }
+]
+```
+
+## Compiling the connector for ownCloud Web
+
+Build all the dependencies:
+
+```
+yarn install
+```
+Build the resulting file `js/web/richdocuments.js`:
+
+```
+yarn build
+```
