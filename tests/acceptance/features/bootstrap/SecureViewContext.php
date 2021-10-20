@@ -22,10 +22,7 @@
  */
 
 use Behat\Behat\Context\Context;
-use Behat\Behat\Hook\Scope\AfterScenarioScope;
 use Behat\Behat\Hook\Scope\BeforeScenarioScope;
-use Behat\Gherkin\Node\PyStringNode;
-use Behat\Gherkin\Node\TableNode;
 use Behat\MinkExtension\Context\RawMinkContext;
 use Page\AdminAdditionalSettingsPage;
 use TestHelpers\SetupHelper;
@@ -75,7 +72,7 @@ class SecureViewContext extends RawMinkContext implements Context {
 	 *
 	 * @return void
 	 */
-	public function theAdministratorHasBrowsedToTheAdminAdditionalSettingsPage() {
+	public function theAdministratorHasBrowsedToTheAdminAdditionalSettingsPage(): void {
 		$this->webUIGeneralContext->adminLogsInUsingTheWebUI();
 		$this->adminAdditionalSettingsPage->open();
 		$this->adminAdditionalSettingsPage->waitTillPageIsLoaded($this->getSession());
@@ -86,7 +83,7 @@ class SecureViewContext extends RawMinkContext implements Context {
 	 *
 	 * @return void
 	 */
-	public function theAdministratorEnablesSecureViewUsingTheWebUI() {
+	public function theAdministratorEnablesSecureViewUsingTheWebUI(): void {
 		if (!$this->adminAdditionalSettingsPage->isSecureViewEnabled()) {
 			$this->adminAdditionalSettingsPage->toggleSecureView($this->getSession());
 		}
@@ -97,7 +94,7 @@ class SecureViewContext extends RawMinkContext implements Context {
 	 *
 	 * @return void
 	 */
-	public function administratorEnablesCanPrintSecureView() {
+	public function administratorEnablesCanPrintSecureView(): void {
 		if (!$this->adminAdditionalSettingsPage->isSecureViewOptionEnabled(
 			AdminAdditionalSettingsPage::CAN_PRINT
 		)
@@ -114,7 +111,7 @@ class SecureViewContext extends RawMinkContext implements Context {
 	 *
 	 * @return void
 	 */
-	public function administratorEnablesCanWatermarkSecureView() {
+	public function administratorEnablesCanWatermarkSecureView(): void {
 		if (!$this->adminAdditionalSettingsPage->isSecureViewOptionEnabled(
 			AdminAdditionalSettingsPage::HAS_WATERMARK
 		)
@@ -131,7 +128,7 @@ class SecureViewContext extends RawMinkContext implements Context {
 	 *
 	 * @return void
 	 */
-	public function administratorDisablesCanPrintSecureView() {
+	public function administratorDisablesCanPrintSecureView(): void {
 		if ($this->adminAdditionalSettingsPage->isSecureViewOptionEnabled(
 			AdminAdditionalSettingsPage::CAN_PRINT
 		)
@@ -148,7 +145,7 @@ class SecureViewContext extends RawMinkContext implements Context {
 	 *
 	 * @return void
 	 */
-	public function administratorDisablesCanWatermarkSecureView() {
+	public function administratorDisablesCanWatermarkSecureView(): void {
 		if ($this->adminAdditionalSettingsPage->isSecureViewOptionEnabled(
 			AdminAdditionalSettingsPage::HAS_WATERMARK
 		)
@@ -165,7 +162,7 @@ class SecureViewContext extends RawMinkContext implements Context {
 	 *
 	 * @return void
 	 */
-	public function theAdditionalSharingAttributesForTheResponseShouldHaveNoData() {
+	public function theAdditionalSharingAttributesForTheResponseShouldHaveNoData(): void {
 		try {
 			$value = $this->featureContext->getSharingAttributesFromLastResponse();
 		} catch (Exception $e) {
@@ -183,7 +180,7 @@ class SecureViewContext extends RawMinkContext implements Context {
 	 *
 	 * @return void
 	 */
-	public function saveOldConfigsForRichdocuments($server) {
+	public function saveOldConfigsForRichdocuments(string $server): void {
 		$this->featureContext->runOcc(['config:list', 'richdocuments', '--output json']);
 		$appConfig = \json_decode($this->featureContext->getStdOutOfOccCommand(), true);
 		if ($appConfig['apps'] && $appConfig['apps']['richdocuments']) {
@@ -199,7 +196,7 @@ class SecureViewContext extends RawMinkContext implements Context {
 	 * @return void
 	 * @throws Exception
 	 */
-	public function revertToOldConfigsRichdocuments($server) {
+	public function revertToOldConfigsRichdocuments(string $server): void {
 		$appConfig = $this->appConfig[$server];
 		foreach ($appConfig as $key => $value) {
 			$this->featureContext->runOcc(
@@ -223,7 +220,7 @@ class SecureViewContext extends RawMinkContext implements Context {
 	 * @return void
 	 * @throws Exception
 	 */
-	public function disableSecureView() {
+	public function disableSecureView(): void {
 		$cmd = ['config:app:set', 'richdocuments', 'secure_view_option', '--value=false'];
 		$this->featureContext->runOcc($cmd);
 
@@ -244,7 +241,7 @@ class SecureViewContext extends RawMinkContext implements Context {
 	 *
 	 * @return void
 	 */
-	public function before(BeforeScenarioScope $scope) {
+	public function before(BeforeScenarioScope $scope): void {
 		// Get the environment
 		$environment = $scope->getEnvironment();
 		// Get all the contexts you need in this context
@@ -271,11 +268,9 @@ class SecureViewContext extends RawMinkContext implements Context {
 	 *
 	 * @AfterScenario @webUI
 	 *
-	 * @param AfterScenarioScope $scope
-	 *
 	 * @return void
 	 */
-	public function after(AfterScenarioScope $scope) {
+	public function after(): void {
 		$this->featureContext->runFunctionOnEveryServer(
 			function ($server) {
 				$this->revertToOldConfigsRichdocuments($server);

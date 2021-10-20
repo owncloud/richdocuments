@@ -25,7 +25,6 @@ namespace Page;
 use Behat\Mink\Element\NodeElement;
 use SensioLabs\Behat\PageObjectExtension\PageObject\Exception\ElementNotFoundException;
 use Behat\Mink\Session;
-use OC\OCS\Exception;
 
 /**
  * Admin General Settings page.
@@ -54,7 +53,7 @@ class AdminAdditionalSettingsPage extends OwncloudPage {
 	 *
 	 * @return bool the new status of the checkbox after toggling
 	 */
-	public function toggleSecureView(Session $session) {
+	public function toggleSecureView(Session $session): bool {
 		$checkbox = $this->getSecureViewCheckbox();
 		$checkbox->click();
 		$this->waitForAjaxCallsToStartAndFinish($session);
@@ -76,7 +75,7 @@ class AdminAdditionalSettingsPage extends OwncloudPage {
 	 *
 	 * @return bool Status of the given secure view option
 	 */
-	public function isSecureViewOptionEnabled($option) {
+	public function isSecureViewOptionEnabled(string $option): bool {
 		if (!$this->isSecureViewEnabled()) {
 			return false;
 		}
@@ -92,7 +91,10 @@ class AdminAdditionalSettingsPage extends OwncloudPage {
 	 *
 	 * @return bool Current status of option
 	 */
-	public function toggleSecureViewOption(Session $session, $option) {
+	public function toggleSecureViewOption(
+		Session $session,
+		string $option
+	): bool {
 		if (!$this->isSecureViewEnabled()) {
 			throw new \Exception('Cannot enable/disable $option as secure view is not enabled.');
 		}
@@ -107,7 +109,7 @@ class AdminAdditionalSettingsPage extends OwncloudPage {
 	 *
 	 * @return bool
 	 */
-	public function isSecureViewEnabled() {
+	public function isSecureViewEnabled(): bool {
 		$checkbox = $this->getSecureViewCheckbox();
 
 		if ($checkbox->hasAttribute('disabled')) {
@@ -123,7 +125,7 @@ class AdminAdditionalSettingsPage extends OwncloudPage {
 	 * @throws ElementNotFoundException
 	 * @return NodeElement
 	 */
-	private function getSecureViewCheckbox() {
+	private function getSecureViewCheckbox(): NodeElement {
 		$checkbox = $this->findById($this->secureViewCheckboxId);
 		$this->assertElementNotNull($checkbox, 'Secure view checkbox not found.');
 		return $checkbox;
@@ -135,7 +137,7 @@ class AdminAdditionalSettingsPage extends OwncloudPage {
 	 * @throws ElementNotFoundException
 	 * @return NodeElement
 	 */
-	private function getSecureViewOptionsCheckbox($option) {
+	private function getSecureViewOptionsCheckbox(string $option): NodeElement {
 		$checkbox = $this->findById($this->idPrefix . $option . $this->idSuffix);
 		$this->assertElementNotNull($checkbox, "$option checkbox not found.");
 		return $checkbox;
@@ -151,8 +153,8 @@ class AdminAdditionalSettingsPage extends OwncloudPage {
 	 */
 	public function waitTillPageIsLoaded(
 		Session $session,
-		$timeout_msec = STANDARD_UI_WAIT_TIMEOUT_MILLISEC
-	) {
+		int $timeout_msec = STANDARD_UI_WAIT_TIMEOUT_MILLISEC
+	): void {
 		$this->waitForAjaxCallsToStartAndFinish($session);
 		$this->waitTillXpathIsVisible(
 			$this->additionalPanelXpath,
