@@ -33,9 +33,6 @@ export default {
         hideSaveAs: true,
     }),
 
-    created() {
-    },
-
     methods: {
         ...mapActions(["showMessage"]),
 

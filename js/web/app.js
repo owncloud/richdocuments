@@ -28,7 +28,10 @@ const appInfo = {
             icon: "x-office-document"
           },
           routes: [
-            "files-personal"
+            "files-personal",
+            "files-favorites",
+            "files-shared-with-others",
+            "files-shared-with-me"
           ]
         },
         {
@@ -36,7 +39,10 @@ const appInfo = {
           routeName: "richdocuments-editor",
           newTab: true,
           routes: [
-            "files-personal"
+            "files-personal",
+            "files-favorites",
+            "files-shared-with-others",
+            "files-shared-with-me"
           ]
         },
         {
@@ -50,7 +56,10 @@ const appInfo = {
             icon: "x-office-spreadsheet"
           },
           routes: [
-            "files-personal"
+            "files-personal",
+            "files-favorites",
+            "files-shared-with-others",
+            "files-shared-with-me"
           ]
         },
         {
@@ -58,7 +67,10 @@ const appInfo = {
           routeName: "richdocuments-editor",
           newTab: true,
           routes: [
-            "files-personal"
+            "files-personal",
+            "files-favorites",
+            "files-shared-with-others",
+            "files-shared-with-me"
           ]
         },
         {
@@ -72,7 +84,10 @@ const appInfo = {
             icon: "x-office-presentation"
           },
           routes: [
-            "files-personal"
+            "files-personal",
+            "files-favorites",
+            "files-shared-with-others",
+            "files-shared-with-me"
           ]
         },
         {
@@ -80,7 +95,10 @@ const appInfo = {
           routeName: "richdocuments-editor",
           newTab: true,
           routes: [
-            "files-personal"
+            "files-personal",
+            "files-favorites",
+            "files-shared-with-others",
+            "files-shared-with-me"
           ]
         }
       ]
