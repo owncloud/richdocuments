@@ -69,12 +69,12 @@ class Application extends App {
 
 		$container->registerService("WebAssetController", function ($c) {
 			/** @var IContainer $c */
-            return new WebAssetController(
-                $c->query('AppName'),
-                $c->query('Request'),
-                $c->query('Logger')
-            );
-        });
+			return new WebAssetController(
+				$c->query('AppName'),
+				$c->query('Request'),
+				$c->query('Logger')
+			);
+		});
 
 		$container->registerService('AppConfig', function ($c) {
 			/** @var IContainer $c */

@@ -3,7 +3,7 @@
  * ownCloud - Richdocuments App
  *
  * @copyright Copyright (c) 2021, ownCloud GmbH
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
  * License as published by the Free Software Foundation; either
@@ -32,55 +32,52 @@ use OCP\IRequest;
 
 class WebAssetController extends Controller {
 
-    /**
-     * @var ILogger
-     */
-    private $logger;
+	/**
+	 * @var ILogger
+	 */
+	private $logger;
 
-    /**
-     * WebAssetController constructor.
-     *
-     * @param string $AppName - application name
-     * @param IRequest $request - request object
-     * @param ILogger $logger
-     */
-    public function __construct($AppName, IRequest $request, ILogger $logger) {
-        parent::__construct($AppName, $request);
-        $this->logger = $logger;
-    }
+	/**
+	 * WebAssetController constructor.
+	 *
+	 * @param string $AppName - application name
+	 * @param IRequest $request - request object
+	 * @param ILogger $logger
+	 */
+	public function __construct($AppName, IRequest $request, ILogger $logger) {
+		parent::__construct($AppName, $request);
+		$this->logger = $logger;
+	}
 
-    /**
-     * Loads the richdocuments.js file for integration into ownCloud Web
-     *
-     * @PublicPage
-     * @NoCSRFRequired
-     *
-     * @return Response
-     */
-    public function get(): Response {
-        $basePath = \dirname(__DIR__, 2);
-        $filePath = \realpath( $basePath . '/js/web/richdocuments.js');
+	/**
+	 * Loads the richdocuments.js file for integration into ownCloud Web
+	 *
+	 * @PublicPage
+	 * @NoCSRFRequired
+	 *
+	 * @return Response
+	 */
+	public function get(): Response {
+		$basePath = \dirname(__DIR__, 2);
+		$filePath = \realpath($basePath . '/js/web/richdocuments.js');
 
-        try {
-            return new DataDisplayResponse(\file_get_contents($filePath), Http::STATUS_OK, [
-                'Content-Type' => $this->getMimeType($filePath),
-                'Content-Length' => \filesize($filePath),
-                'Cache-Control' => 'max-age=0, no-cache, no-store, must-revalidate',
-                'Pragma' => 'no-cache',
-                'Expires' => 'Tue, 24 Sep 1985 22:15:00 GMT',
-                'X-Frame-Options' => 'DENY'
-            ]);
-        } catch(\Exception $e) {
-            $this->logger->logException($e, ['app' => $this->appName]);
-            return new DataResponse(["message" => $e->getMessage()], Http::STATUS_NOT_FOUND);
-        }
+		try {
+			return new DataDisplayResponse(\file_get_contents($filePath), Http::STATUS_OK, [
+				'Content-Type' => $this->getMimeType($filePath),
+				'Content-Length' => \filesize($filePath),
+				'Cache-Control' => 'max-age=0, no-cache, no-store, must-revalidate',
+				'Pragma' => 'no-cache',
+				'Expires' => 'Tue, 24 Sep 1985 22:15:00 GMT',
+				'X-Frame-Options' => 'DENY'
+			]);
+		} catch (\Exception $e) {
+			$this->logger->logException($e, ['app' => $this->appName]);
+			return new DataResponse(["message" => $e->getMessage()], Http::STATUS_NOT_FOUND);
+		}
+	}
 
-    }
-
-    private function getMimeType(string $filename): string {
-        $mimeTypes = Mimetypes::getInstance();
-        return $mimeTypes->fromFilename($filename);
-    }
+	private function getMimeType(string $filename): string {
+		$mimeTypes = Mimetypes::getInstance();
+		return $mimeTypes->fromFilename($filename);
+	}
 }
-
-?>
