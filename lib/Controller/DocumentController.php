@@ -481,7 +481,10 @@ class DocumentController extends Controller {
 			$docRetVal = $this->handleDocIndex($fileId, null, \OC_User::getUser());
 			$docRetVal["locale"] = \strtolower(\str_replace('_', '-', $this->settings->getUserValue(\OC_User::getUser(), 'core', 'lang', 'en')));
 		} catch (\Exception $e) {
-			return $e->getMessage();
+			return new JSONResponse([
+				'status' => 'error',
+				'message' => 'Document index could not be found'
+			], Http::STATUS_BAD_REQUEST);
 		}
 		return new JSONResponse($docRetVal);
 	}
@@ -728,7 +731,7 @@ class DocumentController extends Controller {
 			'updatable' => $updatable ]);
 		$origin = $this->request->getHeader('ORIGIN');
 		$serverHost = null;
-		if ($origin == null) {
+		if ($origin === null) {
 			$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 		} else {
 			// COOL needs to know postMessageOrigin -- in case it's an external app like ownCloud Web
