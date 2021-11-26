@@ -18,6 +18,7 @@ use OCA\Richdocuments\Storage;
 use \OCP\AppFramework\App;
 use \OCA\Richdocuments\Controller\DocumentController;
 use \OCA\Richdocuments\Controller\SettingsController;
+use \OCA\Richdocuments\Controller\WebAssetController;
 use \OCA\Richdocuments\AppConfig;
 use OCP\IContainer;
 use OCP\IUser;
@@ -63,6 +64,15 @@ class Application extends App {
 				$c->query('L10N'),
 				$c->query('AppConfig'),
 				$c->query('UserId')
+			);
+		});
+
+		$container->registerService("WebAssetController", function ($c) {
+			/** @var IContainer $c */
+			return new WebAssetController(
+				$c->query('AppName'),
+				$c->query('Request'),
+				$c->query('Logger')
 			);
 		});
 

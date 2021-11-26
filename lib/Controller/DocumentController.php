@@ -470,6 +470,26 @@ class DocumentController extends Controller {
 	}
 
 	/**
+	 * Accessed from external-apps such as new owncloud web front-end
+	 * It returns the information to load the document from the fileId.
+	 * @NoAdminRequired
+	 * @CORS
+	 * @NoCSRFRequired
+	 */
+	public function getDocumentIndex($fileId) {
+		try {
+			$docRetVal = $this->handleDocIndex($fileId, null, \OC_User::getUser());
+			$docRetVal["locale"] = \strtolower(\str_replace('_', '-', $this->settings->getUserValue(\OC_User::getUser(), 'core', 'lang', 'en')));
+		} catch (\Exception $e) {
+			return new JSONResponse([
+				'status' => 'error',
+				'message' => 'Document index could not be found'
+			], Http::STATUS_BAD_REQUEST);
+		}
+		return new JSONResponse($docRetVal);
+	}
+
+	/**
 	 * @NoAdminRequired
 	 */
 	public function create() {
@@ -709,7 +729,15 @@ class DocumentController extends Controller {
 			'app' => $this->appName,
 			'fileid' => $fileId,
 			'updatable' => $updatable ]);
-		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
+		$origin = $this->request->getHeader('ORIGIN');
+		$serverHost = null;
+		if ($origin === null) {
+			$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
+		} else {
+			// COOL needs to know postMessageOrigin -- in case it's an external app like ownCloud Web
+			// origin will be different therefore postMessages needs to target $origin instead of serverHost
+			$serverHost = $origin;
+		}
 
 		$owner = $this->getOwner($fileId);
 		$this->updateDocumentEncryptionAccessList($owner, $currentUser, $path);
@@ -1116,6 +1144,8 @@ class DocumentController extends Controller {
 	 * @return JSONResponse
 	 */
 	private function putRelative($fileId, $owner, $editor, $suggested) {
+		$token = $this->request->getParam('access_token');
+
 		$file = $this->getFileHandle($fileId, $owner, $editor);
 
 		if (!$file) {
@@ -1179,12 +1209,17 @@ class DocumentController extends Controller {
 		$file->putContent($content);
 		$mtime = $file->getMtime();
 
-		// generate a token for the new file
+		// we should preserve the original PostMessageOrigin
+		// otherwise this will change it to serverHost after save-as
+		// then we can no longer know the outer frame's origin.
 		$row = new Wopi();
-		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
+		$row->loadBy('token', $token);
+		$res = $row->getWopiForToken($token);
+		$serverHost = $res['server_host'] ? $res['server_host'] : $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 
 		// Continue editing
 		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_PRINT;
+		// generate a token for the new file
 		$tokenArray = $row->generateToken($file->getId(), 0, $attributes, $serverHost, $owner, $editor);
 
 		$wopi = 'index.php/apps/richdocuments/wopi/files/' . $file->getId() . '_' . $this->settings->getSystemValue('instanceid') . '?access_token=' . $tokenArray['access_token'];
