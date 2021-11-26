@@ -40,12 +40,12 @@ class WebAssetController extends Controller {
 	/**
 	 * WebAssetController constructor.
 	 *
-	 * @param string $AppName - application name
+	 * @param string $appName - application name
 	 * @param IRequest $request - request object
 	 * @param ILogger $logger
 	 */
-	public function __construct($AppName, IRequest $request, ILogger $logger) {
-		parent::__construct($AppName, $request);
+	public function __construct($appName, IRequest $request, ILogger $logger) {
+		parent::__construct($appName, $request);
 		$this->logger = $logger;
 	}
 
