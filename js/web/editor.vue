@@ -2,7 +2,7 @@
     <main>
         <div id="app">
             <oc-modal
-                title="Save As"
+                :title="$gettext('Save As')"
                 :button-cancel-text="$gettext('Cancel')"
                 :button-confirm-text="$gettext('Save')"
                 :has-input="true"
