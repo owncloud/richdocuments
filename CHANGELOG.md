@@ -4,8 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] -
+## [2.7.0] - 2021-12-03
 
+## Changed
+
+- ownCloud Web compatibility - [#423](https://github.com/owncloud/richdocuments/pull/423)
+- Update .drone.star and drop PHP 7.2 - [#424](https://github.com/owncloud/richdocuments/pull/424) 
+- Library updates
 
 ## [2.6.0] - 2021-05-31
 
@@ -55,7 +60,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [2.4.0] - 2020-07-30
 
 
-[Unreleased]: https://github.com/owncloud/guests/compare/v2.5.0...master
+[Unreleased]: https://github.com/owncloud/guests/compare/v2.7.0...master
+[2.7.0]: https://github.com/owncloud/guests/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/owncloud/guests/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/owncloud/guests/compare/v2.4.1...v2.5.0
 [2.4.1]: https://github.com/owncloud/guests/compare/v2.4.0...v2.4.1
