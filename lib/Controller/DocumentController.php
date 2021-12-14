@@ -511,6 +511,9 @@ class DocumentController extends Controller {
 			case 'application/vnd.oasis.opendocument.presentation':
 				$basename = $this->l10n->t('New Presentation.odp');
 				break;
+			case 'application/vnd.oasis.opendocument.graphics':
+				$basename = $this->l10n->t('New Drawing.odg');
+				break;
 			case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
 				$basename = $this->l10n->t('New Document.docx');
 				break;
