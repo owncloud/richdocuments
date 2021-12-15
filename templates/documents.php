@@ -48,25 +48,11 @@ script('files', 'jquery.fileupload');
 				<label><?php p($l->t('New Presentation')) ?></label>
 			</a>
 			<div id="upload" title="<?php p($l->t('Upload (max. %s)', [$_['uploadMaxHumanFilesize']])) ?>">
-				<form data-upload-id="1"
-					  id="data-upload-form"
-					  class="file_upload_form"
-					  action="<?php print_unescaped(link_to('files', 'ajax/upload.php')); ?>"
-					  method="post"
-					  enctype="multipart/form-data"
-					  target="file_upload_target_1">
-					<?php if ($_['uploadMaxFilesize'] >= 0):?>
-					<input type="hidden" name="MAX_FILE_SIZE" id="max_upload"
-						   value="<?php p($_['uploadMaxFilesize']) ?>" />
-					<?php endif;?>
-					<!-- Send the requesttoken, this is needed for older IE versions
-						 because they don't send the CSRF token via HTTP header in this case -->
-					<input type="hidden" name="requesttoken" value="<?php p($_['requesttoken']) ?>" id="requesttoken" />
-					<input type="hidden" class="max_human_file_size"
-						   value="(max <?php p($_['uploadMaxHumanFilesize']); ?>)" />
-					<input type="file" id="file_upload_start" name='files[]' />
+				<form id="uploadform" enctype="multipart/form-data">
+					<input type="file" id="file_upload_start" name='file' accept=".csv,.doc,.docx,.odp,.ods,.odt,.odg,.pdf,.ppt,.pptx,.txt,.xhtml,.xls,.xlsx,.xml,.xul,.epub,.rtf" required/>
 					<a href="#" class="icon-upload upload svg">
-					<label><?php p($l->t('Upload')) ?></label></a>
+						<label><?php p($l->t('Upload')) ?></label>
+					</a>
 				</form>
 			</div>
 		</li>
