@@ -175,6 +175,35 @@ var documentsMain = {
 	$deferredVersionRestoreAck: null,
 	wopiClientFeatures: null,
 
+
+	uploadFile: function (fileData) {
+		var url = OC.getRootPath() +
+			'/remote.php/dav/files' +
+			'/' + encodeURIComponent(OC.getCurrentUser().uid) + '/' + fileData.name;
+
+		$('#upload').addClass('icon-loading');
+		$('.add-document .upload').css({opacity: 0});
+
+		$.ajax({
+			url: url,
+			type: 'PUT',
+			data: fileData,
+			contentType: false,
+			processData: false,
+			success: function () {
+				OC.Notification.showTemporary(t('richdocuments', ' File uploaded successfully'));
+			},
+			error: function () {
+				OC.Notification.showTemporary(t('richdocuments', ' File upload failed'));
+			},
+			complete: function () {
+				$('#upload').removeClass('icon-loading');
+				$('.add-document .upload').css({opacity: 0.7});
+				documentsMain.show();
+			}
+		});
+	},
+
 	// generates docKey for given fileId
 	_generateDocKey: function(documentId) {
 		var ocurl = OC.generateUrl('apps/richdocuments/wopi/files/{documentId}', {documentId: documentId});
@@ -896,7 +925,8 @@ FileList.isFileNameValid = function (name) {
 FileList.setViewerMode = function(){
 };
 FileList.findFile = function(fileName){
-	fullPath = escapeHTML(FileList.getCurrentDirectory + '/' + fileName);
+	var currentDir = FileList.getCurrentDirectory().replace(/\/$/, '');
+	fullPath = escapeHTML(currentDir + '/' + fileName);
 	return !!$('.documentslist .document:not(.template,.progress) a[original-title="' + fullPath + '"]').length;
 };
 
@@ -945,35 +975,31 @@ $(document).ready(function() {
 	$('.add-document').on('click', '.add-xlsx', documentsMain.onCreateXLSX);
 	$('.add-document').on('click', '.add-pptx', documentsMain.onCreatePPTX);
 
-	var supportAjaxUploadFn;
-	if (OC.Uploader) { // OC.Uploader in oc10 but OC.Upload in < 10
-		OC.Uploader._isReceivedSharedFile = function () {
-			return false;
-		};
-		supportAjaxUploadFn = OC.Uploader.prototype._supportAjaxUploadWithProgress;
-	} else if (OC.Upload) {
-		OC.Upload._isReceivedSharedFile = function () {
-			return false;
-		};
-		supportAjaxUploadFn = supportAjaxUploadWithProgress;
-	}
 
-	var file_upload_start = $('#file_upload_start');
-	if (typeof supportAjaxUploadFn !== 'undefined' &&
-	    supportAjaxUploadFn()) {
-		file_upload_start.bind('fileuploadstart', function(e, data) {
-			$('#upload').addClass('icon-loading');
-			$('.add-document .upload').css({opacity:0});
-		});
-	}
-	file_upload_start.bind('fileuploaddone', function() {
-		$('#upload').removeClass('icon-loading');
-		$('.add-document .upload').css({opacity:0.7});
-		documentsMain.show();
-	});
-	file_upload_start.fileupload();
 
 	// hide the documentlist until we know we don't have any fileId
 	$('.documentslist').hide();
 	documentsMain.onStartup();
+
+	$("#uploadform").change(function (event) {
+		event.preventDefault();
+		var fileData = event.target.files[0];
+		var fileAlreadyExists = window.Files.findFile(fileData.name);
+
+		if (fileAlreadyExists) {
+			OC.dialogs.confirm(
+				t('richdocuments', 'File "{name}" already exists, do you want to overwrite it ?', {name: fileData.name}),
+				t('richdocuments', 'File "{name} already exists', {name: fileData.name}),
+				function (result) {
+					if (result === true) {
+						documentsMain.uploadFile(fileData);
+					}
+				}
+			);
+		} else {
+			documentsMain.uploadFile(fileData);
+		}
+
+		$('#file_upload_start').val('');
+	});
 });
