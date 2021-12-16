@@ -21,6 +21,10 @@
   background-image: url('../../../../core/img/filetypes/x-office-presentation.svg');
 }
 
+.icon-filetype-drawing {
+  background-image: url('../../../../core/img/filetypes/x-office-drawing.svg');
+}
+
 .icon-richdocuments-open {
   background-image: url("../../img/app-dark.svg");
 }
