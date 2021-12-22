@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - added Diagram document type to + button - [#436](https://github.com/owncloud/richdocuments/pull/436)
 - ownCloud Web compatibility - [#423](https://github.com/owncloud/richdocuments/pull/423)
-- Update .drone.star and drop PHP 7.2 - [#424](https://github.com/owncloud/richdocuments/pull/424) 
+- Update .drone.star and drop PHP 7.2 - [#424](https://github.com/owncloud/richdocuments/pull/424)
 - Library and translation updates
 
 ## Fixed
@@ -20,7 +20,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## Changed
 
 - ownCloud Web compatibility - [#423](https://github.com/owncloud/richdocuments/pull/423)
-- Update .drone.star and drop PHP 7.2 - [#424](https://github.com/owncloud/richdocuments/pull/424) 
+- Update .drone.star and drop PHP 7.2 - [#424](https://github.com/owncloud/richdocuments/pull/424)
 - Library updates
 
 ## [2.6.0] - 2021-05-31
@@ -31,7 +31,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Don't log warning message on PUT in favour of debug - [#407](https://github.com/owncloud/richdocuments/pull/407)
 - Prevent documents with tabs in filenames / or any other invalid chars from being created - [enterprise#4628](https://github.com/owncloud/enterprise/issues/4628)
 
-### Changed 
+### Changed
 
 - Introduced "Open documents in Secure View with watermark by default" setting - [#400](https://github.com/owncloud/richdocuments/pull/400) - [#402](https://github.com/owncloud/richdocuments/pull/402)
 - Enable comments on PDFs - [#404](https://github.com/owncloud/richdocuments/pull/404)
