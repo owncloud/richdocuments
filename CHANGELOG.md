@@ -4,13 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [2.7.0] - 2021-12-03
+## [2.7.0] - 2021-12-2222
 
 ## Changed
 
+- added Diagram document type to + button - [#436](https://github.com/owncloud/richdocuments/pull/436)
 - ownCloud Web compatibility - [#423](https://github.com/owncloud/richdocuments/pull/423)
 - Update .drone.star and drop PHP 7.2 - [#424](https://github.com/owncloud/richdocuments/pull/424) 
-- Library updates
+- Library and translation updates
+
+## Fixed
+
+- Make upload work again - [#437](https://github.com/owncloud/richdocuments/pull/437)
+
 
 ## [2.6.0] - 2021-05-31
 
