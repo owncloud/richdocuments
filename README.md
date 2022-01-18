@@ -62,7 +62,7 @@ To register the connector, use these lines:
 "external_apps": [
     {
         "id": "richdocuments",
-        "path": "http(s)://<owncloud-10-server-address>/index.php/apps/richdocuments/js/richdocuments.js",
+        "path": "http(s)://<owncloud-10-server-address>/index.php/apps/richdocuments/js/richdocuments.js"
     }
 ]
 ```
