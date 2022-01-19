@@ -337,6 +337,8 @@ var documentsSettings = {
 
 		$(document).on('change', '#enable_secure_view_option_cb-richdocuments', function() {
 			var page = $(this).parent();
+			
+			page.find('#enable-open-action-with-secure-view-default').toggleClass('hidden', !this.checked);
 			page.find('#enable-watermark-section').toggleClass('hidden', !this.checked);
 			page.find('#enable-share-attributes-defaults').toggleClass('hidden', !this.checked);
 
@@ -348,7 +350,6 @@ var documentsSettings = {
 		});
 
 		$(document).on('change', '#enable_secure_view_open_action_default_cb-richdocuments', function() {
-			var page = $(this).parent();
 			documentsSettings.saveSecureViewOpenActionDefault(this.checked);
 		});
 
@@ -373,7 +374,6 @@ var documentsSettings = {
 		});
 
 		$(document).on('change', '#secure_view_can_print_default_option_cb-richdocuments', function() {
-			var page = $(this).parent();
 			documentsSettings.saveCanPrintDefaultOption(this.checked);
 		});
 
