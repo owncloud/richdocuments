@@ -122,6 +122,7 @@ var odfViewer = {
 
 		var docExt, spreadsheetExt, presentationExt;
 		var docMime, spreadsheetMime, presentationMime;
+		var drawExt, drawMime;
 		if (ooxml) {
 			docExt = 'docx';
 			spreadsheetExt = 'xlsx';
@@ -133,9 +134,11 @@ var odfViewer = {
 			docExt = 'odt';
 			spreadsheetExt = 'ods';
 			presentationExt = 'odp';
+			drawExt = 'odg';
 			docMime = 'application/vnd.oasis.opendocument.text';
 			spreadsheetMime = 'application/vnd.oasis.opendocument.spreadsheet';
 			presentationMime = 'application/vnd.oasis.opendocument.presentation';
+			drawMime = 'application/vnd.oasis.opendocument.graphics';
 		}
 
 		(function(OCA){
@@ -175,6 +178,19 @@ var odfViewer = {
 							self._createDocument(presentationMime, filename);
 						}
 					});
+
+					if (!ooxml) {
+						newFileMenu.addMenuEntry({
+							id: 'add-' + drawExt,
+							displayName: t('richdocuments', 'Diagram'),
+							templateName: 'New Diagram.' + drawExt,
+							iconClass: 'icon-filetype-drawing',
+							fileType: 'x-office-drawing',
+							actionHandler: function(filename) {
+								self._createDocument(drawMime, filename);
+							}
+						});
+					}
 				},
 
 				_createDocument: function(mimetype, filename) {
