@@ -20,12 +20,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 - Make upload work again - [#437](https://github.com/owncloud/richdocuments/pull/437)
 
-## Changed
-
-- ownCloud Web compatibility - [#423](https://github.com/owncloud/richdocuments/pull/423)
-- Update .drone.star and drop PHP 7.2 - [#424](https://github.com/owncloud/richdocuments/pull/424)
-- Library updates
-
 ## [2.6.0] - 2021-05-31
 
 ## Fixed
