@@ -141,9 +141,8 @@ class Application extends App {
 				[$this, 'addViewerScripts']
 			);
 
-			$secureViewOption = $container->getServer()->getConfig()->getAppValue('richdocuments', 'secure_view_option');
-
-			if ($secureViewOption === 'true') {
+			$appConfig = $container->query(AppConfig::class);
+			if ($appConfig->secureViewOptionEnabled() && $appConfig->enterpriseFeaturesEnabled()) {
 				$container->getServer()->getEventDispatcher()->addListener(
 					'OCA\Files::loadAdditionalScripts',
 					function () {
@@ -182,12 +181,12 @@ class Application extends App {
 		$array['array']['oc_appconfig']['richdocuments'] = [
 			'defaultShareAttributes' => [
 				// is secure view is enabled for read-only shares, user cannot download by default
-				'secureViewHasWatermark' => \json_decode($appConfig->getAppValue('secure_view_has_watermark_default')),
-				'secureViewCanPrint' => \json_decode($appConfig->getAppValue('secure_view_can_print_default')),
+				'secureViewHasWatermark' => $appConfig->secureViewHasWatermarkDefaultEnabled(),
+				'secureViewCanPrint' => $appConfig->secureViewCanPrintDefaultEnabled(),
 			],
-			'secureViewAllowed' => \json_decode($appConfig->getAppValue('secure_view_option')),
-			'secureViewOpenActionDefault' => \json_decode($appConfig->getAppValue('secure_view_open_action_default')),
-			'openInNewTab' => \json_decode($appConfig->getAppValue('open_in_new_tab'))
+			'secureViewAllowed' => $appConfig->secureViewOptionEnabled(),
+			'secureViewOpenActionDefault' => $appConfig->secureViewOpenActionDefaultEnabled(),
+			'openInNewTab' => $appConfig->openInNewTabEnabled()
 		];
 	}
 

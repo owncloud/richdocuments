@@ -130,4 +130,39 @@ class AppConfig {
 		// if encryption app is enabled, check for master key
 		return \OC::$server->query('\OCA\Encryption\Util')->isMasterKeyEnabled();
 	}
+
+	/**
+	 * @return bool
+	 */
+	public function secureViewOptionEnabled() {
+		return \filter_var($this->getAppValue('secure_view_option'), FILTER_VALIDATE_BOOLEAN);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function secureViewOpenActionDefaultEnabled() {
+		return \filter_var($this->getAppValue('secure_view_open_action_default'), FILTER_VALIDATE_BOOLEAN);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function secureViewCanPrintDefaultEnabled() {
+		return \filter_var($this->getAppValue('secure_view_can_print_default'), FILTER_VALIDATE_BOOLEAN);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function secureViewHasWatermarkDefaultEnabled() {
+		return \filter_var($this->getAppValue('secure_view_has_watermark_default'), FILTER_VALIDATE_BOOLEAN);
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function openInNewTabEnabled() {
+		return \filter_var($this->getAppValue('open_in_new_tab'), FILTER_VALIDATE_BOOLEAN);
+	}
 }
