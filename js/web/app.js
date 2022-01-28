@@ -12,7 +12,7 @@ const routes = [
 ];
 
 const appInfo = {
-    name: "Richdocuments",
+    name: "Collabora Online",
     id: "richdocuments",
     icon: "x-office-document",
     isFileEditor: true,

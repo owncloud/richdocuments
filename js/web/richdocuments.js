@@ -3362,7 +3362,7 @@ define((function () { 'use strict';
               }
             }];
             const appInfo = {
-              name: "Richdocuments",
+              name: "Collabora Online",
               id: "richdocuments",
               icon: "x-office-document",
               isFileEditor: true,
