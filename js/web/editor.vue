@@ -71,7 +71,7 @@ export default {
         },
 
         WOPIPostMessage(iframe, msgId, values) {
-            if (iframe) return;
+            if (!iframe) return;
             var msg = {
                 MessageId: msgId,
                 SendTime: Date.now(),
@@ -153,6 +153,11 @@ export default {
                         if (args && args.success && args.fileName) {
                             that.fileName = args.fileName;
                             document.title = that.fileName;
+                        }
+                    } else if (msgId === "File_Rename") {
+                        if (args && args.success && args.NewName) {
+                            that.NewName = args.NewName;
+                            document.title = that.NewName;
                         }
                     }
                 });
