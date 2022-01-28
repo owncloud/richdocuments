@@ -152,6 +152,7 @@ export default {
                     } else if (msgId === "Action_Save_Resp") {
                         if (args && args.success && args.fileName) {
                             that.fileName = args.fileName;
+                            document.title = that.fileName;
                         }
                     }
                 });
@@ -181,6 +182,7 @@ export default {
             this.fileName = docFile.title;
             let urlsrc = this.generateDocUrlSrc(docFile);
             this.showEditor(docFile, urlsrc);
+            document.title = this.fileName;
         } catch (error) {
             this.messageDisplay(error);
             this.onRequestClose();
