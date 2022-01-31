@@ -69,10 +69,10 @@ class SettingsController extends Controller {
 				'encryption_enabled' => $this->appConfig->encryptionEnabled() ? 'true' : 'false',
 				'masterkey_encryption_enabled' => $this->appConfig->masterEncryptionEnabled() ? 'true' : 'false',
 				'secure_view_allowed' => $this->appConfig->enterpriseFeaturesEnabled() ? 'true' : 'false',
-				'secure_view_option' => $this->appConfig->getAppValue('secure_view_option'),
-				'secure_view_open_action_default' => $this->appConfig->getAppValue('secure_view_open_action_default'),
-				'secure_view_has_watermark_default' => $this->appConfig->getAppValue('secure_view_has_watermark_default'),
-				'secure_view_can_print_default' => $this->appConfig->getAppValue('secure_view_can_print_default'),
+				'secure_view_option' => ($this->appConfig->secureViewOptionEnabled() && $this->appConfig->enterpriseFeaturesEnabled()) ? 'true' : 'false',
+				'secure_view_open_action_default' => $this->appConfig->secureViewOpenActionDefaultEnabled() ? 'true' : 'false',
+				'secure_view_has_watermark_default' => $this->appConfig->secureViewHasWatermarkDefaultEnabled() ? 'true' : 'false',
+				'secure_view_can_print_default' => $this->appConfig->secureViewCanPrintDefaultEnabled() ? 'true' : 'false',
 				'watermark_text' => $this->appConfig->getAppValue('watermark_text')
 			],
 			'blank'

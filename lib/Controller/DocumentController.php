@@ -672,7 +672,7 @@ class DocumentController extends Controller {
 		$storage = $info->getStorage();
 
 		// check if secure mode feature has been enabled for share/file
-		$secureModeEnabled = \OC::$server->getConfig()->getAppValue('richdocuments', 'secure_view_option') === 'true';
+		$secureModeEnabled = $this->appConfig->secureViewOptionEnabled();
 		$isSharedFile = $info->getStorage()->instanceOfStorage('\OCA\Files_Sharing\SharedStorage');
 		$enforceSecureView = \filter_var($this->request->getParam('enforceSecureView', false), FILTER_VALIDATE_BOOLEAN);
 		if ($secureModeEnabled) {

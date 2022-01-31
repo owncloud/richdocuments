@@ -41,12 +41,12 @@ class AppConfigTest extends TestCase {
 
 	public function testOpenInNewtabDefault() {
 		$this->config->method('getAppValue')
-			->willReturn('true');
+			->willReturn(true);
 		$this->licenseManager->method('checkLicenseFor')
 			->willReturn(true);
-		$value = $this->appConfig->getAppValue('open_in_new_tab');
+		$value = $this->appConfig->openInNewTabEnabled();
 		$enterpriseEdition = $this->appConfig->enterpriseFeaturesEnabled();
-		$this->assertEquals('true', $value);
+		$this->assertEquals(true, $value);
 		$this->assertEquals(true, $enterpriseEdition);
 	}
 
