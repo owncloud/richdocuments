@@ -747,6 +747,11 @@ var documentsMain = {
 		documentsMain.create('application/vnd.oasis.opendocument.presentation');
 	},
 
+	onCreateODG: function(event){
+		event.preventDefault();
+		documentsMain.create('application/vnd.oasis.opendocument.graphics');
+	},
+
 	onCreateDOCX: function(event){
 		event.preventDefault();
 		documentsMain.create('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
@@ -971,6 +976,7 @@ $(document).ready(function() {
 	$('.add-document').on('click', '.add-odt', documentsMain.onCreateODT);
 	$('.add-document').on('click', '.add-ods', documentsMain.onCreateODS);
 	$('.add-document').on('click', '.add-odp', documentsMain.onCreateODP);
+	$('.add-document').on('click', '.add-odg', documentsMain.onCreateODG);
 	$('.add-document').on('click', '.add-docx', documentsMain.onCreateDOCX);
 	$('.add-document').on('click', '.add-xlsx', documentsMain.onCreateXLSX);
 	$('.add-document').on('click', '.add-pptx', documentsMain.onCreatePPTX);

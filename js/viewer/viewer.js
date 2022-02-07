@@ -182,8 +182,8 @@ var odfViewer = {
 					if (!ooxml) {
 						newFileMenu.addMenuEntry({
 							id: 'add-' + drawExt,
-							displayName: t('richdocuments', 'Diagram'),
-							templateName: 'New Diagram.' + drawExt,
+							displayName: t('richdocuments', 'Drawing'),
+							templateName: 'New Drawing.' + drawExt,
 							iconClass: 'icon-filetype-drawing',
 							fileType: 'x-office-drawing',
 							actionHandler: function(filename) {
