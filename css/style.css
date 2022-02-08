@@ -44,6 +44,7 @@
 .add-document .add-odt,
 .add-document .add-ods,
 .add-document .add-odp,
+.add-document .add-odg,
 .add-document .upload {
 	opacity: .7;
 	border: 1px solid #e8e8e8;
@@ -54,9 +55,11 @@
 .add-document .add-odt:hover,
 .add-document .add-ods:hover,
 .add-document .add-odp:hover,
+.add-document .add-odg:hover,
 .add-document .add-odt:focus,
 .add-document .add-ods:focus,
 .add-document .add-odp:focus,
+.add-document .add-odg:focus,
 .add-document #upload:hover .upload,
 .add-document .upload:focus {
 	opacity: 1;

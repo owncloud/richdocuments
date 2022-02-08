@@ -47,6 +47,9 @@ script('files', 'jquery.fileupload');
 			<a class="icon-add add-<?php p($_['doc_format'] === 'ooxml' ? 'pptx' : 'odp') ?> svg" target="_blank" href="">
 				<label><?php p($l->t('New Presentation')) ?></label>
 			</a>
+			<a class="icon-add add-odg ?> svg" target="_blank" href="">
+				<label><?php p($l->t('New Drawing')) ?></label>
+			</a>
 			<div id="upload" title="<?php p($l->t('Upload (max. %s)', [$_['uploadMaxHumanFilesize']])) ?>">
 				<form id="uploadform" enctype="multipart/form-data">
 					<input type="file" id="file_upload_start" name='file' accept=".csv,.doc,.docx,.odp,.ods,.odt,.odg,.pdf,.ppt,.pptx,.txt,.xhtml,.xls,.xlsx,.xml,.xul,.epub,.rtf" required/>
