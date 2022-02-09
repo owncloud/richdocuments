@@ -100,7 +100,24 @@ const appInfo = {
             "files-shared-with-others",
             "files-shared-with-me"
           ]
-        }
+        },
+        {
+          extension: "odg",
+          routeName: "richdocuments-editor",
+          newTab: true,
+          newFileMenu: {
+            menuTitle ($gettext) {
+              return $gettext("Drawing")
+            },
+            icon: "x-office-drawing"
+          },
+          routes: [
+            "files-personal",
+            "files-favorites",
+            "files-shared-with-others",
+            "files-shared-with-me"
+          ]
+        },
       ]
 };
 
