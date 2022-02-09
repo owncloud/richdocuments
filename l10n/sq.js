@@ -37,7 +37,6 @@ OC.L10N.register(
     "Document" : "Dokument",
     "Spreadsheet" : "Fletëllogaritje",
     "Presentation" : "Paraqitje",
-    "Diagram" : "Diagram",
     "Could not create file" : "Kartela s’u krijua dot",
     "View/Edit in Collabora" : "Shiheni/Përpunojeni në Collabora",
     "Office" : "Zyrë",

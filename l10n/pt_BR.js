@@ -37,7 +37,6 @@ OC.L10N.register(
     "Document" : "Documento",
     "Spreadsheet" : "Planilha de Cálculo",
     "Presentation" : "Apresentação",
-    "Diagram" : "Diagrama",
     "Could not create file" : "Não foi possível criar o arquivo",
     "View/Edit in Collabora" : "Ver/Editar em Collabora",
     "Office" : "Escritório",

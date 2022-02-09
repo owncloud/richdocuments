@@ -37,7 +37,6 @@ OC.L10N.register(
     "Document" : "เอกสาร",
     "Spreadsheet" : "สเปรดชีต",
     "Presentation" : "งานนำเสนอ",
-    "Diagram" : "แผนภาพ",
     "Could not create file" : "ไม่สามารถสร้างไฟล์",
     "View/Edit in Collabora" : "ดู/แก้ไข ใน Collabora",
     "Office" : "สำนักงาน",
