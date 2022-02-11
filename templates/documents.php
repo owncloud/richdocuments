@@ -47,7 +47,7 @@ script('files', 'jquery.fileupload');
 			<a class="icon-add add-<?php p($_['doc_format'] === 'ooxml' ? 'pptx' : 'odp') ?> svg" target="_blank" href="">
 				<label><?php p($l->t('New Presentation')) ?></label>
 			</a>
-			<a class="icon-add add-odg ?> svg" target="_blank" href="">
+			<a class="icon-add add-odg svg" target="_blank" href="">
 				<label><?php p($l->t('New Drawing')) ?></label>
 			</a>
 			<div id="upload" title="<?php p($l->t('Upload (max. %s)', [$_['uploadMaxHumanFilesize']])) ?>">
