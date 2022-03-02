@@ -1,53 +1,29 @@
 /* globals FileList, OCA.Files.fileActions, oc_debug */
 var odfViewer = {
 	isDocuments : false,
-	supportedMimes: [
-		'application/pdf',
-		'application/vnd.oasis.opendocument.text',
-		'application/vnd.oasis.opendocument.spreadsheet',
-		'application/vnd.oasis.opendocument.graphics',
-		'application/vnd.oasis.opendocument.presentation',
-		'application/vnd.oasis.opendocument.text-flat-xml',
-		'application/vnd.oasis.opendocument.spreadsheet-flat-xml',
-		'application/vnd.oasis.opendocument.graphics-flat-xml',
-		'application/vnd.oasis.opendocument.presentation-flat-xml',
-		'application/vnd.lotus-wordpro',
-		'image/svg+xml',
-		'application/vnd.visio',
-		'application/vnd.wordperfect',
-		'application/msonenote',
-		'application/msword',
-		'application/rtf',
-		'text/rtf',
-		'text/plain',
-		'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-		'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
-		'application/vnd.ms-word.document.macroEnabled.12',
-		'application/vnd.ms-word.template.macroEnabled.12',
-		'application/vnd.ms-excel',
-		'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-		'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
-		'application/vnd.ms-excel.sheet.macroEnabled.12',
-		'application/vnd.ms-excel.template.macroEnabled.12',
-		'application/vnd.ms-excel.addin.macroEnabled.12',
-		'application/vnd.ms-excel.sheet.binary.macroEnabled.12',
-		'application/vnd.ms-powerpoint',
-		'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-		'application/vnd.openxmlformats-officedocument.presentationml.template',
-		'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
-		'application/vnd.ms-powerpoint.addin.macroEnabled.12',
-		'application/vnd.ms-powerpoint.presentation.macroEnabled.12',
-		'application/vnd.ms-powerpoint.template.macroEnabled.12',
-		'application/vnd.ms-powerpoint.slideshow.macroEnabled.12'
-	],
+
+	loadSettings: function () {
+		return new Promise(function (resolve, reject) {
+			$.ajax({
+				type: "get",
+				url: OC.filePath('richdocuments', 'ajax', 'settings.php'),
+				success: function(data) {
+					resolve(data);
+				},
+				error: function(xhr, status) {
+					reject(Error(status));
+				}
+			});
+		});
+	},
 
 	isSupportedMimeType: function(mimetype) {
 		return (odfViewer.supportedMimes.indexOf(mimetype) !== -1);
 	},
 
-	register : function() {
-		for (var i = 0; i < odfViewer.supportedMimes.length; ++i) {
-			var mime = odfViewer.supportedMimes[i];
+	register : function(settings) {
+		for (var i = 0; i < settings.supported_mimetypes.length; ++i) {
+			var mime = settings.supported_mimetypes[i];
 
 			if(!$("#isPublic").val() &&
 					OC.appConfig.richdocuments &&
@@ -117,8 +93,8 @@ var odfViewer = {
 
 	},
 
-	registerFilesMenu: function(response) {
-		var ooxml = response.doc_format === 'ooxml';
+	registerFilesMenu: function(settings) {
+		var ooxml = settings.doc_format === 'ooxml';
 
 		var docExt, spreadsheetExt, presentationExt;
 		var docMime, spreadsheetMime, presentationMime;
@@ -245,28 +221,29 @@ $(document).ready(function() {
 		&& typeof OCA.Files !== 'undefined'
 		&& typeof OCA.Files.fileActions !== 'undefined'
 	) {
-		odfViewer.register();
 
-		// Check if public file share button
-		var mimetype = $("#mimetype").val();
-		if (odfViewer.supportedMimes.indexOf(mimetype) !== -1 && $("#isPublic").val()){
-			// Single file public share, add button to allow view or edit
-			var button = document.createElement("a");
-			button.href = OC.generateUrl("apps/richdocuments/public?fileId={file_id}&shareToken={shareToken}", { file_id: null, shareToken: encodeURIComponent($("#sharingToken").val()) });
-			button.className = "button";
-			button.innerText = t('richdocuments', 'View/Edit in Collabora');
+		odfViewer.loadSettings().then(function (settings) {
+			odfViewer.register(settings);
 
-			$("#preview").append(button);
-		}
+			// Check if public file share button
+			var mimetype = $("#mimetype").val();
+			if (settings.supported_mimetypes.indexOf(mimetype) !== -1 && $("#isPublic").val()){
+				// Single file public share, add button to allow view or edit
+				var button = document.createElement("a");
+				button.href = OC.generateUrl("apps/richdocuments/public?fileId={file_id}&shareToken={shareToken}", { file_id: null, shareToken: encodeURIComponent($("#sharingToken").val()) });
+				button.className = "button";
+				button.innerText = t('richdocuments', 'View/Edit in Collabora');
 
-		if (!$("#isPublic").val()) {
-			// Dont register file menu with public links
-			$.get(
-				OC.filePath('richdocuments', 'ajax', 'settings.php'),
-				{},
-				odfViewer.registerFilesMenu
-			);
-		}
+				$("#preview").append(button);
+			}
+
+			if (!$("#isPublic").val()) {
+				odfViewer.registerFilesMenu(settings);
+			}
+		}, function (error) {
+			console.error(error);
+		});
+
 	}
 
 	if ($('#odf_close').length) {

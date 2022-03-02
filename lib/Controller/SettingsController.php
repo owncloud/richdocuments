@@ -39,6 +39,7 @@ class SettingsController extends Controller {
 			'wopi_url' => $this->appConfig->getAppValue('wopi_url'),
 			'test_wopi_url' => $this->appConfig->getAppValue('test_wopi_url'),
 			'test_server_groups' => $this->appConfig->getAppValue('test_server_groups'),
+			'supported_mimetypes' => $this->appConfig->getSupportedMimetypes(),
 		];
 	}
 
