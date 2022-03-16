@@ -7,4 +7,3 @@ file_filter = <lang>/richdocuments.po
 source_file = templates/richdocuments.pot
 source_lang = en
 type = PO
-
