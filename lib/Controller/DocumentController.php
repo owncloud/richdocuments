@@ -1242,7 +1242,7 @@ class DocumentController extends Controller {
 	 * @return null|\OCP\Files\File
 	 */
 	private function getFileHandle($fileId, $owner, $editor) {
-		if ($editor && $editor != '') {
+		if ($editor) {
 			$user = $this->userManager->get($editor);
 			if (!$user) {
 				$this->logger->warning('wopiPutFile(): No such user', ['app' => $this->appName]);
