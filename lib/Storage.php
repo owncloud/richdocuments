@@ -164,7 +164,9 @@ class Storage {
 			if ($node->getType() == FileInfo::TYPE_FILE) {
 				/** @var \OCP\Files\Node|null $document */
 				$document = $node;
-			} elseif ($node->getType() == FileInfo::TYPE_FOLDER && $fileId !== null) {
+			} elseif ($fileId !== null) {
+				// node was not a file, so it must be a folder.
+				// fileId was passed in, so look that up in the folder.
 				/** @var \OCP\Files\Node|null $document */
 				$document = $node->getById($fileId)[0];
 			} else {
