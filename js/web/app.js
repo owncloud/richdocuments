@@ -14,7 +14,8 @@ const routes = [
 const appInfo = {
     name: "Collabora Online",
     id: "richdocuments",
-    icon: "x-office-document",
+    icon: "resource-type-text",
+    iconFillType: 'fill',
     isFileEditor: true,
     extensions: [
         {
