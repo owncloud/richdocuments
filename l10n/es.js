@@ -106,4 +106,4 @@ OC.L10N.register(
     "Guest %s" : "Invitado %s",
     "This link has been expired or is never existed. Please contact the person who shared it with you for details." : "Este enlace caducó o nunca existió. Para más detalles, sírvase contactar a la persona que lo compartió con usted."
 },
-"nplurals=2; plural=(n != 1);");
+"nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");

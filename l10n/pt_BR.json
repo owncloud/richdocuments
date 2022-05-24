@@ -103,5 +103,5 @@
     "OK" : "OK",
     "Guest %s" : "Convidado %s",
     "This link has been expired or is never existed. Please contact the person who shared it with you for details." : "Este link expirou ou nunca existiu. Por favor faça contato com a pessoa que compartilhou este link com você para maiores detalhes."
-},"pluralForm" :"nplurals=2; plural=(n > 1);"
+},"pluralForm" :"nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;"
 }
