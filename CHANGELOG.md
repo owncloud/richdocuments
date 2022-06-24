@@ -4,25 +4,37 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [2.8.0] - 2022-06-24
 
+### Changed
+
+- #451 disable secure view js and settings when not available
+- #454 Change Richdocuments app name to Collabora Online
+- #455 ensure ODG Drawing compatibility across integration
+- #456 web: add Drawing filetype and add it to + menu
+- #467 Set appropriate icon for web
+
+### Fixed 
+
+- #457 typo fix
+- #462 Adjust 'if' conditionals that were reported by phpstan
 
 ## [2.7.0] - 2022-01-19
 
-## Changed
+### Changed
 
 - added Diagram document type to + button - [#436](https://github.com/owncloud/richdocuments/pull/436)
 - ownCloud Web compatibility - [#423](https://github.com/owncloud/richdocuments/pull/423)
 - Update .drone.star and drop PHP 7.2 - [#424](https://github.com/owncloud/richdocuments/pull/424)
 - Library and translation updates
 
-## Fixed
+### Fixed
 
 - Make upload work again - [#437](https://github.com/owncloud/richdocuments/pull/437)
 
 ## [2.6.0] - 2021-05-31
 
-## Fixed
+### Fixed
 
 - Only verify path if filename is given, additional log error - [#418](https://github.com/owncloud/richdocuments/pull/418)
 - Don't log warning message on PUT in favour of debug - [#407](https://github.com/owncloud/richdocuments/pull/407)
@@ -68,7 +80,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [2.4.0] - 2020-07-30
 
 
-[Unreleased]: https://github.com/owncloud/guests/compare/v2.7.0...master
+[Unreleased]: https://github.com/owncloud/guests/compare/v2.8.0...master
+[2.8.0]: https://github.com/owncloud/guests/compare/v2.7.0...v2.8.0
 [2.7.0]: https://github.com/owncloud/guests/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/owncloud/guests/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/owncloud/guests/compare/v2.4.1...v2.5.0
