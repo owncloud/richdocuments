@@ -8,16 +8,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- #451 disable secure view js and settings when not available
-- #454 Change Richdocuments app name to Collabora Online
-- #455 ensure ODG Drawing compatibility across integration
-- #456 web: add Drawing filetype and add it to + menu
-- #467 Set appropriate icon for web
+- [#451](https://github.com/owncloud/richdocuments/pull/451) - disable secure view js and settings when not available
+- [#454](https://github.com/owncloud/richdocuments/pull/454) - Change Richdocuments app name to Collabora Online
+- [#455](https://github.com/owncloud/richdocuments/pull/455) - ensure ODG Drawing compatibility across integration
+- [#456](https://github.com/owncloud/richdocuments/pull/456) - web: add Drawing filetype and add it to + menu
+- [#467](https://github.com/owncloud/richdocuments/pull/467) - Set appropriate icon for web
 
 ### Fixed 
 
-- #457 typo fix
-- #462 Adjust 'if' conditionals that were reported by phpstan
+- [#457](https://github.com/owncloud/richdocuments/pull/457) - typo fix
+- [#462](https://github.com/owncloud/richdocuments/pull/462) - Adjust 'if' conditionals that were reported by phpstan
 
 ## [2.7.0] - 2022-01-19
 
