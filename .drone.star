@@ -52,6 +52,7 @@ config = {
             "suites": {
                 "webUISecureView": "webUISecV",
             },
+            "servers": ["daily-master-qa"],
             "browsers": [
                 "chrome",
                 "firefox",
