@@ -422,6 +422,11 @@ OC.Plugins.register('OCA.Share.ShareDialogLinkShareView', {
 						scope: "permissions",
 						key: "download",
 						enabled: false
+					},
+					{
+						scope: "richdocuments",
+						key: "print",
+						enabled: false
 					}
 				]
 			});

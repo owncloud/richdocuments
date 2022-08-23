@@ -447,7 +447,9 @@ class DocumentController extends Controller {
 		if ($useUserAuth) {
 			$wopiInfo = $this->getWopiInfoForAuthUser($doc['fileid'], $doc['version'], $this->uid);
 		} else {
-			$wopiInfo = $this->getWopiInfoForPublicLink($doc['fileid'], $doc['version'], $doc['path'], $permissions, $currentUser, $doc['owner']);
+			// FIXME: review why we really need to pass parmissions here
+			// FIXME: review why we really need to pass $doc['path'] here as we could take from view
+			$wopiInfo = $this->getWopiInfoForPublicLinkShare($doc['fileid'], $doc['version'], $doc['path'], $shareToken, $permissions, $currentUser);
 		}
 
 		// Create document index
@@ -673,9 +675,8 @@ class DocumentController extends Controller {
 
 		// check if secure mode feature has been enabled for share/file
 		$secureModeEnabled = $this->appConfig->secureViewOptionEnabled();
-		$isSharedFile = $info->getStorage()->instanceOfStorage('\OCA\Files_Sharing\SharedStorage');
-		$enforceSecureView = \filter_var($this->request->getParam('enforceSecureView', false), FILTER_VALIDATE_BOOLEAN);
 		if ($secureModeEnabled) {
+			$isSharedFile = $info->getStorage()->instanceOfStorage('\OCA\Files_Sharing\SharedStorage');
 			if ($isSharedFile) {
 				// handle shares
 				/** @var \OCA\Files_Sharing\SharedStorage $storage */
@@ -692,6 +693,7 @@ class DocumentController extends Controller {
 				$canPrint = true;
 			}
 			
+			$enforceSecureView = \filter_var($this->request->getParam('enforceSecureView', false), FILTER_VALIDATE_BOOLEAN);
 			if ($enforceSecureView) {
 				// handle enforced secure view watermark
 				// but preserve other permissions like print/download/edit
@@ -760,6 +762,82 @@ class DocumentController extends Controller {
 	}
 
 	/**
+	 * Generates and returns an access token for a given fileId.
+	 */
+	private function getWopiInfoForPublicLinkShare($fileId, $version, $path, $shareToken, $permissions, $currentUser) {
+		$this->logger->info('getWopiInfoForPublicLinkShare(): Generating WOPI Token for file {fileId}, version {version}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'version' => $version ]);
+
+		$share = \OC::$server->getShareManager()->getShareByToken($shareToken);
+
+		$ownerUid = $share->getShareOwner();
+
+		if ($attributes = $share->getAttributes()) {
+			$canDownload = $share->getAttributes()->getAttribute('permissions', 'download');
+			$viewWithWatermark = $share->getAttributes()->getAttribute('richdocuments', 'view-with-watermark');
+			$canPrint = $share->getAttributes()->getAttribute('richdocuments', 'print');
+		} else {
+			// defaults for standard share
+			$canDownload = true;
+			$viewWithWatermark = false;
+			$canPrint = true;
+		}
+
+		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
+
+		$updateable = ($permissions & Constants::PERMISSION_UPDATE) === Constants::PERMISSION_UPDATE;
+		// If token is for some versioned file
+		if ($version !== '0') {
+			$updateable = false;
+		}
+
+		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
+
+		// restriction on view has been set to false, return forbidden
+		// as there is no supported way of opening this document
+		if ($canDownload === false && $viewWithWatermark === false) {
+			throw new \Exception($this->l10n->t('Insufficient file permissions.'));
+		}
+
+		$attributes = WOPI::ATTR_CAN_VIEW;
+
+		// can export file in editor if download is not set or true
+		if ($canDownload === null || $canDownload === true) {
+			$attributes = $attributes | WOPI::ATTR_CAN_EXPORT;
+		}
+
+		// can print from editor if print is not set or true
+		if ($canPrint === null || $canPrint === true) {
+			$attributes = $attributes | WOPI::ATTR_CAN_PRINT;
+		}
+
+		// restriction on view with watermarking enabled
+		if ($viewWithWatermark === true) {
+			$attributes = $attributes | WOPI::ATTR_HAS_WATERMARK;
+		}
+		
+		if ($updateable) {
+			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE;
+		}
+
+
+		$row = new Db\Wopi();
+		$tokenArray = $row->generateToken($fileId, $version, $attributes, $serverHost, $ownerUid, $currentUser);
+
+		// Return the token.
+		$result = [
+			'status' => 'success',
+			'access_token' => $tokenArray['access_token'],
+			'access_token_ttl' => $tokenArray['access_token_ttl'],
+			'sessionid' => '0' // default shared session
+		];
+		$this->logger->debug('getWopiInfoForPublicLink(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
+		return $result;
+	}
+
+	/**
 	 * @param string $userId
 	 * @param string|int $fileId
 	 * @return null|array
@@ -794,44 +872,6 @@ class DocumentController extends Controller {
 			$accessList['public'] = true;
 			$encryptionManager->getEncryptionModule()->update($absPath, $currentUser, $accessList);
 		}
-	}
-
-	/**
-	 * Generates and returns an access token for a given fileId.
-	 */
-	private function getWopiInfoForPublicLink($fileId, $version, $path, $permissions, $currentUser, $ownerUid) {
-		$this->logger->info('getWopiInfoForPublicLink(): Generating WOPI Token for file {fileId}, version {version}.', [
-			'app' => $this->appName,
-			'fileId' => $fileId,
-			'version' => $version ]);
-
-		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
-
-		$updateable = ($permissions & Constants::PERMISSION_UPDATE) === Constants::PERMISSION_UPDATE;
-		// If token is for some versioned file
-		if ($version !== '0') {
-			$updateable = false;
-		}
-
-		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
-
-		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_EXPORT | WOPI::ATTR_CAN_PRINT;
-		if ($updateable) {
-			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE;
-		}
-
-		$row = new Db\Wopi();
-		$tokenArray = $row->generateToken($fileId, $version, $attributes, $serverHost, $ownerUid, $currentUser);
-
-		// Return the token.
-		$result = [
-			'status' => 'success',
-			'access_token' => $tokenArray['access_token'],
-			'access_token_ttl' => $tokenArray['access_token_ttl'],
-			'sessionid' => '0' // default shared session
-		];
-		$this->logger->debug('getWopiInfoForPublicLink(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
-		return $result;
 	}
 
 	/**
