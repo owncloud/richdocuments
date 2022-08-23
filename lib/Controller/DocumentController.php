@@ -774,6 +774,7 @@ class DocumentController extends Controller {
 
 		$ownerUid = $share->getShareOwner();
 
+		/** @phpstan-ignore-next-line */
 		if ($attributes = $share->getAttributes()) {
 			$canDownload = $share->getAttributes()->getAttribute('permissions', 'download');
 			$viewWithWatermark = $share->getAttributes()->getAttribute('richdocuments', 'view-with-watermark');
@@ -821,7 +822,6 @@ class DocumentController extends Controller {
 		if ($updateable) {
 			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE;
 		}
-
 
 		$row = new Db\Wopi();
 		$tokenArray = $row->generateToken($fileId, $version, $attributes, $serverHost, $ownerUid, $currentUser);
