@@ -4,25 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [3.0.1] - 2022-08-31
+
+### Added
+
+- [#475](https://github.com/owncloud/richdocuments/pull/475) - Add support for link share preview 
 
 
 ## [2.7.0] - 2022-01-19
 
-## Changed
+### Changed
 
 - added Diagram document type to + button - [#436](https://github.com/owncloud/richdocuments/pull/436)
 - ownCloud Web compatibility - [#423](https://github.com/owncloud/richdocuments/pull/423)
 - Update .drone.star and drop PHP 7.2 - [#424](https://github.com/owncloud/richdocuments/pull/424)
 - Library and translation updates
 
-## Fixed
+### Fixed
 
 - Make upload work again - [#437](https://github.com/owncloud/richdocuments/pull/437)
 
 ## [2.6.0] - 2021-05-31
 
-## Fixed
+### Fixed
 
 - Only verify path if filename is given, additional log error - [#418](https://github.com/owncloud/richdocuments/pull/418)
 - Don't log warning message on PUT in favour of debug - [#407](https://github.com/owncloud/richdocuments/pull/407)
@@ -68,7 +72,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [2.4.0] - 2020-07-30
 
 
-[Unreleased]: https://github.com/owncloud/guests/compare/v2.7.0...master
+[Unreleased]: https://github.com/owncloud/guests/compare/v3.0.1...master
+[3.0.1]: https://github.com/owncloud/guests/compare/v2.7.0...v3.0.1
 [2.7.0]: https://github.com/owncloud/guests/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/owncloud/guests/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/owncloud/guests/compare/v2.4.1...v2.5.0
