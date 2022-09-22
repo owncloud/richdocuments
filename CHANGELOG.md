@@ -4,12 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [3.0.0] - 2022-07-05
+## [3.0.0] - 2022-09-22
 
 ### Changed
 
-- [#39387](https://github.com/owncloud/core/issues/39387) - Update guzzle major version to 7
+- [#470](https://github.com/owncloud/richdocuments/pull/470) - Adjust getMimeType for guzzle7 dependencies
+- [#456](https://github.com/owncloud/richdocuments/pull/456) - web: add Drawing filetype and add it to + menu
 - This version requires ownCloud 10.11.0 or above
+
+### Fixed
+
+- [#467](https://github.com/owncloud/richdocuments/pull/467) - Set appropriate icon for web
+- [#455](https://github.com/owncloud/richdocuments/pull/455) - ensure ODG Drawing compatibility across integration
+- [#451](https://github.com/owncloud/richdocuments/pull/451) - disable secure view js and settings when not available
 
 
 ## [2.7.0] - 2022-01-19
