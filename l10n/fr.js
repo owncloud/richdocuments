@@ -50,6 +50,7 @@ OC.L10N.register(
     "New Document.docx" : "Nouveau document.docx",
     "New Spreadsheet.xlsx" : "Nouvelle Feuille de Calculs.xlsx",
     "New Presentation.pptx" : "Nouvelle Présentation.pptx",
+    "Invalid filename" : "Nom de fichier non valide",
     "Can't create document" : "Impossible de créer le document",
     "Saved" : "Sauvegardé",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "Sauvegardé avec une erreur : Collabora en ligne devrait utiliser le même protocole que l'installation du serveur.",
