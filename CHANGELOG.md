@@ -4,7 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [Unreleased] --
+
+
+
+## [3.0.0] - 2022-09-22
+
+### Changed
+
+- [#470](https://github.com/owncloud/richdocuments/pull/470) - Adjust getMimeType for guzzle7 dependencies
+- [#456](https://github.com/owncloud/richdocuments/pull/456) - web: add Drawing filetype and add it to + menu
+- This version requires ownCloud 10.11.0 or above
+
+### Fixed
+
+- [#467](https://github.com/owncloud/richdocuments/pull/467) - Set appropriate icon for web
+- [#455](https://github.com/owncloud/richdocuments/pull/455) - ensure ODG Drawing compatibility across integration
+- [#451](https://github.com/owncloud/richdocuments/pull/451) - disable secure view js and settings when not available
 
 
 ## [2.7.0] - 2022-01-19
@@ -68,7 +84,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [2.4.0] - 2020-07-30
 
 
-[Unreleased]: https://github.com/owncloud/guests/compare/v2.7.0...master
+[Unreleased]: https://github.com/owncloud/guests/compare/v3.0.0...master
+[3.0.0]: https://github.com/owncloud/guests/compare/v2.7.0...v3.0.0
 [2.7.0]: https://github.com/owncloud/guests/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/owncloud/guests/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/owncloud/guests/compare/v2.4.1...v2.5.0
