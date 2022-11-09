@@ -4,11 +4,13 @@ Feature: Secure View
   I want to be able to enable secure view
   So that users can share files with very restricted access to documents
 
+
   Scenario: Admin enables the secure view through webUI
     Given the administrator has added config key "start_grace_period" with value "true" in app "richdocuments"
     And the administrator has browsed to the admin additional settings page
     When the administrator enables secure view using the webUI
     Then the config key "secure_view_option" of app "richdocuments" should have value "true"
+
 
   Scenario: Admin enables the secure view, enabled print permissions through webUI
     Given the administrator has added config key "start_grace_period" with value "true" in app "richdocuments"
@@ -18,6 +20,7 @@ Feature: Secure View
     Then the config key "secure_view_option" of app "richdocuments" should have value "true"
     And the config key "secure_view_can_print_default" of app "richdocuments" should have value "true"
 
+
   Scenario: Admin enables the secure view, disables secure-view permissions through webUI
     Given the administrator has added config key "start_grace_period" with value "true" in app "richdocuments"
     And the administrator has browsed to the admin additional settings page
@@ -25,6 +28,7 @@ Feature: Secure View
     And the administrator disables watermark permission in secure view using the webUI
     Then the config key "secure_view_option" of app "richdocuments" should have value "true"
     And the config key "secure_view_has_watermark_default" of app "richdocuments" should have value "false"
+
 
   Scenario: Admin enables the secure view using occ command, disables print default and enables it again through webUI
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
@@ -34,6 +38,7 @@ Feature: Secure View
     When the administrator enables print permission in secure view using the webUI
     Then the config key "secure_view_option" of app "richdocuments" should have value "true"
     And the config key "secure_view_can_print_default" of app "richdocuments" should have value "true"
+
 
   Scenario: Admin enables the secure view using occ command, disables secure-view default and enables it again through webUI
     Given the administrator has added config key "secure_view_option" with value "true" in app "richdocuments"
