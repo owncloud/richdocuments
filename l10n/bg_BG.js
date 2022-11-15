@@ -70,7 +70,7 @@ OC.L10N.register(
     "Saved" : "Запазване",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "Запазено с грешка: Collabora Online трябва да използва същия протокол като инсталацията на сървъра.",
     "Collabora Online" : "Collabora Online",
-    "Open documentation" : "Отворяне на документацията",
+    "Open documentation" : "Отваряне на документацията",
     "Enabled encryption type will result in limited functionality of the app. App requires privileged access to the files, and the only currently supported type is master key encryption." : "Активирането на типа криптиране ще доведе до ограничена функционалност на приложението. Приложението изисква привилегирован достъп до файловете, а единственият поддържан в момента тип е криптиране с главен ключ.",
     "Collabora Online server" : "Collabora Online сървър",
     "URL (and port) of the Collabora Online server that provides the editing functionality as a WOPI client." : "URL адрес (и порт) на сървъра Collabora Online, който предоставя функционалността за редактиране като WOPI клиент.",
