@@ -22,7 +22,7 @@ OC.L10N.register(
     "Cancel" : "Отказ",
     "Save" : "Запазване",
     "No connection to server. Trying to reconnect." : "Няма връзка със сървъра. Опит за възстановяване на връзката.",
-    "Loading documents..." : "Зареждане на документите...",
+    "Loading documents..." : "Зареждане на документи...",
     "'.' is an invalid file name." : "'.' е невалидно име за файл.",
     "File name cannot be empty." : "Името на файла не може да бъде празно.",
     "Invalid name, '\\', '/', '<', '>', ':', '\"', '|', '?' and '*' are not allowed." : "Невалидно име, '\\', '/', '<', '>', ':', '\"', '|', '?' и '*' не са разрешени.",
