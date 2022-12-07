@@ -14,7 +14,6 @@ namespace OCA\Richdocuments\Http;
 use \OCP\AppFramework\Http;
 use OCP\Files\File;
 use \OCP\IRequest;
-use \OC\Files\View;
 
 class DownloadResponse extends \OCP\AppFramework\Http\Response {
 	private $request;
@@ -39,6 +38,11 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 		];
 		$size = \strlen($data['content']);
 
+		/*
+		 * Cannot modify read-only magic property \OCP\IRequest->server
+		 * I don't know why phan reports this. The property is not being modified.
+		 */
+		/* @phan-suppress-next-line PhanAccessReadOnlyMagicProperty */
 		if (isset($this->request->server['HTTP_RANGE']) && $this->request->server['HTTP_RANGE'] !== null) {
 			$isValidRange = \preg_match('/^bytes=\d*-\d*(,\d*-\d*)*$/', $this->request->server['HTTP_RANGE']);
 			if (!$isValidRange) {

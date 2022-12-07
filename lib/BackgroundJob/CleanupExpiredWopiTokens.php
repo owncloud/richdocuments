@@ -53,6 +53,7 @@ class CleanupExpiredWopiTokens extends TimedJob {
 	 */
 	public function run($argument) {
 		$now = $this->timeFactory->getTime();
+		/* @phan-suppress-next-line PhanDeprecatedFunction */
 		$this->connection->executeUpdate(
 			'DELETE FROM `*PREFIX*richdocuments_wopi` WHERE `expiry` <= ?',
 			[$now]

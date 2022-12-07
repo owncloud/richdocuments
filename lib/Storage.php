@@ -218,6 +218,11 @@ class Storage {
 			$mimeType = $rawDocument['mimetype'];
 			$mtime = $rawDocument['mtime'];
 			try {
+				/*
+				 * File id is a string here, and arg 1 should be an int.
+				 * As long as the string is just a number, all is good.
+				 */
+				/* @phan-suppress-next-line PhanTypeMismatchArgument */
 				$path = $view->getPath($fileId);
 			} catch (\Exception $e) {
 				\OC::$server->getLogger()->debug('Path not found for fileId: {fileId}. Skipping', [

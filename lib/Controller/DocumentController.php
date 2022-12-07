@@ -679,6 +679,7 @@ class DocumentController extends Controller {
 			if ($isSharedFile) {
 				// handle shares
 				/** @var \OCA\Files_Sharing\SharedStorage $storage */
+				/* @phan-suppress-next-line PhanUndeclaredMethod */
 				$share = $storage->getShare();
 				$canDownload = $share->getAttributes()->getAttribute('permissions', 'download');
 				$viewWithWatermark = $share->getAttributes()->getAttribute('richdocuments', 'view-with-watermark');
@@ -746,6 +747,11 @@ class DocumentController extends Controller {
 		$this->updateDocumentEncryptionAccessList($owner, $currentUser, $path);
 
 		$row = new Db\Wopi();
+		/*
+		 * Version is a string here, and arg 2 (version) should be an int.
+		 * As long as the string is just a number, all is good.
+		 */
+		/* @phan-suppress-next-line PhanTypeMismatchArgument */
 		$tokenArray = $row->generateToken($fileId, $version, $attributes, $serverHost, $owner, $currentUser);
 
 		// Return the token.
@@ -821,6 +827,11 @@ class DocumentController extends Controller {
 		}
 
 		$row = new Db\Wopi();
+		/*
+		 * Version is a string here, and arg 2 (version) should be an int.
+		 * As long as the string is just a number, all is good.
+		 */
+		/* @phan-suppress-next-line PhanTypeMismatchArgument */
 		$tokenArray = $row->generateToken($fileId, $version, $attributes, $serverHost, $ownerUid, $currentUser);
 
 		// Return the token.
