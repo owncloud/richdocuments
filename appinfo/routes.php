@@ -12,6 +12,7 @@
 namespace OCA\Richdocuments;
 
 $application = new \OCA\Richdocuments\AppInfo\Application();
+/* @phan-suppress-next-line PhanUndeclaredThis */
 $application->registerRoutes($this, [
 	'routes' => [
 		//documents

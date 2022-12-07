@@ -12,10 +12,6 @@
 
 namespace OCA\Richdocuments\Db;
 
-/**
- * @method string loadRecentDocumentsForMimes()
- */
-
 class Storage extends \OCA\Richdocuments\Db {
 	public const appName = 'richdocuments';
 
@@ -49,6 +45,11 @@ class Storage extends \OCA\Richdocuments\Db {
 		$files = [];
 		while ($row = $result->fetch()) {
 			$row['mimetype'] = $mimetypeLoader->getMimetypeById($row['mimetype']);
+			/*
+			 * mimepart is a string here, and arg 1 (id) should be an int.
+			 * As long as the string is just a number, all is good.
+			 */
+			/* @phan-suppress-next-line PhanTypeMismatchArgument */
 			$row['mimepart'] = $mimetypeLoader->getMimetypeById($row['mimepart']);
 			$files[] = $row;
 		}

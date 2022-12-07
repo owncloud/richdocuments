@@ -13,14 +13,15 @@
 
 namespace OCA\Richdocuments\AppInfo;
 
-use OC_Hook;
 use OCA\Richdocuments\Storage;
 use \OCP\AppFramework\App;
 use \OCA\Richdocuments\Controller\DocumentController;
 use \OCA\Richdocuments\Controller\SettingsController;
 use \OCA\Richdocuments\Controller\WebAssetController;
 use \OCA\Richdocuments\AppConfig;
+/* @phan-suppress-next-line PhanUnreferencedUseNormal */
 use OCP\IContainer;
+/* @phan-suppress-next-line PhanUnreferencedUseNormal */
 use OCP\IUser;
 use OCP\Share;
 use OCP\Util;

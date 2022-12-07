@@ -1,10 +1,5 @@
 {
-  "config": {
-    "platform": {
-      "php": "7.1"
-    }
-  },
   "require": {
-    "phan/phan": "^5.2"
+    "phan/phan": "^5.4"
   }
 }

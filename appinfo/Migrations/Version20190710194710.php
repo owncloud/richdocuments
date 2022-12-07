@@ -17,6 +17,7 @@ class Version20190710194710 implements ISchemaMigration {
 
 		$fileidColumn = $table->getColumn('fileid');
 		if ($fileidColumn) {
+			/* @phan-suppress-next-line PhanDeprecatedClassConstant */
 			$fileidColumn->setType(Type::getType(Type::BIGINT));
 			$fileidColumn->setOptions(['length' => 20]);
 		}
