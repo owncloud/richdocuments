@@ -15,21 +15,22 @@ $application = new \OCA\Richdocuments\AppInfo\Application();
 /* @phan-suppress-next-line PhanUndeclaredThis */
 $application->registerRoutes($this, [
 	'routes' => [
-		//documents
+		// Collabora for Owncloud Application
 		['name' => 'document#index', 'url' => 'index', 'verb' => 'GET'],
 		['name' => 'document#create', 'url' => 'ajax/documents/create', 'verb' => 'POST'],
 		['name' => 'document#listAll', 'url' => 'ajax/documents/list', 'verb' => 'GET'],
 		["name" => 'document#publicIndex', "url" => "public", "verb" => "GET"],
 		['name' => 'document#extAppWopiGetData', 'url' => 'wopi/extapp/data/{documentId}', 'verb' => 'POST'],
 		['name' => 'document#getDocumentIndex', 'url' => 'ajax/documents/index/{fileId}', 'verb' => 'GET'],
+		// Collabora for Owncloud Web (new frontend)
 		['name' => 'web_asset#get', 'url' => 'js/richdocuments.js', 'verb' => 'GET'],
-		//documents - for WOPI access
-		['name' => 'document#wopiCheckFileInfo', 'url' => 'wopi/files/{documentId}', 'verb' => 'GET'],
-		['name' => 'document#wopiGetFile', 'url' => 'wopi/files/{documentId}/contents', 'verb' => 'GET'],
-		['name' => 'document#wopiPutFile', 'url' => 'wopi/files/{documentId}/contents', 'verb' => 'POST'],
-		['name' => 'document#wopiPutRelativeFile', 'url' => 'wopi/files/{documentId}', 'verb' => 'POST'],
-		//settings
+		// Collabora for Owncloud Settings
 		['name' => 'settings#setSettings', 'url' => 'ajax/admin.php', 'verb' => 'POST'],
 		['name' => 'settings#getSettings', 'url' => 'ajax/settings.php', 'verb' => 'GET'],
+		// WOPI protocol implementation
+		['name' => 'wopi#wopiCheckFileInfo', 'url' => 'wopi/files/{documentId}', 'verb' => 'GET'],
+		['name' => 'wopi#wopiGetFile', 'url' => 'wopi/files/{documentId}/contents', 'verb' => 'GET'],
+		['name' => 'wopi#wopiPutFile', 'url' => 'wopi/files/{documentId}/contents', 'verb' => 'POST'],
+		['name' => 'wopi#wopiPutRelativeFile', 'url' => 'wopi/files/{documentId}', 'verb' => 'POST'],
 	]
 ]);

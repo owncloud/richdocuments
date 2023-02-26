@@ -15,11 +15,14 @@ namespace OCA\Richdocuments\AppInfo;
 
 use OCA\Richdocuments\FileService;
 use OCA\Richdocuments\DocumentService;
-use \OCP\AppFramework\App;
-use \OCA\Richdocuments\Controller\DocumentController;
-use \OCA\Richdocuments\Controller\SettingsController;
-use \OCA\Richdocuments\Controller\WebAssetController;
-use \OCA\Richdocuments\AppConfig;
+use OCA\Richdocuments\Controller\WopiController;
+use OCA\Richdocuments\Controller\DocumentController;
+use OCA\Richdocuments\Controller\SettingsController;
+use OCA\Richdocuments\Controller\WebAssetController;
+use OCA\Richdocuments\AppConfig;
+use OCP\AppFramework\App;
+use OCP\Files\IRootFolder;
+use OCP\IURLGenerator;
 /* @phan-suppress-next-line PhanUnreferencedUseNormal */
 use OCP\IContainer;
 /* @phan-suppress-next-line PhanUnreferencedUseNormal */
@@ -51,10 +54,24 @@ class Application extends App {
 				$c->query('UserId'),
 				$c->query('ICacheFactory'),
 				$c->query('Logger'),
-				$c->query('FileService'),
 				$c->query('DocumentService'),
 				$c->query('OCP\App\IAppManager'),
 				$c->query('ServerContainer')->getGroupManager(),
+				$c->query('ServerContainer')->getUserManager()
+			);
+		});
+		$container->registerService('WopiController', function ($c) {
+			/** @var IContainer $c */
+			return new WopiController(
+				$c->query('AppName'),
+				$c->query('Request'),
+				$c->query('CoreConfig'),
+				$c->query('AppConfig'),
+				$c->query('L10N'),
+				$c->query('Logger'),
+				$c->query('FileService'),
+				$c->query('ServerContainer')->getRootFolder(),
+				$c->query('ServerContainer')->getURLGenerator(),
 				$c->query('ServerContainer')->getUserManager()
 			);
 		});
