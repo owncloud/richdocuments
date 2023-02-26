@@ -16,7 +16,6 @@ use OCA\Richdocuments\Db\Wopi;
 use OCP\App\IAppManager;
 use \OCP\AppFramework\Controller;
 use \OCP\Constants;
-use OCP\Files\File;
 use OCP\Files\InvalidPathException;
 use OCP\IGroupManager;
 use OCP\Files\NotPermittedException;
@@ -33,12 +32,11 @@ use \OCP\ILogger;
 use \OCA\Richdocuments\AppConfig;
 use \OCA\Richdocuments\Db;
 use \OCA\Richdocuments\Helper;
-use \OCA\Richdocuments\Storage;
+use \OCA\Richdocuments\FileService;
+use \OCA\Richdocuments\DocumentService;
 use \OCA\Richdocuments\Http\DownloadResponse;
 use \OCA\Richdocuments\Http\ResponseException;
 use OCP\IUserManager;
-
-use Symfony\Component\EventDispatcher\GenericEvent;
 
 class DocumentController extends Controller {
 	private $uid;
@@ -47,16 +45,28 @@ class DocumentController extends Controller {
 	private $appConfig;
 	private $cache;
 	private $logger;
-	private $storage;
 	private $appManager;
+
+	/**
+	 * @var DocumentService
+	 */
+	private $documentService;
+	
+	/**
+	 * @var FileService
+	 */
+	private $fileService;
+
 	/**
 	 * @var IGroupManager
 	 */
 	private $groupManager;
+
 	/**
 	 * @var IUserManager
 	 */
 	private $userManager;
+	
 	public const ODT_TEMPLATE_PATH = '/assets/odttemplate.odt';
 
 	// Signifies LOOL that document has been changed externally in this storage
@@ -71,7 +81,8 @@ class DocumentController extends Controller {
 		$uid,
 		ICacheFactory $cache,
 		ILogger $logger,
-		Storage $storage,
+		FileService $fileService,
+		DocumentService $documentService,
 		IAppManager $appManager,
 		IGroupManager $groupManager,
 		IUserManager $userManager
@@ -83,7 +94,8 @@ class DocumentController extends Controller {
 		$this->appConfig = $appConfig;
 		$this->cache = $cache->create($appName);
 		$this->logger = $logger;
-		$this->storage = $storage;
+		$this->fileService = $fileService;
+		$this->documentService = $documentService;
 		$this->appManager = $appManager;
 		$this->groupManager = $groupManager;
 		$this->userManager = $userManager;
@@ -771,7 +783,7 @@ class DocumentController extends Controller {
 	 * @return null|array
 	 */
 	private function getDocumentByUserAuth($userId, $fileId) {
-		if ($fileInfo = $this->storage->getDocumentByUserId($userId, $fileId)) {
+		if ($fileInfo = $this->documentService->getDocumentByUserId($userId, $fileId)) {
 			return $this->prepareDocument($fileInfo);
 		}
 		return null;
@@ -783,7 +795,7 @@ class DocumentController extends Controller {
 	 * @return null|array
 	 */
 	private function getDocumentByShareToken($token, $fileId = null) {
-		if ($fileInfo = $this->storage->getDocumentByShareToken($token, $fileId)) {
+		if ($fileInfo = $this->documentService->getDocumentByShareToken($token, $fileId)) {
 			return $this->prepareDocument($fileInfo);
 		}
 		return null;
@@ -905,7 +917,7 @@ class DocumentController extends Controller {
 		}
 
 		// make sure file can be read when checking file info
-		$file = $this->getFileHandle($fileId, $res['owner'], $res['editor']);
+		$file = $this->fileService->getFileHandle($fileId, $res['owner'], $res['editor']);
 		if (!$file) {
 			$this->logger->error('wopiCheckFileInfo(): Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
@@ -943,6 +955,8 @@ class DocumentController extends Controller {
 			'UserId' => $editorId,
 			'UserFriendlyName' => $editorDisplayName,
 			'UserCanWrite' => $canWrite,
+			'SupportsGetLock' => false,
+			'SupportsLocks' => false, // TODO: implement https://learn.microsoft.com/en-us/microsoft-365/cloud-storage-partner-program/rest/concepts#lock
 			'UserCanNotWriteRelative' => $this->appConfig->encryptionEnabled(),
 			'PostMessageOrigin' => $res['server_host'],
 			'LastModifiedTime' => Helper::toISO8601($file->getMTime())
@@ -1010,7 +1024,7 @@ class DocumentController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		$file = $this->getFileHandle($fileId, $res['owner'], $res['editor']);
+		$file = $this->fileService->getFileHandle($fileId, $res['owner'], $res['editor']);
 		if (!$file) {
 			$this->logger->warning('wopiGetFile(): Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
@@ -1091,7 +1105,7 @@ class DocumentController extends Controller {
 	 * also adds session and member info for these files
 	 */
 	public function listAll() {
-		return $this->prepareDocuments($this->storage->getDocuments());
+		return $this->prepareDocuments($this->documentService->getDocuments());
 	}
 
 	/**
@@ -1105,7 +1119,7 @@ class DocumentController extends Controller {
 	 * @return JSONResponse
 	 */
 	private function put($fileId, $owner, $editor, $wopiHeaderTime) {
-		$file = $this->getFileHandle($fileId, $owner, $editor);
+		$file = $this->fileService->getFileHandle($fileId, $owner, $editor);
 		if (!$file) {
 			$this->logger->warning('wopiPutFile(): Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
@@ -1160,7 +1174,7 @@ class DocumentController extends Controller {
 	private function putRelative($fileId, $owner, $editor, $suggested) {
 		$token = $this->request->getParam('access_token');
 
-		$file = $this->getFileHandle($fileId, $owner, $editor);
+		$file = $this->fileService->getFileHandle($fileId, $owner, $editor);
 
 		if (!$file) {
 			$this->logger->warning('wopiPutFile(): Could not retrieve file', ['app' => $this->appName]);
@@ -1203,7 +1217,7 @@ class DocumentController extends Controller {
 		// create a unique new file
 		$path = $root->getNonExistingName($path);
 		$file = $root->newFile($path);
-		$file = $this->getFileHandle($file->getId(), $owner, $editor);
+		$file = $this->fileService->getFileHandle($file->getId(), $owner, $editor);
 		if (!$file) {
 			$this->logger->warning('wopiCheckFileInfo(): Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
@@ -1240,59 +1254,5 @@ class DocumentController extends Controller {
 		$url = \OC::$server->getURLGenerator()->getAbsoluteURL($wopi);
 
 		return new JSONResponse([ 'Name' => $file->getName(), 'Url' => $url ], Http::STATUS_OK);
-	}
-
-	/**
-	 * Get privileged access to original (owner) file handle as editor
-	 * for given fileId
-	 *
-	 * @param int $fileId
-	 * @param string $owner
-	 * @param string $editor
-	 *
-	 * @return null|\OCP\Files\File
-	 */
-	private function getFileHandle($fileId, $owner, $editor) {
-		if ($editor) {
-			$user = $this->userManager->get($editor);
-			if (!$user) {
-				$this->logger->warning('wopiPutFile(): No such user', ['app' => $this->appName]);
-				return null;
-			}
-
-			// Make sure editor session is opened for registering activity over file handle
-			$this->logger->debug('wopiPutFile(): Register session as ' . $editor, ['app' => $this->appName]);
-			if (!$this->appConfig->encryptionEnabled()) {
-				// Set session for a user
-				\OC::$server->getUserSession()->setUser($user);
-			} elseif ($this->appConfig->masterEncryptionEnabled()) {
-				// With master encryption, decryption is based on master key (no user password needed)
-				// make sure audit/activity is triggered for editor session
-				\OC::$server->getUserSession()->setUser($user);
-
-				// emit login event to allow decryption of files via master key
-				$afterEvent = new GenericEvent(null, ['loginType' => 'password', 'user' => $user, 'uid' => $user->getUID(), 'password' => '']);
-
-				/** @phpstan-ignore-next-line */
-				\OC::$server->getEventDispatcher()->dispatch($afterEvent, 'user.afterlogin');
-			} else {
-				// other type of encryption is enabled (e.g. user-key) that does not allow to decrypt files without incognito access to files
-				\OC_User::setIncognitoMode(true);
-			}
-		} else {
-			// Public link access
-			\OC_User::setIncognitoMode(true);
-		}
-
-		// Setup FS of original file file-handle to be able to generate
-		// file versions and write files with user session set for editor
-		\OC_Util::tearDownFS();
-		\OC_Util::setupFS($owner);
-		$userFolder = \OC::$server->getRootFolder()->getUserFolder($owner);
-		$files = $userFolder->getById($fileId);
-		if ($files !== [] && $files[0] instanceof File) {
-			return $files[0];
-		}
-		return null;
 	}
 }

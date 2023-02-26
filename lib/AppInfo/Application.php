@@ -13,7 +13,8 @@
 
 namespace OCA\Richdocuments\AppInfo;
 
-use OCA\Richdocuments\Storage;
+use OCA\Richdocuments\FileService;
+use OCA\Richdocuments\DocumentService;
 use \OCP\AppFramework\App;
 use \OCA\Richdocuments\Controller\DocumentController;
 use \OCA\Richdocuments\Controller\SettingsController;
@@ -40,7 +41,6 @@ class Application extends App {
 		 * Controllers
 		 */
 		$container->registerService('DocumentController', function ($c) {
-			$storage = new Storage();
 			/** @var IContainer $c */
 			return new DocumentController(
 				$c->query('AppName'),
@@ -51,7 +51,8 @@ class Application extends App {
 				$c->query('UserId'),
 				$c->query('ICacheFactory'),
 				$c->query('Logger'),
-				$storage,
+				$c->query('FileService'),
+				$c->query('DocumentService'),
 				$c->query('OCP\App\IAppManager'),
 				$c->query('ServerContainer')->getGroupManager(),
 				$c->query('ServerContainer')->getUserManager()
@@ -87,6 +88,21 @@ class Application extends App {
 				$coreConfig,
 				$appManager,
 				$licenseManager
+			);
+		});
+
+		$container->registerService('DocumentService', function ($c) {
+			return new DocumentService();
+		});
+
+		$container->registerService('FileService', function ($c) {
+			return new FileService(
+				$c->query('Logger'),
+				$c->query('AppConfig'),
+				$c->query('ServerContainer')->getUserManager(),
+				$c->query('ServerContainer')->getUserSession(),
+				$c->query('ServerContainer')->getEventDispatcher(),
+				$c->query('ServerContainer')->getRootFolder()
 			);
 		});
 
