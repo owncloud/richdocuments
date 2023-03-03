@@ -27,6 +27,8 @@ use OCP\AppFramework\Controller;
 use OCP\Files\IRootFolder;
 use OCP\Files\InvalidPathException;
 use OCP\Files\NotPermittedException;
+use OCP\Files\Storage\IPersistentLockingStorage;
+use OCP\Files\Storage\IStorage;
 use OCP\IRequest;
 use OCP\IConfig;
 use OCP\IL10N;
@@ -185,6 +187,10 @@ class WopiController extends Controller {
 			$watermark = null;
 		}
 
+		/** @var IStorage $storage */
+		$storage = $file->getStorage();
+		$supportsLocks = $canWrite && $storage->instanceOfStorage(IPersistentLockingStorage::class);
+
 		$result = [
 			'BaseFileName' => $file->getName(),
 			'Size' => $file->getSize(),
@@ -194,7 +200,7 @@ class WopiController extends Controller {
 			'UserFriendlyName' => $editorDisplayName,
 			'UserCanWrite' => $canWrite,
 			'SupportsGetLock' => false,
-			'SupportsLocks' => false, // TODO: implement functions below
+			'SupportsLocks' => $supportsLocks,
 			'UserCanNotWriteRelative' => $userCanNotWriteRelative,
 			'PostMessageOrigin' => $res['server_host'],
 			'LastModifiedTime' => Helper::toISO8601($file->getMTime()),
@@ -225,8 +231,14 @@ class WopiController extends Controller {
 			case 'PUT_RELATIVE':
 				return $this->wopiPutFileRelative($documentId);
 			case 'LOCK':
+				if ($this->request->getHeader('X-WOPI-OldLock')) {
+					return $this->wopiUnlockAndRelock($documentId);
+				}
+				return $this->wopiLock($documentId);
 			case 'UNLOCK':
+				return $this->wopiUnlock($documentId);
 			case 'REFRESH_LOCK':
+				return $this->wopiRefreshLock($documentId);
 			case 'GET_LOCK':
 			case 'DELETE':
 			case 'RENAME_FILE':
@@ -253,11 +265,10 @@ class WopiController extends Controller {
 	public function wopiGetFile(string $documentId): Response {
 		$token = $this->request->getParam('access_token');
 
-		list($fileId, , $version, ) = Helper::parseDocumentId($documentId);
-		$this->logger->info('wopiGetFile(): File {fileId}, version {version}, token {token}.', [
+		list($fileId, , , ) = Helper::parseDocumentId($documentId);
+		$this->logger->info('wopiGetFile(): File {fileId}, token {token}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
-			'version' => $version,
 			'token' => $token ]);
 
 		$row = new Db\Wopi();
@@ -291,11 +302,10 @@ class WopiController extends Controller {
 	public function wopiPutFile(string $documentId): JSONResponse {
 		$token = $this->request->getParam('access_token');
 
-		list($fileId, , $version, ) = Helper::parseDocumentId($documentId);
-		$this->logger->debug('PutFile: file {fileId}, version {version}, token {token}.', [
+		list($fileId, , , ) = Helper::parseDocumentId($documentId);
+		$this->logger->debug('PutFile: file {fileId}, token {token}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
-			'version' => $version,
 			'token' => $token
 		]);
 
@@ -374,11 +384,10 @@ class WopiController extends Controller {
 	public function wopiPutFileRelative(string $documentId): JSONResponse {
 		$token = $this->request->getParam('access_token');
 
-		list($fileId, , $version, ) = Helper::parseDocumentId($documentId);
-		$this->logger->debug('PutFileRelative: file {fileId}, version {version}, token {token}.', [
+		list($fileId, , , ) = Helper::parseDocumentId($documentId);
+		$this->logger->debug('PutFileRelative: file {fileId}, token {token}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
-			'version' => $version,
 			'token' => $token]);
 
 		$row = new Db\Wopi();
@@ -487,4 +496,125 @@ class WopiController extends Controller {
 		return new JSONResponse([ 'Name' => $file->getName(), 'Url' => $url ], Http::STATUS_OK);
 	}
 
+	/**
+	 * The Files endpoint operation Lock. 
+	 */
+	public function wopiLock(string $documentId): JSONResponse {
+		$token = $this->request->getParam('access_token');
+
+		// get wopi lock token
+		$wopiLock = $this->request->getHeader('X-WOPI-Lock');
+
+		list($fileId, , , ) = Helper::parseDocumentId($documentId);
+		$this->logger->debug('Lock: file {fileId}, wopiLock {wopiLock}, token {token}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'wopiLock' => $wopiLock,
+			'token' => $token]);
+
+		$row = new Db\Wopi();
+		$row->loadBy('token', $token);
+		$res = $row->getWopiForToken($token);
+		if ($res == false) {
+			$this->logger->debug('Lock: get token failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
+		}
+
+		// get owner and editor uid's
+		$owner = $res['owner'];
+		$editor = $res['editor'];
+		
+		$file = $this->fileService->getFileHandle($fileId, $owner, $editor);
+
+		if (!$file) {
+			$this->logger->warning('Lock: could not retrieve file', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_NOT_FOUND);
+		}
+
+		/** @var IStorage|IPersistentLockingStorage $storage */
+		$storage = $file->getStorage();
+		$locks = $storage->getLocks($file->getInternalPath(), false);
+
+		// check whether there is lock conflict
+		foreach ($locks as $lock) {
+			if ($lock->getToken() === $wopiLock) {
+				// already locked with this lock token, all ok
+				$this->logger->debug('Lock: resource already locked.', ['app' => $this->appName]);
+				break;
+			}
+			$this->logger->debug('Lock: resource has lock conflict.', ['app' => $this->appName]);
+			$response = new JSONResponse([], Http::STATUS_CONFLICT);
+			$response->addHeader('X-WOPI-LockFailureReason', "Locked by {$lock->getOwner()}");
+			$response->addHeader('X-WOPI-Lock', $lock->getToken());
+
+			return $response;
+		}
+
+		// lock the node
+		$storage->lockNodePersistent($file->getInternalPath(), [
+			'token' => $wopiLock,
+		]);
+
+		return new JSONResponse([], Http::STATUS_OK);
+	}
+
+	/**
+	 * The Files endpoint operation Unlock. 
+	 */
+	public function wopiUnlock(string $documentId): JSONResponse {
+		$token = $this->request->getParam('access_token');
+
+		// get wopi lock token
+		$wopiLock = $this->request->getHeader('X-WOPI-Lock');
+
+		list($fileId, , , ) = Helper::parseDocumentId($documentId);
+		$this->logger->debug('Unlock: file {fileId}, wopiLock {wopiLock}, token {token}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'wopiLock' => $wopiLock,
+			'token' => $token]);
+
+
+		return new JSONResponse([], Http::STATUS_NOT_IMPLEMENTED);
+	}
+
+	/**
+	 * The Files endpoint operation RefreshLock. 
+	 */
+	public function wopiRefreshLock(string $documentId): JSONResponse {
+		$token = $this->request->getParam('access_token');
+
+		// get wopi lock token
+		$wopiLock = $this->request->getHeader('X-WOPI-Lock');
+
+		list($fileId, , , ) = Helper::parseDocumentId($documentId);
+		$this->logger->debug('RefreshLock: file {fileId}, wopiLock {wopiLock}, token {token}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'wopiLock' => $wopiLock,
+			'token' => $token]);
+
+
+		return new JSONResponse([], Http::STATUS_NOT_IMPLEMENTED);
+	}
+
+	/**
+	 * The Files endpoint operation UnlockAndRelock. 
+	 */
+	public function wopiUnlockAndRelock(string $documentId): JSONResponse {
+		$token = $this->request->getParam('access_token');
+
+		// get wopi lock token
+		$wopiLock = $this->request->getHeader('X-WOPI-Lock');
+
+		list($fileId, , , ) = Helper::parseDocumentId($documentId);
+		$this->logger->debug('UnlockAndRelock: file {fileId}, wopiLock {wopiLock}, token {token}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'wopiLock' => $wopiLock,
+			'token' => $token]);
+
+
+		return new JSONResponse([], Http::STATUS_NOT_IMPLEMENTED);
+	}
 }
