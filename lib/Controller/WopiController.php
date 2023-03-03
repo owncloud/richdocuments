@@ -31,6 +31,7 @@ use OCP\IRequest;
 use OCP\IConfig;
 use OCP\IL10N;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\ILogger;
 
@@ -114,12 +115,12 @@ class WopiController extends Controller {
 	 * @NoCSRFRequired
 	 * @PublicPage
 	 * 
-	 * The Files endpoint (GET) operation CheckFileInfo. 
+	 * The Files endpoint operation CheckFileInfo. 
 	 * 
 	 * The operation returns information about a file, a user's permissions on that file, 
 	 * and general information about the capabilities that the WOPI host has on the file.
 	 */
-	public function wopiCheckFileInfo($documentId) {
+	public function wopiCheckFileInfo(string $documentId): JSONResponse {
 		$token = $this->request->getParam('access_token');
 
 		list($fileId, , $version, $sessionId) = Helper::parseDocumentId($documentId);
@@ -162,10 +163,12 @@ class WopiController extends Controller {
 			$editorId = $editor->getUID();
 			$editorDisplayName = $editor->getDisplayName();
 			$editorEmail = $editor->getEMailAddress();
+			$userCanNotWriteRelative = !$file->getParent()->isCreatable();
 		} else {
 			$editorId = $this->l10n->t('remote user');
 			$editorDisplayName = $this->l10n->t('remote user');
 			$editorEmail = null;
+			$userCanNotWriteRelative = true;
 		}
 
 		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
@@ -192,7 +195,7 @@ class WopiController extends Controller {
 			'UserCanWrite' => $canWrite,
 			'SupportsGetLock' => false,
 			'SupportsLocks' => false, // TODO: implement functions below
-			'UserCanNotWriteRelative' => false, // TODO: fix this because $this->appConfig->encryptionEnabled() is wrong
+			'UserCanNotWriteRelative' => $userCanNotWriteRelative,
 			'PostMessageOrigin' => $res['server_host'],
 			'LastModifiedTime' => Helper::toISO8601($file->getMTime()),
 			'DisablePrint' => !$canPrint,
@@ -205,7 +208,8 @@ class WopiController extends Controller {
 		];
 		
 		$this->logger->debug("wopiCheckFileInfo(): Result: {result}", ['app' => $this->appName, 'result' => $result]);
-		return $result;
+
+		return new JSONResponse($result, Http::STATUS_OK);
 	}
 
 	/**
@@ -213,68 +217,18 @@ class WopiController extends Controller {
 	 * @NoCSRFRequired
 	 * @PublicPage
 	 * 
-	 * The Files endpoint (POST) provides access to file-level operations.
+	 * The Files endpoint file-level operations.
 	 */
-	public function wopiFileOperation($documentId) {
+	public function wopiFileOperation(string $documentId): JSONResponse {
 		$operation = $this->request->getHeader('X-WOPI-Override');
 		switch ($operation) {
-			case 'LOCK':
-				// $wopiOldLock = $this->request->getHeader('X-WOPI-OldLock');
-				// if ($wopiOldLock !== null) {
-				// 	$this->unlock($storage, $file, $wopiOldLock);
-				// }
-				// $wopiLock = $this->request->getHeader('X-WOPI-Lock');
-				// return $this->lock($storage, $file, $wopiLock, $tokenData);
-				// if ($wopiOldLock === null) {
-				// 	$this->logger->warning("FileOperation $operation unsupported", ['app' => $this->appName]);
-				// 	break;
-				// }
-			case 'UNLOCK':
-				// $wopiLock = $this->request->getHeader('X-WOPI-Lock');
-				// return $this->unlock($storage, $file, $wopiLock);
-			case 'REFRESH_LOCK':
-				// $wopiLock = $this->request->getHeader('X-WOPI-Lock');
-				// return $this->refreshLock($storage, $file, $wopiLock);
-			case 'GET_LOCK':
-				// TODO: requires SupportsLocks
-				// return $this->getLock($storage, $file);
-			case 'DELETE':
-				// if (!isset($tokenData['UserId'])) {
-				// 	// "delete" put relative functionality only allowed for authenticated users currently,
-				// 	// implementing this feature for public link would require consideration on permissions
-				// 	$this->logger->warning("FileOperation $header unsupported for public links", ['app' => $this->appName]);
-				// 	break;
-				// }
-				
-				// return $this->deleteFile($storage, $file);
 			case 'PUT_RELATIVE':
-				// TODO: this is not fully correct
-				//$this->wopiPutFile($documentId);
-
-				// if (!isset($tokenData['UserId'])) {
-				// 	// "save as" put relative functionality only allowed for authenticated users currently,
-				// 	// implementing this feature for public link would require high effort
-				// 	$this->logger->warning("FileOperation $header unsupported for public links", ['app' => $this->appName]);
-				// 	break;
-				// }
-				
-				// // utf-7 to utf-8 converted
-				// // https://wopi.readthedocs.io/projects/wopirest/en/latest/files/PutRelativeFile.html#putrelativefile
-				// $suggestedTarget = \iconv(
-				// 	'utf-7',
-				// 	'utf-8',
-				// 	$this->request->getHeader('X-WOPI-SuggestedTarget')
-				// );
-				// $relativeTarget = \iconv(
-				// 	'utf-7',
-				// 	'utf-8',
-				// 	$this->request->getHeader('X-WOPI-RelativeTarget')
-				// );
-				// // Parse overwrite header
-				// $overwrite = $this->request->getHeader('X-WOPI-OverwriteRelativeTarget') === 'True';
-				// // other headers
-				// $fileConversion = $this->request->getHeader('X-WOPI-FileConversion');
-				// return $this->putFileRelative($file, $suggestedTarget, $relativeTarget, $overwrite, $fileConversion);
+				return $this->wopiPutFileRelative($documentId);
+			case 'LOCK':
+			case 'UNLOCK':
+			case 'REFRESH_LOCK':
+			case 'GET_LOCK':
+			case 'DELETE':
 			case 'RENAME_FILE':
 			case 'PUT_USER_INFO':
 			case 'GET_SHARE_URL':
@@ -292,11 +246,11 @@ class WopiController extends Controller {
 	 * @NoCSRFRequired
 	 * @PublicPage
 	 * 
-	 * The File contents endpoint (GET) provides access to retrieve the contents of a file.
+	 * The File contents endpoint provides access to retrieve the contents of a file.
 	 * 
 	 * The GetFile operation retrieves a file from a host.
 	 */
-	public function wopiGetFile($documentId) {
+	public function wopiGetFile(string $documentId): Response {
 		$token = $this->request->getParam('access_token');
 
 		list($fileId, , $version, ) = Helper::parseDocumentId($documentId);
@@ -330,78 +284,59 @@ class WopiController extends Controller {
 	 * @NoCSRFRequired
 	 * @PublicPage
 	 * 
-	 * The File contents endpoint (POST) provides access to update the contents of a file.
+	 * The File contents endpoint provides access to update the contents of a file.
 	 * 
 	 * The PutFile operation updates a file’s binary contents.
 	 */
-	public function wopiPutFile($documentId) {
+	public function wopiPutFile(string $documentId): JSONResponse {
 		$token = $this->request->getParam('access_token');
 
-		$isPutRelative = ($this->request->getHeader('X-WOPI-Override') === 'PUT_RELATIVE');
-
 		list($fileId, , $version, ) = Helper::parseDocumentId($documentId);
-		$this->logger->debug('wopiputFile(): File {fileId}, version {version}, token {token}, WopiOverride {wopiOverride}.', [
+		$this->logger->debug('PutFile: file {fileId}, version {version}, token {token}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
 			'version' => $version,
-			'token' => $token,
-			'wopiOverride' => $this->request->getHeader('X-WOPI-Override')]);
+			'token' => $token
+		]);
 
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
 
 		$res = $row->getWopiForToken($token);
 		if ($res == false) {
-			$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
+			$this->logger->debug('PutFile: get token failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
 		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
 		if (!$canWrite) {
-			$this->logger->debug('wopiPutFile(): getWopiForToken() failed.', ['app' => $this->appName]);
+			$this->logger->debug('PutFile: not allowed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		if ($isPutRelative) {
-			// Retrieve suggested target
-			$suggested = $this->request->getHeader('X-WOPI-SuggestedTarget');
-			$suggested = \iconv('utf-7', 'utf-8', $suggested);
+		// Retrieve wopi timestamp header
+		$wopiHeaderTime = $this->request->getHeader('X-LOOL-WOPI-Timestamp');
+		$this->logger->debug('PutFile: WOPI header timestamp: {wopiHeaderTime}', [
+			'app' => $this->appName,
+			'wopiHeaderTime' => $wopiHeaderTime
+		]);
 
-			return $this->putRelative($fileId, $res['owner'], $res['editor'], $suggested);
-		} else {
-			// Retrieve wopi timestamp header
-			$wopiHeaderTime = $this->request->getHeader('X-LOOL-WOPI-Timestamp');
-			$this->logger->debug('wopiPutFile(): WOPI header timestamp: {wopiHeaderTime}', [
-				'app' => $this->appName,
-				'wopiHeaderTime' => $wopiHeaderTime
-			]);
 
-			return $this->put($fileId, $res['owner'], $res['editor'], $wopiHeaderTime);
-		}
-	}
+		// get owner and editor uid's
+		$owner = $res['owner'];
+		$editor = $res['editor'];
 
-	/**
-	 * Privileged put to original (owner) file as editor
-	 * for given fileId
-	 *
-	 * @param int $fileId
-	 * @param string $owner
-	 * @param string $editor
-	 * @param string $wopiHeaderTime
-	 * @return JSONResponse
-	 */
-	private function put($fileId, $owner, $editor, $wopiHeaderTime) {
 		$file = $this->fileService->getFileHandle($fileId, $owner, $editor);
 		if (!$file) {
-			$this->logger->warning('wopiPutFile(): Could not retrieve file', ['app' => $this->appName]);
+			$this->logger->warning('PutFile: Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
 		// Handle wopiHeaderTime
 		if (!$wopiHeaderTime) {
-			$this->logger->debug('wopiPutFile(): X-LOOL-WOPI-Timestamp absent. Saving file.', ['app' => $this->appName]);
+			$this->logger->debug('PutFile: X-LOOL-WOPI-Timestamp absent. Saving file.', ['app' => $this->appName]);
 		} elseif ($wopiHeaderTime != Helper::toISO8601($file->getMTime())) {
-			$this->logger->debug('wopiPutFile(): Document timestamp mismatch ! WOPI client says mtime {headerTime} but storage says {storageTime}', [
+			$this->logger->debug('PutFile: Document timestamp mismatch ! WOPI client says mtime {headerTime} but storage says {storageTime}', [
 				'app' => $this->appName,
 				'headerTime' => $wopiHeaderTime,
 				'storageTime' => Helper::toISO8601($file->getMtime())
@@ -413,16 +348,17 @@ class WopiController extends Controller {
 		// Read the contents of the file from the POST body and store.
 		$content = \fopen('php://input', 'r');
 		$this->logger->debug(
-			'wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.',
+			'PutFile: storing file {fileId}, editor: {editor}, owner: {owner}.',
 			[
 				'app' => $this->appName,
 				'fileId' => $fileId,
 				'editor' => $editor,
-				'owner' => $owner]
+				'owner' => $owner
+			]
 		);
 		$file->putContent($content);
 
-		$this->logger->debug('wopiPutFile(): mtime', ['app' => $this->appName]);
+		$this->logger->debug('PutFile: mtime', ['app' => $this->appName]);
 
 		$mtime = $file->getMtime();
 
@@ -433,23 +369,45 @@ class WopiController extends Controller {
 	}
 
 	/**
-	 * Privileged put relative to original (owner) file as editor
-	 * for given fileId
-	 *
-	 * @param int $fileId
-	 * @param string $owner
-	 * @param string $editor
-	 * @param string $suggested
-	 *
-	 * @return JSONResponse
+	 * The Files endpoint operation PutFileRelative. 
 	 */
-	private function putRelative($fileId, $owner, $editor, $suggested) {
+	public function wopiPutFileRelative(string $documentId): JSONResponse {
 		$token = $this->request->getParam('access_token');
 
+		list($fileId, , $version, ) = Helper::parseDocumentId($documentId);
+		$this->logger->debug('PutFileRelative: file {fileId}, version {version}, token {token}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'version' => $version,
+			'token' => $token]);
+
+		$row = new Db\Wopi();
+		$row->loadBy('token', $token);
+
+		$res = $row->getWopiForToken($token);
+		if ($res == false) {
+			$this->logger->debug('PutFileRelative: get token failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
+		if (!$canWrite) {
+			$this->logger->debug('PutFileRelative: not allowed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		// get owner and editor uid's
+		$owner = $res['owner'];
+		$editor = $res['editor'];
+
+		// Retrieve suggested target
+		$suggested = $this->request->getHeader('X-WOPI-SuggestedTarget');
+		$suggested = \iconv('utf-7', 'utf-8', $suggested);
+		
 		$file = $this->fileService->getFileHandle($fileId, $owner, $editor);
 
 		if (!$file) {
-			$this->logger->warning('wopiPutFile(): Could not retrieve file', ['app' => $this->appName]);
+			$this->logger->warning('PutFileRelative: could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
@@ -489,23 +447,26 @@ class WopiController extends Controller {
 		$file = $this->rootFolder->newFile($path);
 		$file = $this->fileService->getFileHandle($file->getId(), $owner, $editor);
 		if (!$file) {
-			$this->logger->warning('wopiCheckFileInfo(): Could not retrieve file', ['app' => $this->appName]);
+			$this->logger->warning('PutFileRelative: could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
 		// Read the contents of the file from the POST body and store.
 		$content = \fopen('php://input', 'r');
+
+		$file->putContent($content);
+		$mtime = $file->getMtime();
+
 		$this->logger->debug(
-			'wopiPutFile(): Storing file {fileId}, editor: {editor}, owner: {owner}.',
+			'PutFileRelative: storing file {fileId}, editor: {editor}, owner: {owner}, mtime: {mtime}.',
 			[
 			'app' => $this->appName,
 			'fileId' => $fileId,
 			'editor' => $editor,
-			'owner' => $owner]
+			'owner' => $owner,
+			'mtime' => $mtime
+			]
 		);
-
-		$file->putContent($content);
-		$mtime = $file->getMtime();
 
 		// we should preserve the original PostMessageOrigin
 		// otherwise this will change it to serverHost after save-as
@@ -525,4 +486,5 @@ class WopiController extends Controller {
 
 		return new JSONResponse([ 'Name' => $file->getName(), 'Url' => $url ], Http::STATUS_OK);
 	}
+
 }
