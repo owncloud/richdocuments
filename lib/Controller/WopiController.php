@@ -113,7 +113,11 @@ class WopiController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @PublicPage
-	 * Returns general info about a file.
+	 * 
+	 * The Files endpoint (GET) operation CheckFileInfo. 
+	 * 
+	 * The operation returns information about a file, a user's permissions on that file, 
+	 * and general information about the capabilities that the WOPI host has on the file.
 	 */
 	public function wopiCheckFileInfo($documentId) {
 		$token = $this->request->getParam('access_token');
@@ -187,8 +191,8 @@ class WopiController extends Controller {
 			'UserFriendlyName' => $editorDisplayName,
 			'UserCanWrite' => $canWrite,
 			'SupportsGetLock' => false,
-			'SupportsLocks' => false, // TODO: implement https://learn.microsoft.com/en-us/microsoft-365/cloud-storage-partner-program/rest/concepts#lock
-			'UserCanNotWriteRelative' => $this->appConfig->encryptionEnabled(),
+			'SupportsLocks' => false, // TODO: implement functions below
+			'UserCanNotWriteRelative' => false, // TODO: fix this because $this->appConfig->encryptionEnabled() is wrong
 			'PostMessageOrigin' => $res['server_host'],
 			'LastModifiedTime' => Helper::toISO8601($file->getMTime()),
 			'DisablePrint' => !$canPrint,
@@ -208,8 +212,89 @@ class WopiController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @PublicPage
-	 * Given a request access token and a document id, returns the contents of the file.
-	 * Expects a valid token in access_token parameter.
+	 * 
+	 * The Files endpoint (POST) provides access to file-level operations.
+	 */
+	public function wopiFileOperation($documentId) {
+		$operation = $this->request->getHeader('X-WOPI-Override');
+		switch ($operation) {
+			case 'LOCK':
+				// $wopiOldLock = $this->request->getHeader('X-WOPI-OldLock');
+				// if ($wopiOldLock !== null) {
+				// 	$this->unlock($storage, $file, $wopiOldLock);
+				// }
+				// $wopiLock = $this->request->getHeader('X-WOPI-Lock');
+				// return $this->lock($storage, $file, $wopiLock, $tokenData);
+				// if ($wopiOldLock === null) {
+				// 	$this->logger->warning("FileOperation $operation unsupported", ['app' => $this->appName]);
+				// 	break;
+				// }
+			case 'UNLOCK':
+				// $wopiLock = $this->request->getHeader('X-WOPI-Lock');
+				// return $this->unlock($storage, $file, $wopiLock);
+			case 'REFRESH_LOCK':
+				// $wopiLock = $this->request->getHeader('X-WOPI-Lock');
+				// return $this->refreshLock($storage, $file, $wopiLock);
+			case 'GET_LOCK':
+				// TODO: requires SupportsLocks
+				// return $this->getLock($storage, $file);
+			case 'DELETE':
+				// if (!isset($tokenData['UserId'])) {
+				// 	// "delete" put relative functionality only allowed for authenticated users currently,
+				// 	// implementing this feature for public link would require consideration on permissions
+				// 	$this->logger->warning("FileOperation $header unsupported for public links", ['app' => $this->appName]);
+				// 	break;
+				// }
+				
+				// return $this->deleteFile($storage, $file);
+			case 'PUT_RELATIVE':
+				// TODO: this is not fully correct
+				//$this->wopiPutFile($documentId);
+
+				// if (!isset($tokenData['UserId'])) {
+				// 	// "save as" put relative functionality only allowed for authenticated users currently,
+				// 	// implementing this feature for public link would require high effort
+				// 	$this->logger->warning("FileOperation $header unsupported for public links", ['app' => $this->appName]);
+				// 	break;
+				// }
+				
+				// // utf-7 to utf-8 converted
+				// // https://wopi.readthedocs.io/projects/wopirest/en/latest/files/PutRelativeFile.html#putrelativefile
+				// $suggestedTarget = \iconv(
+				// 	'utf-7',
+				// 	'utf-8',
+				// 	$this->request->getHeader('X-WOPI-SuggestedTarget')
+				// );
+				// $relativeTarget = \iconv(
+				// 	'utf-7',
+				// 	'utf-8',
+				// 	$this->request->getHeader('X-WOPI-RelativeTarget')
+				// );
+				// // Parse overwrite header
+				// $overwrite = $this->request->getHeader('X-WOPI-OverwriteRelativeTarget') === 'True';
+				// // other headers
+				// $fileConversion = $this->request->getHeader('X-WOPI-FileConversion');
+				// return $this->putFileRelative($file, $suggestedTarget, $relativeTarget, $overwrite, $fileConversion);
+			case 'RENAME_FILE':
+			case 'PUT_USER_INFO':
+			case 'GET_SHARE_URL':
+				$this->logger->warning("wopiFileOperation $operation unsupported", ['app' => $this->appName]);
+				break;
+			default:
+				$this->logger->warning("wopiFileOperation $operation unknown", ['app' => $this->appName]);
+		}
+
+		return new JSONResponse([], Http::STATUS_NOT_IMPLEMENTED);
+	}
+
+	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @PublicPage
+	 * 
+	 * The File contents endpoint (GET) provides access to retrieve the contents of a file.
+	 * 
+	 * The GetFile operation retrieves a file from a host.
 	 */
 	public function wopiGetFile($documentId) {
 		$token = $this->request->getParam('access_token');
@@ -244,8 +329,10 @@ class WopiController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @PublicPage
-	 * Given a request access token and a document id, replaces the files with the request body.
-	 * Expects a valid token in access_token parameter.
+	 * 
+	 * The File contents endpoint (POST) provides access to update the contents of a file.
+	 * 
+	 * The PutFile operation updates a file’s binary contents.
 	 */
 	public function wopiPutFile($documentId) {
 		$token = $this->request->getParam('access_token');
@@ -291,19 +378,6 @@ class WopiController extends Controller {
 
 			return $this->put($fileId, $res['owner'], $res['editor'], $wopiHeaderTime);
 		}
-	}
-
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 * @PublicPage
-	 * Given a request access token and a document, replaces the files with the request body.
-	 * Expects a valid token in access_token parameter.
-	 * Just actually routes to the PutFile, the implementation of PutFile
-	 * handles both saving and saving as.
-	 */
-	public function wopiPutRelativeFile($documentId) {
-		return $this->wopiPutFile($documentId);
 	}
 
 	/**

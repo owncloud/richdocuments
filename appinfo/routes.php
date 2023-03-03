@@ -29,8 +29,8 @@ $application->registerRoutes($this, [
 		['name' => 'settings#getSettings', 'url' => 'ajax/settings.php', 'verb' => 'GET'],
 		// WOPI protocol implementation
 		['name' => 'wopi#wopiCheckFileInfo', 'url' => 'wopi/files/{documentId}', 'verb' => 'GET'],
+		['name' => 'wopi#wopiFileOperation', 'url' => 'wopi/files/{documentId}', 'verb' => 'POST'],
 		['name' => 'wopi#wopiGetFile', 'url' => 'wopi/files/{documentId}/contents', 'verb' => 'GET'],
 		['name' => 'wopi#wopiPutFile', 'url' => 'wopi/files/{documentId}/contents', 'verb' => 'POST'],
-		['name' => 'wopi#wopiPutRelativeFile', 'url' => 'wopi/files/{documentId}', 'verb' => 'POST'],
 	]
 ]);
