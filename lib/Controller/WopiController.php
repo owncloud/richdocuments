@@ -116,10 +116,10 @@ class WopiController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @PublicPage
-	 * 
-	 * The Files endpoint operation CheckFileInfo. 
-	 * 
-	 * The operation returns information about a file, a user's permissions on that file, 
+	 *
+	 * The Files endpoint operation CheckFileInfo.
+	 *
+	 * The operation returns information about a file, a user's permissions on that file,
 	 * and general information about the capabilities that the WOPI host has on the file.
 	 */
 	public function wopiCheckFileInfo(string $documentId): JSONResponse {
@@ -222,7 +222,7 @@ class WopiController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @PublicPage
-	 * 
+	 *
 	 * The Files endpoint file-level operations.
 	 */
 	public function wopiFileOperation(string $documentId): JSONResponse {
@@ -257,9 +257,9 @@ class WopiController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @PublicPage
-	 * 
+	 *
 	 * The File contents endpoint provides access to retrieve the contents of a file.
-	 * 
+	 *
 	 * The GetFile operation retrieves a file from a host.
 	 */
 	public function wopiGetFile(string $documentId): Response {
@@ -294,9 +294,9 @@ class WopiController extends Controller {
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 * @PublicPage
-	 * 
+	 *
 	 * The File contents endpoint provides access to update the contents of a file.
-	 * 
+	 *
 	 * The PutFile operation updates a file’s binary contents.
 	 */
 	public function wopiPutFile(string $documentId): JSONResponse {
@@ -330,7 +330,6 @@ class WopiController extends Controller {
 			'app' => $this->appName,
 			'wopiHeaderTime' => $wopiHeaderTime
 		]);
-
 
 		// get owner and editor uid's
 		$owner = $res['owner'];
@@ -379,7 +378,7 @@ class WopiController extends Controller {
 	}
 
 	/**
-	 * The Files endpoint operation PutFileRelative. 
+	 * The Files endpoint operation PutFileRelative.
 	 */
 	public function wopiPutFileRelative(string $documentId): JSONResponse {
 		$token = $this->request->getParam('access_token');
@@ -497,7 +496,7 @@ class WopiController extends Controller {
 	}
 
 	/**
-	 * The Files endpoint operation Lock. 
+	 * The Files endpoint operation Lock.
 	 */
 	public function wopiLock(string $documentId): JSONResponse {
 		$token = $this->request->getParam('access_token');
@@ -559,7 +558,7 @@ class WopiController extends Controller {
 	}
 
 	/**
-	 * The Files endpoint operation Unlock. 
+	 * The Files endpoint operation Unlock.
 	 */
 	public function wopiUnlock(string $documentId): JSONResponse {
 		$token = $this->request->getParam('access_token');
@@ -574,12 +573,11 @@ class WopiController extends Controller {
 			'wopiLock' => $wopiLock,
 			'token' => $token]);
 
-
 		return new JSONResponse([], Http::STATUS_NOT_IMPLEMENTED);
 	}
 
 	/**
-	 * The Files endpoint operation RefreshLock. 
+	 * The Files endpoint operation RefreshLock.
 	 */
 	public function wopiRefreshLock(string $documentId): JSONResponse {
 		$token = $this->request->getParam('access_token');
@@ -594,12 +592,11 @@ class WopiController extends Controller {
 			'wopiLock' => $wopiLock,
 			'token' => $token]);
 
-
 		return new JSONResponse([], Http::STATUS_NOT_IMPLEMENTED);
 	}
 
 	/**
-	 * The Files endpoint operation UnlockAndRelock. 
+	 * The Files endpoint operation UnlockAndRelock.
 	 */
 	public function wopiUnlockAndRelock(string $documentId): JSONResponse {
 		$token = $this->request->getParam('access_token');
@@ -613,7 +610,6 @@ class WopiController extends Controller {
 			'fileId' => $fileId,
 			'wopiLock' => $wopiLock,
 			'token' => $token]);
-
 
 		return new JSONResponse([], Http::STATUS_NOT_IMPLEMENTED);
 	}
