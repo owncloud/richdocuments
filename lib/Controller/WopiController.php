@@ -534,22 +534,41 @@ class WopiController extends Controller {
 		$storage = $file->getStorage();
 		$locks = $storage->getLocks($file->getInternalPath(), false);
 
-		// check whether there is lock conflict
-		foreach ($locks as $lock) {
-			if ($lock->getToken() === $wopiLock) {
-				// already locked with this lock token, all ok
-				$this->logger->debug('Lock: resource already locked.', ['app' => $this->appName]);
-				break;
-			}
-			$this->logger->debug('Lock: resource has lock conflict.', ['app' => $this->appName]);
-			$response = new JSONResponse([], Http::STATUS_CONFLICT);
-			$response->addHeader('X-WOPI-LockFailureReason', "Locked by {$lock->getOwner()}");
-			$response->addHeader('X-WOPI-Lock', $lock->getToken());
+		// handle non-existing lock
 
-			return $response;
+		if (empty($locks)) {
+			// set new lock
+			if (isset($editor) && $editor != '') {
+				$this->logger->debug('Lock: locking the file for user.', ['app' => $this->appName]);
+				$user = $this->userManager->get($editor);
+				$storage->lockNodePersistent($file->getInternalPath(), [
+					'token' => $wopiLock,
+					'owner' => $this->l10n->t('%s via Office Collabora', [$user->getDisplayName()])
+				]);
+			} else {
+				$this->logger->debug('Lock: locking the file for public link.', ['app' => $this->appName]);
+				$storage->lockNodePersistent($file->getInternalPath(), [
+					'token' => $wopiLock,
+					'owner' => $this->l10n->t('Public Link User via Collabora Online')
+				]);
+			}
+			return new JSONResponse([], Http::STATUS_OK);
 		}
 
-		// lock the node
+		// handle existing lock
+
+		$currentLock = $locks[0];
+		if ($currentLock->getToken() !== $wopiLock) {
+			// foreign lock conflict
+			$this->logger->debug('Lock: resource has lock conflict.', ['app' => $this->appName]);
+
+			$response = new JSONResponse([], Http::STATUS_CONFLICT);
+			$response->addHeader('X-WOPI-LockFailureReason', "Locked by {$currentLock->getOwner()}");
+			$response->addHeader('X-WOPI-Lock', $currentLock->getToken());
+		}
+
+		$this->logger->debug('Lock: resource already locked, refresh.', ['app' => $this->appName]);
+
 		$storage->lockNodePersistent($file->getInternalPath(), [
 			'token' => $wopiLock,
 		]);
