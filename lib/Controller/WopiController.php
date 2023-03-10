@@ -729,14 +729,83 @@ class WopiController extends Controller {
 
 		// get wopi lock token
 		$wopiLock = $this->request->getHeader('X-WOPI-Lock');
+		$wopiLockOld = $this->request->getHeader('X-WOPI-OldLock');
 
 		list($fileId, , , ) = Helper::parseDocumentId($documentId);
-		$this->logger->debug('UnlockAndRelock: file {fileId}, wopiLock {wopiLock}, token {token}.', [
+		$this->logger->debug('UnlockAndRelock: file {fileId}, wopiLock {wopiLock}, wopiLockOld {wopiLockOld}, token {token}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
 			'wopiLock' => $wopiLock,
+			'wopiLockOld' => $wopiLockOld,
 			'token' => $token]);
 
-		return new JSONResponse([], Http::STATUS_NOT_IMPLEMENTED);
+		$row = new Db\Wopi();
+		$row->loadBy('token', $token);
+		$res = $row->getWopiForToken($token);
+		if ($res == false) {
+			$this->logger->debug('UnlockAndRelock: get token failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
+		}
+
+		// get owner and editor uid's
+		$owner = $res['owner'];
+		$editor = $res['editor'];
+		
+		$file = $this->fileService->getFileHandle($fileId, $owner, $editor);
+
+		if (!$file) {
+			$this->logger->warning('UnlockAndRelock: could not retrieve file', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_NOT_FOUND);
+		}
+
+		/** @var IStorage|IPersistentLockingStorage $storage */
+		$storage = $file->getStorage();
+		$locks = $storage->getLocks($file->getInternalPath(), false);
+
+		// handle non-existing lock
+
+		if (empty($locks)) {
+			$this->logger->debug('UnlockAndRelock: file is not locked.', ['app' => $this->appName]);
+
+			$response = new JSONResponse([], Http::STATUS_CONFLICT);
+			$response->addHeader('X-WOPI-LockFailureReason', "Attempt to unlock and refresh on the file that is not locked");
+			$response->addHeader('X-WOPI-Lock', '');
+			return $response;
+		}
+
+		// handle existing lock
+
+		$currentLock = $locks[0];
+		if ($currentLock->getToken() !== $wopiLockOld) {
+			// foreign lock conflict
+			$this->logger->debug('UnlockAndRelock: resource has lock conflict.', ['app' => $this->appName]);
+
+			$response = new JSONResponse([], Http::STATUS_CONFLICT);
+			$response->addHeader('X-WOPI-LockFailureReason', "Locked by {$currentLock->getOwner()}");
+			$response->addHeader('X-WOPI-Lock', $currentLock->getToken());
+			return $response;
+		}
+
+		$this->logger->debug('UnlockAndRelock: unlocking the old lock and locking with new lock.', ['app' => $this->appName]);
+
+		$storage->unlockNodePersistent($file->getInternalPath(), [
+			'token' => $wopiLockOld,
+		]);
+
+		if (isset($editor) && $editor != '') {
+			$this->logger->debug('UnlockAndRelock: locking the file for user.', ['app' => $this->appName]);
+			$user = $this->userManager->get($editor);
+			$storage->lockNodePersistent($file->getInternalPath(), [
+				'token' => $wopiLock,
+				'owner' => $this->l10n->t('%s via Office Collabora', [$user->getDisplayName()])
+			]);
+		} else {
+			$this->logger->debug('UnlockAndRelock: locking the file for public link.', ['app' => $this->appName]);
+			$storage->lockNodePersistent($file->getInternalPath(), [
+				'token' => $wopiLock,
+				'owner' => $this->l10n->t('Public Link User via Collabora Online')
+			]);
+		}
+		return new JSONResponse([], Http::STATUS_OK);
 	}
 }
