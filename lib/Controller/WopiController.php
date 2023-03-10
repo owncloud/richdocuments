@@ -28,7 +28,6 @@ use OCP\Files\IRootFolder;
 use OCP\Files\InvalidPathException;
 use OCP\Files\NotPermittedException;
 use OCP\Files\Storage\IPersistentLockingStorage;
-use OCP\Files\Storage\IStorage;
 use OCP\IRequest;
 use OCP\IConfig;
 use OCP\IL10N;
@@ -187,7 +186,6 @@ class WopiController extends Controller {
 			$watermark = null;
 		}
 
-		/** @var IStorage $storage */
 		$storage = $file->getStorage();
 		$supportsLocks = $canWrite && $storage->instanceOfStorage(IPersistentLockingStorage::class);
 
@@ -530,8 +528,13 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
-		/** @var IStorage|IPersistentLockingStorage $storage */
 		$storage = $file->getStorage();
+
+		/**
+		 * @var IPersistentLockingStorage $storage
+		 * @phpstan-ignore-next-line
+		*/
+		'@phan-var IPersistentLockingStorage $storage';
 		$locks = $storage->getLocks($file->getInternalPath(), false);
 
 		// handle non-existing lock
@@ -541,12 +544,24 @@ class WopiController extends Controller {
 			if (isset($editor) && $editor != '') {
 				$this->logger->debug('Lock: locking the file for user.', ['app' => $this->appName]);
 				$user = $this->userManager->get($editor);
+
+				/**
+				 * @var IPersistentLockingStorage $storage
+				 * @phpstan-ignore-next-line
+				*/
+				'@phan-var IPersistentLockingStorage $storage';
 				$storage->lockNodePersistent($file->getInternalPath(), [
 					'token' => $wopiLock,
 					'owner' => $this->l10n->t('%s via Office Collabora', [$user->getDisplayName()])
 				]);
 			} else {
 				$this->logger->debug('Lock: locking the file for public link.', ['app' => $this->appName]);
+
+				/**
+				 * @var IPersistentLockingStorage $storage
+				 * @phpstan-ignore-next-line
+				*/
+				'@phan-var IPersistentLockingStorage $storage';
 				$storage->lockNodePersistent($file->getInternalPath(), [
 					'token' => $wopiLock,
 					'owner' => $this->l10n->t('Public Link User via Collabora Online')
@@ -570,6 +585,11 @@ class WopiController extends Controller {
 
 		$this->logger->debug('Lock: resource already locked, refresh.', ['app' => $this->appName]);
 
+		/**
+		 * @var IPersistentLockingStorage $storage
+		 * @phpstan-ignore-next-line
+		*/
+		'@phan-var IPersistentLockingStorage $storage';
 		$storage->lockNodePersistent($file->getInternalPath(), [
 			'token' => $wopiLock,
 		]);
@@ -612,8 +632,13 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
-		/** @var IStorage|IPersistentLockingStorage $storage */
 		$storage = $file->getStorage();
+
+		/**
+		 * @var IPersistentLockingStorage $storage
+		 * @phpstan-ignore-next-line
+		*/
+		'@phan-var IPersistentLockingStorage $storage';
 		$locks = $storage->getLocks($file->getInternalPath(), false);
 
 		// handle non-existing lock
@@ -642,6 +667,11 @@ class WopiController extends Controller {
 
 		$this->logger->debug('Unlock: unlocking resource.', ['app' => $this->appName]);
 
+		/**
+		 * @var IPersistentLockingStorage $storage
+		 * @phpstan-ignore-next-line
+		*/
+		'@phan-var IPersistentLockingStorage $storage';
 		$storage->unlockNodePersistent($file->getInternalPath(), [
 			'token' => $wopiLock,
 		]);
@@ -684,8 +714,13 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
-		/** @var IStorage|IPersistentLockingStorage $storage */
 		$storage = $file->getStorage();
+
+		/**
+		 * @var IPersistentLockingStorage $storage
+		 * @phpstan-ignore-next-line
+		*/
+		'@phan-var IPersistentLockingStorage $storage';
 		$locks = $storage->getLocks($file->getInternalPath(), false);
 
 		// handle non-existing lock
@@ -714,6 +749,11 @@ class WopiController extends Controller {
 
 		$this->logger->debug('RefreshLock: resource already locked, refresh.', ['app' => $this->appName]);
 
+		/**
+		 * @var IPersistentLockingStorage $storage
+		 * @phpstan-ignore-next-line
+		*/
+		'@phan-var IPersistentLockingStorage $storage';
 		$storage->lockNodePersistent($file->getInternalPath(), [
 			'token' => $wopiLock,
 		]);
@@ -758,8 +798,13 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
-		/** @var IStorage|IPersistentLockingStorage $storage */
 		$storage = $file->getStorage();
+
+		/**
+		 * @var IPersistentLockingStorage $storage
+		 * @phpstan-ignore-next-line
+		*/
+		'@phan-var IPersistentLockingStorage $storage';
 		$locks = $storage->getLocks($file->getInternalPath(), false);
 
 		// handle non-existing lock
@@ -788,6 +833,11 @@ class WopiController extends Controller {
 
 		$this->logger->debug('UnlockAndRelock: unlocking the old lock and locking with new lock.', ['app' => $this->appName]);
 
+		/**
+		 * @var IPersistentLockingStorage $storage
+		 * @phpstan-ignore-next-line
+		*/
+		'@phan-var IPersistentLockingStorage $storage';
 		$storage->unlockNodePersistent($file->getInternalPath(), [
 			'token' => $wopiLockOld,
 		]);
@@ -795,12 +845,24 @@ class WopiController extends Controller {
 		if (isset($editor) && $editor != '') {
 			$this->logger->debug('UnlockAndRelock: locking the file for user.', ['app' => $this->appName]);
 			$user = $this->userManager->get($editor);
+
+			/**
+			 * @var IPersistentLockingStorage $storage
+			 * @phpstan-ignore-next-line
+			*/
+			'@phan-var IPersistentLockingStorage $storage';
 			$storage->lockNodePersistent($file->getInternalPath(), [
 				'token' => $wopiLock,
 				'owner' => $this->l10n->t('%s via Office Collabora', [$user->getDisplayName()])
 			]);
 		} else {
 			$this->logger->debug('UnlockAndRelock: locking the file for public link.', ['app' => $this->appName]);
+
+			/**
+			 * @var IPersistentLockingStorage $storage
+			 * @phpstan-ignore-next-line
+			*/
+			'@phan-var IPersistentLockingStorage $storage';
 			$storage->lockNodePersistent($file->getInternalPath(), [
 				'token' => $wopiLock,
 				'owner' => $this->l10n->t('Public Link User via Collabora Online')

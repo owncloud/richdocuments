@@ -10,5 +10,5 @@ parameters:
       message: '#Property OCA\\Richdocuments\\Controller\\SettingsController::\$userId is never read, only written.#'
       path: lib/Controller/SettingsController.php
     -
-      message: '#Dead catch - Exception is never thrown in the try block.#'
-      path: lib/Controller/DocumentController.php
+      message: '#^Dead catch [^"]* is never thrown in the try block.$#'
+      path: lib/Controller/WopiController.php  

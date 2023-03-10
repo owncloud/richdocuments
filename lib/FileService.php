@@ -83,13 +83,18 @@ class FileService {
 	 * Get privileged access to original file handle as user
 	 * for given fileId
 	 *
-	 * @param int $fileId
-	 * @param string $ownerUID
-	 * @param string $userUID
+	 * @param int $fileId original file id
+	 * @param string $ownerUID original file owner
+	 * @param string $userUID file editor
 	 *
-	 * @return null|\OCP\Files\File
+	 * @return null|File
 	 */
-	public function getFileHandle(int $fileId, string $ownerUID, string $userUID) {
+	public function getFileHandle(int $fileId, string $ownerUID, string $userUID): ?File {
+		if (!$ownerUID) {
+			$this->logger->warning('getFileHandle(): owner must be provided', ['app' => 'richdocuments']);
+			return null;
+		}
+
 		if ($userUID) {
 			$user = $this->userManager->get($userUID);
 			if (!$user) {
@@ -109,8 +114,6 @@ class FileService {
 
 				// emit login event to allow decryption of files via master key
 				$afterEvent = new GenericEvent(null, ['loginType' => 'password', 'user' => $user, 'uid' => $userUID, 'password' => '']);
-
-				/** @phpstan-ignore-next-line */
 				$this->eventDispatcher->dispatch($afterEvent, 'user.afterlogin');
 			} else {
 				// other type of encryption is enabled (e.g. user-key) that does not allow to decrypt files without incognito access to files
@@ -124,7 +127,7 @@ class FileService {
 		// Setup FS of original file file-handle to be able to generate
 		// file versions and write files with user session set for editor
 		$this->setupFS($ownerUID);
-		$userFolder = \OC::$server->getRootFolder()->getUserFolder($ownerUID);
+		$userFolder = $this->rootFolder->getUserFolder($ownerUID);
 		$files = $userFolder->getById($fileId);
 		if ($files !== [] && $files[0] instanceof File) {
 			return $files[0];
@@ -135,9 +138,9 @@ class FileService {
 	/**
 	 * Set the incognito mode
 	 *
-	 * @param bool $incognitoMode Flag to enable or disable incognito mode
+	 * @param bool $status Flag to enable or disable incognito mode
 	 */
-	private function setIncognitoMode(bool $status) {
+	protected function setIncognitoMode(bool $status): void {
 		\OC_User::setIncognitoMode($status);
 	}
 
@@ -146,7 +149,7 @@ class FileService {
 	 *
 	 * @param string $uid User ID
 	 */
-	private function setupFS($uid) {
+	protected function setupFS($uid): void {
 		\OC_Util::tearDownFS();
 		\OC_Util::setupFS($uid);
 	}

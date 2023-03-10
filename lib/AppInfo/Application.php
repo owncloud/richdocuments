@@ -21,8 +21,6 @@ use OCA\Richdocuments\Controller\SettingsController;
 use OCA\Richdocuments\Controller\WebAssetController;
 use OCA\Richdocuments\AppConfig;
 use OCP\AppFramework\App;
-use OCP\Files\IRootFolder;
-use OCP\IURLGenerator;
 /* @phan-suppress-next-line PhanUnreferencedUseNormal */
 use OCP\IContainer;
 /* @phan-suppress-next-line PhanUnreferencedUseNormal */
