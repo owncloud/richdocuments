@@ -126,7 +126,7 @@ class WopiController extends Controller {
 		$token = $this->request->getParam('access_token');
 
 		list($fileId, , $version, $sessionId) = Helper::parseDocumentId($documentId);
-		$this->logger->info('wopiCheckFileInfo(): Getting info about file {fileId}, version {version} by token {token}.', [
+		$this->logger->info('CheckFileInfo: Getting info about file {fileId}, version {version} by token {token}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
 			'version' => $version,
@@ -137,14 +137,14 @@ class WopiController extends Controller {
 
 		$res = $row->getWopiForToken($token);
 		if ($res == false) {
-			$this->logger->debug('wopiCheckFileInfo(): getWopiForToken() failed.', ['app' => $this->appName]);
+			$this->logger->debug('CheckFileInfo: get token failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
 		// make sure file can be read when checking file info
 		$file = $this->fileService->getFileHandle($fileId, $res['owner'], $res['editor']);
 		if (!$file) {
-			$this->logger->error('wopiCheckFileInfo(): Could not retrieve file', ['app' => $this->appName]);
+			$this->logger->error('CheckFileInfo: Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
@@ -153,10 +153,10 @@ class WopiController extends Controller {
 		try {
 			$file->fopen('rb');
 		} catch (NotPermittedException $e) {
-			$this->logger->error('wopiCheckFileInfo(): Could not open file - {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
+			$this->logger->error('CheckFileInfo: Could not open file - {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		} catch (\Exception $e) {
-			$this->logger->error('wopiCheckFileInfo(): Unexpected Exception - {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
+			$this->logger->error('CheckFileInfo: Unexpected Exception - {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
 			return new JSONResponse([], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
@@ -213,7 +213,7 @@ class WopiController extends Controller {
 			'WatermarkText' => $watermark,
 		];
 		
-		$this->logger->debug("wopiCheckFileInfo(): Result: {result}", ['app' => $this->appName, 'result' => $result]);
+		$this->logger->debug("CheckFileInfo: Result: {result}", ['app' => $this->appName, 'result' => $result]);
 
 		return new JSONResponse($result, Http::STATUS_OK);
 	}
@@ -244,10 +244,10 @@ class WopiController extends Controller {
 			case 'RENAME_FILE':
 			case 'PUT_USER_INFO':
 			case 'GET_SHARE_URL':
-				$this->logger->warning("wopiFileOperation $operation unsupported", ['app' => $this->appName]);
+				$this->logger->warning("FileOperation: $operation unsupported", ['app' => $this->appName]);
 				break;
 			default:
-				$this->logger->warning("wopiFileOperation $operation unknown", ['app' => $this->appName]);
+				$this->logger->warning("FileOperation: $operation unknown", ['app' => $this->appName]);
 		}
 
 		return new JSONResponse([], Http::STATUS_NOT_IMPLEMENTED);
@@ -266,7 +266,7 @@ class WopiController extends Controller {
 		$token = $this->request->getParam('access_token');
 
 		list($fileId, , , ) = Helper::parseDocumentId($documentId);
-		$this->logger->info('wopiGetFile(): File {fileId}, token {token}.', [
+		$this->logger->info('GetFile: File {fileId}, token {token}.', [
 			'app' => $this->appName,
 			'fileId' => $fileId,
 			'token' => $token ]);
@@ -277,13 +277,13 @@ class WopiController extends Controller {
 		//TODO: Support X-WOPIMaxExpectedSize header.
 		$res = $row->getWopiForToken($token);
 		if ($res == false) {
-			$this->logger->debug('wopiGetFile(): getWopiForToken() failed.', ['app' => $this->appName]);
+			$this->logger->debug('GetFile: get token failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
 		$file = $this->fileService->getFileHandle($fileId, $res['owner'], $res['editor']);
 		if (!$file) {
-			$this->logger->warning('wopiGetFile(): Could not retrieve file', ['app' => $this->appName]);
+			$this->logger->warning('GetFile: Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
