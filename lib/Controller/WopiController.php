@@ -565,6 +565,7 @@ class WopiController extends Controller {
 			$response = new JSONResponse([], Http::STATUS_CONFLICT);
 			$response->addHeader('X-WOPI-LockFailureReason', "Locked by {$currentLock->getOwner()}");
 			$response->addHeader('X-WOPI-Lock', $currentLock->getToken());
+			return $response;
 		}
 
 		$this->logger->debug('Lock: resource already locked, refresh.', ['app' => $this->appName]);
@@ -592,7 +593,60 @@ class WopiController extends Controller {
 			'wopiLock' => $wopiLock,
 			'token' => $token]);
 
-		return new JSONResponse([], Http::STATUS_NOT_IMPLEMENTED);
+		$row = new Db\Wopi();
+		$row->loadBy('token', $token);
+		$res = $row->getWopiForToken($token);
+		if ($res == false) {
+			$this->logger->debug('Unlock: get token failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
+		}
+
+		// get owner and editor uid's
+		$owner = $res['owner'];
+		$editor = $res['editor'];
+		
+		$file = $this->fileService->getFileHandle($fileId, $owner, $editor);
+
+		if (!$file) {
+			$this->logger->warning('Unlock: could not retrieve file', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_NOT_FOUND);
+		}
+
+		/** @var IStorage|IPersistentLockingStorage $storage */
+		$storage = $file->getStorage();
+		$locks = $storage->getLocks($file->getInternalPath(), false);
+
+		// handle non-existing lock
+
+		if (empty($locks)) {
+			$this->logger->debug('Unlock: file is not locked.', ['app' => $this->appName]);
+
+			$response = new JSONResponse([], Http::STATUS_CONFLICT);
+			$response->addHeader('X-WOPI-LockFailureReason', "Attempt to unlock the file that is not locked");
+			$response->addHeader('X-WOPI-Lock', '');
+			return $response;
+		}
+
+		// handle existing lock
+
+		$currentLock = $locks[0];
+		if ($currentLock->getToken() !== $wopiLock) {
+			// foreign lock conflict
+			$this->logger->debug('Unlock: resource has lock conflict.', ['app' => $this->appName]);
+
+			$response = new JSONResponse([], Http::STATUS_CONFLICT);
+			$response->addHeader('X-WOPI-LockFailureReason', "Locked by {$currentLock->getOwner()}");
+			$response->addHeader('X-WOPI-Lock', $currentLock->getToken());
+			return $response;
+		}
+
+		$this->logger->debug('Unlock: unlocking resource.', ['app' => $this->appName]);
+
+		$storage->unlockNodePersistent($file->getInternalPath(), [
+			'token' => $wopiLock,
+		]);
+
+		return new JSONResponse([], Http::STATUS_OK);
 	}
 
 	/**
