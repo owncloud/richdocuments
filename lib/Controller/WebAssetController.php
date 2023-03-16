@@ -21,7 +21,7 @@
 
 namespace OCA\Richdocuments\Controller;
 
-use GuzzleHttp\Psr7\MimeType;
+use GuzzleHttp\Mimetypes;
 use OC\AppFramework\Http;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\DataDisplayResponse;
@@ -77,6 +77,7 @@ class WebAssetController extends Controller {
 	}
 
 	private function getMimeType(string $filename): string {
-		return MimeType::fromFilename($filename);
+		$mimeTypes = Mimetypes::getInstance();
+		return $mimeTypes->fromFilename($filename);
 	}
 }

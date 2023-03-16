@@ -4,22 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] --
 
-
-
-## [3.0.0] - 2022-09-22
+## [2.8.0] - 2023-03-16
 
 ### Changed
 
-- [#470](https://github.com/owncloud/richdocuments/pull/470) - Adjust getMimeType for guzzle7 dependencies
 - [#456](https://github.com/owncloud/richdocuments/pull/456) - web: add Drawing filetype and add it to + menu
-- This version requires ownCloud 10.11.0 or above
 
 ### Fixed
 
 - [#467](https://github.com/owncloud/richdocuments/pull/467) - Set appropriate icon for web
+- [#462](https://github.com/owncloud/richdocuments/pull/462) - Adjust 'if' conditionals that were reported by phpstan
+- [#457](https://github.com/owncloud/richdocuments/pull/457) - typo fix (templates/documents.php)
 - [#455](https://github.com/owncloud/richdocuments/pull/455) - ensure ODG Drawing compatibility across integration
+- [#454](https://github.com/owncloud/richdocuments/pull/454) - Change Richdocuments app name to Collabora Online
 - [#451](https://github.com/owncloud/richdocuments/pull/451) - disable secure view js and settings when not available
 
 
