@@ -135,7 +135,7 @@ class WopiController extends Controller {
 		$row->loadBy('token', $token);
 
 		$res = $row->getWopiForToken($token);
-		if ($res == false) {
+		if (!$res) {
 			$this->logger->debug('CheckFileInfo: get token failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
@@ -159,7 +159,7 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
-		if ($res['editor'] && $res['editor'] != '') {
+		if ($res['editor'] && $res['editor'] !== '') {
 			$editor = $this->userManager->get($res['editor']);
 			$editorId = $editor->getUID();
 			$editorDisplayName = $editor->getDisplayName();
@@ -274,7 +274,7 @@ class WopiController extends Controller {
 
 		//TODO: Support X-WOPIMaxExpectedSize header.
 		$res = $row->getWopiForToken($token);
-		if ($res == false) {
+		if (!$res) {
 			$this->logger->debug('GetFile: get token failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
@@ -311,7 +311,7 @@ class WopiController extends Controller {
 		$row->loadBy('token', $token);
 
 		$res = $row->getWopiForToken($token);
-		if ($res == false) {
+		if (!$res) {
 			$this->logger->debug('PutFile: get token failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
@@ -391,7 +391,7 @@ class WopiController extends Controller {
 		$row->loadBy('token', $token);
 
 		$res = $row->getWopiForToken($token);
-		if ($res == false) {
+		if (!$res) {
 			$this->logger->debug('PutFileRelative: get token failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
@@ -512,7 +512,7 @@ class WopiController extends Controller {
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
 		$res = $row->getWopiForToken($token);
-		if ($res == false) {
+		if (!$res) {
 			$this->logger->debug('Lock: get token failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
 		}
@@ -541,7 +541,7 @@ class WopiController extends Controller {
 
 		if (empty($locks)) {
 			// set new lock
-			if (isset($editor) && $editor != '') {
+			if (isset($editor) && $editor !== '') {
 				$this->logger->debug('Lock: locking the file for user.', ['app' => $this->appName]);
 				$user = $this->userManager->get($editor);
 
@@ -616,7 +616,7 @@ class WopiController extends Controller {
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
 		$res = $row->getWopiForToken($token);
-		if ($res == false) {
+		if (!$res) {
 			$this->logger->debug('Unlock: get token failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
 		}
@@ -698,7 +698,7 @@ class WopiController extends Controller {
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
 		$res = $row->getWopiForToken($token);
-		if ($res == false) {
+		if (!$res) {
 			$this->logger->debug('RefreshLock: get token failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
 		}
@@ -782,7 +782,7 @@ class WopiController extends Controller {
 		$row = new Db\Wopi();
 		$row->loadBy('token', $token);
 		$res = $row->getWopiForToken($token);
-		if ($res == false) {
+		if (!$res) {
 			$this->logger->debug('UnlockAndRelock: get token failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
 		}
@@ -842,7 +842,7 @@ class WopiController extends Controller {
 			'token' => $wopiLockOld,
 		]);
 
-		if (isset($editor) && $editor != '') {
+		if (isset($editor) && $editor !== '') {
 			$this->logger->debug('UnlockAndRelock: locking the file for user.', ['app' => $this->appName]);
 			$user = $this->userManager->get($editor);
 

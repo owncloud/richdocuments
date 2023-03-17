@@ -21,8 +21,7 @@ use OCA\Richdocuments\Controller\SettingsController;
 use OCA\Richdocuments\Controller\WebAssetController;
 use OCA\Richdocuments\AppConfig;
 use OCP\AppFramework\App;
-/* @phan-suppress-next-line PhanUnreferencedUseNormal */
-use OCP\IContainer;
+use OC\AppFramework\Utility\SimpleContainer;
 /* @phan-suppress-next-line PhanUnreferencedUseNormal */
 use OCP\IUser;
 use OCP\Share;
@@ -37,12 +36,12 @@ class Application extends App {
 
 	private function registerServices() {
 		$container = $this->getContainer();
+		$server = $container->getServer();
 
 		/**
 		 * Controllers
 		 */
-		$container->registerService('DocumentController', function ($c) {
-			/** @var IContainer $c */
+		$container->registerService('DocumentController', function (SimpleContainer $c) use ($server) {
 			return new DocumentController(
 				$c->query('AppName'),
 				$c->query('Request'),
@@ -54,12 +53,11 @@ class Application extends App {
 				$c->query('Logger'),
 				$c->query('DocumentService'),
 				$c->query('OCP\App\IAppManager'),
-				$c->query('ServerContainer')->getGroupManager(),
-				$c->query('ServerContainer')->getUserManager()
+				$server->getGroupManager(),
+				$server->getUserManager()
 			);
 		});
-		$container->registerService('WopiController', function ($c) {
-			/** @var IContainer $c */
+		$container->registerService('WopiController', function (SimpleContainer $c) use ($server) {
 			return new WopiController(
 				$c->query('AppName'),
 				$c->query('Request'),
@@ -68,13 +66,12 @@ class Application extends App {
 				$c->query('L10N'),
 				$c->query('Logger'),
 				$c->query('FileService'),
-				$c->query('ServerContainer')->getRootFolder(),
-				$c->query('ServerContainer')->getURLGenerator(),
-				$c->query('ServerContainer')->getUserManager()
+				$server->getRootFolder(),
+				$server->getURLGenerator(),
+				$server->getUserManager()
 			);
 		});
-		$container->registerService('SettingsController', function ($c) {
-			/** @var IContainer $c */
+		$container->registerService('SettingsController', function (SimpleContainer $c) {
 			return new SettingsController(
 				$c->query('AppName'),
 				$c->query('Request'),
@@ -84,8 +81,7 @@ class Application extends App {
 			);
 		});
 
-		$container->registerService("WebAssetController", function ($c) {
-			/** @var IContainer $c */
+		$container->registerService("WebAssetController", function (SimpleContainer $c) {
 			return new WebAssetController(
 				$c->query('AppName'),
 				$c->query('Request'),
@@ -93,11 +89,10 @@ class Application extends App {
 			);
 		});
 
-		$container->registerService('AppConfig', function ($c) {
-			/** @var IContainer $c */
+		$container->registerService('AppConfig', function (SimpleContainer $c) use ($server) {
 			$coreConfig = $c->query('CoreConfig');
-			$appManager = $c->query('ServerContainer')->getAppManager();
-			$licenseManager = $c->query('ServerContainer')->getLicenseManager();
+			$appManager = $server->getAppManager();
+			$licenseManager = $server->getLicenseManager();
 
 			return new AppConfig(
 				$coreConfig,
@@ -106,46 +101,41 @@ class Application extends App {
 			);
 		});
 
-		$container->registerService('DocumentService', function ($c) {
+		$container->registerService('DocumentService', function (SimpleContainer $c) {
 			return new DocumentService();
 		});
 
-		$container->registerService('FileService', function ($c) {
+		$container->registerService('FileService', function (SimpleContainer $c) use ($server) {
 			return new FileService(
 				$c->query('Logger'),
 				$c->query('AppConfig'),
-				$c->query('ServerContainer')->getUserManager(),
-				$c->query('ServerContainer')->getUserSession(),
-				$c->query('ServerContainer')->getEventDispatcher(),
-				$c->query('ServerContainer')->getRootFolder()
+				$server->getUserManager(),
+				$server->getUserSession(),
+				$server->getEventDispatcher(),
+				$server->getRootFolder()
 			);
 		});
 
 		/**
 		 * Core
 		 */
-		$container->registerService('Logger', function ($c) {
-			/** @var IContainer $c */
-			return $c->query('ServerContainer')->getLogger();
+		$container->registerService('Logger', function (SimpleContainer $c) use ($server) {
+			return $server->getLogger();
 		});
-		$container->registerService('CoreConfig', function ($c) {
-			/** @var IContainer $c */
-			return $c->query('ServerContainer')->getConfig();
+		$container->registerService('CoreConfig', function (SimpleContainer $c) use ($server) {
+			return $server->getConfig();
 		});
-		$container->registerService('L10N', function ($c) {
-			/** @var IContainer $c */
-			return $c->query('ServerContainer')->getL10N($c->query('AppName'));
+		$container->registerService('L10N', function (SimpleContainer $c) use ($server) {
+			return $server->getL10N($c->query('AppName'));
 		});
-		$container->registerService('UserId', function ($c) {
-			/** @var IContainer $c */
+		$container->registerService('UserId', function (SimpleContainer $c) use ($server) {
 			/** @var IUser|null $user */
-			$user = $c->query('ServerContainer')->getUserSession()->getUser();
+			$user = $server->getUserSession()->getUser();
 			$uid = $user === null ? '' : $user->getUID();
 			return $uid;
 		});
-		$container->registerService('ICacheFactory', function ($c) {
-			/** @var IContainer $c */
-			return $c->query('ServerContainer')->getMemCacheFactory();
+		$container->registerService('ICacheFactory', function (SimpleContainer $c) use ($server) {
+			return $server->getMemCacheFactory();
 		});
 	}
 

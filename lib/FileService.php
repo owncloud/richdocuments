@@ -22,14 +22,14 @@
 
 namespace OCA\Richdocuments;
 
-use OC\User\Session;
 use OCP\Files\IRootFolder;
+use OCP\IUserSession;
 use OCP\Files\File;
 use OCP\ILogger;
 use OCP\IUserManager;
 use OCA\Richdocuments\AppConfig;
 use Symfony\Component\EventDispatcher\GenericEvent;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class FileService {
 	
@@ -49,12 +49,12 @@ class FileService {
 	private $userManager;
 
 	/**
-	 * @var Session
+	 * @var IUserSession
 	 */
 	private $userSession;
 
 	/**
-	 * @var EventDispatcher
+	 * @var EventDispatcherInterface
 	 */
 	private $eventDispatcher;
 
@@ -67,8 +67,8 @@ class FileService {
 		ILogger $logger,
 		AppConfig $appConfig,
 		IUserManager $userManager,
-		Session $userSession,
-		EventDispatcher $eventDispatcher,
+		IUserSession $userSession,
+		EventDispatcherInterface $eventDispatcher,
 		IRootFolder $rootFolder
 	) {
 		$this->appConfig = $appConfig;
