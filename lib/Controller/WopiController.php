@@ -477,9 +477,6 @@ class WopiController extends Controller {
 		// we should preserve the original PostMessageOrigin
 		// otherwise this will change it to serverHost after save-as
 		// then we can no longer know the outer frame's origin.
-		$row = new Wopi();
-		$row->loadBy('token', $token);
-		$res = $row->getWopiForToken($token);
 		$serverHost = $res['server_host'] ? $res['server_host'] : $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 
 		// Continue editing
