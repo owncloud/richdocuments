@@ -84,16 +84,16 @@ class Wopi extends \OCA\Richdocuments\Db {
 
 	/**
 	 * @param string $token
-	 * @return array | false for invalid token
+	 * @return array|null
 	 */
-	public function getWopiForToken($token) {
+	public function getWopiForToken($token) : ?array {
 		$wopi = new Wopi();
 		$row = $wopi->loadBy('token', $token)->getData();
 		\OC::$server->getLogger()->debug('Loaded WOPI Token record: {row}.', [
 			'app' => self::appName,
 			'row' => $row ]);
 		if (!isset($row['expiry']) || $row['expiry'] <= \time()) {
-			return false;
+			return null;
 		}
 
 		return [

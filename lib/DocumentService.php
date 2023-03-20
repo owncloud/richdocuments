@@ -29,7 +29,7 @@ use OCP\Files\NotFoundException;
 use OCP\Share\Exceptions\ShareNotFound;
 use OCP\Share\IShare;
 
-class Storage {
+class DocumentService {
 	public static $MIMETYPE_LIBREOFFICE_WORDPROCESSOR = [
 		'application/pdf',
 		'application/vnd.oasis.opendocument.text',

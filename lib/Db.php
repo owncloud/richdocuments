@@ -150,7 +150,7 @@ abstract class Db {
 	
 	/**
 	 * Get object data
-	 * @return Array
+	 * @return array
 	 */
 	public function getData() {
 		return $this->data;
@@ -175,8 +175,8 @@ abstract class Db {
 	/**
 	 * Build placeholders for the query with variable input data
 	 * @param string $field field name
-	 * @param Array $array data
-	 * @return String `field` IN (?, ?...) placeholders matching the number of elements in array
+	 * @param array $array data
+	 * @return string `field` IN (?, ?...) placeholders matching the number of elements in array
 	 */
 	protected function buildInQuery($field, $array) {
 		$count = \count($array);
