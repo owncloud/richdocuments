@@ -69,6 +69,7 @@ OC.L10N.register(
     "Saved" : "U ruajt",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "U ruajt me gabim: Collabora Online do të duhej të përdorte të njëjtin protokoll si instalimi i shërbyesit.",
     "remote user" : "përdorues i largët",
+    "%s via Office Collabora" : "%s përmes Office Collabora",
     "Collabora Online" : "Collabora Online",
     "Open documentation" : "Hap dokumentimin",
     "Enabled encryption type will result in limited functionality of the app. App requires privileged access to the files, and the only currently supported type is master key encryption." : "Lloji i fshehtëzimit i aktivizuar do të rezultojë në funksionim të kufizuar të aplikacionit. Aplikacioni lyp hyrje të privilegjuar te kartelat, dhe lloji i vetëm i mbuluar hëpërhë është fshehtëzimi me kyç të përgjithshëm.",
