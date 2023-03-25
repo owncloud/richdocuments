@@ -69,6 +69,8 @@ OC.L10N.register(
     "Saved" : "Salvo",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "Salvo com erro: Collabora Online deve usar o mesmo protocolo que a instalação do servidor.",
     "remote user" : "usuário remoto",
+    "%s via Office Collabora" : "%s via Office Collabora",
+    "Public Link User via Collabora Online" : "Public Link User via Collabora Online",
     "Collabora Online" : "Collabora Online",
     "Open documentation" : "Abrir documentação",
     "Enabled encryption type will result in limited functionality of the app. App requires privileged access to the files, and the only currently supported type is master key encryption." : "O tipo de criptografia ativado resultará em funcionalidade limitada do aplicativo. O aplicativo requer acesso privilegiado aos arquivos, e o único tipo atualmente suportado é a criptografia de chave mestra.",

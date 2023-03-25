@@ -62,6 +62,8 @@
     "Saved" : "저장됨",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "저장 오류 발생: Collabora Online과 서버 설치본이 같은 프로토콜을 사용해야 합니다.",
     "remote user" : "원격 사용자",
+    "%s via Office Collabora" : "Office Collabora에서 %s",
+    "Public Link User via Collabora Online" : "Collabora Online에서 사용자 공개 링크",
     "Collabora Online" : "Collabora Online",
     "Open documentation" : "문서 열기",
     "Enabled encryption type will result in limited functionality of the app. App requires privileged access to the files, and the only currently supported type is master key encryption." : "암호화 형식을 켜면 앱의 기능이 제한됩니다. 앱은 파일 접근 권한이 필요하며, 현재 지원되는 유일한 형식은 마스터 키 암호화입니다.",
