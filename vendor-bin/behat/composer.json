@@ -15,6 +15,7 @@
         "symfony/translation": "^4.4",
         "sabre/xml": "^2.2",
         "guzzlehttp/guzzle": "^7.4",
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^9.5",
+        "helmich/phpunit-json-assert": "^3.4"
     }
 }
