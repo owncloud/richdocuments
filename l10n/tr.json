@@ -67,6 +67,8 @@
     "Saved" : "Kaydedildi",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "Hata ile kaydedildi: Collabora Online, sunucu kurulumuyla aynı protokolü kullanmalıdır.",
     "remote user" : "uzak kullanıcı",
+    "%s via Office Collabora" : "%s, Office Collabora aracılığıyla",
+    "Public Link User via Collabora Online" : "Collabora Online aracılığıyla Herkese Açık Bağlantı Kullanıcısı",
     "Collabora Online" : "Collabora Online",
     "Open documentation" : "Belgelendirmeyi aç",
     "Enabled encryption type will result in limited functionality of the app. App requires privileged access to the files, and the only currently supported type is master key encryption." : "Etkin şifreleme türü uygulamanın sınırlı işlevselliğine neden olur. Uygulama, dosyalara ayrıcalıklı erişim gerektirir ve şu anda desteklenen tek tür ana anahtar şifrelemesidir.",
