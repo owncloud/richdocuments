@@ -67,6 +67,8 @@
     "Saved" : "Gespeichert",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "Mit Fehler gespeichert: Collabora Online sollte das gleiche Protokoll wie die Server-Installation nutzen.",
     "remote user" : "Entfernter Benutzer",
+    "%s via Office Collabora" : "%s via Office Collabora",
+    "Public Link User via Collabora Online" : "Benutzer/-in mit public Link via Collabora Online",
     "Collabora Online" : "Collabora Online",
     "Open documentation" : "Dokumentation öffnen",
     "Enabled encryption type will result in limited functionality of the app. App requires privileged access to the files, and the only currently supported type is master key encryption." : "Bei aktiviertem Verschlüsselungstyp ist die Funktionalität der Anwendung eingeschränkt. Die Anwendung erfordert einen privilegierten Zugriff auf die Dateien und der einzige derzeit unterstützte Typ ist die Master-Key-Verschlüsselung.",
