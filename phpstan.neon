@@ -12,6 +12,3 @@ parameters:
     -
       message: '#^Dead catch [^"]* is never thrown in the try block.$#'
       path: lib/Controller/WopiController.php  
-    -
-      message: '#Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface::dispatch\(\) invoked with 2 parameters, 1 required.#'
-      path: lib/FileService.php
