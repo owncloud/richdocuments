@@ -325,6 +325,10 @@ class DocumentController extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function index($fileId, $dir) {
+		// If type of fileId is a string, then it
+		// doesn't work for shared documents, lets cast to int everytime
+		$fileId = (int)$fileId;
+
 		// Normal editing and user/group share editing
 		// Parameter $dir is not used during indexing, but might be used by Document Server
 		return $this->handleIndex($fileId, $dir, null, 'user');
@@ -336,6 +340,10 @@ class DocumentController extends Controller {
 	 * @PublicPage
 	 */
 	public function publicIndex($fileId, $shareToken) {
+		// If type of fileId is a string, then it
+		// doesn't work for shared documents, lets cast to int everytime
+		$fileId = (int)$fileId;
+
 		// Public share link (folder or file)
 		return $this->handleIndex($fileId, null, $shareToken, 'base');
 	}
@@ -346,13 +354,13 @@ class DocumentController extends Controller {
 	 * - file in user folder (also shared by user/group) if fileId not null and shareToken is null
 	 * - public link (public file share or file in public folder share identified by fileId) if shareToken is not null
 	 *
-	 * @param string|int|null $fileId
+	 * @param int|null $fileId
 	 * @param string|null $dir
 	 * @param string|null $shareToken
 	 * @param string $renderAs the template layout to be used
 	 * @return TemplateResponse
 	 */
-	private function handleIndex($fileId, $dir, $shareToken, $renderAs) {
+	private function handleIndex(?int $fileId, ?string $dir, ?string $shareToken, string $renderAs) : TemplateResponse {
 		// Handle general response
 		$wopiRemote = $this->getWopiUrl($this->isTester());
 		if (($parts = \parse_url($wopiRemote)) && isset($parts['scheme'], $parts['host'])) {
@@ -402,14 +410,14 @@ class DocumentController extends Controller {
 	 * - file in user folder if fileId and currently authenticated user are specified, and shareToken is null
 	 * - public link (public file share or file in public folder share identified by fileId) if shareToken is not null
 	 *
-	 * @param string|int|null $fileId
+	 * @param int|null $fileId
 	 * @param string|null $dir
 	 * @param string|null $shareToken
 	 *
 	 * @return array
 	 * @throws \Exception
 	 */
-	private function handleDocIndex($fileId, $dir, $shareToken) {
+	private function handleDocIndex(?int $fileId, ?string $dir, ?string $shareToken) : array {
 		if ($fileId === null && $shareToken === null) {
 			return [];
 		}
@@ -478,6 +486,10 @@ class DocumentController extends Controller {
 	 */
 	public function getDocumentIndex($fileId) {
 		try {
+			// If type of fileId is a string, then it
+			// doesn't work for shared documents, lets cast to int everytime
+			$fileId = (int)$fileId;
+			
 			$docRetVal = $this->handleDocIndex($fileId, null, null);
 			$docRetVal["locale"] = \strtolower(\str_replace('_', '-', $this->settings->getUserValue($this->uid, 'core', 'lang', 'en')));
 		} catch (\Exception $e) {
@@ -634,18 +646,15 @@ class DocumentController extends Controller {
 		return $isAllowed;
 	}
 
-	// private function getOwner($fileId) {
-	// 	$view = \OC\Files\Filesystem::getView();
-	// 	$path = $view->getPath($fileId);
-	// 	return $view->getOwner($path);
-	// }
-
 	/**
-	 * Generates and returns an access token for a given fileId.
+	 * Generates and returns an wopi access info containing token for a given fileId.
+	 *
+	 * @param array $docInfo doc index as retrieved from DocumentService
+	 * @return array wopi access info
 	 *
 	 * @throws \Exception
 	 */
-	private function getWopiInfoForAuthUser($docInfo) {
+	private function getWopiInfoForAuthUser(array $docInfo) : array {
 		$currentUser = $this->uid;
 		$ownerUid = $docInfo['owner'];
 		$updatable = $docInfo['updateable'];
@@ -660,10 +669,8 @@ class DocumentController extends Controller {
 			'version' => $version ]);
 
 		$view = \OC\Files\Filesystem::getView();
-		//$path = $view->getPath($fileId);
 
-		// If token is for some versioned file
-		// $updatable = (bool)$view->isUpdatable($path);
+		// If token is for some versioned file, then it is not updatable
 		if ($version !== '0') {
 			$updatable = false;
 		}
@@ -751,7 +758,6 @@ class DocumentController extends Controller {
 			$serverHost = $origin;
 		}
 
-		//$owner = $this->getOwner($fileId);
 		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
 
 		$row = new Db\Wopi();
@@ -775,9 +781,9 @@ class DocumentController extends Controller {
 
 	/**
 	 * @param string $userId
-	 * @param string|int $fileId
+	 * @param int $fileId
 	 * @param string|null $dir
-	 * @return null|array
+	 * @return array|null
 	 */
 	private function getDocumentByUserAuth($userId, $fileId, $dir) {
 		if ($fileInfo = $this->documentService->getDocumentByUserId($userId, $fileId, $dir)) {
@@ -788,10 +794,10 @@ class DocumentController extends Controller {
 
 	/**
 	 * @param string $token
-	 * @param string|int $fileId
-	 * @return null|array
+	 * @param int|null $fileId
+	 * @return array|null
 	 */
-	private function getDocumentByShareToken($token, $fileId = null) {
+	private function getDocumentByShareToken(string $token, ?int $fileId) : ?array {
 		if ($fileInfo = $this->documentService->getDocumentByShareToken($token, $fileId)) {
 			return $this->prepareDocument($fileInfo);
 		}
@@ -812,9 +818,12 @@ class DocumentController extends Controller {
 	}
 
 	/**
-	 * Generates and returns an access token for a given fileId.
+	 * Generates and returns an wopi access info containing token for a given fileId.
+	 *
+	 * @param array $docInfo doc index as retrieved from DocumentService
+	 * @return array wopi access info
 	 */
-	private function getWopiInfoForPublicLink($docInfo) {
+	private function getWopiInfoForPublicLink(array $docInfo) : array {
 		$currentUser = $this->uid;
 		$ownerUid = $docInfo['owner'];
 		$fileId = $docInfo['fileid'];
@@ -869,6 +878,11 @@ class DocumentController extends Controller {
 	 */
 	public function extAppWopiGetData($documentId) {
 		list($fileId, , $version, ) = Helper::parseDocumentId($documentId);
+
+		// If type of fileId is a string, then it
+		// doesn't work for shared documents, lets cast to int everytime
+		$fileId = (int)$fileId;
+
 		$secretToken = $this->request->getParam('secret_token');
 		$apps = \array_filter(\explode(',', $this->appConfig->getAppValue('external_apps')));
 		foreach ($apps as $app) {
@@ -882,8 +896,8 @@ class DocumentController extends Controller {
 					]);
 
 					$retArray = [];
-					if ($doc = $this->getDocumentByUserAuth($this->uid, $fileId)) {
-						$retArray = $this->getWopiInfoForAuthUser($fileId, $version, $this->uid);
+					if ($doc = $this->getDocumentByUserAuth($this->uid, $fileId, null)) {
+						$retArray = $this->getWopiInfoForAuthUser($doc);
 						$retArray['urlsrc'] = $doc['urlsrc'];
 					}
 

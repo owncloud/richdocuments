@@ -101,8 +101,13 @@ class Application extends App {
 			);
 		});
 
-		$container->registerService('DocumentService', function (SimpleContainer $c) {
-			return new DocumentService();
+		$container->registerService('DocumentService', function (SimpleContainer $c) use ($server) {
+			$rootFolder = $server->getRootFolder();
+			$coreConfig = $c->query('CoreConfig');
+			return new DocumentService(
+				$rootFolder,
+				$coreConfig
+			);
 		});
 
 		$container->registerService('FileService', function (SimpleContainer $c) use ($server) {
