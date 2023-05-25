@@ -223,7 +223,7 @@ var documentsMain = {
 		if (dir)
 			ocurl = OC.generateUrl('apps/richdocuments/index?fileId={fileId}&dir={dir}', {fileId: fileId, dir: dir});
 		else
-			ocurl = OC.generateUrl('apps/richdocuments/index?fileId={fileId}', {fileId: fileId});
+			ocurl = OC.generateUrl('apps/richdocuments/index?fileId={fileId}&dir=', {fileId: fileId});
 
 		return window.location.protocol + '//' + window.location.host + ocurl;
 	},

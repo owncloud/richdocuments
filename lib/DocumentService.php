@@ -1,35 +1,55 @@
 <?php
 
 /**
- * ownCloud - Richdocuments App
+ * @author Piotr Mrowczynski <piotr@owncloud.com>
  *
- * @author Frank Karlitschek
- * @copyright 2013-2014 Frank Karlitschek frank@owncloud.org
+ * @copyright Copyright (c) 2023, ownCloud GmbH
+ * @license AGPL-3.0
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
- * License as published by the Free Software Foundation; either
- * version 3 of the License, or any later version.
+ * This code is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License, version 3,
+ * as published by the Free Software Foundation.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU AFFERO GENERAL PUBLIC LICENSE for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public
- * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License, version 3,
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
  *
  */
-
 namespace OCA\Richdocuments;
 
+use OCP\IConfig;
+use OCP\Files\IRootFolder;
 use OCP\Files\FileInfo;
+use OCP\Files\Folder;
 use OCP\Files\InvalidPathException;
 use OCP\Files\NotFoundException;
 use OCP\Share\Exceptions\ShareNotFound;
 use OCP\Share\IShare;
 
 class DocumentService {
+
+	/**
+	 * @var IRootFolder
+	 */
+	private $rootFolder;
+
+	/**
+	 * @var IConfig
+	 */
+	private $config;
+
+	public function __construct(
+		IRootFolder $rootFolder,
+		IConfig $config
+	) {
+		$this->rootFolder = $rootFolder;
+		$this->config = $config;
+	}
+
 	public static $MIMETYPE_LIBREOFFICE_WORDPROCESSOR = [
 		'application/pdf',
 		'application/vnd.oasis.opendocument.text',
@@ -95,22 +115,34 @@ class DocumentService {
 	 * If share is invalid or file does not exist, null is returned
 	 *
 	 * @param string $userId
-	 * @param string|int $fileId
+	 * @param int $fileId
+	 * @param string|null $dir
 	 * @return array|null
 	 */
-	public function getDocumentByUserId($userId, $fileId) {
+	public function getDocumentByUserId(string $userId, int $fileId, ?string $dir) : ?array {
 		$ret = [];
-		$root = \OC::$server->getRootFolder()->getUserFolder($userId);
-
-		// If type of fileId is a string, then it
-		// doesn't work for shared documents, lets cast to int everytime
-		/** @var \OCP\Files\Node|null $document */
-		$document = $root->getById((int)$fileId)[0];
-		if ($document === null) {
-			return $this->reportError('Document for the fileId ' . $fileId . 'not found');
-		}
+		$root = $this->rootFolder->getUserFolder($userId);
 
 		try {
+			// if dir is set, then we need to check fileId in that folder,
+			// as in case of user/group shares we can have multiple file mounts with same id
+			// return these fileMounts
+			if ($dir !== null) {
+				/** @var Folder $parentFolder */
+				$parentFolder = $root->get($dir);
+
+				/** @phpstan-ignore-next-line */
+				'@phan-var Folder $parentFolder';
+				$fileMounts = $parentFolder->getById($fileId);
+			} else {
+				$fileMounts = $root->getById($fileId);
+			}
+			
+			$document = $fileMounts[0] ?? null;
+			if ($document === null) {
+				return $this->reportError('Document for the fileId ' . $fileId . 'not found');
+			}
+
 			// Set basic parameters
 			$ret['owner'] = $document->getOwner()->getUID();
 			$ret['permissions'] = $document->getPermissions();
@@ -119,7 +151,7 @@ class DocumentService {
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $fileId;
-			$ret['instanceid'] = \OC::$server->getConfig()->getSystemValue('instanceid');
+			$ret['instanceid'] = $this->config->getSystemValue('instanceid');
 			$ret['version'] = '0'; // latest
 
 			return $ret;
@@ -152,7 +184,7 @@ class DocumentService {
 	 * @param int|null $fileId
 	 * @return array|null
 	 */
-	public function getDocumentByShareToken($token, $fileId = null) {
+	public function getDocumentByShareToken(string $token, ?int $fileId) : ?array {
 		try {
 			// Get share by token
 			$share = \OC::$server->getShareManager()->getShareByToken($token);
