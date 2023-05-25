@@ -126,9 +126,10 @@ class FileService {
 
 		// Setup FS of original file file-handle to be able to generate
 		// file versions and write files with user session set for editor
+		// take 1st mount as here we access original version of the file from owner
 		$this->setupFS($ownerUID);
-		$userFolder = $this->rootFolder->getUserFolder($ownerUID);
-		$files = $userFolder->getById($fileId);
+		$root = $this->rootFolder->getUserFolder($ownerUID);
+		$files = $root->getById($fileId);
 		if ($files !== [] && $files[0] instanceof File) {
 			return $files[0];
 		}

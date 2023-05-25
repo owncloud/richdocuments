@@ -96,21 +96,36 @@ class DocumentService {
 	 *
 	 * @param string $userId
 	 * @param string|int $fileId
+	 * @param string|null $dir
 	 * @return array|null
 	 */
-	public function getDocumentByUserId($userId, $fileId) {
+	public function getDocumentByUserId($userId, $fileId, $dir) {
 		$ret = [];
 		$root = \OC::$server->getRootFolder()->getUserFolder($userId);
 
 		// If type of fileId is a string, then it
 		// doesn't work for shared documents, lets cast to int everytime
-		/** @var \OCP\Files\Node|null $document */
-		$document = $root->getById((int)$fileId)[0];
-		if ($document === null) {
-			return $this->reportError('Document for the fileId ' . $fileId . 'not found');
-		}
-
+		$fileId = (int)$fileId;
 		try {
+			// if dir is set, then we need to check fileId in that folder,
+			// as in case of user/group shares we can have multiple file mounts with same id
+			// return these fileMounts
+			if ($dir !== null) {
+				/** @var \OCP\Files\Folder $parentFolder */
+				$parentFolder = $root->get($dir);
+
+				/** @var \OCP\Files\Node|null $document */
+				$fileMounts = $parentFolder->getById($fileId);
+			} else {
+				/** @var \OCP\Files\Node|null $document */
+				$fileMounts = $root->getById($fileId);
+			}
+			
+			$document = $fileMounts[0] ?? null;
+			if ($document === null) {
+				return $this->reportError('Document for the fileId ' . $fileId . 'not found');
+			}
+
 			// Set basic parameters
 			$ret['owner'] = $document->getOwner()->getUID();
 			$ret['permissions'] = $document->getPermissions();
