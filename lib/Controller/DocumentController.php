@@ -875,6 +875,10 @@ class DocumentController extends Controller {
 	 * @PublicPage
 	 * Generates and returns an access token and urlsrc for a given fileId
 	 * for requests that provide secret token set in app settings
+	 * 
+	 * WARNING: This method is legacy, use with caution.
+	 * 
+	 * @param string $documentId
 	 */
 	public function extAppWopiGetData($documentId) {
 		list($fileId, , $version, ) = Helper::parseDocumentId($documentId);

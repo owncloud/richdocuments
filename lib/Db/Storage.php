@@ -23,8 +23,12 @@ class Storage extends \OCA\Richdocuments\Db {
 
 	/*
 	 * Loads the recent accessed documents that match any of the mimetypes given in array $mimes
+	 * for currently logged in user
+	 * 
+	 * WARNING: This method is legacy, use with caution.
 	 */
 	public function loadRecentDocumentsForMimes($mimes) {
+		// FIXME: we should not assume user being logged in here
 		$view = \OC\Files\Filesystem::getView();
 		$mount = $view->getMount('');
 		$mountPoint = $mount->getMountPoint();

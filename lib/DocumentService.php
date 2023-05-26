@@ -89,16 +89,57 @@ class DocumentService {
 		'application/vnd.ms-powerpoint.slideshow.macroEnabled.12'
 	];
 
+	/**
+	 * Retrieve all document info for current user.
+	 * 
+	 * WARNING: This method is legacy, use with caution.
+	 *
+	 * @return array
+	 */
 	public function getDocuments() {
+		// FIXME: we should not assume user being logged in here
 		$db = new Db\Storage();
+		$view = \OC\Files\Filesystem::getView();
+
 		$rawDocuments = $db->loadRecentDocumentsForMimes(self::$MIMETYPE_LIBREOFFICE_WORDPROCESSOR);
-		$documents = $this->processDocuments($rawDocuments);
+
+		$documents = [];
+		foreach ($rawDocuments as $rawDocument) {
+			$fileId = $rawDocument['fileid'];
+			$fileName = $rawDocument['name'];
+			$mimeType = $rawDocument['mimetype'];
+			$mtime = $rawDocument['mtime'];
+			try {
+				/*
+				 * File id is a string here, and arg 1 should be an int.
+				 * As long as the string is just a number, all is good.
+				 */
+				/* @phan-suppress-next-line PhanTypeMismatchArgument */
+				$path = $view->getPath($fileId);
+			} catch (\Exception $e) {
+				\OC::$server->getLogger()->debug('Path not found for fileId: {fileId}. Skipping', [
+					'app' => 'richdocuments',
+					'fileId' => $fileId
+				]);
+				continue;
+			}
+
+			$document = [
+				'fileid' => $fileId,
+				'path' => $path,
+				'name' => $fileName,
+				'mimetype' => $mimeType,
+				'mtime' => $mtime
+				];
+
+			\array_push($documents, $document);
+		}
 
 		$list = \array_filter(
 			$documents,
 			function ($item) {
 				//filter Deleted
-				if (\strpos($item['path'], '_trashbin')===0) {
+				if (\strpos($item['path'], '_trashbin') === 0) {
 					return false;
 				}
 				return true;
@@ -239,41 +280,4 @@ class DocumentService {
 		return null;
 	}
 
-	private function processDocuments($rawDocuments) {
-		$documents = [];
-		$view = \OC\Files\Filesystem::getView();
-
-		foreach ($rawDocuments as $rawDocument) {
-			$fileId = $rawDocument['fileid'];
-			$fileName = $rawDocument['name'];
-			$mimeType = $rawDocument['mimetype'];
-			$mtime = $rawDocument['mtime'];
-			try {
-				/*
-				 * File id is a string here, and arg 1 should be an int.
-				 * As long as the string is just a number, all is good.
-				 */
-				/* @phan-suppress-next-line PhanTypeMismatchArgument */
-				$path = $view->getPath($fileId);
-			} catch (\Exception $e) {
-				\OC::$server->getLogger()->debug('Path not found for fileId: {fileId}. Skipping', [
-					'app' => 'richdocuments',
-					'fileId' => $fileId
-				]);
-				continue;
-			}
-
-			$document = [
-				'fileid' => $fileId,
-				'path' => $path,
-				'name' => $fileName,
-				'mimetype' => $mimeType,
-				'mtime' => $mtime
-				];
-
-			\array_push($documents, $document);
-		}
-
-		return $documents;
-	}
 }
