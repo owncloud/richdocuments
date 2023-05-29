@@ -50,7 +50,6 @@ class Application extends App {
 				$c->query('AppConfig'),
 				$c->query('L10N'),
 				$c->query('UserId'),
-				$c->query('ICacheFactory'),
 				$c->query('Logger'),
 				$c->query('DocumentService'),
 				$c->query('DiscoveryService'),
@@ -117,13 +116,11 @@ class Application extends App {
 		$container->registerService('DiscoveryService', function (SimpleContainer $c) use ($server) {
 			$config = $c->query('AppConfig');
 			$logger = $server->getLogger();
-			$l10n = $server->getL10N($c->query('AppName'));
 			$cacheFactory = $c->query('ICacheFactory');
 			$httpClient = $server->getHTTPClientService();
 			return new DiscoveryService(
 				$config,
 				$logger,
-				$l10n,
 				$cacheFactory,
 				$httpClient
 			);

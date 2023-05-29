@@ -21,7 +21,6 @@
  */
 namespace OCA\Richdocuments;
 
-use OCP\IL10N;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\ILogger;
@@ -42,11 +41,6 @@ class DiscoveryService {
 	private $logger;
 
 	/**
-	 * @var IL10N
-	 */
-	private $l10n;
-
-	/**
 	 * @var ICache
 	 */
 	private $cache;
@@ -59,13 +53,11 @@ class DiscoveryService {
 	public function __construct(
 		AppConfig $config,
 		ILogger $logger,
-		IL10N $l10n,
 		ICacheFactory $cacheFactory,
 		IClientService $httpClient
 	) {
 		$this->appConfig = $config;
 		$this->logger = $logger;
-		$this->l10n = $l10n;
 		$this->cache = $cacheFactory->create('oca.richdocuments.discovery');
 		$this->httpClient = $httpClient;
 	}

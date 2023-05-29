@@ -25,8 +25,6 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\Constants;
 use OCP\Files\InvalidPathException;
-use OCP\ICache;
-use OCP\ICacheFactory;
 use OCP\IGroupManager;
 use OCP\INavigationManager;
 use OCP\IRequest;
@@ -58,11 +56,6 @@ class DocumentController extends Controller {
 	 * @var AppConfig The Richdocuments app configuration service
 	 */
 	private $appConfig;
-
-	/**
-	 * @var ICache The cache service
-	 */
-	private $cache;
 
 	/**
 	 * @var ILogger The logger service
@@ -116,7 +109,6 @@ class DocumentController extends Controller {
 		AppConfig $appConfig,
 		IL10N $l10n,
 		$uid,
-		ICacheFactory $cacheFactory,
 		ILogger $logger,
 		DocumentService $documentService,
 		DiscoveryService $discoveryService,
@@ -131,7 +123,6 @@ class DocumentController extends Controller {
 		$this->l10n = $l10n;
 		$this->settings = $settings;
 		$this->appConfig = $appConfig;
-		$this->cache = $cacheFactory->create($appName);
 		$this->logger = $logger;
 		$this->documentService = $documentService;
 		$this->discoveryService = $discoveryService;
