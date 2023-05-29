@@ -28,6 +28,7 @@ use OCP\Files\InvalidPathException;
 use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\IGroupManager;
+use OCP\INavigationManager;
 use OCP\IRequest;
 use OCP\IConfig;
 use OCP\IL10N;
@@ -97,6 +98,11 @@ class DocumentController extends Controller {
 	 * @var IPreview The user manager service
 	 */
 	private $previewManager;
+
+	/**
+	 * @var INavigationManager The user manager service
+	 */
+	private $navigationManager;
 	
 	/**
 	 * The path to the ODT template
@@ -117,7 +123,8 @@ class DocumentController extends Controller {
 		IAppManager $appManager,
 		IGroupManager $groupManager,
 		IUserManager $userManager,
-		IPreview $previewManager
+		IPreview $previewManager,
+		INavigationManager $navigationManager
 	) {
 		parent::__construct($appName, $request);
 		$this->uid = $uid;
@@ -132,6 +139,7 @@ class DocumentController extends Controller {
 		$this->groupManager = $groupManager;
 		$this->userManager = $userManager;
 		$this->previewManager = $previewManager;
+		$this->navigationManager = $navigationManager;
 	}
 
 	private function responseError($message, $hint = '') {
@@ -188,7 +196,7 @@ class DocumentController extends Controller {
 			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', [$wopiRemote]), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
 		}
 
-		\OC::$server->getNavigationManager()->setActiveEntry('richdocuments_index');
+		$this->navigationManager->setActiveEntry('richdocuments_index');
 		$retVal = [
 			'enable_previews' => $this->settings->getSystemValue('enable_previews', true),
 			'wopi_url' => $webSocket,
@@ -259,7 +267,7 @@ class DocumentController extends Controller {
 			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', [$wopiRemote]), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
 		}
 
-		\OC::$server->getNavigationManager()->setActiveEntry('richdocuments_index');
+		$this->navigationManager->setActiveEntry('richdocuments_index');
 		$retVal = [
 			'enable_previews' => $this->settings->getSystemValue('enable_previews', true),
 			'wopi_url' => $webSocket,

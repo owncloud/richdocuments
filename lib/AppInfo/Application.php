@@ -57,7 +57,8 @@ class Application extends App {
 				$c->query('OCP\App\IAppManager'),
 				$server->getGroupManager(),
 				$server->getUserManager(),
-				$server->getPreviewManager()
+				$server->getPreviewManager(),
+				$server->getNavigationManager()
 			);
 		});
 		$container->registerService('WopiController', function (SimpleContainer $c) use ($server) {
