@@ -142,21 +142,6 @@ class DocumentController extends Controller {
 	}
 
 	/**
-	 * Return the original wopi url or test wopi url
-	 */
-	private function getWopiUrl() {
-		$tester = $this->appConfig->testUserSessionEnabled();
-		$wopiurl = '';
-		if ($tester) {
-			$wopiurl = $this->appConfig->getAppValue('test_wopi_url');
-		} else {
-			$wopiurl = $this->appConfig->getAppValue('wopi_url');
-		}
-
-		return $wopiurl;
-	}
-	
-	/**
 	 * Prepare document structure from raw file node metadata
 	 *
 	 * @param array $fileInfo
@@ -247,7 +232,7 @@ class DocumentController extends Controller {
 		$renderAs = 'user';
 
 		// Handle general response
-		$wopiRemote = $this->getWopiUrl();
+		$wopiRemote = $this->discoveryService->getWopiUrl();
 		if (($parts = \parse_url($wopiRemote)) && isset($parts['scheme'], $parts['host'])) {
 			$webSocketProtocol = "ws://";
 			if ($parts['scheme'] == "https") {
@@ -308,7 +293,7 @@ class DocumentController extends Controller {
 		$renderAs = 'base';
 
 		// Handle general response
-		$wopiRemote = $this->getWopiUrl();
+		$wopiRemote = $this->discoveryService->getWopiUrl();
 		if (($parts = \parse_url($wopiRemote)) && isset($parts['scheme'], $parts['host'])) {
 			$webSocketProtocol = "ws://";
 			if ($parts['scheme'] == "https") {
@@ -373,15 +358,24 @@ class DocumentController extends Controller {
 		$useUserAuth = ($fileId !== null && $shareToken === null);
 		if ($useUserAuth) {
 			// Normal editing or share by user/group
-			$doc = $this->getDocumentByUserAuth($this->uid, $fileId, $dir);
+			if ($fileInfo = $this->documentService->getDocumentByUserId($this->uid, $fileId, $dir)) {
+				$doc = $this->prepareDocument($fileInfo);
+			}
+			
+			if (!$doc) {
+				$this->logger->warning("Cannot retrieve document with fileid {fileid} in dir {dir}", ["fileid" => $fileId, "dir" => $dir]);
+				return [];
+			}
 		} else {
 			// Share by link in public folder or file
-			$doc = $this->getDocumentByShareToken($shareToken, $fileId);
-		}
-
-		if ($doc === null) {
-			$this->logger->warning("Null returned for document with fileid {fileid}", ["fileid" => $fileId]);
-			return [];
+			if ($fileInfo = $this->documentService->getDocumentByShareToken($shareToken, $fileId)) {
+				$doc = $this->prepareDocument($fileInfo);
+			}
+			
+			if (!$doc) {
+				$this->logger->warning("Cannot retrieve document from share {token} that has fileid {fileId}", ["token" => $shareToken, "fileId" => $fileId]);
+				return [];
+			}
 		}
 
 		// Update permissions
@@ -710,31 +704,6 @@ class DocumentController extends Controller {
 		];
 		$this->logger->debug('getWopiInfoForAuthUser(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
 		return $result;
-	}
-
-	/**
-	 * @param string $userId
-	 * @param int $fileId
-	 * @param string|null $dir
-	 * @return array|null
-	 */
-	private function getDocumentByUserAuth($userId, $fileId, $dir) {
-		if ($fileInfo = $this->documentService->getDocumentByUserId($userId, $fileId, $dir)) {
-			return $this->prepareDocument($fileInfo);
-		}
-		return null;
-	}
-
-	/**
-	 * @param string $token
-	 * @param int|null $fileId
-	 * @return array|null
-	 */
-	private function getDocumentByShareToken(string $token, ?int $fileId) : ?array {
-		if ($fileInfo = $this->documentService->getDocumentByShareToken($token, $fileId)) {
-			return $this->prepareDocument($fileInfo);
-		}
-		return null;
 	}
 
 	private function updateDocumentEncryptionAccessList($owner, $currentUser, $path) {

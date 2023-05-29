@@ -71,13 +71,23 @@ class DiscoveryService {
 	}
 
 	/**
+	 * Return the original wopi url or test wopi url
+	 */
+	public function getWopiUrl(): string {
+		if ($this->appConfig->testUserSessionEnabled()) {
+			return $this->appConfig->getAppValue('test_wopi_url');
+		}
+		return $this->appConfig->getAppValue('wopi_url');
+	}
+
+	/**
 	 * Get urlsrc and action for a given mimetype from WOPI discovery
 	 * 
 	 * @param string $mimetype
 	 * 
 	 * @return array|null returns urlsrc and action if matched or null in case of error to retrieve discovery
 	 */
-	public function getWopiSrcUrl($mimetype) : ?array {
+	public function getWopiSrcUrl(string $mimetype) : ?array {
 		$discoveryXML =	$this->getDiscovery();
 		if ($discoveryXML === null) {
 			// error retrieving discovery
