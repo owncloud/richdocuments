@@ -29,7 +29,7 @@ $.widget('oc.documentGrid', {
 			.attr('original-title', document.path)
 			.attr('urlsrc', document.urlsrc)
 			.attr('action', document.action)
-			.attr('lolang', document.lolang)
+			.attr('lolang', document.locale)
 			.find('label').text(document.name)
 		;
 

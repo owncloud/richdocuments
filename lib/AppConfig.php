@@ -172,9 +172,9 @@ class AppConfig {
 	 * Return true if the currently logged in user is a tester.
 	 * This depends on whether current user is the member of one of the groups
 	 * mentioned in settings (test_server_groups)
-	 * 
+	 *
 	 * WARNING: This method is legacy, use with caution.
-	 * 
+	 *
 	 * @return bool
 	 */
 	public function testUserSessionEnabled() {

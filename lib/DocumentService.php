@@ -91,7 +91,7 @@ class DocumentService {
 
 	/**
 	 * Retrieve all document info for current user.
-	 * 
+	 *
 	 * WARNING: This method is legacy, use with caution.
 	 *
 	 * @return array
@@ -279,5 +279,4 @@ class DocumentService {
 		\error_log($error);
 		return null;
 	}
-
 }

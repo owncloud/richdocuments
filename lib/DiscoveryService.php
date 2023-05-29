@@ -57,12 +57,12 @@ class DiscoveryService {
 	private $httpClient;
 
 	public function __construct(
-			AppConfig $config, 
-			ILogger $logger, 
-			IL10N $l10n, 
-			ICacheFactory $cacheFactory, 
-			IClientService $httpClient
-		) {
+		AppConfig $config,
+		ILogger $logger,
+		IL10N $l10n,
+		ICacheFactory $cacheFactory,
+		IClientService $httpClient
+	) {
 		$this->appConfig = $config;
 		$this->logger = $logger;
 		$this->l10n = $l10n;
@@ -82,9 +82,9 @@ class DiscoveryService {
 
 	/**
 	 * Get urlsrc and action for a given mimetype from WOPI discovery
-	 * 
+	 *
 	 * @param string $mimetype
-	 * 
+	 *
 	 * @return array|null returns urlsrc and action if matched or null in case of error to retrieve discovery
 	 */
 	public function getWopiSrcUrl(string $mimetype) : ?array {
@@ -106,9 +106,9 @@ class DiscoveryService {
 		return [ 'urlsrc' => null, 'action' => null ];
 	}
 
-	/** 
+	/**
 	 * Return the content of discovery.xml - either from cache, or download it.
-	 * 
+	 *
 	 * @return SimpleXMLElement|null returns discovery or null in case of discovery cannot be retrieved
 	 */
 	private function getDiscovery() : ?SimpleXMLElement {

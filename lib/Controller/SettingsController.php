@@ -43,6 +43,8 @@ class SettingsController extends Controller {
 	}
 
 	/**
+	 * FIXME: remove ./settings.php and this function, implement with OCP\Settings\ISettings instead
+	 *
 	 * @NoCSRFRequired
 	 */
 	public function settingsIndex() {
@@ -53,6 +55,9 @@ class SettingsController extends Controller {
 		);
 	}
 
+	/**
+	 * FIXME: remove ./admin.php and this function, implement with OCP\Settings\ISettings instead
+	 */
 	public function adminIndex() {
 		return new TemplateResponse(
 			$this->appName,
