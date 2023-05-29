@@ -11,29 +11,32 @@
 
 namespace OCA\Richdocuments\Controller;
 
-use \OC\Files\View;
+use OCA\Richdocuments\AppConfig;
+use OCA\Richdocuments\Db;
 use OCA\Richdocuments\Db\Wopi;
+use OCA\Richdocuments\DiscoveryService;
+use OCA\Richdocuments\DocumentService;
+use OCA\Richdocuments\Helper;
+use OCA\Richdocuments\Http\ResponseException;
 use OCP\App\IAppManager;
-use \OCP\AppFramework\Controller;
-use \OCP\Constants;
+use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\ContentSecurityPolicy;
+use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Http\TemplateResponse;
+use OCP\Constants;
 use OCP\Files\InvalidPathException;
+use OCP\ICache;
+use OCP\ICacheFactory;
 use OCP\IGroupManager;
-use \OCP\IRequest;
-use \OCP\IConfig;
-use \OCP\IL10N;
-use \OCP\AppFramework\Http\ContentSecurityPolicy;
-use \OCP\AppFramework\Http;
-use \OCP\AppFramework\Http\JSONResponse;
-use \OCP\AppFramework\Http\TemplateResponse;
-use \OCP\ICacheFactory;
-use \OCP\ILogger;
-
-use \OCA\Richdocuments\AppConfig;
-use \OCA\Richdocuments\Db;
-use \OCA\Richdocuments\Helper;
-use \OCA\Richdocuments\DocumentService;
-use \OCA\Richdocuments\Http\ResponseException;
+use OCP\IRequest;
+use OCP\IConfig;
+use OCP\IL10N;
+use OCP\ILogger;
+use OCP\Template;
 use OCP\IUserManager;
+use OCP\IPreview;
+use OC\Files\View;
 
 class DocumentController extends Controller {
 	/**
@@ -57,7 +60,7 @@ class DocumentController extends Controller {
 	private $appConfig;
 
 	/**
-	 * @var ICacheFactory The cache service
+	 * @var ICache The cache service
 	 */
 	private $cache;
 
@@ -77,6 +80,11 @@ class DocumentController extends Controller {
 	private $documentService;
 
 	/**
+	 * @var DiscoveryService The document service
+	 */
+	private $discoveryService;
+
+	/**
 	 * @var IGroupManager The group manager service
 	 */
 	private $groupManager;
@@ -85,6 +93,11 @@ class DocumentController extends Controller {
 	 * @var IUserManager The user manager service
 	 */
 	private $userManager;
+
+	/**
+	 * @var IPreview The user manager service
+	 */
+	private $previewManager;
 	
 	/**
 	 * The path to the ODT template
@@ -98,44 +111,28 @@ class DocumentController extends Controller {
 		AppConfig $appConfig,
 		IL10N $l10n,
 		$uid,
-		ICacheFactory $cache,
+		ICacheFactory $cacheFactory,
 		ILogger $logger,
 		DocumentService $documentService,
+		DiscoveryService $discoveryService,
 		IAppManager $appManager,
 		IGroupManager $groupManager,
-		IUserManager $userManager
+		IUserManager $userManager, 
+		IPreview $previewManager
 	) {
 		parent::__construct($appName, $request);
 		$this->uid = $uid;
 		$this->l10n = $l10n;
 		$this->settings = $settings;
 		$this->appConfig = $appConfig;
-		$this->cache = $cache->create($appName);
+		$this->cache = $cacheFactory->create($appName);
 		$this->logger = $logger;
 		$this->documentService = $documentService;
+		$this->discoveryService = $discoveryService;
 		$this->appManager = $appManager;
 		$this->groupManager = $groupManager;
 		$this->userManager = $userManager;
-	}
-
-	/**
-	 * @param \SimpleXMLElement|null $discovery_parsed
-	 * @param string $mimetype
-	 */
-	private function getWopiSrcUrl($discovery_parsed, $mimetype) {
-		if ($discovery_parsed === null || $discovery_parsed == false) {
-			return null;
-		}
-
-		$result = $discovery_parsed->xpath(\sprintf('/wopi-discovery/net-zone/app[@name=\'%s\']/action', $mimetype));
-		if (($result !== false) && (\count($result) > 0)) {
-			return [
-				'urlsrc' => (string)$result[0]['urlsrc'],
-				'action' => (string)$result[0]['name']
-			];
-		}
-
-		return null;
+		$this->previewManager = $previewManager;
 	}
 
 	private function responseError($message, $hint = '') {
@@ -158,77 +155,7 @@ class DocumentController extends Controller {
 
 		return $wopiurl;
 	}
-
-	/** Return the content of discovery.xml - either from cache, or download it.
-	 * @return string
-	 */
-	private function getDiscovery() {
-		$tester = $this->appConfig->testUserSessionEnabled();
-		$wopiRemote = $this->getWopiUrl();
-		$discoveryKey = 'discovery.xml';
-		if ($tester) {
-			$discoveryKey = 'discovery.xml_test';
-		}
-		// Provides access to information about the capabilities of a WOPI client
-		// and the mechanisms for invoking those abilities through URIs.
-		$wopiDiscovery = $wopiRemote . '/hosting/discovery';
-
-		// Read the memcached value (if the memcache is installed)
-		$discovery = $this->cache->get($discoveryKey);
-
-		if ($discovery === null) {
-			$this->logger->debug('getDiscovery(): Not found in cache; Fetching discovery.xml', ['app' => $this->appName]);
-
-			$contact_admin = $this->l10n->t('Please contact the "%s" administrator.', [$wopiRemote]);
-
-			try {
-				// If we are sending query to built-in CODE server, we avoid using IClient::get() method
-				// because of an encoding issue in guzzle: https://github.com/guzzle/guzzle/issues/1758
-				if (\strpos($wopiDiscovery, 'proxy.php') === false) {
-					$wopiClient = \OC::$server->getHTTPClientService()->newClient();
-					$discovery = $wopiClient->get($wopiDiscovery)->getBody();
-				} else {
-					$discovery = \file_get_contents($wopiDiscovery);
-				}
-			} catch (\Exception $e) {
-				$error_message = $e->getMessage();
-
-				$this->logger->error('Collabora Online: Encountered error {error}', ['app' => $this->appName, 'error' => $error_message ]);
-				if (\preg_match('/^cURL error ([0-9]*):/', $error_message, $matches)) {
-					$admin_check = $this->l10n->t('Please ask your administrator to check the Collabora Online server setting. The exact error message was: ') . $error_message;
-
-					$curl_error = $matches[1];
-					switch ($curl_error) {
-						case '1':
-							throw new ResponseException($this->l10n->t('Collabora Online: The protocol specified in "%s" is not allowed.', [$wopiRemote]), $admin_check);
-						case '3':
-							throw new ResponseException($this->l10n->t('Collabora Online: Malformed URL "%s".', [$wopiRemote]), $admin_check);
-						case '6':
-							throw new ResponseException($this->l10n->t('Collabora Online: Cannot resolve the host "%s".', [$wopiRemote]), $admin_check);
-						case '7':
-							throw new ResponseException($this->l10n->t('Collabora Online: Cannot connect to the host "%s".', [$wopiRemote]), $admin_check);
-						case '35':
-							throw new ResponseException($this->l10n->t('Collabora Online: SSL/TLS handshake failed with the host "%s".', [$wopiRemote]), $admin_check);
-						case '60':
-							throw new ResponseException($this->l10n->t('Collabora Online: SSL certificate is not installed.'), $this->l10n->t('Please ask your administrator to add ca-chain.cert.pem to the ca-bundle.crt, for example "cat /etc/loolwsd/ca-chain.cert.pem >> <server-installation>/resources/config/ca-bundle.crt" . The exact error message was: ') . $error_message);
-					}
-				}
-				throw new ResponseException($this->l10n->t('Collabora Online unknown error: ') . $error_message, $contact_admin);
-			}
-
-			if (!$discovery) {
-				throw new ResponseException($this->l10n->t('Collabora Online: Unable to read discovery.xml from "%s".', [$wopiRemote]), $contact_admin);
-			}
-
-			$this->logger->debug('Storing the discovery.xml under key ' . $discoveryKey . ' to the cache.', ['app' => $this->appName]);
-			$this->cache->set($discoveryKey, $discovery, 3600);
-		} else {
-			$this->logger->debug('getDiscovery(): Found in cache', ['app' => $this->appName]);
-		}
-
-		return $discovery;
-	}
-
+	
 	/**
 	 * Prepare document structure from raw file node metadata
 	 *
@@ -254,33 +181,6 @@ class DocumentController extends Controller {
 	 * @return array
 	 */
 	private function prepareDocuments($rawDocuments) {
-		$discovery_parsed = null;
-		try {
-			$discovery = $this->getDiscovery();
-
-			$loadEntities = \libxml_disable_entity_loader(true);
-			$discovery_parsed = \simplexml_load_string($discovery);
-			\libxml_disable_entity_loader($loadEntities);
-
-			if ($discovery_parsed === false) {
-				$this->cache->remove('discovery.xml');
-				$wopiRemote = $this->getWopiUrl();
-
-				return [
-					'status' => 'error',
-					'message' => $this->l10n->t('Collabora Online: discovery.xml from "%s" is not a well-formed XML string.', [$wopiRemote]),
-					'hint' => $this->l10n->t('Please contact the "%s" administrator.', [$wopiRemote])
-				];
-			}
-		} catch (ResponseException $e) {
-			return [
-				'status' => 'error',
-				'message' => $e->getMessage(),
-				'hint' => $e->getHint()
-			];
-		}
-
-		$fileIds = [];
 		$documents = [];
 		$lolang = \strtolower(\str_replace('_', '-', $this->settings->getUserValue($this->uid, 'core', 'lang', 'en')));
 		foreach ($rawDocuments as $key=>$document) {
@@ -290,13 +190,20 @@ class DocumentController extends Controller {
 				$documents[$key] = $document;
 			}
 
-			$documents[$key]['icon'] = \preg_replace('/\.png$/', '.svg', \OCP\Template::mimetype_icon($document['mimetype']));
-			$documents[$key]['hasPreview'] = \OC::$server->getPreviewManager()->isMimeSupported($document['mimetype']);
-			$ret = $this->getWopiSrcUrl($discovery_parsed, $document['mimetype']);
-			$documents[$key]['urlsrc'] = $ret['urlsrc'];
-			$documents[$key]['action'] = $ret['action'];
+			$wopiSrcUrl = $this->discoveryService->getWopiSrcUrl($document['mimetype']);
+			if (!$wopiSrcUrl) {
+				return [
+					'status' => 'error',
+					'message' => $this->l10n->t('Collabora Online: Unable to read WOPI discovery for given document', []),
+					'hint' => $this->l10n->t('Please contact the administrator.', [])
+				];
+			}
+
+			$documents[$key]['icon'] = \preg_replace('/\.png$/', '.svg', Template::mimetype_icon($document['mimetype']));
+			$documents[$key]['hasPreview'] = $this->previewManager->isMimeSupported($document['mimetype']);
+			$documents[$key]['urlsrc'] = $wopiSrcUrl['urlsrc'];
+			$documents[$key]['action'] = $wopiSrcUrl['action'];
 			$documents[$key]['lolang'] = $lolang;
-			$fileIds[] = $document['fileid'];
 		}
 
 		\usort($documents, function ($a, $b) {
@@ -472,7 +379,7 @@ class DocumentController extends Controller {
 			$doc = $this->getDocumentByShareToken($shareToken, $fileId);
 		}
 
-		if ($doc == null) {
+		if ($doc === null) {
 			$this->logger->warning("Null returned for document with fileid {fileid}", ["fileid" => $fileId]);
 			return [];
 		}
@@ -613,41 +520,23 @@ class DocumentController extends Controller {
 			$content = \file_get_contents($this->appManager->getAppPath($this->appName) . self::ODT_TEMPLATE_PATH);
 		}
 
-		$discovery_parsed = null;
-		try {
-			$discovery = $this->getDiscovery();
-
-			$loadEntities = \libxml_disable_entity_loader(true);
-			$discovery_parsed = \simplexml_load_string($discovery);
-			\libxml_disable_entity_loader($loadEntities);
-
-			if ($discovery_parsed === false) {
-				$this->cache->remove('discovery.xml');
-				$wopiRemote = $this->getWopiUrl();
-
-				return [
-					'status' => 'error',
-					'message' => $this->l10n->t('Collabora Online: discovery.xml from "%s" is not a well-formed XML string.', [$wopiRemote]),
-					'hint' => $this->l10n->t('Please contact the "%s" administrator.', [$wopiRemote])
-				];
-			}
-		} catch (ResponseException $e) {
+		$wopiSrcUrl = $this->discoveryService->getWopiSrcUrl($mimetype);
+		if (!$wopiSrcUrl) {
 			return [
 				'status' => 'error',
-				'message' => $e->getMessage(),
-				'hint' => $e->getHint()
+				'message' => $this->l10n->t('Collabora Online: Unable to read WOPI discovery for given document', []),
+				'hint' => $this->l10n->t('Please contact the administrator.', [])
 			];
 		}
 
 		if ($content && $view->file_put_contents($path, $content)) {
 			$info = $view->getFileInfo($path);
-			$ret = $this->getWopiSrcUrl($discovery_parsed, $mimetype);
 			$lolang = \strtolower(\str_replace('_', '-', $this->settings->getUserValue($this->uid, 'core', 'lang', 'en')));
 			$response =  [
 				'status' => 'success',
 				'fileid' => $info['fileid'],
-				'urlsrc' => $ret['urlsrc'],
-				'action' => $ret['action'],
+				'urlsrc' => $wopiSrcUrl['urlsrc'],
+				'action' => $wopiSrcUrl['action'],
 				'lolang' => $lolang,
 				'data' => \OCA\Files\Helper::formatFileInfo($info)
 			];

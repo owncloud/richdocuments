@@ -13,6 +13,7 @@
 
 namespace OCA\Richdocuments\AppInfo;
 
+use OCA\Richdocuments\DiscoveryService;
 use OCA\Richdocuments\FileService;
 use OCA\Richdocuments\DocumentService;
 use OCA\Richdocuments\Controller\WopiController;
@@ -52,9 +53,11 @@ class Application extends App {
 				$c->query('ICacheFactory'),
 				$c->query('Logger'),
 				$c->query('DocumentService'),
+				$c->query('DiscoveryService'),
 				$c->query('OCP\App\IAppManager'),
 				$server->getGroupManager(),
-				$server->getUserManager()
+				$server->getUserManager(),
+				$server->getPreviewManager()
 			);
 		});
 		$container->registerService('WopiController', function (SimpleContainer $c) use ($server) {
@@ -107,6 +110,21 @@ class Application extends App {
 			return new DocumentService(
 				$rootFolder,
 				$coreConfig
+			);
+		});
+
+		$container->registerService('DiscoveryService', function (SimpleContainer $c) use ($server) {
+			$config = $c->query('AppConfig');
+			$logger = $server->getLogger();
+			$l10n = $server->getL10N($c->query('AppName'));
+			$cacheFactory = $c->query('ICacheFactory');
+			$httpClient = $server->getHTTPClientService();
+			return new DiscoveryService(
+				$config,
+				$logger,
+				$l10n,
+				$cacheFactory,
+				$httpClient
 			);
 		});
 
