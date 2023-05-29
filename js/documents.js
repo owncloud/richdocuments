@@ -221,9 +221,9 @@ var documentsMain = {
 	_generateFullUrl: function(fileId, dir) {
 		var ocurl;
 		if (dir)
-			ocurl = OC.generateUrl('apps/richdocuments/index?fileId={fileId}&dir={dir}', {fileId: fileId, dir: dir});
+			ocurl = OC.generateUrl('apps/richdocuments/documents.php/index?fileId={fileId}&dir={dir}', {fileId: fileId, dir: dir});
 		else
-			ocurl = OC.generateUrl('apps/richdocuments/index?fileId={fileId}&dir=', {fileId: fileId});
+			ocurl = OC.generateUrl('apps/richdocuments/documents.php/index?fileId={fileId}&dir=', {fileId: fileId});
 
 		return window.location.protocol + '//' + window.location.host + ocurl;
 	},

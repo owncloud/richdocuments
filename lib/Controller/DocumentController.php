@@ -36,29 +36,59 @@ use \OCA\Richdocuments\Http\ResponseException;
 use OCP\IUserManager;
 
 class DocumentController extends Controller {
+	/**
+	 * @var string The user ID of the current user
+	 */
 	private $uid;
+
+	/**
+	 * @var IL10N The localization service
+	 */
 	private $l10n;
+
+	/**
+	 * @var IConfig The ownCloud configuration service
+	 */
 	private $settings;
+
+	/**
+	 * @var AppConfig The Richdocuments app configuration service
+	 */
 	private $appConfig;
+
+	/**
+	 * @var ICacheFactory The cache service
+	 */
 	private $cache;
+
+	/**
+	 * @var ILogger The logger service
+	 */
 	private $logger;
+
+	/**
+	 * @var IAppManager The app manager service
+	 */
 	private $appManager;
 
 	/**
-	 * @var DocumentService
+	 * @var DocumentService The document service
 	 */
 	private $documentService;
 
 	/**
-	 * @var IGroupManager
+	 * @var IGroupManager The group manager service
 	 */
 	private $groupManager;
 
 	/**
-	 * @var IUserManager
+	 * @var IUserManager The user manager service
 	 */
 	private $userManager;
 	
+	/**
+	 * The path to the ODT template
+	 */
 	public const ODT_TEMPLATE_PATH = '/assets/odttemplate.odt';
 
 	public function __construct(
@@ -293,6 +323,10 @@ class DocumentController extends Controller {
 	}
 
 	/**
+	 * Get collabora document for:
+	 * - the base template if fileId is null
+	 * - file in user folder (also shared by user/group) if fileId not null
+	 * 
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
@@ -300,39 +334,11 @@ class DocumentController extends Controller {
 		// If type of fileId is a string, then it
 		// doesn't work for shared documents, lets cast to int everytime
 		$fileId = (int)$fileId;
-
+		
 		// Normal editing and user/group share editing
 		// Parameter $dir is not used during indexing, but might be used by Document Server
-		return $this->handleIndex($fileId, $dir, null, 'user');
-	}
+		$renderAs = 'user';
 
-	/**
-	 * @NoAdminRequired
-	 * @NoCSRFRequired
-	 * @PublicPage
-	 */
-	public function publicIndex($fileId, $shareToken) {
-		// If type of fileId is a string, then it
-		// doesn't work for shared documents, lets cast to int everytime
-		$fileId = (int)$fileId;
-
-		// Public share link (folder or file)
-		return $this->handleIndex($fileId, null, $shareToken, 'base');
-	}
-
-	/**
-	 * Get collabora document template for:
-	 * - the base template if both fileId and shareToken are null
-	 * - file in user folder (also shared by user/group) if fileId not null and shareToken is null
-	 * - public link (public file share or file in public folder share identified by fileId) if shareToken is not null
-	 *
-	 * @param int|null $fileId
-	 * @param string|null $dir
-	 * @param string|null $shareToken
-	 * @param string $renderAs the template layout to be used
-	 * @return TemplateResponse
-	 */
-	private function handleIndex(?int $fileId, ?string $dir, ?string $shareToken, string $renderAs) : TemplateResponse {
 		// Handle general response
 		$wopiRemote = $this->getWopiUrl();
 		if (($parts = \parse_url($wopiRemote)) && isset($parts['scheme'], $parts['host'])) {
@@ -357,12 +363,73 @@ class DocumentController extends Controller {
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
 			'instanceId' => $this->settings->getSystemValue('instanceid'),
 			'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
-			'show_custom_header' => $renderAs === 'base'  // public link should show a customer header without buttons
+			'show_custom_header' => false
 		];
 
 		// Get doc index if possible
 		try {
-			$docRetVal = $this->handleDocIndex($fileId, $dir, $shareToken);
+			$docRetVal = $this->getDocumentIndex($fileId, $dir, null);
+		} catch (\Exception $e) {
+			return $this->responseError($this->l10n->t('Collabora Online: Cannot open document.'), $e->getMessage());
+		}
+		$retVal = \array_merge($retVal, $docRetVal);
+
+		$response = new TemplateResponse('richdocuments', 'documents', $retVal, $renderAs);
+		$policy = new ContentSecurityPolicy();
+		$policy->addAllowedFrameDomain($this->domainOnly($wopiRemote));
+		$policy->allowInlineScript(true);
+		$response->setContentSecurityPolicy($policy);
+
+		return $response;
+	}
+
+	/**
+	 * Get collabora document for public link by share token shareToken:
+	 * - file shared by public link (shareToken points directly to file)
+	 * - file in public folder shared by link (shareToken points to shared folder, and file to get is identified by fileId)
+	 * 
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @PublicPage
+	 */
+	public function public($shareToken, $fileId) {
+		// If type of fileId is a string, then it
+		// doesn't work for shared documents, lets cast to int everytime
+		$fileId = (int)$fileId;
+
+		// Public share link (folder or file)
+		$renderAs = 'base';
+
+		// Handle general response
+		$wopiRemote = $this->getWopiUrl();
+		if (($parts = \parse_url($wopiRemote)) && isset($parts['scheme'], $parts['host'])) {
+			$webSocketProtocol = "ws://";
+			if ($parts['scheme'] == "https") {
+				$webSocketProtocol = "wss://";
+			}
+			$webSocket = \sprintf(
+				"%s%s%s",
+				$webSocketProtocol,
+				$parts['host'],
+				isset($parts['port']) ? ":" . $parts['port'] : ""
+			);
+		} else {
+			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', [$wopiRemote]), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
+		}
+
+		\OC::$server->getNavigationManager()->setActiveEntry('richdocuments_index');
+		$retVal = [
+			'enable_previews' => $this->settings->getSystemValue('enable_previews', true),
+			'wopi_url' => $webSocket,
+			'doc_format' => $this->appConfig->getAppValue('doc_format'),
+			'instanceId' => $this->settings->getSystemValue('instanceid'),
+			'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
+			'show_custom_header' => true // public link should show a customer header without buttons
+		];
+
+		// Get doc index if possible
+		try {
+			$docRetVal = $this->getDocumentIndex($fileId, null, $shareToken);
 		} catch (\Exception $e) {
 			return $this->responseError($this->l10n->t('Collabora Online: Cannot open document.'), $e->getMessage());
 		}
@@ -379,8 +446,10 @@ class DocumentController extends Controller {
 
 	/**
 	 * Get document metadata for:
-	 * - file in user folder if fileId and currently authenticated user are specified, and shareToken is null
-	 * - public link (public file share or file in public folder share identified by fileId) if shareToken is not null
+	 * - the base template if fileId is null and shareToken is null
+	 * - file in user folder (also shared by user/group) if fileId not null and shareToken is null
+	 * - file shared by public link (shareToken points directly to file)
+	 * - file in public folder shared by link (shareToken points to shared folder, and file to get is identified by fileId)
 	 *
 	 * @param int|null $fileId
 	 * @param string|null $dir
@@ -389,7 +458,7 @@ class DocumentController extends Controller {
 	 * @return array
 	 * @throws \Exception
 	 */
-	private function handleDocIndex(?int $fileId, ?string $dir, ?string $shareToken) : array {
+	private function getDocumentIndex(?int $fileId, ?string $dir, ?string $shareToken) : array {
 		if ($fileId === null && $shareToken === null) {
 			return [];
 		}
@@ -450,19 +519,20 @@ class DocumentController extends Controller {
 	}
 
 	/**
-	 * Accessed from external-apps such as new owncloud web front-end
-	 * It returns the information to load the document from the fileId.
+	 * API endpoint for  external-apps such as new owncloud web front-end
+	 * to return the information needed to load the document using the fileId.
+	 * 
 	 * @NoAdminRequired
 	 * @CORS
 	 * @NoCSRFRequired
 	 */
-	public function getDocumentIndex($fileId) {
+	public function get($fileId) {
 		try {
 			// If type of fileId is a string, then it
 			// doesn't work for shared documents, lets cast to int everytime
 			$fileId = (int)$fileId;
 			
-			$docRetVal = $this->handleDocIndex($fileId, null, null);
+			$docRetVal = $this->getDocumentIndex($fileId, null, null);
 			$docRetVal["locale"] = \strtolower(\str_replace('_', '-', $this->settings->getUserValue($this->uid, 'core', 'lang', 'en')));
 		} catch (\Exception $e) {
 			return new JSONResponse([
@@ -474,6 +544,8 @@ class DocumentController extends Controller {
 	}
 
 	/**
+	 * API endpoint for to create new document
+	 * 
 	 * @NoAdminRequired
 	 */
 	public function create() {
@@ -841,11 +913,14 @@ class DocumentController extends Controller {
 		$this->logger->debug('getWopiInfoForPublicLink(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
 		return $result;
 	}
-	
+
 	/**
-	 * @NoAdminRequired
+	 * API endpoint to list all user documents
+	 * 
 	 * lists the documents the user has access to (including shared files, once the code in core has been fixed)
 	 * also adds session and member info for these files
+	 * 
+	 * @NoAdminRequired
 	 */
 	public function listAll() {
 		return $this->prepareDocuments($this->documentService->getDocuments());
