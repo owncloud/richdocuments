@@ -116,9 +116,9 @@ class DocumentController extends Controller {
 
 	/**
 	 * Return the original wopi url or test wopi url
-	 * @param boolean $tester
 	 */
-	private function getWopiUrl($tester) {
+	private function getWopiUrl() {
+		$tester = $this->appConfig->testUserSessionEnabled();
 		$wopiurl = '';
 		if ($tester) {
 			$wopiurl = $this->appConfig->getAppValue('test_wopi_url');
@@ -129,40 +129,12 @@ class DocumentController extends Controller {
 		return $wopiurl;
 	}
 
-	/**
-	 * Return true if the currently logged in user is a tester.
-	 * This depends on whether current user is the member of one of the groups
-	 * mentioned in settings (test_server_groups)
-	 */
-	private function isTester() {
-		$tester = false;
-
-		$user = \OC::$server->getUserSession()->getUser();
-		if ($user === null) {
-			return false;
-		}
-
-		$uid = $user->getUID();
-		$testgroups = \array_filter(\explode('|', $this->appConfig->getAppValue('test_server_groups')));
-		$this->logger->debug('Testgroups are {testgroups}', [ 'app' => $this->appName, 'testgroups' => $testgroups ]);
-		foreach ($testgroups as $testgroup) {
-			$test = $this->groupManager->get($testgroup);
-			if ($test !== null && \sizeof($test->searchUsers($uid)) > 0) {
-				$this->logger->debug('User {user} found in {group}', ['app' => $this->appName, 'user' => $uid, 'group' => $testgroup ]);
-				$tester = true;
-				break;
-			}
-		}
-
-		return $tester;
-	}
-
 	/** Return the content of discovery.xml - either from cache, or download it.
 	 * @return string
 	 */
 	private function getDiscovery() {
-		$tester = $this->isTester();
-		$wopiRemote = $this->getWopiUrl($tester);
+		$tester = $this->appConfig->testUserSessionEnabled();
+		$wopiRemote = $this->getWopiUrl();
 		$discoveryKey = 'discovery.xml';
 		if ($tester) {
 			$discoveryKey = 'discovery.xml_test';
@@ -262,7 +234,7 @@ class DocumentController extends Controller {
 
 			if ($discovery_parsed === false) {
 				$this->cache->remove('discovery.xml');
-				$wopiRemote = $this->getWopiUrl($this->isTester());
+				$wopiRemote = $this->getWopiUrl();
 
 				return [
 					'status' => 'error',
@@ -362,7 +334,7 @@ class DocumentController extends Controller {
 	 */
 	private function handleIndex(?int $fileId, ?string $dir, ?string $shareToken, string $renderAs) : TemplateResponse {
 		// Handle general response
-		$wopiRemote = $this->getWopiUrl($this->isTester());
+		$wopiRemote = $this->getWopiUrl();
 		if (($parts = \parse_url($wopiRemote)) && isset($parts['scheme'], $parts['host'])) {
 			$webSocketProtocol = "ws://";
 			if ($parts['scheme'] == "https") {
@@ -579,7 +551,7 @@ class DocumentController extends Controller {
 
 			if ($discovery_parsed === false) {
 				$this->cache->remove('discovery.xml');
-				$wopiRemote = $this->getWopiUrl($this->isTester());
+				$wopiRemote = $this->getWopiUrl();
 
 				return [
 					'status' => 'error',
