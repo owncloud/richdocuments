@@ -262,7 +262,7 @@ $(document).ready(function() {
 		if (!$("#isPublic").val()) {
 			// Dont register file menu with public links
 			$.get(
-				OC.filePath('richdocuments', 'ajax', 'settings.php'),
+				OC.generateUrl("apps/richdocuments/ajax/settings/list"),
 				{},
 				odfViewer.registerFilesMenu
 			);
