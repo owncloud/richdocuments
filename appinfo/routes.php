@@ -20,7 +20,6 @@ $application->registerRoutes($this, [
 		['name' => 'document#create', 'url' => 'ajax/documents/create', 'verb' => 'POST'],
 		['name' => 'document#listAll', 'url' => 'ajax/documents/list', 'verb' => 'GET'],
 		["name" => 'document#publicIndex', "url" => "public", "verb" => "GET"],
-		['name' => 'document#extAppWopiGetData', 'url' => 'wopi/extapp/data/{documentId}', 'verb' => 'POST'],
 		['name' => 'document#getDocumentIndex', 'url' => 'ajax/documents/index/{fileId}', 'verb' => 'GET'],
 		// Collabora for Owncloud Web (new frontend)
 		['name' => 'web_asset#get', 'url' => 'js/richdocuments.js', 'verb' => 'GET'],

@@ -841,50 +841,7 @@ class DocumentController extends Controller {
 		$this->logger->debug('getWopiInfoForPublicLink(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
 		return $result;
 	}
-
-	/**
-	 * @NoCSRFRequired
-	 * @PublicPage
-	 * Generates and returns an access token and urlsrc for a given fileId
-	 * for requests that provide secret token set in app settings
-	 * 
-	 * WARNING: This method is legacy, use with caution.
-	 * 
-	 * @param string $documentId
-	 */
-	public function extAppWopiGetData($documentId) {
-		list($fileId, , $version, ) = Helper::parseDocumentId($documentId);
-
-		// If type of fileId is a string, then it
-		// doesn't work for shared documents, lets cast to int everytime
-		$fileId = (int)$fileId;
-
-		$secretToken = $this->request->getParam('secret_token');
-		$apps = \array_filter(\explode(',', $this->appConfig->getAppValue('external_apps')));
-		foreach ($apps as $app) {
-			if ($app !== '') {
-				if ($secretToken === $app) {
-					$appName = \explode(':', $app);
-					$this->logger->info('extAppWopiGetData(): External app "{extApp}" authenticated; issuing access token for fileId {fileId}', [
-						'app' => $this->appName,
-						'extApp' => $appName[0],
-						'fileId' => $fileId
-					]);
-
-					$retArray = [];
-					if ($doc = $this->getDocumentByUserAuth($this->uid, $fileId, null)) {
-						$retArray = $this->getWopiInfoForAuthUser($doc);
-						$retArray['urlsrc'] = $doc['urlsrc'];
-					}
-
-					return $retArray;
-				}
-			}
-		}
-
-		return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
-	}
-
+	
 	/**
 	 * @NoAdminRequired
 	 * lists the documents the user has access to (including shared files, once the code in core has been fixed)
