@@ -31,6 +31,7 @@ use OCP\IRequest;
 use OCP\IConfig;
 use OCP\IL10N;
 use OCP\ILogger;
+use OCP\IUser;
 use OCP\Template;
 use OCP\IUserManager;
 use OCP\IPreview;
@@ -103,12 +104,11 @@ class DocumentController extends Controller {
 	public const ODT_TEMPLATE_PATH = '/assets/odttemplate.odt';
 
 	public function __construct(
-		$appName,
+		string $appName,
 		IRequest $request,
 		IConfig $settings,
 		AppConfig $appConfig,
 		IL10N $l10n,
-		$uid,
 		ILogger $logger,
 		DocumentService $documentService,
 		DiscoveryService $discoveryService,
@@ -119,7 +119,6 @@ class DocumentController extends Controller {
 		INavigationManager $navigationManager
 	) {
 		parent::__construct($appName, $request);
-		$this->uid = $uid;
 		$this->l10n = $l10n;
 		$this->settings = $settings;
 		$this->appConfig = $appConfig;
@@ -315,7 +314,7 @@ class DocumentController extends Controller {
 		$useUserAuth = ($fileId !== null && $shareToken === null);
 		if ($useUserAuth) {
 			// Normal editing or share by user/group
-			$fileInfo = $this->documentService->getDocumentByUserId($this->uid, $fileId, $dir);
+			$fileInfo = $this->documentService->getDocumentByUserId($this->getCurrentUserUID(), $fileId, $dir);
 			if (!$fileInfo) {
 				$this->logger->warning("Cannot retrieve document with fileid {fileid} in dir {dir}", ["fileid" => $fileId, "dir" => $dir]);
 				return null;
@@ -330,7 +329,7 @@ class DocumentController extends Controller {
 		}
 
 		// enrich fileinfo with additional details
-		$locale = \strtolower(\str_replace('_', '-', $this->settings->getUserValue($this->uid, 'core', 'lang', 'en')));
+		$locale = \strtolower(\str_replace('_', '-', $this->settings->getUserValue($this->getCurrentUserUID(), 'core', 'lang', 'en')));
 		$wopiSrcUrl = $this->discoveryService->getWopiSrcUrl($fileInfo['mimetype']);
 		if (!$wopiSrcUrl) {
 			$this->logger->error("Cannot retrieve discovery for document", []);
@@ -413,7 +412,7 @@ class DocumentController extends Controller {
 		$filename = $this->request->getParam('filename');
 		$dir = $this->request->getParam('dir');
 
-		$view = new View('/' . $this->uid . '/files');
+		$view = new View('/' . $this->getCurrentUserUID() . '/files');
 
 		if (!$dir) {
 			$dir = '/';
@@ -484,7 +483,7 @@ class DocumentController extends Controller {
 
 		if ($content && $view->file_put_contents($path, $content)) {
 			$info = $view->getFileInfo($path);
-			$locale = \strtolower(\str_replace('_', '-', $this->settings->getUserValue($this->uid, 'core', 'lang', 'en')));
+			$locale = \strtolower(\str_replace('_', '-', $this->settings->getUserValue($this->getCurrentUserUID(), 'core', 'lang', 'en')));
 			$response =  [
 				'status' => 'success',
 				'fileid' => $info['fileid'],
@@ -541,7 +540,7 @@ class DocumentController extends Controller {
 	 * @throws \Exception
 	 */
 	private function getWopiInfoForAuthUser(array $docInfo) : array {
-		$currentUser = $this->uid;
+		$currentUser = $this->getCurrentUserUID();
 		$ownerUid = $docInfo['owner'];
 		$updatable = $docInfo['updateable'];
 		$fileId = $docInfo['fileid'];
@@ -677,6 +676,20 @@ class DocumentController extends Controller {
 			$encryptionManager->getEncryptionModule()->update($absPath, $currentUser, $accessList);
 		}
 	}
+	
+	/**
+	 * Return uid of currently logged in user.
+	 *
+	 * WARNING: This method is legacy, use with caution.
+	 *
+	 * @return string
+	 */
+	private function getCurrentUserUID() : string {
+		/** @var IUser|null $user */
+		$user =  \OC::$server->getUserSession()->getUser();
+		$uid = $user === null ? '' : $user->getUID();
+		return $uid;
+	}
 
 	/**
 	 * Generates and returns an wopi access info containing token for a given fileId.
@@ -685,7 +698,7 @@ class DocumentController extends Controller {
 	 * @return array wopi access info
 	 */
 	private function getWopiInfoForPublicLink(array $docInfo) : array {
-		$currentUser = $this->uid;
+		$currentUser = $this->getCurrentUserUID();
 		$ownerUid = $docInfo['owner'];
 		$fileId = $docInfo['fileid'];
 		$path = $docInfo['path'];
@@ -743,7 +756,7 @@ class DocumentController extends Controller {
 		$rawDocuments = $this->documentService->getDocuments();
 
 		$documents = [];
-		$locale = \strtolower(\str_replace('_', '-', $this->settings->getUserValue($this->uid, 'core', 'lang', 'en')));
+		$locale = \strtolower(\str_replace('_', '-', $this->settings->getUserValue($this->getCurrentUserUID(), 'core', 'lang', 'en')));
 		foreach ($rawDocuments as $key=>$document) {
 			if (\is_object($document)) {
 				$documents[] = $document->getData();

@@ -19,13 +19,16 @@ use \OCP\AppFramework\Http\TemplateResponse;
 use \OCA\Richdocuments\AppConfig;
 
 class SettingsController extends Controller {
-	private $userId;
 	private $l10n;
 	private $appConfig;
 
-	public function __construct($appName, IRequest $request, IL10N $l10n, AppConfig $appConfig, $userId) {
+	public function __construct(
+		string $appName, 
+		IRequest $request, 
+		IL10N $l10n, 
+		AppConfig $appConfig
+	) {
 		parent::__construct($appName, $request);
-		$this->userId = $userId;
 		$this->l10n = $l10n;
 		$this->appConfig = $appConfig;
 	}
