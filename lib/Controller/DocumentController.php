@@ -31,17 +31,12 @@ use OCP\IRequest;
 use OCP\IConfig;
 use OCP\IL10N;
 use OCP\ILogger;
-use OCP\IUser;
 use OCP\Template;
 use OCP\IUserManager;
 use OCP\IPreview;
 use OC\Files\View;
 
 class DocumentController extends Controller {
-	/**
-	 * @var string The user ID of the current user
-	 */
-	private $uid;
 
 	/**
 	 * @var IL10N The localization service
@@ -161,9 +156,15 @@ class DocumentController extends Controller {
 	 * @NoCSRFRequired
 	 */
 	public function index($fileId, $dir) {
-		// If type of fileId is a string, then it
-		// doesn't work for shared documents, lets cast to int everytime
-		$fileId = \is_numeric($fileId) ? (int)$fileId : null;
+		if (\is_numeric($fileId)) {
+			// parse fileId pointing to file
+			$fileId = (int) $fileId;
+		} elseif ($fileId === '' || $fileId === null) {
+			// base template
+			$fileId = null;
+		} else {
+			return $this->responseError($this->l10n->t('Invalid request parameters'));
+		}
 		
 		// Normal editing and user/group share editing
 		// Parameter $dir is not used during indexing, but might be used by Document Server
@@ -171,16 +172,18 @@ class DocumentController extends Controller {
 
 		// Handle general response
 		$wopiRemote = $this->discoveryService->getWopiUrl();
-		if (($parts = \parse_url($wopiRemote)) && isset($parts['scheme'], $parts['host'])) {
+		$wopiRemoteParts = \parse_url($wopiRemote);
+		if (isset($wopiRemoteParts['scheme'], $wopiRemoteParts['host'])) {
 			$webSocketProtocol = "ws://";
-			if ($parts['scheme'] == "https") {
+			if ($wopiRemoteParts['scheme'] === "https") {
 				$webSocketProtocol = "wss://";
 			}
+			
 			$webSocket = \sprintf(
 				"%s%s%s",
 				$webSocketProtocol,
-				$parts['host'],
-				isset($parts['port']) ? ":" . $parts['port'] : ""
+				$wopiRemoteParts['host'],
+				isset($wopiRemoteParts['port']) ? ":" . $wopiRemoteParts['port'] : ""
 			);
 		} else {
 			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', [$wopiRemote]), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
@@ -233,25 +236,32 @@ class DocumentController extends Controller {
 	 * @PublicPage
 	 */
 	public function public($shareToken, $fileId) {
-		// If type of fileId is a string, then it
-		// doesn't work for shared documents, lets cast to int everytime
-		$fileId = \is_numeric($fileId) ? (int)$fileId : null;
+		if (\is_string($shareToken) && \strlen($shareToken) > 0 && \is_numeric($fileId)) {
+			// fileId is a numeric string indicating the file in the folder link share (via shareToken)
+			$fileId = (int) $fileId;
+		} elseif (\is_string($shareToken) && \strlen($shareToken) > 0 && ($fileId === '' || $fileId === null)) {
+			// shareToken points directly to the file
+			$fileId = null;
+		} else {
+			return $this->responseError($this->l10n->t('Invalid request parameters'));
+		}
 
 		// Public share link (folder or file)
 		$renderAs = 'base';
 
 		// Handle general response
 		$wopiRemote = $this->discoveryService->getWopiUrl();
-		if (($parts = \parse_url($wopiRemote)) && isset($parts['scheme'], $parts['host'])) {
+		$wopiRemoteParts = \parse_url($wopiRemote);
+		if (isset($wopiRemoteParts['scheme'], $wopiRemoteParts['host'])) {
 			$webSocketProtocol = "ws://";
-			if ($parts['scheme'] == "https") {
+			if ($wopiRemoteParts['scheme'] == "https") {
 				$webSocketProtocol = "wss://";
 			}
 			$webSocket = \sprintf(
 				"%s%s%s",
 				$webSocketProtocol,
-				$parts['host'],
-				isset($parts['port']) ? ":" . $parts['port'] : ""
+				$wopiRemoteParts['host'],
+				isset($wopiRemoteParts['port']) ? ":" . $wopiRemoteParts['port'] : ""
 			);
 		} else {
 			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', [$wopiRemote]), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
@@ -379,7 +389,7 @@ class DocumentController extends Controller {
 	}
 
 	/**
-	 * API endpoint for  external-apps such as new owncloud web front-end
+	 * API endpoint for external-apps such as new owncloud web front-end
 	 * to return the information needed to load the document using the fileId.
 	 *
 	 * @NoAdminRequired
@@ -388,9 +398,12 @@ class DocumentController extends Controller {
 	 */
 	public function get($fileId) {
 		try {
-			// If type of fileId is a string, then it
-			// doesn't work for shared documents, lets cast to int everytime
-			$fileId = \is_numeric($fileId) ? (int)$fileId : null;
+			if (\is_numeric($fileId)) {
+				// parse fileId pointing to file
+				$fileId = (int) $fileId;
+			} else {
+				return $this->responseError($this->l10n->t('Invalid request parameters'));
+			}
 			
 			$docRetVal = $this->getDocumentIndex($fileId, null, null);
 		} catch (\Exception $e) {
@@ -685,7 +698,6 @@ class DocumentController extends Controller {
 	 * @return string
 	 */
 	private function getCurrentUserUID() : string {
-		/** @var IUser|null $user */
 		$user =  \OC::$server->getUserSession()->getUser();
 		$uid = $user === null ? '' : $user->getUID();
 		return $uid;

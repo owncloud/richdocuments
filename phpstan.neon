@@ -7,14 +7,6 @@ parameters:
     - %currentWorkingDirectory%/appinfo/routes.php
   ignoreErrors:
     -
-      message: '#^Right side of || is always false.$#'
-      path: lib/Controller/DocumentController.php
-      count: 1
-    -
-      message: '#Property OCA\\Richdocuments\\Controller\\SettingsController::\$userId is never read, only written.#'
-      path: lib/Controller/SettingsController.php
-      count: 1
-    -
       message: '#^Dead catch [^"]* is never thrown in the try block.$#'
       path: lib/Controller/WopiController.php  
       count: 1

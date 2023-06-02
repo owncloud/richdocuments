@@ -112,7 +112,6 @@ class DocumentControllerTest extends \Test\TestCase {
 			$this->settings,
 			$this->appConfig,
 			$this->l10n,
-			'test',
 			$this->logger,
 			$this->documentService,
 			$this->discoveryService,

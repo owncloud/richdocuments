@@ -86,6 +86,11 @@ class DiscoveryService {
 			return null;
 		}
 
+		// validate mimetype
+		if (!\in_array($mimetype, Helper::$MIMETYPE_LIBREOFFICE_WORDPROCESSOR, true)) {
+			return null;
+		}
+
 		$result = $discoveryXML->xpath(\sprintf('/wopi-discovery/net-zone/app[@name=\'%s\']/action', $mimetype));
 		if (($result !== false) && (\count($result) > 0)) {
 			return [
@@ -106,10 +111,10 @@ class DiscoveryService {
 	private function getDiscovery() : ?SimpleXMLElement {
 		if ($this->appConfig->testUserSessionEnabled()) {
 			$wopiRemote = $this->appConfig->getAppValue('test_wopi_url');
-			$discoveryKey = 'discovery.xml_test';
+			$discoveryCacheKey = 'discovery.xml_test';
 		} else {
 			$wopiRemote = $this->appConfig->getAppValue('wopi_url');
-			$discoveryKey = 'discovery.xml';
+			$discoveryCacheKey = 'discovery.xml';
 		}
 
 		// Provides access to information about the capabilities of a WOPI client
@@ -117,10 +122,10 @@ class DiscoveryService {
 		$wopiDiscovery = $wopiRemote . '/hosting/discovery';
 
 		// Read the memcached value (if the memcache is installed)
-		$discovery = $this->cache->get($discoveryKey);
+		$discovery = $this->cache->get($discoveryCacheKey);
 
 		if ($discovery === null) {
-			$this->logger->debug('Fetching {discoveryKey} as not found in cache', ['app' => 'richdocuments', 'discoveryKey' => $discoveryKey]);
+			$this->logger->debug('Fetching {discoveryKey} as not found in cache', ['app' => 'richdocuments', 'discoveryKey' => $discoveryCacheKey]);
 
 			try {
 				// If we are sending query to built-in CODE server, we avoid using IClient::get() method
@@ -171,10 +176,10 @@ class DiscoveryService {
 				return null;
 			}
 
-			$this->logger->debug('Storing {discoveryKey} to the cache.', ['app' => 'richdocuments', 'discoveryKey' => $discoveryKey]);
-			$this->cache->set($discoveryKey, $discovery, 3600);
+			$this->logger->debug('Storing {discoveryKey} to the cache.', ['app' => 'richdocuments', 'discoveryKey' => $discoveryCacheKey]);
+			$this->cache->set($discoveryCacheKey, $discovery, 3600);
 		} else {
-			$this->logger->debug('{discoveryKey} found in cache', ['app' => 'richdocuments', 'discoveryKey' => $discoveryKey]);
+			$this->logger->debug('{discoveryKey} found in cache', ['app' => 'richdocuments', 'discoveryKey' => $discoveryCacheKey]);
 		}
 
 		$loadEntities = \libxml_disable_entity_loader(true);
@@ -182,8 +187,8 @@ class DiscoveryService {
 		\libxml_disable_entity_loader($loadEntities);
 
 		if ($discoveryXML === false) {
-			$this->cache->remove($discoveryKey);
-			$this->logger->error('Collabora Online: {discoveryKey} from {wopiRemote} is not a well-formed XML string.', ['app' => 'richdocuments', 'wopiRemote' => $wopiRemote, 'discoveryKey' => $discoveryKey]);
+			$this->cache->remove($discoveryCacheKey);
+			$this->logger->error('Collabora Online: {discoveryKey} from {wopiRemote} is not a well-formed XML string.', ['app' => 'richdocuments', 'wopiRemote' => $wopiRemote, 'discoveryKey' => $discoveryCacheKey]);
 			return null;
 		}
 

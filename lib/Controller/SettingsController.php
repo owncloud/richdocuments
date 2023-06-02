@@ -23,9 +23,9 @@ class SettingsController extends Controller {
 	private $appConfig;
 
 	public function __construct(
-		string $appName, 
-		IRequest $request, 
-		IL10N $l10n, 
+		string $appName,
+		IRequest $request,
+		IL10N $l10n,
 		AppConfig $appConfig
 	) {
 		parent::__construct($appName, $request);

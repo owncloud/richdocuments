@@ -122,6 +122,17 @@ class DiscoveryServiceTest extends TestCase {
 		$this->assertEquals(['urlsrc' => null, 'action' => null], $result);
 	}
 	
+	public function testGetWopiSrcUrlWithWrongMimetype() {
+		$this->cache->expects($this->once())
+			->method('get')
+			->with('discovery.xml')
+			->willReturn($this->discoveryXml);
+
+		$result = $this->discoveryService->getWopiSrcUrl('wrong');
+
+		$this->assertEquals(null, $result);
+	}
+	
 	public function testGetWopiSrcUrlWithUnparsableDiscovery() {
 		$this->cache->expects($this->once())
 			->method('get')

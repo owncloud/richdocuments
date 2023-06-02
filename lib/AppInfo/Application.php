@@ -45,6 +45,7 @@ class Application extends App {
 			$menuOption = $container->getServer()->getConfig()->getAppValue('richdocuments', 'menu_option');
 			if ($menuOption !== 'false') {
 				$navigationEntry = function () use ($container) {
+					// Navigation button to /apps/richdocuments/documents.php/index
 					return [
 						'id' => 'richdocuments_index',
 						'order' => 2,
