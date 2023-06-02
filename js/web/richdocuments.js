@@ -1915,8 +1915,8 @@ define((function () { 'use strict';
 
               utils.forEach(headers.split('\n'), function parser(line) {
                 i = line.indexOf(':');
-                key = utils.trim(line.substr(0, i)).toLowerCase();
-                val = utils.trim(line.substr(i + 1));
+                key = utils.trim(line.slice(0, i !== -1 ? i : 0)).toLowerCase();
+                val = utils.trim(line.slice(i + 1));
 
                 if (key) {
                   if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
