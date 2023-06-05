@@ -33,7 +33,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use Test\TestCase;
 
 class DiscoveryServiceTest extends TestCase {
-
 	/**
 	 * The AppConfig instance.
 	 *

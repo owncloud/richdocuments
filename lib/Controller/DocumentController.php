@@ -1,14 +1,24 @@
 <?php
 /**
- * ownCloud - Richdocuments App
+ * @author Victor Dubiniuk <victor.dubiniuk@gmail.com>
+ * @author Piotr Mrowczynski <piotr@owncloud.com>
  *
- * @author Victor Dubiniuk
- * @copyright 2014 Victor Dubiniuk victor.dubiniuk@gmail.com
+ * @copyright Copyright (c) 2023, ownCloud GmbH
+ * @license AGPL-3.0
  *
- * This file is licensed under the Affero General Public License version 3 or
- * later.
+ * This code is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License, version 3,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License, version 3,
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
+ *
  */
-
 namespace OCA\Richdocuments\Controller;
 
 use OCA\Richdocuments\AppConfig;
@@ -37,7 +47,6 @@ use OCP\IPreview;
 use OC\Files\View;
 
 class DocumentController extends Controller {
-
 	/**
 	 * @var IL10N The localization service
 	 */

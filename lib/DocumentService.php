@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @author Piotr Mrowczynski <piotr@owncloud.com>
  *

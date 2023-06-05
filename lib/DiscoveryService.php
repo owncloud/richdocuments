@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @author Piotr Mrowczynski <piotr@owncloud.com>
  *
@@ -29,7 +28,6 @@ use OCA\Richdocuments\AppConfig;
 use SimpleXMLElement;
 
 class DiscoveryService {
-
 	/**
 	 * @var AppConfig
 	 */
