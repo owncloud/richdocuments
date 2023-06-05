@@ -14,10 +14,10 @@
 
 <?php
 style('richdocuments', 'style');
-script('richdocuments', 'documents');
-script('files', 'file-upload');
-script('files', 'jquery.fileupload');
-?>
+	 script('richdocuments', 'documents');
+	 script('files', 'file-upload');
+	 script('files', 'jquery.fileupload');
+	 ?>
 
 <?php if ($_['show_custom_header']): ?>
 	<div id="notification-container">

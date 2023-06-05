@@ -28,7 +28,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use Test\TestCase;
 
 class CleanupExpiredWopiTokensTest extends TestCase {
-
 	/**
 	 * @var CleanupExpiredWopiTokens $job
 	 */

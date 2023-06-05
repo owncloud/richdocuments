@@ -26,7 +26,6 @@ use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\IDBConnection;
 
 class CleanupExpiredWopiTokens extends TimedJob {
-
 	/**
 	 * @var IDBConnection $connection
 	 */

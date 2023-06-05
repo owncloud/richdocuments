@@ -32,7 +32,6 @@ use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class FileService {
-	
 	/**
 	 * @var ILogger
 	 */

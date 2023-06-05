@@ -30,7 +30,6 @@ use OCP\IUserManager;
  * @package OCA\Richdocuments\Tests\Controller
  */
 class DocumentControllerTest extends \Test\TestCase {
-
 	/**
 	 * @var IRequest
 	 */
