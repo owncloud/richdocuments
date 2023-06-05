@@ -31,7 +31,6 @@ use OCP\ILogger;
 use OCP\IRequest;
 
 class WebAssetController extends Controller {
-
 	/**
 	 * @var ILogger
 	 */

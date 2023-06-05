@@ -31,7 +31,6 @@ use OCP\Share\Exceptions\ShareNotFound;
 use OCP\Share\IShare;
 
 class DocumentService {
-
 	/**
 	 * @var IRootFolder
 	 */

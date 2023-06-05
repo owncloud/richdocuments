@@ -40,7 +40,6 @@ use OCP\Files\IRootFolder;
  * @package OCA\Richdocuments\Tests\Controller
  */
 class WopiControllerTest extends \Test\TestCase {
-
 	/**
 	 * @var IRequest
 	 */

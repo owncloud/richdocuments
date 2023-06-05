@@ -21,7 +21,6 @@ use OCA\Richdocuments\AppInfo\Application;
  * @package OCA\Richdocuments\Tests\AppInfo
  */
 class ApplicationTest extends \Test\TestCase {
-
 	/**
 	 * @var Application
 	 */

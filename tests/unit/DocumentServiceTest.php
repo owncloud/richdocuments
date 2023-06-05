@@ -32,7 +32,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use Test\TestCase;
 
 class DocumentServiceTest extends TestCase {
-
 	/**
 	 * @var IRootFolder|MockObject $rootFolder The root folder mock object.
 	 */
