@@ -21,7 +21,6 @@
 
 namespace OCA\Richdocuments\Controller;
 
-use GuzzleHttp\Psr7\MimeType;
 use OC\AppFramework\Http;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\DataDisplayResponse;
@@ -62,7 +61,7 @@ class WebAssetController extends Controller {
 
 		try {
 			return new DataDisplayResponse(\file_get_contents($filePath), Http::STATUS_OK, [
-				'Content-Type' => $this->getMimeType($filePath),
+				'Content-Type' => 'text/javascript',
 				'Content-Length' => \filesize($filePath),
 				'Cache-Control' => 'max-age=0, no-cache, no-store, must-revalidate',
 				'Pragma' => 'no-cache',
@@ -73,9 +72,5 @@ class WebAssetController extends Controller {
 			$this->logger->logException($e, ['app' => $this->appName]);
 			return new DataResponse(["message" => $e->getMessage()], Http::STATUS_NOT_FOUND);
 		}
-	}
-
-	private function getMimeType(string $filename): string {
-		return MimeType::fromFilename($filename);
 	}
 }
