@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @author Piotr Mrowczynski <piotr@owncloud.com>
  *
@@ -19,7 +18,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  *
  */
-
 namespace OCA\Richdocuments;
 
 use OCP\Files\IRootFolder;

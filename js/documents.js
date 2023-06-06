@@ -29,7 +29,7 @@ $.widget('oc.documentGrid', {
 			.attr('original-title', document.path)
 			.attr('urlsrc', document.urlsrc)
 			.attr('action', document.action)
-			.attr('lolang', document.lolang)
+			.attr('lolang', document.locale)
 			.find('label').text(document.name)
 		;
 
@@ -221,9 +221,9 @@ var documentsMain = {
 	_generateFullUrl: function(fileId, dir) {
 		var ocurl;
 		if (dir)
-			ocurl = OC.generateUrl('apps/richdocuments/index?fileId={fileId}&dir={dir}', {fileId: fileId, dir: dir});
+			ocurl = OC.generateUrl('apps/richdocuments/documents.php/index?fileId={fileId}&dir={dir}', {fileId: fileId, dir: dir});
 		else
-			ocurl = OC.generateUrl('apps/richdocuments/index?fileId={fileId}&dir=', {fileId: fileId});
+			ocurl = OC.generateUrl('apps/richdocuments/documents.php/index?fileId={fileId}&dir=', {fileId: fileId});
 
 		return window.location.protocol + '//' + window.location.host + ocurl;
 	},

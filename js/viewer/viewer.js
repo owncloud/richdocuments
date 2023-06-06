@@ -84,11 +84,11 @@ var odfViewer = {
 		var url;
 		if ($("#isPublic").val()) {
 			// Generate url for click on file in public share folder
-			url = OC.generateUrl("apps/richdocuments/public?fileId={file_id}&shareToken={shareToken}", { file_id: fileId, shareToken: encodeURIComponent($("#sharingToken").val()) });
+			url = OC.generateUrl("apps/richdocuments/documents.php/public?fileId={file_id}&shareToken={shareToken}", { file_id: fileId, shareToken: encodeURIComponent($("#sharingToken").val()) });
 		} else if (fileDir) {
-			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}&dir={dir}', { file_id: fileId, dir: fileDir });
+			url = OC.generateUrl('apps/richdocuments/documents.php/index?fileId={file_id}&dir={dir}', { file_id: fileId, dir: fileDir });
 		} else {
-			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}', {file_id: fileId});
+			url = OC.generateUrl('apps/richdocuments/documents.php/index?fileId={file_id}', {file_id: fileId});
 		}
 
 		if (OC.appConfig.richdocuments.openInNewTab === true) {
@@ -105,9 +105,9 @@ var odfViewer = {
 
 		var url;
 		if (fileDir) {
-			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}&dir={dir}&enforceSecureView={enforceSecureView}', { file_id: fileId, dir: fileDir, enforceSecureView: "true" });
+			url = OC.generateUrl('apps/richdocuments/documents.php/index?fileId={file_id}&dir={dir}&enforceSecureView={enforceSecureView}', { file_id: fileId, dir: fileDir, enforceSecureView: "true" });
 		} else {
-			url = OC.generateUrl('apps/richdocuments/index?fileId={file_id}&enforceSecureView={enforceSecureView}', {file_id: fileId, enforceSecureView: "true" });
+			url = OC.generateUrl('apps/richdocuments/documents.php/index?fileId={file_id}&enforceSecureView={enforceSecureView}', {file_id: fileId, enforceSecureView: "true" });
 		}
 		if (OC.appConfig.richdocuments.openInNewTab === true) {
 			window.open(url,'_blank');
@@ -252,7 +252,7 @@ $(document).ready(function() {
 		if (odfViewer.supportedMimes.indexOf(mimetype) !== -1 && $("#isPublic").val()){
 			// Single file public share, add button to allow view or edit
 			var button = document.createElement("a");
-			button.href = OC.generateUrl("apps/richdocuments/public?fileId={file_id}&shareToken={shareToken}", { file_id: null, shareToken: encodeURIComponent($("#sharingToken").val()) });
+			button.href = OC.generateUrl("apps/richdocuments/documents.php/public?fileId={file_id}&shareToken={shareToken}", { file_id: '', shareToken: encodeURIComponent($("#sharingToken").val()) });
 			button.className = "button";
 			button.innerText = t('richdocuments', 'View/Edit in Collabora');
 
@@ -262,7 +262,7 @@ $(document).ready(function() {
 		if (!$("#isPublic").val()) {
 			// Dont register file menu with public links
 			$.get(
-				OC.filePath('richdocuments', 'ajax', 'settings.php'),
+				OC.generateUrl("apps/richdocuments/ajax/settings/list"),
 				{},
 				odfViewer.registerFilesMenu
 			);

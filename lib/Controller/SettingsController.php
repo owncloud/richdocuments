@@ -19,13 +19,16 @@ use \OCP\AppFramework\Http\TemplateResponse;
 use \OCA\Richdocuments\AppConfig;
 
 class SettingsController extends Controller {
-	private $userId;
 	private $l10n;
 	private $appConfig;
 
-	public function __construct($appName, IRequest $request, IL10N $l10n, AppConfig $appConfig, $userId) {
+	public function __construct(
+		string $appName,
+		IRequest $request,
+		IL10N $l10n,
+		AppConfig $appConfig
+	) {
 		parent::__construct($appName, $request);
-		$this->userId = $userId;
 		$this->l10n = $l10n;
 		$this->appConfig = $appConfig;
 	}
@@ -33,7 +36,7 @@ class SettingsController extends Controller {
 	/**
 	 * @NoAdminRequired
 	 */
-	public function getSettings() {
+	public function list() {
 		return [
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
 			'wopi_url' => $this->appConfig->getAppValue('wopi_url'),
@@ -43,6 +46,8 @@ class SettingsController extends Controller {
 	}
 
 	/**
+	 * FIXME: remove ./settings.php and this function, implement with OCP\Settings\ISettings instead
+	 *
 	 * @NoCSRFRequired
 	 */
 	public function settingsIndex() {
@@ -53,6 +58,9 @@ class SettingsController extends Controller {
 		);
 	}
 
+	/**
+	 * FIXME: remove ./admin.php and this function, implement with OCP\Settings\ISettings instead
+	 */
 	public function adminIndex() {
 		return new TemplateResponse(
 			$this->appName,
@@ -63,7 +71,6 @@ class SettingsController extends Controller {
 				'doc_format' => $this->appConfig->getAppValue('doc_format'),
 				'test_wopi_url' => $this->appConfig->getAppValue('test_wopi_url'),
 				'test_server_groups' => $this->appConfig->getAppValue('test_server_groups'),
-				'external_apps' => $this->appConfig->getAppValue('external_apps'),
 				'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
 				'menu_option' => $this->appConfig->getAppValue('menu_option'),
 				'encryption_enabled' => $this->appConfig->encryptionEnabled() ? 'true' : 'false',
@@ -79,7 +86,7 @@ class SettingsController extends Controller {
 		);
 	}
 
-	public function setSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option, $secure_view_option, $secure_view_open_action_default, $secure_view_can_print_default, $secure_view_has_watermark_default, $watermark_text) {
+	public function update($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option, $secure_view_option, $secure_view_open_action_default, $secure_view_can_print_default, $secure_view_has_watermark_default, $watermark_text) {
 		$message = $this->l10n->t('Saved');
 
 		if ($wopi_url !== null) {
@@ -105,10 +112,6 @@ class SettingsController extends Controller {
 
 		if ($test_server_groups !== null) {
 			$this->appConfig->setAppValue('test_server_groups', $test_server_groups);
-		}
-
-		if ($external_apps !== null) {
-			$this->appConfig->setAppValue('external_apps', $external_apps);
 		}
 
 		if ($canonical_webroot !== null) {

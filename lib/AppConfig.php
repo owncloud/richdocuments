@@ -26,7 +26,8 @@ class AppConfig {
 		'secure_view_has_watermark_default' => 'true',
 		'open_in_new_tab' => 'true',
 		'start_grace_period' => 'false',
-		'watermark_text' => ''
+		'watermark_text' => '',
+		'test_server_groups' => '',
 	];
 
 	private $config;
@@ -165,5 +166,35 @@ class AppConfig {
 	 */
 	public function openInNewTabEnabled() {
 		return \filter_var($this->getAppValue('open_in_new_tab'), FILTER_VALIDATE_BOOLEAN);
+	}
+
+	/**
+	 * Return true if the currently logged in user is a tester.
+	 * This depends on whether current user is the member of one of the groups
+	 * mentioned in settings (test_server_groups)
+	 *
+	 * WARNING: This method is legacy, use with caution.
+	 *
+	 * @return bool
+	 */
+	public function testUserSessionEnabled() {
+		$tester = false;
+
+		$user = \OC::$server->getUserSession()->getUser();
+		if ($user === null) {
+			return false;
+		}
+
+		$uid = $user->getUID();
+		$testgroups = \array_filter(\explode('|', $this->getAppValue('test_server_groups')));
+		foreach ($testgroups as $testgroup) {
+			$test = \OC::$server->getGroupManager()->get($testgroup);
+			if ($test !== null && \sizeof($test->searchUsers($uid)) > 0) {
+				$tester = true;
+				break;
+			}
+		}
+
+		return $tester;
 	}
 }

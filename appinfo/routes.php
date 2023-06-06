@@ -15,18 +15,18 @@ $application = new \OCA\Richdocuments\AppInfo\Application();
 /* @phan-suppress-next-line PhanUndeclaredThis */
 $application->registerRoutes($this, [
 	'routes' => [
-		// Collabora for Owncloud Application
-		['name' => 'document#index', 'url' => 'index', 'verb' => 'GET'],
+		// Collabora Documents API
 		['name' => 'document#create', 'url' => 'ajax/documents/create', 'verb' => 'POST'],
 		['name' => 'document#listAll', 'url' => 'ajax/documents/list', 'verb' => 'GET'],
-		["name" => 'document#publicIndex', "url" => "public", "verb" => "GET"],
-		['name' => 'document#extAppWopiGetData', 'url' => 'wopi/extapp/data/{documentId}', 'verb' => 'POST'],
-		['name' => 'document#getDocumentIndex', 'url' => 'ajax/documents/index/{fileId}', 'verb' => 'GET'],
-		// Collabora for Owncloud Web (new frontend)
+		['name' => 'document#get', 'url' => 'ajax/documents/index/{fileId}', 'verb' => 'GET'],
+		// Collabora Settings API
+		['name' => 'settings#list', 'url' => 'ajax/settings/list', 'verb' => 'GET'],
+		['name' => 'settings#update', 'url' => 'ajax/settings/update', 'verb' => 'POST'],
+		// Collabora for OC10 legacy frontend
+		['name' => 'document#index', 'url' => 'documents.php/index', 'verb' => 'GET'],
+		["name" => 'document#public', 'url' => 'documents.php/public', "verb" => "GET"],
+		// Collabora for Owncloud Web frontend
 		['name' => 'web_asset#get', 'url' => 'js/richdocuments.js', 'verb' => 'GET'],
-		// Collabora for Owncloud Settings
-		['name' => 'settings#setSettings', 'url' => 'ajax/admin.php', 'verb' => 'POST'],
-		['name' => 'settings#getSettings', 'url' => 'ajax/settings.php', 'verb' => 'GET'],
 		// WOPI protocol implementation
 		['name' => 'wopi#wopiCheckFileInfo', 'url' => 'wopi/files/{documentId}', 'verb' => 'GET'],
 		['name' => 'wopi#wopiFileOperation', 'url' => 'wopi/files/{documentId}', 'verb' => 'POST'],

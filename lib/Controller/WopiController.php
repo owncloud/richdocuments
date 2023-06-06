@@ -89,7 +89,7 @@ class WopiController extends Controller {
 	public const LOOL_STATUS_DOC_CHANGED = 1010;
 
 	public function __construct(
-		$appName,
+		string $appName,
 		IRequest $request,
 		IConfig $settings,
 		AppConfig $appConfig,
