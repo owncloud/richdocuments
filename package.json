@@ -1,26 +1,35 @@
 {
   "name": "richdocuments",
   "version": "1.0.0",
-  "main": "richdocuments.js",
+  "type": "module",
   "scripts": {
-    "build": "rollup -c",
-    "serve": "DEV=true rollup -c -w"
+    "lint": "eslint src --ext vue --ext js --ext ts --color",
+    "build": "pnpm vite build",
+    "build:w": "pnpm vite build --watch --mode development"
   },
   "devDependencies": {
-    "@babel/core": "^7.13.10",
-    "@erquhart/rollup-plugin-node-builtins": "^2.1.5",
-    "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-json": "^4.1.0",
-    "axios": "^0.21.1",
-    "rollup": "^2.42.2",
-    "rollup-plugin-babel": "^4.3.3",
-    "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-vue": "^5.1.9",
-    "vue-template-compiler": "^2.6.11"
+    "@ownclouders/eslint-config": "0.0.1",
+    "@ownclouders/extension-sdk": "0.0.1-alpha.4",
+    "@ownclouders/prettier-config": "0.0.1",
+    "@ownclouders/tsconfig": "0.0.4",
+    "@types/node": "^20.2.3",
+    "axios": "^0.27.2",
+    "easygettext": "https://github.com/owncloud/easygettext/archive/refs/tags/v2.18.2-oc.tar.gz",
+    "eslint": "8.31.0",
+    "prettier": "2.6.2",
+    "typescript": "4.9.5",
+    "vite": "4.1.1",
+    "vue": "3.3.4"
   },
-  "dependencies": {
-    "rollup-plugin-serve": "^1.1.0",
-    "vuex": "^3.2.0"
+  "peerDependencies": {
+    "@ownclouders/web-pkg": "^0.0.3"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "@ownclouders/web-*",
+        "web-*"
+      ]
+    }
   }
 }
