@@ -106,7 +106,7 @@ class DiscoveryServiceTest extends TestCase {
 			->with('discovery.xml')
 			->willReturn($this->discoveryXml);
 
-		$result = $this->discoveryService->getWopiSrcUrl('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+		$result = $this->discoveryService->getWopiSrc('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 		$this->assertEquals(['urlsrc' => 'https://example.com/view', 'action' => 'view'], $result);
 	}
 	
@@ -116,7 +116,7 @@ class DiscoveryServiceTest extends TestCase {
 			->with('discovery.xml')
 			->willReturn($this->discoveryXml);
 
-		$result = $this->discoveryService->getWopiSrcUrl('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		$result = $this->discoveryService->getWopiSrc('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
 		$this->assertEquals(['urlsrc' => null, 'action' => null], $result);
 	}
@@ -127,7 +127,7 @@ class DiscoveryServiceTest extends TestCase {
 			->with('discovery.xml')
 			->willReturn($this->discoveryXml);
 
-		$result = $this->discoveryService->getWopiSrcUrl('wrong');
+		$result = $this->discoveryService->getWopiSrc('wrong');
 
 		$this->assertEquals(null, $result);
 	}
@@ -138,7 +138,7 @@ class DiscoveryServiceTest extends TestCase {
 			->with('discovery.xml')
 			->willReturn("wrong");
 
-		$result = $this->discoveryService->getWopiSrcUrl('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		$result = $this->discoveryService->getWopiSrc('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
 		$errors = \libxml_get_errors();
 		\libxml_clear_errors();
@@ -165,7 +165,7 @@ class DiscoveryServiceTest extends TestCase {
 		
 		$this->httpClient->method('newClient')->willReturn($client);
 
-		$result = $this->discoveryService->getWopiSrcUrl('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+		$result = $this->discoveryService->getWopiSrc('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 		$this->assertEquals(['urlsrc' => 'https://example.com/view', 'action' => 'view'], $result);
 	}
 
@@ -195,7 +195,7 @@ class DiscoveryServiceTest extends TestCase {
 		
 		$this->httpClient->method('newClient')->willReturn($client);
 
-		$result = $this->discoveryService->getWopiSrcUrl('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+		$result = $this->discoveryService->getWopiSrc('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 		$this->assertEquals(null, $result);
 	}
 }

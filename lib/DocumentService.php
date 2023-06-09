@@ -28,6 +28,7 @@ use OCP\Files\InvalidPathException;
 use OCP\Files\NotFoundException;
 use OCP\Share\Exceptions\ShareNotFound;
 use OCP\Share\IShare;
+use OCA\Richdocuments\AppConfig;
 
 class DocumentService {
 	/**
@@ -36,16 +37,16 @@ class DocumentService {
 	private $rootFolder;
 
 	/**
-	 * @var IConfig
+	 * @var AppConfig
 	 */
-	private $config;
+	private $appConfig;
 
 	public function __construct(
 		IRootFolder $rootFolder,
-		IConfig $config
+		AppConfig $appConfig
 	) {
 		$this->rootFolder = $rootFolder;
-		$this->config = $config;
+		$this->appConfig = $appConfig;
 	}
 
 	/**
@@ -119,7 +120,6 @@ class DocumentService {
 	 * @return array|null
 	 */
 	public function getDocumentByUserId(string $userId, int $fileId, ?string $dir) : ?array {
-		$ret = [];
 		$root = $this->rootFolder->getUserFolder($userId);
 
 		try {
@@ -142,16 +142,56 @@ class DocumentService {
 				return $this->reportError('Document for the fileId ' . $fileId . 'not found');
 			}
 
-			// Set basic parameters
+			/** @var OCP\Files\Storage\IStorage $storage */
+			$storage = $document->getStorage();
+			$isSharedFile = $storage->instanceOfStorage('\OCA\Files_Sharing\SharedStorage');
+			$isFederatedShare = $storage->instanceOfStorage('OCA\Files_Sharing\External\Storage');
+			$isSecureModeEnabled = $this->appConfig->secureViewOptionEnabled();
+
+			// Base file info
+			$ret = [];
 			$ret['owner'] = $document->getOwner()->getUID();
-			$ret['permissions'] = $document->getPermissions();
-			$ret['updateable'] = $document->isUpdateable();
+			$ret['allowEdit'] = $document->isUpdateable();
+			$ret['allowExport'] = true;
+			$ret['allowPrint'] = true;
+			$ret['useWatermark'] = false;
+			$ret['federatedServer'] = null;
+			$ret['federatedToken'] = null;
 			$ret['mimetype'] = $document->getMimeType();
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $fileId;
-			$ret['instanceid'] = $this->config->getSystemValue('instanceid');
 			$ret['version'] = '0'; // latest
+
+			if ($isSharedFile && $isSecureModeEnabled) {
+				/** @var \OCA\Files_Sharing\SharedStorage $storage */
+				/* @phan-suppress-next-line PhanUndeclaredMethod */
+				$share = $storage->getShare();
+				$sharePermissionsDownload = $share->getAttributes()->getAttribute('permissions', 'download');
+				$shareViewWithWatermark = $share->getAttributes()->getAttribute('richdocuments', 'view-with-watermark');
+				$shareCanPrint = $share->getAttributes()->getAttribute('richdocuments', 'print');
+
+				// restriction on view has been set to false, return forbidden
+				// as there is no supported way of opening this document
+				if ($sharePermissionsDownload === false && $shareViewWithWatermark === false) {
+					return $this->reportError('Insufficient file permissions for the fileId ' . $fileId);
+				}
+
+				// can export file in editor if download is not set or true
+				$ret['allowExport'] = ($sharePermissionsDownload === null || $sharePermissionsDownload === true);
+
+				// can print from editor if print is not set or true
+				$ret['allowPrint'] = ($shareCanPrint === null || $shareCanPrint === true);
+
+				// restriction on view with watermarking enabled
+				$ret['useWatermark'] = ($shareViewWithWatermark === true);
+			} else if ($isFederatedShare) {
+				/** @var \OCA\Files_Sharing\External\Storage $storage */
+				/* @phan-suppress-next-line PhanUndeclaredMethod */
+				$ret['federatedServer'] = $storage->getRemote();
+				/* @phan-suppress-next-line PhanUndeclaredMethod */
+				$ret['federatedToken'] = $storage->getToken();
+			}
 
 			return $ret;
 		} catch (InvalidPathException $e) {
@@ -214,13 +254,10 @@ class DocumentService {
 
 			$ret = [];
 			$ret['owner'] = $owner;
-			$ret['permissions'] = $share->getPermissions();
-			$ret['updateable'] = $document->isUpdateable();
 			$ret['mimetype'] = $document->getMimeType();
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $document->getId();
-			$ret['instanceid'] = \OC::$server->getConfig()->getSystemValue('instanceid');
 			$ret['version'] = '0'; // latest
 			$ret['sessionid'] = '0'; // default shared session
 

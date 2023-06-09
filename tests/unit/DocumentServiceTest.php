@@ -145,7 +145,7 @@ class DocumentServiceTest extends TestCase {
 		$this->assertNotNull($result);
 		$this->assertEquals('owner', $result['owner']);
 		$this->assertEquals(Constants::PERMISSION_ALL, $result['permissions']);
-		$this->assertTrue($result['updateable']);
+		$this->assertTrue($result['allowEdit']);
 		$this->assertEquals('text/plain', $result['mimetype']);
 		$this->assertEquals('file.txt', $result['path']);
 		$this->assertEquals('file.txt', $result['name']);
@@ -224,7 +224,7 @@ class DocumentServiceTest extends TestCase {
 		$this->assertNotNull($result);
 		$this->assertEquals('owner', $result['owner']);
 		$this->assertEquals(Constants::PERMISSION_ALL, $result['permissions']);
-		$this->assertTrue($result['updateable']);
+		$this->assertTrue($result['allowEdit']);
 		$this->assertEquals('text/plain', $result['mimetype']);
 		$this->assertEquals('/testdir/file.txt', $result['path']);
 		$this->assertEquals('file.txt', $result['name']);

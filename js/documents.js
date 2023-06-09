@@ -164,8 +164,6 @@ var documentsMain = {
 	isEditorMode : false,
 	isViewerMode: false,
 	fileName: null,
-	canShare : false,
-	canEdit: false,
 	loadError : false,
 	loadErrorMessage : '',
 	loadErrorHint : '',
@@ -487,7 +485,7 @@ var documentsMain = {
 			    "&lang=" + OC.getLocale().replace('_', '-') +
 			    "&closebutton=1" +
 			    "&revisionhistory=1";
-			if (!documentsMain.canEdit || action === "view") {
+			if (action === "view") {
 				urlsrc += "&permission=readonly";
 			}
 
@@ -706,8 +704,6 @@ var documentsMain = {
 
 		$(documentsMain.toolbar).appendTo('#header');
 
-		documentsMain.canShare = typeof OC.Share !== 'undefined' && rd_permissions & OC.PERMISSION_SHARE;
-
 		// fade out file list and show the document
 		$('#content-wrapper').fadeOut('fast').promise().done(function() {
 			documentsMain.fileId = rd_fileId;
@@ -715,7 +711,6 @@ var documentsMain = {
 			documentsMain.version = rd_version;
 			documentsMain.sessionId = rd_sessionId;
 			documentsMain.fileName = rd_title;
-			documentsMain.canEdit = Boolean(rd_permissions & OC.PERMISSION_UPDATE);
 
 			documentsMain.loadDocument();
 		});
