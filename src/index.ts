@@ -3,7 +3,7 @@ import editor from './editor.vue'
 const routes = [
   {
     path: '/:driveAliasAndItem(.*)?',
-    components: editor,
+    component: editor,
     name: 'editor',
     meta: {
       title: 'Collabora Online',
