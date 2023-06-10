@@ -20,7 +20,7 @@
  */
 namespace OCA\Richdocuments;
 
-use OCP\IConfig;
+use OCP\Constants;
 use OCP\Files\IRootFolder;
 use OCP\Files\FileInfo;
 use OCP\Files\Folder;
@@ -154,7 +154,8 @@ class DocumentService {
 			$ret['allowEdit'] = $document->isUpdateable();
 			$ret['allowExport'] = true;
 			$ret['allowPrint'] = true;
-			$ret['useWatermark'] = false;
+			$ret['secureView'] = false;
+			$ret['secureViewId'] = null;
 			$ret['federatedServer'] = null;
 			$ret['federatedToken'] = null;
 			$ret['mimetype'] = $document->getMimeType();
@@ -183,9 +184,13 @@ class DocumentService {
 				// can print from editor if print is not set or true
 				$ret['allowPrint'] = ($shareCanPrint === null || $shareCanPrint === true);
 
-				// restriction on view with watermarking enabled
-				$ret['useWatermark'] = ($shareViewWithWatermark === true);
-			} else if ($isFederatedShare) {
+				// view with watermarking enabled with private mode enabled
+				if ($shareViewWithWatermark === true) {
+					$ret['allowEdit'] = false;
+					$ret['secureView'] = true;
+					$ret['secureViewId'] = $share->getId();
+				}
+			} elseif ($isFederatedShare) {
 				/** @var \OCA\Files_Sharing\External\Storage $storage */
 				/* @phan-suppress-next-line PhanUndeclaredMethod */
 				$ret['federatedServer'] = $storage->getRemote();
@@ -254,12 +259,14 @@ class DocumentService {
 
 			$ret = [];
 			$ret['owner'] = $owner;
+			$ret['allowEdit'] = ($share->getPermissions() & Constants::PERMISSION_UPDATE) === Constants::PERMISSION_UPDATE;
+			$ret['allowExport'] = true;
+			$ret['allowPrint'] = true;
 			$ret['mimetype'] = $document->getMimeType();
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $document->getId();
 			$ret['version'] = '0'; // latest
-			$ret['sessionid'] = '0'; // default shared session
 
 			return $ret;
 		} catch (ShareNotFound $e) {

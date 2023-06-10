@@ -188,7 +188,7 @@ class DocumentController extends Controller {
 					);
 				}
 
-				if (isset($docinfo['federatedServer']) && isset($docinfo['federatedToken'])) {
+				if (isset($docinfo['federatedServer'], $docinfo['federatedToken'])) {
 					return $this->responseError(
 						$this->l10n->t('Collabora Online: Federated shares not supported yet.', []),
 						$this->l10n->t('Please contact the administrator.', [])
@@ -258,7 +258,7 @@ class DocumentController extends Controller {
 				'instanceId' => $this->settings->getSystemValue('instanceid'),
 				'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
 				'show_custom_header' => false
-			], 
+			],
 			$docRetVal
 		);
 		
@@ -429,10 +429,16 @@ class DocumentController extends Controller {
 		}
 	}
 
-	private function getLocale() {
-		return \strtolower(\str_replace('_', '-', $this->settings->getUserValue($this->getCurrentUserUID(), 'core', 'lang', 'en')));		
+	/**
+	 * Get current user locale
+	 */
+	private function getLocale() : string {
+		return \strtolower(\str_replace('_', '-', $this->settings->getUserValue($this->getCurrentUserUID(), 'core', 'lang', 'en')));
 	}
 
+	/**
+	 * Parse wopi socket from the wopi url
+	 */
 	private function parseWopiSocket(string $wopiRemote) : ?string {
 		$wopiRemoteParts = \parse_url($wopiRemote);
 		if (isset($wopiRemoteParts['scheme'], $wopiRemoteParts['host'])) {
@@ -591,7 +597,11 @@ class DocumentController extends Controller {
 	private function createWopiSessionForAuthUser(array $docInfo) : array {
 		$currentUser = $this->getCurrentUserUID();
 		$ownerUid = $docInfo['owner'];
-		$updateable = $docInfo['allowEdit'];
+		$allowEdit = $docInfo['allowEdit'];
+		$allowExport = $docInfo['allowExport'];
+		$allowPrint = $docInfo['allowPrint'];
+		$secureView = $docInfo['secureView'];
+		$secureViewId = $docInfo['secureViewId'];
 		$mimetype = $docInfo['mimetype'];
 		$fileId = $docInfo['fileid'];
 		$path = $docInfo['path'];
@@ -602,94 +612,46 @@ class DocumentController extends Controller {
 			'fileId' => $fileId,
 			'version' => $version ]);
 
-		$view = \OC\Files\Filesystem::getView();
-
-		// If token is for some versioned file, then it is not updateable
-
-		if ($version !== '0') {
-			$updateable = false;
-		}
-
-		// Check if is allowed editor
-		if ($updateable) {
-			$updateable = $this->isAllowedEditor($currentUser);
-		}
-
-		// Check if mimetime supports updates
-		$wopiSrc = $this->discoveryService->getWopiSrc($mimetype);
-		if (!($wopiSrc['action'] === 'edit') && !($wopiSrc['action'] === 'view_comment')) {
-			$updateable = false;
-		}
-
 		// default shared session id
 		$sessionid = '0';
 
-		// get file info and storage
-		$info = $view->getFileInfo($path);
-		$storage = $info->getStorage();
+		$wopiSessionAttr = WOPI::ATTR_CAN_VIEW;
 
-		// check if secure mode feature has been enabled for share/file
-		$secureModeEnabled = $this->appConfig->secureViewOptionEnabled();
-		$isSharedFile = $storage->instanceOfStorage('\OCA\Files_Sharing\SharedStorage');
-		$enforceSecureView = \filter_var($this->request->getParam('enforceSecureView', false), FILTER_VALIDATE_BOOLEAN);
-		if ($secureModeEnabled) {
-			if ($isSharedFile) {
-				// handle shares
-				/** @var \OCA\Files_Sharing\SharedStorage $storage */
-				/* @phan-suppress-next-line PhanUndeclaredMethod */
-				$share = $storage->getShare();
-				$canDownload = $share->getAttributes()->getAttribute('permissions', 'download');
-				$viewWithWatermark = $share->getAttributes()->getAttribute('richdocuments', 'view-with-watermark');
-				$canPrint = $share->getAttributes()->getAttribute('richdocuments', 'print');
-				// if view with watermark enforce user-private secure session with dedicated sessionid
-				$sessionid = $viewWithWatermark === true ? $share->getId() : '0';
-			} else {
-				// handle files
-				$canDownload = true;
-				$viewWithWatermark = false;
-				$canPrint = true;
-			}
-			
-			if ($enforceSecureView) {
-				// handle enforced secure view watermark
-				// but preserve other permissions like print/download/edit
-				$viewWithWatermark = true;
-			}
-
-			// restriction on view has been set to false, return forbidden
-			// as there is no supported way of opening this document
-			if ($canDownload === false && $viewWithWatermark === false) {
-				throw new \Exception($this->l10n->t('Insufficient file permissions.'));
-			}
-
-			$attributes = WOPI::ATTR_CAN_VIEW;
-
-			// can export file in editor if download is not set or true
-			if ($canDownload === null || $canDownload === true) {
-				$attributes = $attributes | WOPI::ATTR_CAN_EXPORT;
-			}
-
-			// can print from editor if print is not set or true
-			if ($canPrint === null || $canPrint === true) {
-				$attributes = $attributes | WOPI::ATTR_CAN_PRINT;
-			}
-
-			// restriction on view with watermarking enabled
-			if ($viewWithWatermark === true) {
-				$attributes = $attributes | WOPI::ATTR_HAS_WATERMARK;
-			}
-		} else {
-			$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_EXPORT | WOPI::ATTR_CAN_PRINT;
+		// Check if edit allowed for document
+		// Check if mimetime supports updates
+		// Check if is allowed editor
+		// If token is for some versioned file, it is not possible to edit it
+		$wopiSrc = $this->discoveryService->getWopiSrc($mimetype);
+		if (($allowEdit === true) && ($wopiSrc['action'] === 'edit' || $wopiSrc['action'] === 'view_comment') && ($this->isAllowedEditor($currentUser) === true) && ($version === '0')) {
+			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_CAN_UPDATE;
 		}
 
-		if ($updateable) {
-			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE;
+		// can export file in editor if download is not set or true
+		if ($allowExport === true) {
+			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_CAN_EXPORT;
 		}
 
-		$this->logger->debug('File {fileid} is updateable? {updateable}', [
+		// can print from editor if print is not set or true
+		if ($allowPrint === true) {
+			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_CAN_PRINT;
+		}
+
+		// restriction on view with watermarking enabled
+		if ($secureView === true) {
+			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_HAS_WATERMARK;
+		}
+
+		// if secureViewId is set, then it is a dedicated shared session
+		// it should not be possible that users associated with that secureViewId see activities of other users
+		// (e.g. their edits)
+		if ($secureView === true && isset($secureViewId)) {
+			$sessionid = \strval($secureViewId);
+		}
+
+		$this->logger->debug('File {fileid} is updateable? {allowEdit}', [
 			'app' => $this->appName,
 			'fileid' => $fileId,
-			'updateable' => $updateable ]);
+			'allowEdit' => $allowEdit ]);
 		$origin = $this->request->getHeader('ORIGIN');
 		$serverHost = null;
 		if ($origin === null) {
@@ -708,7 +670,7 @@ class DocumentController extends Controller {
 		 * As long as the string is just a number, all is good.
 		 */
 		/* @phan-suppress-next-line PhanTypeMismatchArgument */
-		$tokenArray = $row->generateToken($fileId, $version, $attributes, $serverHost, $ownerUid, $currentUser);
+		$tokenArray = $row->generateToken($fileId, $version, $wopiSessionAttr, $serverHost, $ownerUid, $currentUser);
 
 		// Return the token.
 		$result = [
@@ -760,7 +722,7 @@ class DocumentController extends Controller {
 		$mimetype = $docInfo['mimetype'];
 		$path = $docInfo['path'];
 		$version = $docInfo['version'];
-		$updateable = $docInfo['allowEdit'];
+		$allowEdit = $docInfo['allowEdit'];
 
 		$this->logger->info('Generating WOPI Token for file {fileId}, version {version}.', [
 			'app' => $this->appName,
@@ -771,20 +733,20 @@ class DocumentController extends Controller {
 
 		// If token is for some versioned file
 		if ($version !== '0') {
-			$updateable = false;
+			$allowEdit = false;
 		}
 
 		// Check if mimetime supports updates
 		$wopiSrc = $this->discoveryService->getWopiSrc($mimetype);
 		if (!($wopiSrc['action'] === 'edit') && !($wopiSrc['action'] === 'view_comment')) {
-			$updateable = false;
+			$allowEdit = false;
 		}
 
 		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 
-		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_EXPORT | WOPI::ATTR_CAN_PRINT;
-		if ($updateable) {
-			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE;
+		$wopiSessionAttr = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_EXPORT | WOPI::ATTR_CAN_PRINT;
+		if ($allowEdit) {
+			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_CAN_UPDATE;
 		}
 
 		$row = new Db\Wopi();
@@ -793,7 +755,7 @@ class DocumentController extends Controller {
 		 * As long as the string is just a number, all is good.
 		 */
 		/* @phan-suppress-next-line PhanTypeMismatchArgument */
-		$tokenArray = $row->generateToken($fileId, $version, $attributes, $serverHost, $ownerUid, $currentUser);
+		$tokenArray = $row->generateToken($fileId, $version, $wopiSessionAttr, $serverHost, $ownerUid, $currentUser);
 
 		// Return the token.
 		$result = [
