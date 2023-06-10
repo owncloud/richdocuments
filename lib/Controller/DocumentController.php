@@ -33,7 +33,6 @@ use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
-use OCP\Constants;
 use OCP\Files\InvalidPathException;
 use OCP\IGroupManager;
 use OCP\INavigationManager;
@@ -622,7 +621,9 @@ class DocumentController extends Controller {
 		// Check if is allowed editor
 		// If token is for some versioned file, it is not possible to edit it
 		$wopiSrc = $this->discoveryService->getWopiSrc($mimetype);
-		if (($allowEdit === true) && ($wopiSrc['action'] === 'edit' || $wopiSrc['action'] === 'view_comment') && ($this->isAllowedEditor($currentUser) === true) && ($version === '0')) {
+		if (($allowEdit === true) && isset($wopiSrc['action'])
+				&& ($wopiSrc['action'] === 'edit' || $wopiSrc['action'] === 'view_comment')
+				&& ($this->isAllowedEditor($currentUser) === true) && ($version === '0')) {
 			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_CAN_UPDATE;
 		}
 
@@ -731,21 +732,16 @@ class DocumentController extends Controller {
 
 		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
 
-		// If token is for some versioned file
-		if ($version !== '0') {
-			$allowEdit = false;
-		}
-
-		// Check if mimetime supports updates
-		$wopiSrc = $this->discoveryService->getWopiSrc($mimetype);
-		if (!($wopiSrc['action'] === 'edit') && !($wopiSrc['action'] === 'view_comment')) {
-			$allowEdit = false;
-		}
-
 		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 
 		$wopiSessionAttr = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_EXPORT | WOPI::ATTR_CAN_PRINT;
-		if ($allowEdit) {
+
+		// If token is for some versioned file
+		// Check if mimetime supports updates
+		$wopiSrc = $this->discoveryService->getWopiSrc($mimetype);
+		if (($allowEdit === true) && isset($wopiSrc['action'])
+				&& ($wopiSrc['action'] === 'edit' || $wopiSrc['action'] === 'view_comment')
+				&& ($version === '0')) {
 			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_CAN_UPDATE;
 		}
 

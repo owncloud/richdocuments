@@ -23,11 +23,12 @@ namespace OCA\Richdocuments;
 use OCP\Constants;
 use OCP\Files\IRootFolder;
 use OCP\Files\FileInfo;
-use OCP\Files\Folder;
 use OCP\Files\InvalidPathException;
 use OCP\Files\NotFoundException;
 use OCP\Share\Exceptions\ShareNotFound;
+use OCP\Share\IManager;
 use OCP\Share\IShare;
+use OCP\ISession;
 use OCA\Richdocuments\AppConfig;
 
 class DocumentService {
@@ -41,12 +42,26 @@ class DocumentService {
 	 */
 	private $appConfig;
 
+	/**
+	 * @var IManager
+	 */
+	private $shareManager;
+
+	/**
+	 * @var ISession
+	 */
+	private $session;
+
 	public function __construct(
 		IRootFolder $rootFolder,
-		AppConfig $appConfig
+		AppConfig $appConfig,
+		IManager $shareManager,
+		ISession $session
 	) {
 		$this->rootFolder = $rootFolder;
 		$this->appConfig = $appConfig;
+		$this->shareManager = $shareManager;
+		$this->session = $session;
 	}
 
 	/**
@@ -127,11 +142,11 @@ class DocumentService {
 			// as in case of user/group shares we can have multiple file mounts with same id
 			// return these fileMounts
 			if ($dir !== null) {
-				/** @var Folder $parentFolder */
+				/** @var \OCP\Files\Folder $parentFolder */
 				$parentFolder = $root->get($dir);
 
 				/** @phpstan-ignore-next-line */
-				'@phan-var Folder $parentFolder';
+				'@phan-var \OCP\Files\Folder $parentFolder';
 				$fileMounts = $parentFolder->getById($fileId);
 			} else {
 				$fileMounts = $root->getById($fileId);
@@ -142,10 +157,10 @@ class DocumentService {
 				return $this->reportError('Document for the fileId ' . $fileId . 'not found');
 			}
 
-			/** @var OCP\Files\Storage\IStorage $storage */
+			/** @var \OCP\Files\Storage\IStorage $storage */
 			$storage = $document->getStorage();
 			$isSharedFile = $storage->instanceOfStorage('\OCA\Files_Sharing\SharedStorage');
-			$isFederatedShare = $storage->instanceOfStorage('OCA\Files_Sharing\External\Storage');
+			$isFederatedShare = $storage->instanceOfStorage('\OCA\Files_Sharing\External\Storage');
 			$isSecureModeEnabled = $this->appConfig->secureViewOptionEnabled();
 
 			// Base file info
@@ -211,8 +226,8 @@ class DocumentService {
 		// (calling directly from API, password form cannot be enforced, so check is needed)
 		if ($share->getPassword() === null) {
 			return true;
-		} elseif (! \OC::$server->getSession()->exists('public_link_authenticated')
-			|| \OC::$server->getSession()->get('public_link_authenticated') !== (string)$share->getId()) {
+		} elseif (! $this->session->exists('public_link_authenticated')
+			|| $this->session->get('public_link_authenticated') !== (string)$share->getId()) {
 			return false;
 		}
 		return true;
@@ -231,19 +246,19 @@ class DocumentService {
 	public function getDocumentByShareToken(string $token, ?int $fileId) : ?array {
 		try {
 			// Get share by token
-			$share = \OC::$server->getShareManager()->getShareByToken($token);
+			$share = $this->shareManager->getShareByToken($token);
 			if (!$this->isShareAuthValid($share)) {
 				return null;
 			}
 
 			$node = $share->getNode();
 			if ($node->getType() == FileInfo::TYPE_FILE) {
-				/** @var \OCP\Files\Node|null $document */
+				/** @var \OCP\Files\File|null $node */
 				$document = $node;
 			} elseif ($fileId !== null) {
 				// node was not a file, so it must be a folder.
 				// fileId was passed in, so look that up in the folder.
-				/** @var \OCP\Files\Node|null $document */
+				/** @var \OCP\Files\Folder|null $node */
 				$document = $node->getById($fileId)[0];
 			} else {
 				return $this->reportError('Cannot retrieve metadata for the node ' . $node->getPath());
@@ -255,7 +270,7 @@ class DocumentService {
 
 			// Retrieve user folder for the file to be able to get relative path
 			$owner = $share->getShareOwner();
-			$root = \OC::$server->getRootFolder()->getUserFolder($owner);
+			$root = $this->rootFolder->getUserFolder($owner);
 
 			$ret = [];
 			$ret['owner'] = $owner;
