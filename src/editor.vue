@@ -1,6 +1,6 @@
 <template>
   <main>
-    <div id="app">
+    <div id="app" class="oc-width-1-1 oc-height-1-1">
       <oc-modal
         :title="$gettext('Save As')"
         :button-cancel-text="$gettext('Cancel')"
@@ -11,7 +11,7 @@
           $gettext('Please enter filename to which this document should be stored.')
         "
         :input-value="fileName"
-        class="oc-mb-l uk-position-absolute"
+        class="oc-mb-l"
         :hidden="hideSaveAs"
         @cancel="cancelSaveAs"
         @confirm="confirmSaveAs"
@@ -143,7 +143,7 @@ export default defineComponent({
     },
 
     showEditor(docFile, urlsrc) {
-      let formHTML =
+      const formHTML =
         '<form id="loleafletform" name="loleafletform" target="loleafletframe" action="' +
         urlsrc +
         '" method="post">' +
@@ -157,14 +157,15 @@ export default defineComponent({
         window.location.origin +
         '" type="hidden"/>' +
         '</form>'
-      let frameHTML =
-        '<iframe id="loleafletframe" name= "loleafletframe" allowfullscreen style="width:100%;height:100%;position:absolute;" onload="this.contentWindow.focus()"/>'
-      let mainContainer = document.getElementById('mainContainer')
+      const frameHTML =
+        '<iframe id="loleafletframe" name= "loleafletframe" class="oc-width-1-1 oc-height-1-1" allowfullscreen onload="this.contentWindow.focus()"/>'
+      const mainContainer = document.getElementById('mainContainer')
       mainContainer.insertAdjacentHTML('beforeend', formHTML)
       mainContainer.insertAdjacentHTML('beforeend', frameHTML)
-      let loleafletForm = document.getElementById('loleafletform')
-      let frame = document.getElementById('loleafletframe')
-      let that = this
+      mainContainer.className = "oc-width-1-1 oc-height-1-1"
+      const loleafletForm = document.getElementById('loleafletform')
+      const frame = document.getElementById('loleafletframe')
+      const that = this
       frame.onload = function () {
         window.addEventListener('message', function (e) {
           let msg, msgId, deprecated, args
@@ -203,11 +204,3 @@ export default defineComponent({
   }
 })
 </script>
-<style>
-#app {
-  width: 100%;
-}
-#app > iframe {
-  position: absolute;
-}
-</style>
