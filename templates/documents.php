@@ -2,7 +2,6 @@
 	 var rd_instanceId = '<?php p($_['instanceId']) ?>';
 	 var rd_version = '<?php p($_['version']) ?>';
 	 var rd_sessionId = '<?php p($_['sessionId']) ?>';
-	 var rd_permissions = '<?php p($_['permissions']) ?>';
 	 var rd_title = '<?php p($_['title']) ?>';
 	 var rd_fileId = '<?php p($_['fileId']) ?>';
 	 var rd_access_token = '<?php p($_['access_token']) ?>';

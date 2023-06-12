@@ -77,7 +77,7 @@ class DiscoveryService {
 	 *
 	 * @return array|null returns urlsrc and action if matched or null in case of error to retrieve discovery
 	 */
-	public function getWopiSrcUrl(string $mimetype) : ?array {
+	public function getWopiSrc(string $mimetype) : ?array {
 		$discoveryXML =	$this->getDiscovery();
 		if ($discoveryXML === null) {
 			// error retrieving discovery

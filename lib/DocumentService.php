@@ -20,14 +20,16 @@
  */
 namespace OCA\Richdocuments;
 
-use OCP\IConfig;
+use OCP\Constants;
 use OCP\Files\IRootFolder;
 use OCP\Files\FileInfo;
-use OCP\Files\Folder;
 use OCP\Files\InvalidPathException;
 use OCP\Files\NotFoundException;
 use OCP\Share\Exceptions\ShareNotFound;
+use OCP\Share\IManager;
 use OCP\Share\IShare;
+use OCP\ISession;
+use OCA\Richdocuments\AppConfig;
 
 class DocumentService {
 	/**
@@ -36,16 +38,30 @@ class DocumentService {
 	private $rootFolder;
 
 	/**
-	 * @var IConfig
+	 * @var AppConfig
 	 */
-	private $config;
+	private $appConfig;
+
+	/**
+	 * @var IManager
+	 */
+	private $shareManager;
+
+	/**
+	 * @var ISession
+	 */
+	private $session;
 
 	public function __construct(
 		IRootFolder $rootFolder,
-		IConfig $config
+		AppConfig $appConfig,
+		IManager $shareManager,
+		ISession $session
 	) {
 		$this->rootFolder = $rootFolder;
-		$this->config = $config;
+		$this->appConfig = $appConfig;
+		$this->shareManager = $shareManager;
+		$this->session = $session;
 	}
 
 	/**
@@ -119,7 +135,6 @@ class DocumentService {
 	 * @return array|null
 	 */
 	public function getDocumentByUserId(string $userId, int $fileId, ?string $dir) : ?array {
-		$ret = [];
 		$root = $this->rootFolder->getUserFolder($userId);
 
 		try {
@@ -127,11 +142,11 @@ class DocumentService {
 			// as in case of user/group shares we can have multiple file mounts with same id
 			// return these fileMounts
 			if ($dir !== null) {
-				/** @var Folder $parentFolder */
+				/** @var \OCP\Files\Folder $parentFolder */
 				$parentFolder = $root->get($dir);
 
 				/** @phpstan-ignore-next-line */
-				'@phan-var Folder $parentFolder';
+				'@phan-var \OCP\Files\Folder $parentFolder';
 				$fileMounts = $parentFolder->getById($fileId);
 			} else {
 				$fileMounts = $root->getById($fileId);
@@ -142,16 +157,61 @@ class DocumentService {
 				return $this->reportError('Document for the fileId ' . $fileId . 'not found');
 			}
 
-			// Set basic parameters
+			/** @var \OCP\Files\Storage\IStorage $storage */
+			$storage = $document->getStorage();
+			$isSharedFile = $storage->instanceOfStorage('\OCA\Files_Sharing\SharedStorage');
+			$isFederatedShare = $storage->instanceOfStorage('\OCA\Files_Sharing\External\Storage');
+			$isSecureModeEnabled = $this->appConfig->secureViewOptionEnabled();
+
+			// Base file info
+			$ret = [];
 			$ret['owner'] = $document->getOwner()->getUID();
-			$ret['permissions'] = $document->getPermissions();
-			$ret['updateable'] = $document->isUpdateable();
+			$ret['allowEdit'] = $document->isUpdateable();
+			$ret['allowExport'] = true;
+			$ret['allowPrint'] = true;
+			$ret['secureView'] = false;
+			$ret['secureViewId'] = null;
+			$ret['federatedServer'] = null;
+			$ret['federatedToken'] = null;
 			$ret['mimetype'] = $document->getMimeType();
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $fileId;
-			$ret['instanceid'] = $this->config->getSystemValue('instanceid');
 			$ret['version'] = '0'; // latest
+
+			if ($isSharedFile && $isSecureModeEnabled) {
+				/** @var \OCA\Files_Sharing\SharedStorage $storage */
+				/* @phan-suppress-next-line PhanUndeclaredMethod */
+				$share = $storage->getShare();
+				$sharePermissionsDownload = $share->getAttributes()->getAttribute('permissions', 'download');
+				$shareViewWithWatermark = $share->getAttributes()->getAttribute('richdocuments', 'view-with-watermark');
+				$shareCanPrint = $share->getAttributes()->getAttribute('richdocuments', 'print');
+
+				// restriction on view has been set to false, return forbidden
+				// as there is no supported way of opening this document
+				if ($sharePermissionsDownload === false && $shareViewWithWatermark === false) {
+					return $this->reportError('Insufficient file permissions for the fileId ' . $fileId);
+				}
+
+				// can export file in editor if download is not set or true
+				$ret['allowExport'] = ($sharePermissionsDownload === null || $sharePermissionsDownload === true);
+
+				// can print from editor if print is not set or true
+				$ret['allowPrint'] = ($shareCanPrint === null || $shareCanPrint === true);
+
+				// view with watermarking enabled with private mode enabled
+				if ($shareViewWithWatermark === true) {
+					$ret['allowEdit'] = false;
+					$ret['secureView'] = true;
+					$ret['secureViewId'] = $share->getId();
+				}
+			} elseif ($isFederatedShare) {
+				/** @var \OCA\Files_Sharing\External\Storage $storage */
+				/* @phan-suppress-next-line PhanUndeclaredMethod */
+				$ret['federatedServer'] = $storage->getRemote();
+				/* @phan-suppress-next-line PhanUndeclaredMethod */
+				$ret['federatedToken'] = $storage->getToken();
+			}
 
 			return $ret;
 		} catch (InvalidPathException $e) {
@@ -166,8 +226,8 @@ class DocumentService {
 		// (calling directly from API, password form cannot be enforced, so check is needed)
 		if ($share->getPassword() === null) {
 			return true;
-		} elseif (! \OC::$server->getSession()->exists('public_link_authenticated')
-			|| \OC::$server->getSession()->get('public_link_authenticated') !== (string)$share->getId()) {
+		} elseif (! $this->session->exists('public_link_authenticated')
+			|| $this->session->get('public_link_authenticated') !== (string)$share->getId()) {
 			return false;
 		}
 		return true;
@@ -186,19 +246,19 @@ class DocumentService {
 	public function getDocumentByShareToken(string $token, ?int $fileId) : ?array {
 		try {
 			// Get share by token
-			$share = \OC::$server->getShareManager()->getShareByToken($token);
+			$share = $this->shareManager->getShareByToken($token);
 			if (!$this->isShareAuthValid($share)) {
 				return null;
 			}
 
 			$node = $share->getNode();
 			if ($node->getType() == FileInfo::TYPE_FILE) {
-				/** @var \OCP\Files\Node|null $document */
+				/** @var \OCP\Files\File|null $node */
 				$document = $node;
 			} elseif ($fileId !== null) {
 				// node was not a file, so it must be a folder.
 				// fileId was passed in, so look that up in the folder.
-				/** @var \OCP\Files\Node|null $document */
+				/** @var \OCP\Files\Folder|null $node */
 				$document = $node->getById($fileId)[0];
 			} else {
 				return $this->reportError('Cannot retrieve metadata for the node ' . $node->getPath());
@@ -210,19 +270,18 @@ class DocumentService {
 
 			// Retrieve user folder for the file to be able to get relative path
 			$owner = $share->getShareOwner();
-			$root = \OC::$server->getRootFolder()->getUserFolder($owner);
+			$root = $this->rootFolder->getUserFolder($owner);
 
 			$ret = [];
 			$ret['owner'] = $owner;
-			$ret['permissions'] = $share->getPermissions();
-			$ret['updateable'] = $document->isUpdateable();
+			$ret['allowEdit'] = ($share->getPermissions() & Constants::PERMISSION_UPDATE) === Constants::PERMISSION_UPDATE;
+			$ret['allowExport'] = true;
+			$ret['allowPrint'] = true;
 			$ret['mimetype'] = $document->getMimeType();
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $document->getId();
-			$ret['instanceid'] = \OC::$server->getConfig()->getSystemValue('instanceid');
 			$ret['version'] = '0'; // latest
-			$ret['sessionid'] = '0'; // default shared session
 
 			return $ret;
 		} catch (ShareNotFound $e) {
