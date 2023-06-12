@@ -12,31 +12,38 @@
 namespace OCA\Richdocuments\Controller;
 
 use \OCA\Richdocuments\Db\Wopi;
+use OCA\Richdocuments\DiscoveryService;
 use \OCP\AppFramework\OCSController;
 use \OCP\AppFramework\Http\DataResponse;
 use \OCP\IConfig;
 use \OCP\IRequest;
 
-class FederationController extends OCSController {
+class OCSFederationController extends OCSController {
 	private $config;
+	private $discoveryService;
 
 	public function __construct(
 		string $appName,
 		IRequest $request,
-		IConfig $config
+		IConfig $config,
+		DiscoveryService $discoveryService
 	) {
 		parent::__construct($appName, $request);
 		$this->config = $config;
+		$this->discoveryService = $discoveryService;
 	}
 
 	/**
 	* @PublicPage
 	* @NoCSRFRequired
 	*/
-	public function getWopiUrl() {
-		$data = ['wopi_url' => $this->config->getAppValue('richdocuments', 'wopi_url')];
+	public function index() {
+		$wopiRemote = $this->discoveryService->getWopiUrl();
+		$data = [
+			'wopi_url' => $wopiRemote
+		];
 		$headers = ['X-Frame-Options' => 'ALLOW'];
-		$response = new DataResponse(['data' => $data], 200, $headers);
+		$response = new DataResponse($data, 200, $headers);
 		return $response;
 	}
 
@@ -49,7 +56,7 @@ class FederationController extends OCSController {
 	 * @param string $token access token provided by remote server
 	 * @return DataResponse
 	 */
-	public function getRemoteWopiInfo($token) {
+	public function getWopiForToken($token) {
 		$row = new Wopi();
 		$row->loadBy('token', $token);
 		$wopi = $row->getWopiForToken($token);

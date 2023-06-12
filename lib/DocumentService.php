@@ -207,10 +207,20 @@ class DocumentService {
 				}
 			} elseif ($isFederatedShare) {
 				/** @var \OCA\Files_Sharing\External\Storage $storage */
+
+				// get the federated share server
 				/* @phan-suppress-next-line PhanUndeclaredMethod */
 				$ret['federatedServer'] = $storage->getRemote();
+
+				// get the federated share token
 				/* @phan-suppress-next-line PhanUndeclaredMethod */
 				$ret['federatedToken'] = $storage->getToken();
+
+				// get the path of the file in the federates share:
+				//  - in case of shared folder it would be relative path to file in that shared folder
+				//  - in case of shared file it would be name of the shared file
+				/* @phan-suppress-next-line PhanUndeclaredMethod */
+				$ret['federatedPath'] = $document->getInternalPath();
 			}
 
 			return $ret;
@@ -286,6 +296,67 @@ class DocumentService {
 			return $ret;
 		} catch (ShareNotFound $e) {
 			return $this->reportError('Share for the token ' . $token . ' and document fileid ' . $fileId . 'not found');
+		} catch (NotFoundException $e) {
+			return $this->reportError($e->getMessage());
+		} catch (InvalidPathException $e) {
+			return $this->reportError($e->getMessage());
+		}
+	}
+
+
+	/**
+	 * Retrieve document info for the federated share token. If file in the public link folder is used,
+	 * path has to be provided.
+	 *
+	 * If share or file does not exist, null is returned
+	 *
+	 * @param string $token
+	 * @param string|null $path
+	 * @return array|null
+	 */
+	public function getDocumentByFederatedToken(string $token, ?string $path) : ?array {
+		try {
+			// Get share by token
+			$share = $this->shareManager->getShareByToken($token);
+			if (!$this->isShareAuthValid($share)) {
+				return null;
+			}
+
+			$node = $share->getNode();
+			if ($node->getType() == FileInfo::TYPE_FILE) {
+				/** @var \OCP\Files\File|null $node */
+				$document = $node;
+			} elseif ($path !== null) {
+				// node was not a file, so it must be a folder.
+				// fileId was passed in, so look that up in the folder.
+				/** @var \OCP\Files\Folder|null $node */
+				$document = $node->get($path);
+			} else {
+				return $this->reportError('Cannot retrieve metadata for the node ' . $node->getPath());
+			}
+
+			if ($document === null) {
+				return $this->reportError('Document for the node ' . $node->getPath() . 'not found');
+			}
+
+			// Retrieve user folder for the file to be able to get relative path
+			$owner = $share->getShareOwner();
+			$root = $this->rootFolder->getUserFolder($owner);
+
+			$ret = [];
+			$ret['owner'] = $owner;
+			$ret['allowEdit'] = ($share->getPermissions() & Constants::PERMISSION_UPDATE) === Constants::PERMISSION_UPDATE;
+			$ret['allowExport'] = true;
+			$ret['allowPrint'] = true;
+			$ret['mimetype'] = $document->getMimeType();
+			$ret['path'] = $root->getRelativePath($document->getPath());
+			$ret['name'] = $document->getName();
+			$ret['fileid'] = $document->getId();
+			$ret['version'] = '0'; // latest
+
+			return $ret;
+		} catch (ShareNotFound $e) {
+			return $this->reportError('Share for the token ' . $token . ' and document path ' . $path . 'not found');
 		} catch (NotFoundException $e) {
 			return $this->reportError($e->getMessage());
 		} catch (InvalidPathException $e) {
