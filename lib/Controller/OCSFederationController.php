@@ -62,16 +62,13 @@ class OCSFederationController extends OCSController {
 		$wopi = $row->getWopiForToken($token);
 
 		if ($wopi == false) {
-			$code = 404;
-			$data = null;
-		} else {
-			$code = 200;
-			$data = [
-				'editorUid' => $wopi['editor'],
-				'canwrite' => $wopi['attributes'] | Wopi::ATTR_CAN_UPDATE
-			];
-		}
-
-		return new DataResponse(['data' => $data], $code);
+			return new DataResponse([], 404);
+		} 
+		return new DataResponse([
+			'owner_uid' => $wopi['owner_uid'],
+			'editor_uid' => $wopi['editor_uid'],
+			'attributes' => $wopi['attributes'],
+			'server_host' => $wopi['server_host']
+		], 200);
 	}
 }

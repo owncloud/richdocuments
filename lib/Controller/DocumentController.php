@@ -26,6 +26,7 @@ use OCA\Richdocuments\Db;
 use OCA\Richdocuments\Db\Wopi;
 use OCA\Richdocuments\DiscoveryService;
 use OCA\Richdocuments\DocumentService;
+use OCA\Richdocuments\FederationService;
 use OCA\Richdocuments\Helper;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
@@ -83,6 +84,11 @@ class DocumentController extends Controller {
 	private $discoveryService;
 
 	/**
+	 * @var FederationService The document service
+	 */
+	private $federationService;
+
+	/**
 	 * @var IGroupManager The group manager service
 	 */
 	private $groupManager;
@@ -120,7 +126,8 @@ class DocumentController extends Controller {
 		IGroupManager $groupManager,
 		IUserManager $userManager,
 		IPreview $previewManager,
-		INavigationManager $navigationManager
+		INavigationManager $navigationManager,
+		FederationService $federationService
 	) {
 		parent::__construct($appName, $request);
 		$this->l10n = $l10n;
@@ -134,6 +141,7 @@ class DocumentController extends Controller {
 		$this->userManager = $userManager;
 		$this->previewManager = $previewManager;
 		$this->navigationManager = $navigationManager;
+		$this->federationService = $federationService;
 	}
 
 	private function responseError($message, $hint = '') {
@@ -177,70 +185,62 @@ class DocumentController extends Controller {
 
 		// Get doc index if possible
 		if ($fileId !== null) {
-			try {
-				// Normal editing or share by user/group
-				$docinfo = $this->documentService->getDocumentByUserId($this->getCurrentUserUID(), $fileId, $dir);
-				if (!$docinfo) {
-					$this->logger->warning("Cannot retrieve document with fileid {fileid} in dir {dir}", ["fileid" => $fileId, "dir" => $dir]);
-					return $this->responseError(
-						$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
-						$this->l10n->t('Please contact the administrator.', [])
-					);
-				}
-
-				if (isset($docinfo['federatedServer'], $docinfo['federatedToken'], $docinfo['federatedPath'])) {
-					//$serverHost = \OC::$server->getURLGenerator()->getAbsoluteURL('/');
-					$remoteFileUrl = \rtrim($docinfo['federatedServer'], '/') . '/index.php/apps/richdocuments/documents.php/federated' .
-						'?token=' . $docinfo['federatedToken'] .
-						'&path=' . $docinfo['federatedPath'];
-					$response = new RedirectResponse($remoteFileUrl);
-					$response->addHeader('X-Frame-Options', 'ALLOW');
-					return $response;
-					// return $this->responseError(
-					// 	$this->l10n->t('Collabora Online: Federated shares not supported yet.', []),
-					// 	$this->l10n->t('Please contact the administrator.', [])
-					// );
-				}
-
-				// Get document discovery
-				$wopiSrc = $this->discoveryService->getWopiSrc($docinfo['mimetype']);
-				if (!$wopiSrc) {
-					$this->logger->error("Cannot retrieve discovery for document", []);
-					return $this->responseError(
-						$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
-						$this->l10n->t('Please contact the administrator.', [])
-					);
-				}
-	
-				// Decide max upload size
-				$maxUploadFilesize = \OCP\Util::maxUploadFilesize("/");
-
-				// Get wopi access info
-				$wopiAccessInfo = $this->createWopiSessionForAuthUser($docinfo);
-
-				// Create document index
-				$docRetVal = [
-					'uploadMaxFilesize' => $maxUploadFilesize,
-					'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
-					'title' => $docinfo['name'],
-					'fileId' => $docinfo['fileid'],
-					'instanceId' => $this->settings->getSystemValue('instanceid'),
-					'locale' => $this->getLocale(),
-					'version' => $docinfo['version'],
-					'sessionId' => $wopiAccessInfo['sessionid'],
-					'access_token' => $wopiAccessInfo['access_token'],
-					'access_token_ttl' => $wopiAccessInfo['access_token_ttl'],
-					'default_action' => $wopiSrc['action'],
-					'urlsrc' => $wopiSrc['urlsrc'],
-					'path' => $docinfo['path']
-				];
-			} catch (\Exception $e) {
-				$this->logger->error('Collabora Online: Encountered error {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
+			// Normal editing or share by user/group/federated
+			$docinfo = $this->documentService->getDocumentByUserId($this->getCurrentUserUID(), $fileId, $dir);
+			if (!$docinfo) {
+				$this->logger->warning("Cannot retrieve document with fileid {fileid} in dir {dir}", ["fileid" => $fileId, "dir" => $dir]);
 				return $this->responseError(
-					$this->l10n->t('Collabora Online: Cannot open document due to unexpected error.'),
+					$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
 					$this->l10n->t('Please contact the administrator.', [])
 				);
 			}
+
+			// Get wopi access info
+			$wopiAccessInfo = $this->createWopiSessionForAuthUser($docinfo);
+
+			// If federated sharing redirect to remote server,
+			// providing also access token for OCS federated handshake
+			if (isset($docinfo['federatedShareToken'], $docinfo['federatedPath'], $docinfo['federatedServer'])) {
+				$remoteFileUrl = $this->federationService->getRemoteFileUrl(
+					$docinfo['federatedShareToken'],
+					$docinfo['federatedPath'],
+					$docinfo['federatedServer'],
+					$wopiAccessInfo['access_token']
+				);
+				$response = new RedirectResponse($remoteFileUrl);
+				$response->addHeader('X-Frame-Options', 'ALLOW');
+				return $response;
+			}
+
+			// Get document discovery for this server
+			$wopiSrc = $this->discoveryService->getWopiSrc($docinfo['mimetype']);
+			if (!$wopiSrc) {
+				$this->logger->error("Cannot retrieve discovery for document", []);
+				return $this->responseError(
+					$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
+					$this->l10n->t('Please contact the administrator.', [])
+				);
+			}
+	
+			// Decide max upload size
+			$maxUploadFilesize = \OCP\Util::maxUploadFilesize("/");
+
+			// Create document index
+			$docRetVal = [
+				'uploadMaxFilesize' => $maxUploadFilesize,
+				'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
+				'title' => $docinfo['name'],
+				'fileId' => $docinfo['fileid'],
+				'instanceId' => $this->settings->getSystemValue('instanceid'),
+				'locale' => $this->getLocale(),
+				'version' => $docinfo['version'],
+				'sessionId' => $wopiAccessInfo['sessionid'],
+				'access_token' => $wopiAccessInfo['access_token'],
+				'access_token_ttl' => $wopiAccessInfo['access_token_ttl'],
+				'default_action' => $wopiSrc['action'],
+				'urlsrc' => $wopiSrc['urlsrc'],
+				'path' => $docinfo['path']
+			];
 		} else {
 			// base template
 			$docRetVal = [];
@@ -302,23 +302,18 @@ class DocumentController extends Controller {
 			return $this->responseError($this->l10n->t('Invalid request parameters'));
 		}
 
-		try {
-			// Share by link in public folder or file
-			$docinfo = $this->documentService->getDocumentByShareToken($shareToken, $fileId);
-			if (!$docinfo) {
-				$this->logger->warning("Cannot retrieve document from share {token} that has fileid {fileId}", ["token" => $shareToken, "fileId" => $fileId]);
-				return $this->responseError(
-					$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
-					$this->l10n->t('Please contact the administrator.', [])
-				);
-			}
-
-			// Get wopi token
-			$wopiAccessInfo = $this->createWopiSessionForPublicLink($docinfo);
-		} catch (\Exception $e) {
-			$this->logger->error('Collabora Online: Encountered error {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
-			return $this->responseError($this->l10n->t('Collabora Online: Cannot open document.'), $e->getMessage());
+		// Share by link in public folder or file
+		$docinfo = $this->documentService->getDocumentByShareToken($shareToken, $fileId);
+		if (!$docinfo) {
+			$this->logger->warning("Cannot retrieve document from share {token} that has fileid {fileId}", ["token" => $shareToken, "fileId" => $fileId]);
+			return $this->responseError(
+				$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
+				$this->l10n->t('Please contact the administrator.', [])
+			);
 		}
+
+		// Get wopi token
+		$wopiAccessInfo = $this->createWopiSessionForPublicLink($docinfo);
 
 		// Get document discovery
 		$wopiSrc = $this->discoveryService->getWopiSrc($docinfo['mimetype']);
@@ -383,23 +378,34 @@ class DocumentController extends Controller {
 	 * @NoCSRFRequired
 	 * @PublicPage
 	*/
-	public function federated($token, $path) {
-		if (!\is_string($token) || $token === '') {
+	public function federated($shareToken, $path, $server, $accessToken) {
+		if (!\is_string($shareToken) || $shareToken === '') {
 			return $this->responseError($this->l10n->t('Invalid request parameters'));
 		}
 
-		try {
-			$docinfo = $this->documentService->getDocumentByFederatedToken($token, $path);
-
-			// Get wopi token
-			$wopiAccessInfo = $this->createWopiSessionForFederatedShare($docinfo);
-		} catch (\Exception $e) {
-			$this->logger->error('Collabora Online: Encountered error {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
+		$docinfo = $this->documentService->getDocumentByFederatedToken($shareToken, $path);
+		if (!$docinfo) {
+			$this->logger->warning("Cannot retrieve document from share {token} that has path {path}", ["token" => $shareToken, "path" => $path]);
 			return $this->responseError(
-				$this->l10n->t('Collabora Online: Cannot open document due to unexpected error.'),
+				$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
 				$this->l10n->t('Please contact the administrator.', [])
 			);
 		}
+
+		// Federation exchange
+		$remoteWopiInfo = $this->federationService->getWopiForToken($server, $accessToken);
+		if (!$remoteWopiInfo) {
+			$this->logger->error("Cannot retrieve federated document wopi session metadata", []);
+			return $this->responseError(
+				$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
+				$this->l10n->t('Please contact the administrator.', [])
+			);
+		}
+
+		// FIXME: use here remoteWopiInfo to enrich token here with editing details assigned in remote server (currently we just create new token which is wrong)
+		
+		// Get wopi token
+		$wopiAccessInfo = $this->createWopiSessionForFederatedShare($docinfo);
 		
 		// Get document discovery
 		$wopiSrc = $this->discoveryService->getWopiSrc($docinfo['mimetype']);
@@ -684,6 +690,7 @@ class DocumentController extends Controller {
 	 * @throws \Exception
 	 */
 	private function createWopiSessionForAuthUser(array $docInfo) : array {
+		$origin = $this->request->getHeader('ORIGIN');
 		$currentUser = $this->getCurrentUserUID();
 		$ownerUid = $docInfo['owner'];
 		$allowEdit = $docInfo['allowEdit'];
@@ -695,6 +702,7 @@ class DocumentController extends Controller {
 		$fileId = $docInfo['fileid'];
 		$path = $docInfo['path'];
 		$version = $docInfo['version'];
+		$federatedServer = $docInfo['federatedServer'];
 
 		$this->logger->info('Generating WOPI Token for file {fileId}, version {version}.', [
 			'app' => $this->appName,
@@ -743,14 +751,18 @@ class DocumentController extends Controller {
 			'app' => $this->appName,
 			'fileid' => $fileId,
 			'allowEdit' => $allowEdit ]);
-		$origin = $this->request->getHeader('ORIGIN');
+		
 		$serverHost = null;
-		if ($origin === null) {
-			$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
-		} else {
+		if ($federatedServer !== null) {
+			// this token will be used for OCS federation exchange
+			//  and here we need to assign server host to be remote server
+			$serverHost = $federatedServer;
+		} elseif ($origin !== null) {
 			// COOL needs to know postMessageOrigin -- in case it's an external app like ownCloud Web
 			// origin will be different therefore postMessages needs to target $origin instead of serverHost
 			$serverHost = $origin;
+		} else {
+			$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 		}
 
 		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
@@ -860,6 +872,7 @@ class DocumentController extends Controller {
 	 * @return array wopi access info
 	 */
 	private function createWopiSessionForFederatedShare(array $docInfo) : array {
+		// FIXME: federatedUser can be retrieved from remote server
 		$federatedUser = ''; // remote
 		$ownerUid = $docInfo['owner'];
 		$fileId = $docInfo['fileid'];
@@ -950,90 +963,5 @@ class DocumentController extends Controller {
 		return [
 			'status' => 'success', 'documents' => $documents
 		];
-	}
-
-	/**
-	 * Check if server is trusted
-	 *
-	 * @param string $remote a remote url
-	 * @return bool indicating if given remote is trusted server
-	 */
-	private function isTrustedServer($remote) {
-		$trustedServers = null;
-
-		try {
-			$trustedServers = \OC::$server->query(\OCA\Federation\TrustedServers::class);
-		} catch (QueryException $e) {
-			$this->logger->warning("Cannot load trusted servers.");
-		}
-
-		if ($trustedServers !== null && $trustedServers->isTrustedServer($remote)) {
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Get the wopiSrc Url from a remote server.
-	 *
-	 * @param string $remote a remote
-	 * @return string with the wopi src Url
-	 */
-	private function getRemoteWopiSrc($remote) {
-		if (\strpos($remote, 'http://') === false && \strpos($remote, 'https://') === false) {
-			$remote = 'https://' . $remote;
-		}
-
-		// if (!$this->isTrustedServer($remote)) {
-		// 	$this->logger->info("Server {server} is not trusted.", ["server" => $remote]);
-		// 	return '';
-		// }
-
-		try {
-			$getWopiSrcUrl = $remote . '/ocs/v2.php/apps/richdocuments/api/v1/federation?format=json';
-			$client = \OC::$server->getHTTPClientService()->newClient();
-			$response = $client->get($getWopiSrcUrl, ['timeout' => 5]);
-			$data = \json_decode($response->getBody(), true);
-			$wopiSrc = $data['ocs']['data']['wopi_url'];
-			return $wopiSrc;
-		} catch (\Throwable $e) {
-			$this->logger->info('Cannot get the wopiSrc of remote server: ' . $remote, ['exception' => $e]);
-		}
-
-		return '';
-	}
-
-	/**
-	 * Get the Url of the collabora document on a federated server.
-	 *
-	 * @param Node $file a remote file
-	 * @return string with the Url to the given resource
-	 */
-	private function getRemoteFileUrl($file) {
-		/** @var ExternalStorage $storage */
-		$storage = $file->getStorage();
-
-		$remote = $storage->getRemote();
-		$remoteWopiSrc = $this->getRemoteWopiSrc($remote);
-
-		if (!empty($remoteWopiSrc)) {
-			$version = '0'; // FIXME
-			$serverHost = \OC::$server->getURLGenerator()->getAbsoluteURL('/');
-			$wopi = $this->getWopiInfoForAuthUser($file->getId(), $version, $this->uid);
-
-			$url = \rtrim($remote, '/') . '/index.php/apps/richdocuments/remote' .
-				'?shareToken=' . $storage->getToken() .
-				'&remoteServer=' . $serverHost .
-				'&remoteServerToken=' . $wopi['access_token'];
-
-			if (!empty($file->getInternalPath())) {
-				$url .= '&filePath=' . $file->getInternalPath();
-			}
-
-			return $url;
-		}
-
-		return '';
 	}
 }

@@ -214,7 +214,7 @@ class DocumentService {
 
 				// get the federated share token
 				/* @phan-suppress-next-line PhanUndeclaredMethod */
-				$ret['federatedToken'] = $storage->getToken();
+				$ret['federatedShareToken'] = $storage->getToken();
 
 				// get the path of the file in the federates share:
 				//  - in case of shared folder it would be relative path to file in that shared folder
@@ -302,7 +302,6 @@ class DocumentService {
 			return $this->reportError($e->getMessage());
 		}
 	}
-
 
 	/**
 	 * Retrieve document info for the federated share token. If file in the public link folder is used,
