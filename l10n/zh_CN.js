@@ -53,7 +53,6 @@ OC.L10N.register(
     "New Presentation.pptx" : "新演示文稿.pptx",
     "Invalid filename" : "无效的文件名",
     "Can't create document" : "无法创建文档",
-    "Insufficient file permissions." : "文件权限不足。",
     "Saved" : "已保存",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "保存时出现错误：Collabora Online 应使用与服务器安装相同的协议。",
     "remote user" : "远程用户",

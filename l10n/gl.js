@@ -45,7 +45,6 @@ OC.L10N.register(
     "New Spreadsheet.xlsx" : "Nova FollaDeCálculo.xlsx",
     "New Presentation.pptx" : "Nova Presentación.pptx",
     "Can't create document" : "Non é posíbel crear o documento",
-    "Insufficient file permissions." : "Non ten permisos abondo neste ficheiro",
     "Saved" : "Gardado",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "Gardado con erros: Collabora Online debe usar o mesmo protocolo que o instalado no servidor.",
     "remote user" : "usuario remoto",

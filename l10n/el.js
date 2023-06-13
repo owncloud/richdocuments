@@ -47,7 +47,6 @@ OC.L10N.register(
     "New Presentation.pptx" : "Νέα Παρουσίαση.pptx",
     "Invalid filename" : "Μη έγκυρο όνομα αρχείου",
     "Can't create document" : "Αδυναμία δημιουργίας του εγγράφου",
-    "Insufficient file permissions." : "Ανεπαρκή δικαιώματα αρχείου.",
     "Saved" : "Αποθηκεύτηκε",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "Αποθηκεύτηκε με σφάλμα: Το Collabora Online θα χρησιμοποιήσει το ίδιο πρωτόκολλο όπως η εγκατάσταση του διακομιστή.",
     "remote user" : "απομακρυσμένος χρήστης",

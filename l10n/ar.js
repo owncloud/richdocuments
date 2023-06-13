@@ -45,7 +45,6 @@ OC.L10N.register(
     "New Spreadsheet.xlsx" : "New Spreadsheet.xlsx",
     "New Presentation.pptx" : "New Presentation.pptx",
     "Can't create document" : "لا يمكن إنشاء مستند",
-    "Insufficient file permissions." : "أذونات ملف غير كافية.",
     "Saved" : "تم الحفظ",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "تم الحفظ مع حدوث خطأ: يجب أن يستخدم Collabora Online نفس البروتوكول المُستخدم في تثبيت الخادم.",
     "remote user" : "مستخدم بعيد",

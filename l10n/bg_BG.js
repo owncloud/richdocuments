@@ -53,7 +53,6 @@ OC.L10N.register(
     "New Presentation.pptx" : "Нов Presentation.pptx",
     "Invalid filename" : "Невалидно име на файл",
     "Can't create document" : "Неуспешно създаване на документ",
-    "Insufficient file permissions." : "Недостатъчни файлови права.",
     "Saved" : "Запазено",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "Запазено с грешка: Collabora Online трябва да използва същия протокол, както инсталацията на сървъра.",
     "remote user" : "отдалечен потребител",

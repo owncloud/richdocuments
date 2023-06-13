@@ -53,7 +53,6 @@ OC.L10N.register(
     "New Presentation.pptx" : "새 프레젠테이션.pptx",
     "Invalid filename" : "잘못된 파일명",
     "Can't create document" : "문서를 만들 수 없음",
-    "Insufficient file permissions." : "파일 권한이 부족합니다.",
     "Saved" : "저장됨",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "저장 오류 발생: Collabora Online과 서버 설치본이 같은 프로토콜을 사용해야 합니다.",
     "remote user" : "원격 사용자",

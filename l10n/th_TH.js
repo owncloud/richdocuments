@@ -52,7 +52,6 @@ OC.L10N.register(
     "New Presentation.pptx" : "งานนำเสนอใหม่.pptx",
     "Invalid filename" : "ชื่อไฟล์ไม่ถูกต้อง",
     "Can't create document" : "ไม่สามารถสร้างเอกสารได้",
-    "Insufficient file permissions." : "การอนุญาตไฟล์ไม่เพียงพอ",
     "Saved" : "บันทึกแล้ว",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "บันทึกกับข้อผิดพลาด: Collabora ออนไลน์ควรใช้โปรโตคอลเดียวกันกับตอนติดตั้งเซิร์ฟเวอร์",
     "remote user" : "รีโมทของผู้ใช้",
