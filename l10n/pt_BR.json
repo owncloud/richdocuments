@@ -42,6 +42,7 @@
     "Invalid request parameters" : "Parâmetros de solicitação inválidos",
     "Collabora Online: Error encountered while opening the document." : "Collabora Online: Erro encontrado ao abrir o documento.",
     "Please contact the administrator." : "Entre em contato com o administrador.",
+    "Collabora Online: Federated shares not supported yet." : "Collabora Online: compartilhamentos federados ainda não são suportados.",
     "Collabora Online: Cannot open document due to unexpected error." : "Collabora Online: Não é possível abrir o documento devido a um erro inesperado.",
     "Collabora Online: Invalid URL \"%s\"." : "Collabora Online: URL inválido \"%s\".",
     "Please ask your administrator to check the Collabora Online server setting." : "Por favor, pergunte ao seu administrador para verificar a configuração do servidor Collabora Online.",

@@ -44,6 +44,7 @@ OC.L10N.register(
     "Invalid request parameters" : "Invalid request parameters",
     "Collabora Online: Error encountered while opening the document." : "Collabora Online: Error encountered while opening the document.",
     "Please contact the administrator." : "Please contact the administrator.",
+    "Collabora Online: Federated shares not supported yet." : "Collabora Online: Federated shares are not supported yet.",
     "Collabora Online: Cannot open document due to unexpected error." : "Collabora Online: Cannot open document due to unexpected error.",
     "Collabora Online: Invalid URL \"%s\"." : "Collabora Online: Invalid URL \"%s\".",
     "Please ask your administrator to check the Collabora Online server setting." : "Please ask your administrator to check the Collabora Online server setting.",
