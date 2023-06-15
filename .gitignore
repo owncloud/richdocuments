@@ -22,3 +22,4 @@ vendor-bin/**/composer.lock
 node_modules
 
 .idea/
+.pnpm-store/
