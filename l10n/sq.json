@@ -42,6 +42,7 @@
     "Invalid request parameters" : "Parametra të pavlefshëm kërkese",
     "Collabora Online: Error encountered while opening the document." : "Collabora Online: U has gabim teksa hapej dokumenti.",
     "Please contact the administrator." : "Ju lutemi, lidhuni me përgjegjësin.",
+    "Collabora Online: Federated shares not supported yet." : "Collabora Online: Nuk mbulohen ende pjesë të përbashkëta të federuara.",
     "Collabora Online: Cannot open document due to unexpected error." : "Collabora Online: S’hapet dot dokumenti, për shkak gabimi të papritur.",
     "Collabora Online: Invalid URL \"%s\"." : "Collabora Online: URL \"%s\" e pavlefshme.",
     "Please ask your administrator to check the Collabora Online server setting." : "Ju lutemi, kërkojini përgjegjësit tuaj të kontrollojë rregullimin e shërbyesit Collabora Online.",
