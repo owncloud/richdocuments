@@ -220,7 +220,7 @@ class DocumentService {
 				//  - in case of shared folder it would be relative path to file in that shared folder
 				//  - in case of shared file it would be name of the shared file
 				/* @phan-suppress-next-line PhanUndeclaredMethod */
-				$ret['federatedPath'] = $document->getInternalPath();
+				$ret['federatedShareRelativePath'] = $document->getInternalPath();
 			}
 
 			return $ret;

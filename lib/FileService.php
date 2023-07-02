@@ -82,25 +82,25 @@ class FileService {
 	 *
 	 * @param int $fileId original file id
 	 * @param string $ownerUID original file owner
-	 * @param string $userUID file editor
+	 * @param string $editorUID file editor (empty string if incognito mode)
 	 *
 	 * @return null|File
 	 */
-	public function getFileHandle(int $fileId, string $ownerUID, string $userUID): ?File {
+	public function getFileHandle(int $fileId, string $ownerUID, string $editorUID): ?File {
 		if (!$ownerUID) {
 			$this->logger->warning('getFileHandle(): owner must be provided', ['app' => 'richdocuments']);
 			return null;
 		}
 
-		if ($userUID) {
-			$user = $this->userManager->get($userUID);
+		if ($editorUID) {
+			$user = $this->userManager->get($editorUID);
 			if (!$user) {
 				$this->logger->warning('getFileHandle(): No such user', ['app' => 'richdocuments']);
 				return null;
 			}
 
 			// Make sure editor session is opened for registering activity over file handle
-			$this->logger->debug('getFileHandle(): Register session as ' . $userUID, ['app' => 'richdocuments']);
+			$this->logger->debug('getFileHandle(): Register session as ' . $editorUID, ['app' => 'richdocuments']);
 			if (!$this->appConfig->encryptionEnabled()) {
 				// Set session for a user
 				$this->userSession->setUser($user);
@@ -110,7 +110,7 @@ class FileService {
 				$this->userSession->setUser($user);
 
 				// emit login event to allow decryption of files via master key
-				$afterEvent = new GenericEvent(null, ['loginType' => 'password', 'user' => $user, 'uid' => $userUID, 'password' => '']);
+				$afterEvent = new GenericEvent(null, ['loginType' => 'password', 'user' => $user, 'uid' => $editorUID, 'password' => '']);
 				$this->eventDispatcher->dispatch($afterEvent, 'user.afterlogin');
 			} else {
 				// other type of encryption is enabled (e.g. user-key) that does not allow to decrypt files without incognito access to files

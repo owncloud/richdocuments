@@ -21,6 +21,7 @@ class Wopi extends \OCA\Richdocuments\Db {
 	public const ATTR_CAN_EXPORT = 2;
 	public const ATTR_CAN_PRINT = 4;
 	public const ATTR_HAS_WATERMARK = 8;
+	public const ATTR_FEDERATED = 16;
 
 	public const appName = 'richdocuments';
 
@@ -97,6 +98,8 @@ class Wopi extends \OCA\Richdocuments\Db {
 		}
 
 		return [
+			'fileId' => $row['fileId'],
+			'version' => $row['version'],
 			'owner' => $row['owner_uid'],
 			'editor' => $row['editor_uid'],
 			'attributes' => $row['attributes'],

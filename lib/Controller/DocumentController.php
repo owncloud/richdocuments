@@ -2,6 +2,7 @@
 /**
  * @author Victor Dubiniuk <victor.dubiniuk@gmail.com>
  * @author Piotr Mrowczynski <piotr@owncloud.com>
+ * @author Szymon Kłos <szymon.klos@collabora.com>
  *
  * @copyright Copyright (c) 2023, ownCloud GmbH
  * @license AGPL-3.0
@@ -198,12 +199,12 @@ class DocumentController extends Controller {
 			// Get wopi access info
 			$wopiAccessInfo = $this->createWopiSessionForAuthUser($docinfo);
 
-			// If federated sharing redirect to remote server,
+			// If federated share mount redirect to remote server for WOPI editing,
 			// providing also access token for OCS federated handshake
-			if (isset($docinfo['federatedShareToken'], $docinfo['federatedPath'], $docinfo['federatedServer'])) {
+			if (isset($docinfo['federatedShareToken'], $docinfo['federatedShareRelativePath'], $docinfo['federatedServer'])) {
 				$remoteFileUrl = $this->federationService->getRemoteFileUrl(
 					$docinfo['federatedShareToken'],
-					$docinfo['federatedPath'],
+					$docinfo['federatedShareRelativePath'],
 					$docinfo['federatedServer'],
 					$wopiAccessInfo['access_token']
 				);
@@ -378,14 +379,14 @@ class DocumentController extends Controller {
 	 * @NoCSRFRequired
 	 * @PublicPage
 	*/
-	public function federated($shareToken, $path, $server, $accessToken) {
+	public function federated($shareToken, $shareRelativePath, $server, $accessToken) {
 		if (!\is_string($shareToken) || $shareToken === '') {
 			return $this->responseError($this->l10n->t('Invalid request parameters'));
 		}
 
-		$docinfo = $this->documentService->getDocumentByFederatedToken($shareToken, $path);
+		$docinfo = $this->documentService->getDocumentByFederatedToken($shareToken, $shareRelativePath);
 		if (!$docinfo) {
-			$this->logger->warning("Cannot retrieve document from share {token} that has path {path}", ["token" => $shareToken, "path" => $path]);
+			$this->logger->warning("Cannot retrieve document from share {token} that has path {path}", ["token" => $shareToken, "path" => $shareRelativePath]);
 			return $this->responseError(
 				$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
 				$this->l10n->t('Please contact the administrator.', [])
@@ -402,10 +403,8 @@ class DocumentController extends Controller {
 			);
 		}
 
-		// FIXME: use here remoteWopiInfo to enrich token here with editing details assigned in remote server (currently we just create new token which is wrong)
-		
 		// Get wopi token
-		$wopiAccessInfo = $this->createWopiSessionForFederatedShare($docinfo);
+		$wopiAccessInfo = $this->createWopiSessionForFederatedShare($docinfo, $remoteWopiInfo);
 		
 		// Get document discovery
 		$wopiSrc = $this->discoveryService->getWopiSrc($docinfo['mimetype']);
@@ -755,8 +754,9 @@ class DocumentController extends Controller {
 		$serverHost = null;
 		if ($federatedServer !== null) {
 			// this token will be used for OCS federation exchange
-			//  and here we need to assign server host to be remote server
+			// and here we need to assign server host to be remote server
 			$serverHost = $federatedServer;
+			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_FEDERATED;
 		} elseif ($origin !== null) {
 			// COOL needs to know postMessageOrigin -- in case it's an external app like ownCloud Web
 			// origin will be different therefore postMessages needs to target $origin instead of serverHost
@@ -869,17 +869,16 @@ class DocumentController extends Controller {
 	 * Generates and returns an wopi access info containing token for a given fileId.
 	 *
 	 * @param array $docInfo doc index as retrieved from DocumentService
+	 * @param array $remoteWopiInfo wopi info as retrieved from OCS API
 	 * @return array wopi access info
 	 */
-	private function createWopiSessionForFederatedShare(array $docInfo) : array {
-		// FIXME: federatedUser can be retrieved from remote server
-		$federatedUser = ''; // remote
+	private function createWopiSessionForFederatedShare(array $docInfo, array $remoteWopiInfo) : array {
 		$ownerUid = $docInfo['owner'];
 		$fileId = $docInfo['fileid'];
-		$mimetype = $docInfo['mimetype'];
 		$path = $docInfo['path'];
 		$version = $docInfo['version'];
-		$allowEdit = $docInfo['allowEdit'];
+
+		$federatedUser = $remoteWopiInfo['editor'];
 
 		$this->logger->info('Generating WOPI Token for file {fileId}, version {version}.', [
 			'app' => $this->appName,
@@ -888,18 +887,11 @@ class DocumentController extends Controller {
 
 		$this->updateDocumentEncryptionAccessList($ownerUid, $federatedUser, $path);
 
+		// server host where the edit session is created
 		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 
-		$wopiSessionAttr = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_EXPORT | WOPI::ATTR_CAN_PRINT;
-
-		// If token is for some versioned file
-		// Check if mimetime supports updates
-		$wopiSrc = $this->discoveryService->getWopiSrc($mimetype);
-		if (($allowEdit === true) && isset($wopiSrc['action'])
-				&& ($wopiSrc['action'] === 'edit' || $wopiSrc['action'] === 'view_comment')
-				&& ($version === '0')) {
-			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_CAN_UPDATE;
-		}
+		// take attributes for session from remote wopi info
+		$wopiSessionAttr = $remoteWopiInfo['attributes'];
 
 		$row = new Db\Wopi();
 		/*

@@ -1,6 +1,7 @@
 <?php
 /**
  * @author Piotr Mrowczynski <piotr@owncloud.com>
+ * @author Szymon Kłos <szymon.klos@collabora.com>
  *
  * @copyright Copyright (c) 2023, ownCloud GmbH
  * @license AGPL-3.0
@@ -72,16 +73,16 @@ class FederationService {
 	 * Get the Url of the collabora document on a federated server.
 	 *
 	 * @param string $shareToken
-	 * @param string $path
+	 * @param string $shareRelativePath
 	 * @param string $server
 	 * @param string $accessToken
 	 * @return string with the Url to the given resource
 	 */
-	public function getRemoteFileUrl(string $shareToken, string $path, string $server, string $accessToken) : string {
+	public function getRemoteFileUrl(string $shareToken, string $shareRelativePath, string $server, string $accessToken) : string {
 		$serverHost = $this->urlGenerator->getAbsoluteURL('/');
 		$remoteFileUrl = \rtrim($server, '/') . '/index.php/apps/richdocuments/documents.php/federated' .
 			'?shareToken=' . $shareToken .
-			'&path=' . $path .
+			'&shareRelativePath=' . $shareRelativePath .
 			'&server=' . \rtrim($serverHost, '/') .
 			'&accessToken=' . $accessToken;
 		return $remoteFileUrl;
@@ -107,7 +108,6 @@ class FederationService {
 			$response = $client->post(
 				$url,
 				[
-				[
 					'form_params' => [
 						'token' => $remoteToken,
 						'format' => 'json'
@@ -115,7 +115,6 @@ class FederationService {
 					'timeout' => 3,
 					'connect_timeout' => 3,
 				]
-			]
 			);
 
 			$responseBody = $response->getBody();
