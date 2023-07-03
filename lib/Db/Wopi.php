@@ -98,7 +98,7 @@ class Wopi extends \OCA\Richdocuments\Db {
 		}
 
 		return [
-			'fileId' => $row['fileId'],
+			'fileid' => $row['fileid'],
 			'version' => $row['version'],
 			'owner' => $row['owner_uid'],
 			'editor' => $row['editor_uid'],
