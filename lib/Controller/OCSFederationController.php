@@ -24,28 +24,24 @@ namespace OCA\Richdocuments\Controller;
 
 use OCA\Richdocuments\Db\Wopi;
 use OCA\Richdocuments\DiscoveryService;
+use OCA\Richdocuments\FederationService;
 use OCP\AppFramework\OCSController;
 use OCP\AppFramework\Http\DataResponse;
-use OCP\IConfig;
 use OCP\IRequest;
-use OCP\IURLGenerator;
 
 class OCSFederationController extends OCSController {
-	private $config;
 	private $discoveryService;
-	private $urlGenerator;
+	private $federationService;
 
 	public function __construct(
 		string $appName,
 		IRequest $request,
-		IConfig $config,
 		DiscoveryService $discoveryService,
-		IURLGenerator $urlGenerator
+		FederationService $federationService
 	) {
 		parent::__construct($appName, $request);
-		$this->config = $config;
 		$this->discoveryService = $discoveryService;
-		$this->urlGenerator = $urlGenerator;
+		$this->federationService = $federationService;
 	}
 
 	/**
@@ -78,69 +74,13 @@ class OCSFederationController extends OCSController {
 
 		if ($wopi == false) {
 			return new DataResponse([], 404);
-		} 
+		}
 
 		return new DataResponse(['data' => [
-			'owner' => $this->generateFederatedCloudID($wopi['owner']),
-			'editor' => $this->generateFederatedCloudID($wopi['editor']),
+			'owner' => $this->federationService->generateFederatedCloudID($wopi['owner']),
+			'editor' => $this->federationService->generateFederatedCloudID($wopi['editor']),
 			'attributes' => $wopi['attributes'],
 			'server_host' => $wopi['server_host']
 		]], 200);
-	}
-
-	/**
-	 * split user and remote from federated cloud id, null if not federated cloud id
-	 *
-	 * @param string $userId user id
-	 * @return string
-	 */
-	public function generateFederatedCloudID(string $userId) : string {
-		if (\strpos($userId, '@') === false) {
-			// generate federated cloud id
-			$user =  $userId;
-			$remote = \preg_replace('|^(.*?://)|', '', \rtrim($this->urlGenerator->getAbsoluteURL('/'), '/'));
-			return "{$user}@{$remote}";
-		}
-
-		// Find the first character that is not allowed in user names
-		$id = \str_replace('\\', '/', $userId);
-		$posSlash = \strpos($id, '/');
-		$posColon = \strpos($id, ':');
-
-		if ($posSlash === false && $posColon === false) {
-			$invalidPos = \strlen($id);
-		} elseif ($posSlash === false) {
-			$invalidPos = $posColon;
-		} elseif ($posColon === false) {
-			$invalidPos = $posSlash;
-		} else {
-			$invalidPos = \min($posSlash, $posColon);
-		}
-
-		// Find the last @ before $invalidPos
-		$pos = $lastAtPos = 0;
-		while ($lastAtPos !== false && $lastAtPos <= $invalidPos) {
-			$pos = $lastAtPos;
-			$lastAtPos = \strpos($id, '@', $pos + 1);
-		}
-
-		if ($pos !== false) {
-			$user = \substr($id, 0, $pos);
-			$remote = \substr($id, $pos + 1);
-			$remote = \str_replace('\\', '/', $remote);
-			if ($fileNamePosition = \strpos($remote, '/index.php')) {
-				$remote = \substr($remote, 0, $fileNamePosition);
-			}
-			$remote = \rtrim($remote, '/');
-			if (!empty($user) && !empty($remote)) {
-				// already a federated cloud id
-				return $userId;
-			}
-		}
-
-		// generate federated cloud id
-		$user =  $userId;
-		$remote = \preg_replace('|^(.*?://)|', '', \rtrim($this->urlGenerator->getAbsoluteURL('/'), '/'));
-		return "{$user}@{$remote}";
 	}
 }

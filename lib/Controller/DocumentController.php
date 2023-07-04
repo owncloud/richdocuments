@@ -85,7 +85,7 @@ class DocumentController extends Controller {
 	private $discoveryService;
 
 	/**
-	 * @var FederationService The document service
+	 * @var FederationService The federation service
 	 */
 	private $federationService;
 
@@ -393,7 +393,7 @@ class DocumentController extends Controller {
 			);
 		}
 
-		// Federation exchange
+		// Call federated server to get wopi information (editor/permissions etc)
 		$remoteWopiInfo = $this->federationService->getWopiForToken($server, $accessToken);
 		if (!$remoteWopiInfo) {
 			$this->logger->error("Cannot retrieve federated document wopi session metadata", []);
@@ -873,19 +873,14 @@ class DocumentController extends Controller {
 	 * @return array wopi access info
 	 */
 	private function createWopiSessionForFederatedShare(array $docInfo, array $remoteWopiInfo) : array {
+		// base doc details
 		$ownerUid = $docInfo['owner'];
 		$fileId = $docInfo['fileid'];
 		$path = $docInfo['path'];
 		$version = $docInfo['version'];
 
-		$federatedUser = $remoteWopiInfo['editor'];
-
-		$this->logger->info('Generating WOPI Token for file {fileId}, version {version}.', [
-			'app' => $this->appName,
-			'fileId' => $fileId,
-			'version' => $version ]);
-
-		$this->updateDocumentEncryptionAccessList($ownerUid, $federatedUser, $path);
+		// editor is federated user
+		$editor = $remoteWopiInfo['editor'];
 
 		// server host where the edit session is created
 		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
@@ -893,13 +888,20 @@ class DocumentController extends Controller {
 		// take attributes for session from remote wopi info
 		$wopiSessionAttr = $remoteWopiInfo['attributes'];
 
+		$this->logger->info('Generating WOPI Token for file {fileId}, version {version}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'version' => $version ]);
+
+		$this->updateDocumentEncryptionAccessList($ownerUid, $editor, $path);
+
 		$row = new Db\Wopi();
 		/*
 		 * Version is a string here, and arg 2 (version) should be an int.
 		 * As long as the string is just a number, all is good.
 		 */
 		/* @phan-suppress-next-line PhanTypeMismatchArgument */
-		$tokenArray = $row->generateToken($fileId, $version, $wopiSessionAttr, $serverHost, $ownerUid, $federatedUser);
+		$tokenArray = $row->generateToken($fileId, $version, $wopiSessionAttr, $serverHost, $ownerUid, $editor);
 
 		// Return the token.
 		$result = [

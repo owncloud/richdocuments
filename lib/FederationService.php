@@ -21,29 +21,15 @@
  */
 namespace OCA\Richdocuments;
 
-use OCP\ICache;
-use OCP\ICacheFactory;
 use OCP\ILogger;
 use OCP\Http\Client\IClientService;
-use OCA\Richdocuments\AppConfig;
 use OCP\IURLGenerator;
-use SimpleXMLElement;
 
 class FederationService {
-	/**
-	 * @var AppConfig
-	 */
-	private $appConfig;
-
 	/**
 	 * @var ILogger
 	 */
 	private $logger;
-
-	/**
-	 * @var ICache
-	 */
-	private $cache;
 
 	/**
 	 * @var IURLGenerator
@@ -56,15 +42,11 @@ class FederationService {
 	private $httpClient;
 
 	public function __construct(
-		AppConfig $config,
 		ILogger $logger,
-		ICacheFactory $cacheFactory,
 		IURLGenerator $urlGenerator,
 		IClientService $httpClient
 	) {
-		$this->appConfig = $config;
 		$this->logger = $logger;
-		$this->cache = $cacheFactory->create('oca.richdocuments.federation');
 		$this->urlGenerator = $urlGenerator;
 		$this->httpClient = $httpClient;
 	}
@@ -94,12 +76,13 @@ class FederationService {
 	* @param string $accessToken wopi access token from a remote server
 	* @return array|null with additional wopi information
 	*/
-	public function getWopiForToken($server, $remoteToken) {
+	public function getWopiForToken($server, $accessToken) {
 		$remote = $server;
-		// if (!$this->isTrustedServer($remote)) {
-		// 	$this->logger->info("Server {server} is not trusted.", ["server" => $remote]);
-		// 	return null;
-		// }
+
+		if (!$this->isServerAllowed($remote)) {
+			$this->logger->info("Server {server} is not allowed.", ["server" => $remote]);
+			return null;
+		}
 
 		try {
 			$client = $this->httpClient->newClient();
@@ -109,7 +92,7 @@ class FederationService {
 				$url,
 				[
 					'form_params' => [
-						'token' => $remoteToken,
+						'token' => $accessToken,
 						'format' => 'json'
 					],
 					'timeout' => 3,
@@ -119,8 +102,10 @@ class FederationService {
 
 			$responseBody = $response->getBody();
 			$data = \json_decode($responseBody, true, 512);
-
-			return $data['ocs']['data'];
+			if (\is_array($data)) {
+				return $data['ocs']['data'];
+			}
+			return null;
 		} catch (\Throwable $e) {
 			$this->logger->info('Cannot get the wopi info from remote server: ' . $remote, ['exception' => $e]);
 		}
@@ -129,54 +114,113 @@ class FederationService {
 	}
 
 	/**
-	 * Check if server is trusted
+	 * Check if server is allowed
 	 *
 	 * @param string $remote a remote url
-	 * @return bool indicating if given remote is trusted server
+	 * @return bool indicating if given remote is allowed server
 	 */
-	private function isTrustedServer($remote) {
-		$trustedServers = null;
+	public function isServerAllowed($remote) {
+		// FIXME: implement check for trusted server, for a moment all trusted
 
-		try {
-			$trustedServers = \OC::$server->query(\OCA\Federation\TrustedServers::class);
-		} catch (QueryException $e) {
-			$this->logger->warning("Cannot load trusted servers.");
-		}
+		// $trustedServers = null;
+		// try {
+		// 	$trustedServers = \OC::$server->query(\OCA\Federation\TrustedServers::class);
+		// } catch (QueryException $e) {
+		// 	$this->logger->warning("Cannot load trusted servers.");
+		// }
+		// if ($trustedServers !== null && $trustedServers->isTrustedServer($remote)) {
+		// 	return true;
+		// }
+		//return false;
 
-		if ($trustedServers !== null && $trustedServers->isTrustedServer($remote)) {
-			return true;
-		}
-
-		return false;
+		return true;
 	}
 
 	/**
 	 * Get the wopiSrc Url from a remote server.
 	 *
-	 * @param string $remote a remote
+	 * @param string $server a remote
 	 * @return string with the wopi src Url
 	 */
-	public function getRemoteWopiSrc($server, $token) {
+	public function getRemoteWopiSrc($server) {
 		if (\strpos($server, 'http://') === false && \strpos($server, 'https://') === false) {
-			$remote = 'https://' . $server;
+			$server = 'https://' . $server;
 		}
 
-		// if (!$this->isTrustedServer($remote)) {
-		// 	$this->logger->info("Server {server} is not trusted.", ["server" => $remote]);
-		// 	return '';
-		// }
+		if (!$this->isServerAllowed($server)) {
+			$this->logger->info("Server {server} is not allowed.", ["server" => $server]);
+			return '';
+		}
 
 		try {
-			$getWopiSrcUrl = $remote . '/ocs/v2.php/apps/richdocuments/api/v1/federation?format=json';
-			$client = \OC::$server->getHTTPClientService()->newClient();
+			$getWopiSrcUrl = $server . '/ocs/v2.php/apps/richdocuments/api/v1/federation?format=json';
+			$client = $this->httpClient->newClient();
 			$response = $client->get($getWopiSrcUrl, ['timeout' => 5]);
 			$data = \json_decode($response->getBody(), true);
-			$wopiSrc = $data['ocs']['data']['wopi_url'];
-			return $wopiSrc;
+
+			if (\is_array($data)) {
+				return $data['ocs']['data']['wopi_url'];
+			}
 		} catch (\Throwable $e) {
-			$this->logger->info('Cannot get the wopiSrc of remote server: ' . $remote, ['exception' => $e]);
+			$this->logger->info('Cannot get the wopiSrc of remote server: ' . $server, ['exception' => $e]);
 		}
 
 		return '';
+	}
+
+	/**
+	 * split user and remote from federated cloud id, null if not federated cloud id
+	 *
+	 * @param string $userId user id
+	 * @return string
+	 */
+	public function generateFederatedCloudID(string $userId) : string {
+		if (\strpos($userId, '@') === false) {
+			// generate federated cloud id
+			$user =  $userId;
+			$remote = \preg_replace('|^(.*?://)|', '', \rtrim($this->urlGenerator->getAbsoluteURL('/'), '/'));
+			return "{$user}@{$remote}";
+		}
+
+		// Find the first character that is not allowed in user names
+		$id = \str_replace('\\', '/', $userId);
+		$posSlash = \strpos($id, '/');
+		$posColon = \strpos($id, ':');
+
+		if ($posSlash === false && $posColon === false) {
+			$invalidPos = \strlen($id);
+		} elseif ($posSlash === false) {
+			$invalidPos = $posColon;
+		} elseif ($posColon === false) {
+			$invalidPos = $posSlash;
+		} else {
+			$invalidPos = \min($posSlash, $posColon);
+		}
+
+		// Find the last @ before $invalidPos
+		$pos = $lastAtPos = 0;
+		while ($lastAtPos !== false && $lastAtPos <= $invalidPos) {
+			$pos = $lastAtPos;
+			$lastAtPos = \strpos($id, '@', $pos + 1);
+		}
+
+		if ($pos !== false) {
+			$user = \substr($id, 0, $pos);
+			$remote = \substr($id, $pos + 1);
+			$remote = \str_replace('\\', '/', $remote);
+			if ($fileNamePosition = \strpos($remote, '/index.php')) {
+				$remote = \substr($remote, 0, $fileNamePosition);
+			}
+			$remote = \rtrim($remote, '/');
+			if (!empty($user) && !empty($remote)) {
+				// already a federated cloud id
+				return $userId;
+			}
+		}
+
+		// generate federated cloud id
+		$user =  $userId;
+		$remote = \preg_replace('|^(.*?://)|', '', \rtrim($this->urlGenerator->getAbsoluteURL('/'), '/'));
+		return "{$user}@{$remote}";
 	}
 }

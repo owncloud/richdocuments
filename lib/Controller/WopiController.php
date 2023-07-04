@@ -21,10 +21,9 @@
 
 namespace OCA\Richdocuments\Controller;
 
-use OC\Files\View;
+use OC\Security\SecureRandom;
 use OCA\Richdocuments\Db\Wopi;
 use OCP\AppFramework\Controller;
-use OCP\Files\InvalidPathException;
 use OCP\Files\NotPermittedException;
 use OCP\Files\Storage\IPersistentLockingStorage;
 use OCP\IRequest;
@@ -79,6 +78,11 @@ class WopiController extends Controller {
 	 */
 	private $userManager;
 
+	/**
+	 * @var SecureRandom
+	 */
+	private $secureRandom;
+
 	// Signifies LOOL that document has been changed externally in this storage
 	public const LOOL_STATUS_DOC_CHANGED = 1010;
 
@@ -91,7 +95,8 @@ class WopiController extends Controller {
 		ILogger $logger,
 		FileService $fileService,
 		IURLGenerator $urlGenerator,
-		IUserManager $userManager
+		IUserManager $userManager,
+		SecureRandom $secureRandom
 	) {
 		parent::__construct($appName, $request);
 		$this->l10n = $l10n;
@@ -101,6 +106,7 @@ class WopiController extends Controller {
 		$this->fileService = $fileService;
 		$this->urlGenerator = $urlGenerator;
 		$this->userManager = $userManager;
+		$this->secureRandom = $secureRandom;
 	}
 
 	/**
@@ -142,17 +148,18 @@ class WopiController extends Controller {
 			$userFriendlyName = $editor->getDisplayName();
 			$userEmail = $editor->getEMailAddress();
 			$isAnonymousUser = false;
-		} else if ($res['editor'] && $res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
-			// federated share needs to access file as incognito (remote user) as 
+		} elseif ($res['editor'] && $res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			// federated share needs to access file as incognito (remote user) as
 			// currently it is not supported to set federated user as file editor
+			// FIXME: knowing federated user we could get its friendly name from DAV contacts
 			$userId = $res['editor'];
 			$userFriendlyName = $res['editor'];
 			$userEmail = null;
 			$isAnonymousUser = true;
 		} else {
 			// public link needs to access file as incognito (remote user)
-			$userId = 'public-link-user-' . \OC::$server->getSecureRandom()->generate(8);
-			$userFriendlyName = $this->l10n->t('public link user');
+			$userId = 'public-link-user-' . $this->secureRandom->generate(8);
+			$userFriendlyName = $this->l10n->t('Public Link User');
 			$userEmail = null;
 			$isAnonymousUser = true;
 		}
@@ -431,7 +438,6 @@ class WopiController extends Controller {
 		$suggested = $this->request->getHeader('X-WOPI-SuggestedTarget');
 		$suggested = \iconv('utf-7', 'utf-8', $suggested);
 
-		$path = '';
 		if ($suggested[0] === '.') {
 			$path = \dirname($file->getPath()) . '/New File' . $suggested;
 		} elseif ($suggested[0] !== '/') {
@@ -439,13 +445,6 @@ class WopiController extends Controller {
 		} else {
 			$this->logger->debug('PutFileRelative: Suggested path {suggested} not supported', ['app' => $this->appName, 'suggested' => $suggested]);
 			return new JSONResponse([], Http::STATUS_BAD_REQUEST);
-		}
-
-		if ($path === '') {
-			return new JSONResponse([
-				'status' => 'error',
-				'message' => 'Cannot create the file'
-			], Http::STATUS_BAD_REQUEST);
 		}
 
 		// create a unique new file
@@ -541,7 +540,7 @@ class WopiController extends Controller {
 			if ($res['editor'] && $res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 				$editor = $this->userManager->get($res['editor']);
 				$lockUser = $this->l10n->t('%s via Office Collabora', [$editor->getDisplayName()]);
-			} else if ($res['editor'] && $res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			} elseif ($res['editor'] && $res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 				$lockUser = $this->l10n->t('%s via Office Collabora', [$res['editor']]);
 			} else {
 				$lockUser = $this->l10n->t('Public Link User via Collabora Online');
@@ -550,8 +549,8 @@ class WopiController extends Controller {
 			// set new lock
 			/**
 			 * @var IPersistentLockingStorage $storage
-		     * @phpstan-ignore-next-line
-		     */
+			 * @phpstan-ignore-next-line
+			 */
 			'@phan-var IPersistentLockingStorage $storage';
 			$storage->lockNodePersistent($file->getInternalPath(), [
 				'token' => $wopiLock,
@@ -830,7 +829,7 @@ class WopiController extends Controller {
 		if ($res['editor'] && $res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			$editor = $this->userManager->get($res['editor']);
 			$lockUser = $this->l10n->t('%s via Office Collabora', [$editor->getDisplayName()]);
-		} else if ($res['editor'] && $res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+		} elseif ($res['editor'] && $res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			$lockUser = $this->l10n->t('%s via Office Collabora', [$res['editor']]);
 		} else {
 			$lockUser = $this->l10n->t('Public Link User via Collabora Online');

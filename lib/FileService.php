@@ -158,7 +158,7 @@ class FileService {
 				// emit login event to allow decryption of files via master key
 				$afterEvent = new GenericEvent(null, ['loginType' => 'password', 'user' => $user, 'uid' => $editorUID, 'password' => '']);
 				$this->eventDispatcher->dispatch($afterEvent, 'user.afterlogin');
-			} else {	
+			} else {
 				return null;
 			}
 		} else {
