@@ -393,3 +393,67 @@ OC.Plugins.register('OC.Share.ShareDialogView', {
 		});
 	}
 });
+
+
+OC.Plugins.register('OCA.Share.ShareDialogLinkShareView', {
+
+	attach: function (view) {
+		if (_.isUndefined(view.model)) {
+			console.error("missing OC.Share.ShareItemModel");
+			return;
+		}
+
+		// NOTE: folder is not supported at the moment
+		var mimetype = view.itemModel.getFileInfo().getMimeType();
+		if (!odfViewer.isSupportedMimeType(mimetype)) {
+			return;
+		}
+
+		var baseGetRolesCall = view.getRoles;
+		view.getRoles = function(properties, options) {
+			/** @type {OC.Share.ShareDialogLink.PublicLinkRole[]} **/
+			var roles = baseGetRolesCall.call(view);
+			
+			roles.push({
+				name: "allowPreviewRichdocuments",
+				permissions: OC.PERMISSION_READ,
+				attributes: [
+					{
+						scope: "permissions",
+						key: "download",
+						enabled: false
+					}
+				]
+			});
+			return roles;
+		};
+
+		// customize rendering of checkboxes
+		var baseRenderCall = view.render;
+		view.render = function() {
+			baseRenderCall.call(view);
+
+			var _template = Handlebars.compile(
+				'<div id="allowPreviewRichdocuments" class="public-link-modal--item">' +
+					'<input type="radio" value="allowPreviewRichdocuments" name="publicLinkRole" id="sharingDialogAllowPreviewRichdocuments-{{cid}}" class="checkbox publicLinkRole" {{#if allowPreviewRichdocumentSelected}}checked{{/if}}/>' +
+					'<label class="bold" for="sharingDialogAllowPreviewRichdocuments-{{cid}}">{{allowPreviewRichdocumentsLabel}}</label>' +
+					'<p><em>{{allowPreviewRichdocumentsDescription}}</em></p>' +
+				'</div>'
+			)
+			
+			var $container = view.$el.find('div[id=appManagedPublicLinkModelItems]');
+
+			$container.append(
+				_template({
+					cid: view.cid,
+					allowPreviewRichdocumentsLabel: "Preview",
+					allowPreviewRichdocumentsDescription: "Recipients can only view contents online. Download is restricted.",
+					allowPreviewRichdocumentSelected: view._checkRoleEnabled('allowPreviewRichdocuments'),
+				})
+			);
+			return;
+		};
+		//
+		
+	}
+});
