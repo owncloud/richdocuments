@@ -764,6 +764,82 @@ class DocumentController extends Controller {
 	}
 
 	/**
+	 * Generates and returns an access token for a given fileId.
+	 */
+	private function getWopiInfoForPublicLinkShare($fileId, $version, $path, $shareToken, $permissions, $currentUser) {
+		$this->logger->info('getWopiInfoForPublicLinkShare(): Generating WOPI Token for file {fileId}, version {version}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'version' => $version ]);
+
+		$share = \OC::$server->getShareManager()->getShareByToken($shareToken);
+
+		$ownerUid = $share->getShareOwner();
+
+		/** @phpstan-ignore-next-line */
+		if ($attributes = $share->getAttributes()) {
+			$canDownload = $share->getAttributes()->getAttribute('permissions', 'download');
+			$viewWithWatermark = $share->getAttributes()->getAttribute('richdocuments', 'view-with-watermark');
+			$canPrint = $share->getAttributes()->getAttribute('richdocuments', 'print');
+		} else {
+			// defaults for standard share
+			$canDownload = true;
+			$viewWithWatermark = false;
+			$canPrint = true;
+		}
+
+		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
+
+		$updateable = ($permissions & Constants::PERMISSION_UPDATE) === Constants::PERMISSION_UPDATE;
+		// If token is for some versioned file
+		if ($version !== '0') {
+			$updateable = false;
+		}
+
+		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
+
+		// restriction on view has been set to false, return forbidden
+		// as there is no supported way of opening this document
+		if ($canDownload === false && $viewWithWatermark === false) {
+			throw new \Exception($this->l10n->t('Insufficient file permissions.'));
+		}
+
+		$attributes = WOPI::ATTR_CAN_VIEW;
+
+		// can export file in editor if download is not set or true
+		if ($canDownload === null || $canDownload === true) {
+			$attributes = $attributes | WOPI::ATTR_CAN_EXPORT;
+		}
+
+		// can print from editor if print is not set or true
+		if ($canPrint === null || $canPrint === true) {
+			$attributes = $attributes | WOPI::ATTR_CAN_PRINT;
+		}
+
+		// restriction on view with watermarking enabled
+		if ($viewWithWatermark === true) {
+			$attributes = $attributes | WOPI::ATTR_HAS_WATERMARK;
+		}
+		
+		if ($updateable) {
+			$attributes = $attributes | WOPI::ATTR_CAN_UPDATE;
+		}
+
+		$row = new Db\Wopi();
+		$tokenArray = $row->generateToken($fileId, $version, $attributes, $serverHost, $ownerUid, $currentUser);
+
+		// Return the token.
+		$result = [
+			'status' => 'success',
+			'access_token' => $tokenArray['access_token'],
+			'access_token_ttl' => $tokenArray['access_token_ttl'],
+			'sessionid' => '0' // default shared session
+		];
+		$this->logger->debug('getWopiInfoForPublicLink(): Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
+		return $result;
+	}
+
+	/**
 	 * API endpoint to list all user documents
 	 *
 	 * lists the documents the user has access to (including shared files, once the code in core has been fixed)
