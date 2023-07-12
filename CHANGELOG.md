@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [3.1.0] - 2023-07-12
+
+### Added
+
+- [#486](https://github.com/owncloud/richdocuments/pull/486) - E5515 feature/wopi locks
+- [#456](https://github.com/owncloud/richdocuments/pull/456) - web: add Drawing filetype and add it to + menu
+
+### Changed
+
+- [#493](https://github.com/owncloud/richdocuments/pull/493) - make sure to retrieve correct supershare based on current dir context
+- [#492](https://github.com/owncloud/richdocuments/pull/492) - Remove Symfony event dispatch from ignoreErrors
+- [#467](https://github.com/owncloud/richdocuments/pull/467) - Set appropriate icon for web
+- [#462](https://github.com/owncloud/richdocuments/pull/462) - Adjust 'if' conditionals that were reported by phpstan
+- [#454](https://github.com/owncloud/richdocuments/pull/454) - Change Richdocuments app name to Collabora Online
+
+### Fixed
+
+- [#457](https://github.com/owncloud/richdocuments/pull/457) - typo fix (templates/documents.php)
+- [#455](https://github.com/owncloud/richdocuments/pull/455) - ensure ODG Drawing compatibility across integration
+- [#451](https://github.com/owncloud/richdocuments/pull/451) - disable secure view js and settings when not available
+- [#468](https://github.com/owncloud/richdocuments/pull/468) - Upload button overlaps with a document icon in the second row
+
+
 ## [3.0.1] - 2022-08-31
 
 ### Added
