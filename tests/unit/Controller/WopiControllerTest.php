@@ -31,6 +31,7 @@ use OCP\ILogger;
 use OCP\IUserManager;
 use OCP\IURLGenerator;
 use OCP\Files\IRootFolder;
+use OCP\Security\ISecureRandom;
 
 /**
  * Class WopiControllerTest
@@ -86,6 +87,11 @@ class WopiControllerTest extends \Test\TestCase {
 	private $userManager;
 
 	/**
+	 * @var ISecureRandom
+	 */
+	private $secureRandom;
+
+	/**
 	 * @var WopiController
 	 */
 	private $wopiController;
@@ -101,6 +107,7 @@ class WopiControllerTest extends \Test\TestCase {
 		$this->rootFolder = $this->createMock(IRootFolder::class);
 		$this->urlGenerator = $this->createMock(IURLGenerator::class);
 		$this->userManager = $this->createMock(IUserManager::class);
+		$this->secureRandom = $this->createMock(ISecureRandom::class);
 
 		$this->wopiController = new WopiController(
 			'richdocuments',
@@ -110,9 +117,9 @@ class WopiControllerTest extends \Test\TestCase {
 			$this->l10n,
 			$this->logger,
 			$this->fileService,
-			$this->rootFolder,
 			$this->urlGenerator,
-			$this->userManager
+			$this->userManager,
+			$this->secureRandom
 		);
 	}
 

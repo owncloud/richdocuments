@@ -21,7 +21,7 @@
 
 namespace OCA\Richdocuments\Controller;
 
-use OC\Security\SecureRandom;
+use OCP\Security\ISecureRandom;
 use OCA\Richdocuments\Db\Wopi;
 use OCP\AppFramework\Controller;
 use OCP\Files\NotPermittedException;
@@ -79,7 +79,7 @@ class WopiController extends Controller {
 	private $userManager;
 
 	/**
-	 * @var SecureRandom
+	 * @var ISecureRandom
 	 */
 	private $secureRandom;
 
@@ -96,7 +96,7 @@ class WopiController extends Controller {
 		FileService $fileService,
 		IURLGenerator $urlGenerator,
 		IUserManager $userManager,
-		SecureRandom $secureRandom
+		ISecureRandom $secureRandom
 	) {
 		parent::__construct($appName, $request);
 		$this->l10n = $l10n;

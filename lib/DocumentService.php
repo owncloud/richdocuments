@@ -172,7 +172,8 @@ class DocumentService {
 			$ret['secureView'] = false;
 			$ret['secureViewId'] = null;
 			$ret['federatedServer'] = null;
-			$ret['federatedToken'] = null;
+			$ret['federatedShareToken'] = null;
+			$ret['federatedShareRelativePath'] = null;
 			$ret['mimetype'] = $document->getMimeType();
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
