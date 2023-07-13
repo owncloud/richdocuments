@@ -120,18 +120,7 @@ class FederationService {
 	 * @return bool indicating if given remote is allowed server
 	 */
 	public function isServerAllowed($remote) {
-		// FIXME: implement check for trusted server, for a moment all trusted
-
-		// $trustedServers = null;
-		// try {
-		// 	$trustedServers = \OC::$server->query(\OCA\Federation\TrustedServers::class);
-		// } catch (QueryException $e) {
-		// 	$this->logger->warning("Cannot load trusted servers.");
-		// }
-		// if ($trustedServers !== null && $trustedServers->isTrustedServer($remote)) {
-		// 	return true;
-		// }
-		//return false;
+		// TODO: implement check for trusted server, for a moment all trusted
 
 		return true;
 	}

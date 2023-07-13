@@ -151,7 +151,9 @@ class WopiController extends Controller {
 		} elseif ($res['editor'] && $res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			// federated share needs to access file as incognito (remote user) as
 			// currently it is not supported to set federated user as file editor
-			// FIXME: knowing federated user we could get its friendly name from DAV contacts
+
+			// FIXME: knowing federated user we could get its friendly name (userFriendlyName) from DAV contacts
+
 			$userId = $res['editor'];
 			$userFriendlyName = $res['editor'];
 			$userEmail = null;
