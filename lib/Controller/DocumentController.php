@@ -234,7 +234,7 @@ class DocumentController extends Controller {
 				'fileId' => $docinfo['fileid'],
 				'instanceId' => $this->settings->getSystemValue('instanceid'),
 				'locale' => $this->getLocale(),
-				'version' => $docinfo['version'],
+				'version' => \strval($docinfo['version']),
 				'sessionId' => $wopiAccessInfo['sessionid'],
 				'access_token' => $wopiAccessInfo['access_token'],
 				'access_token_ttl' => $wopiAccessInfo['access_token_ttl'],
@@ -246,10 +246,6 @@ class DocumentController extends Controller {
 			// base template
 			$docRetVal = [];
 		}
-
-		// Normal editing and user/group share editing
-		// Parameter $dir is not used during indexing, but might be used by Document Server
-		$renderAs = 'user';
 
 		// Handle general response
 		$wopiRemote = $this->discoveryService->getWopiUrl();
@@ -272,6 +268,10 @@ class DocumentController extends Controller {
 		
 		// set active navigation entry
 		$this->navigationManager->setActiveEntry('richdocuments_index');
+
+		// Normal editing and user/group share editing
+		// Parameter $dir is not used during indexing, but might be used by Document Server
+		$renderAs = 'user';
 
 		// prepare template response
 		$response = new TemplateResponse('richdocuments', 'documents', $retVal, $renderAs);
@@ -326,9 +326,6 @@ class DocumentController extends Controller {
 			);
 		}
 
-		// Public share link (folder or file)
-		$renderAs = 'base';
-
 		// Handle general response
 		$wopiRemote = $this->discoveryService->getWopiUrl();
 		$webSocket = $this->parseWopiSocket($wopiRemote);
@@ -337,7 +334,10 @@ class DocumentController extends Controller {
 		}
 
 		// FIXME: In public links allow max 100MB
-		$maxUploadFilesize = 100000000;
+		$maxUploadFilesize = 100*1000*1000;
+
+		// Public share link (folder or file)
+		$renderAs = 'base';
 
 		$this->navigationManager->setActiveEntry('richdocuments_index');
 		$retVal = [
@@ -346,7 +346,7 @@ class DocumentController extends Controller {
 			'title' => $docinfo['name'],
 			'fileId' => $docinfo['fileid'],
 			'locale' => $this->getLocale(),
-			'version' => $docinfo['version'],
+			'version' => \strval($docinfo['version']),
 			'sessionId' => $wopiAccessInfo['sessionid'],
 			'access_token' => $wopiAccessInfo['access_token'],
 			'access_token_ttl' => $wopiAccessInfo['access_token_ttl'],
@@ -416,9 +416,6 @@ class DocumentController extends Controller {
 			);
 		}
 
-		// Federated share is a user coming from remote instance so cannot show base template
-		$renderAs = 'empty';
-
 		// Handle general response
 		$wopiRemote = $this->discoveryService->getWopiUrl();
 		$webSocket = $this->parseWopiSocket($wopiRemote);
@@ -427,7 +424,7 @@ class DocumentController extends Controller {
 		}
 
 		// FIXME: In federated shares allow max 100MB
-		$maxUploadFilesize = 100000000;
+		$maxUploadFilesize = 100*1000*1000;
 
 		$this->navigationManager->setActiveEntry('richdocuments_index');
 		$retVal = [
@@ -436,7 +433,7 @@ class DocumentController extends Controller {
 			'title' => $docinfo['name'],
 			'fileId' => $docinfo['fileid'],
 			'locale' => $this->getLocale(),
-			'version' => $docinfo['version'],
+			'version' => \strval($docinfo['version']),
 			'sessionId' => $wopiAccessInfo['sessionid'],
 			'access_token' => $wopiAccessInfo['access_token'],
 			'access_token_ttl' => $wopiAccessInfo['access_token_ttl'],
@@ -450,6 +447,9 @@ class DocumentController extends Controller {
 			'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
 			'show_custom_header' => true // federated share should show a customer header without buttons
 		];
+
+		// Federated share is a user coming from remote instance so cannot show base template
+		$renderAs = 'empty';
 
 		$response = new TemplateResponse('richdocuments', 'documents', $retVal, $renderAs);
 		$response->addHeader('X-Frame-Options', 'ALLOW');
@@ -506,7 +506,7 @@ class DocumentController extends Controller {
 				'fileId' => $docinfo['fileid'],
 				'instanceId' => $this->settings->getSystemValue('instanceid'),
 				'locale' => $this->getLocale(),
-				'version' => $docinfo['version'],
+				'version' => \strval($docinfo['version']),
 				'sessionId' => $wopiAccessInfo['sessionid'],
 				'access_token' => $wopiAccessInfo['access_token'],
 				'access_token_ttl' => $wopiAccessInfo['access_token_ttl'],
@@ -690,7 +690,7 @@ class DocumentController extends Controller {
 	 */
 	private function createWopiSessionForAuthUser(array $docInfo) : array {
 		$origin = $this->request->getHeader('ORIGIN');
-		$currentUser = $this->getCurrentUserUID();
+		$editorUid = $this->getCurrentUserUID();
 		$ownerUid = $docInfo['owner'];
 		$allowEdit = $docInfo['allowEdit'];
 		$allowExport = $docInfo['allowExport'];
@@ -711,6 +711,7 @@ class DocumentController extends Controller {
 		// default shared session id
 		$sessionid = '0';
 
+		// decice wopi sessin attributes
 		$wopiSessionAttr = WOPI::ATTR_CAN_VIEW;
 
 		// Check if edit allowed for document
@@ -720,7 +721,7 @@ class DocumentController extends Controller {
 		$wopiSrc = $this->discoveryService->getWopiSrc($mimetype);
 		if (($allowEdit === true) && isset($wopiSrc['action'])
 				&& ($wopiSrc['action'] === 'edit' || $wopiSrc['action'] === 'view_comment')
-				&& ($this->isAllowedEditor($currentUser) === true) && ($version === '0')) {
+				&& ($this->isAllowedEditor($editorUid) === true) && ($version === 0)) {
 			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_CAN_UPDATE;
 		}
 
@@ -739,41 +740,43 @@ class DocumentController extends Controller {
 			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_HAS_WATERMARK;
 		}
 
+		// mark federated session if such
+		if ($federatedServer !== null) {
+			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_FEDERATED;
+		}
+
 		// if secureViewId is set, then it is a dedicated shared session
 		// it should not be possible that users associated with that secureViewId see activities of other users
 		// (e.g. their edits)
 		if ($secureView === true && isset($secureViewId)) {
 			$sessionid = \strval($secureViewId);
 		}
-
-		$this->logger->debug('File {fileid} is updateable? {allowEdit}', [
-			'app' => $this->appName,
-			'fileid' => $fileId,
-			'allowEdit' => $allowEdit ]);
 		
-		$serverHost = null;
 		if ($federatedServer !== null) {
-			// this token will be used for OCS federation exchange
-			// and here we need to assign server host to be remote server
+			// federated share mount access where we would redirect to remote server,
+			// we need to assign server host to be remote server where the editing will happen
 			$serverHost = $federatedServer;
-			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_FEDERATED;
 		} elseif ($origin !== null) {
 			// COOL needs to know postMessageOrigin -- in case it's an external app like ownCloud Web
 			// origin will be different therefore postMessages needs to target $origin instead of serverHost
 			$serverHost = $origin;
 		} else {
+			// default
 			$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 		}
 
-		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
+		if ($federatedServer !== null) {
+			// federated share mount access where we would redirect to remote server:
+			// - current user should have federated cloud id assigned
+			// - owner of federated share has federated cloud id already
+			$editorUid = $this->federationService->generateFederatedCloudID($editorUid);
+		} else {
+			// local editing, we need to update document encryption access list for editor
+			$this->updateDocumentEncryptionAccessList($ownerUid, $editorUid, $path);
+		}
 
 		$row = new Db\Wopi();
-		/*
-		 * Version is a string here, and arg 2 (version) should be an int.
-		 * As long as the string is just a number, all is good.
-		 */
-		/* @phan-suppress-next-line PhanTypeMismatchArgument */
-		$tokenArray = $row->generateToken($fileId, $version, $wopiSessionAttr, $serverHost, $ownerUid, $currentUser);
+		$tokenArray = $row->generateToken($fileId, $version, $wopiSessionAttr, $serverHost, $ownerUid, $editorUid);
 
 		// Return the token.
 		$result = [
@@ -786,7 +789,7 @@ class DocumentController extends Controller {
 		return $result;
 	}
 
-	private function updateDocumentEncryptionAccessList($owner, $currentUser, $path) {
+	private function updateDocumentEncryptionAccessList($owner, $editorUid, $path) {
 		$encryptionManager = \OC::$server->getEncryptionManager();
 		if ($encryptionManager->isEnabled()) {
 			// Update the current file to be accessible with system public
@@ -795,7 +798,7 @@ class DocumentController extends Controller {
 			$absPath = '/' . $owner . '/files' .  $path;
 			$accessList = \OC::$server->getEncryptionFilesHelper()->getAccessList($absPath);
 			$accessList['public'] = true;
-			$encryptionManager->getEncryptionModule()->update($absPath, $currentUser, $accessList);
+			$encryptionManager->getEncryptionModule()->update($absPath, $editorUid, $accessList);
 		}
 	}
 	
@@ -819,7 +822,7 @@ class DocumentController extends Controller {
 	 * @return array wopi access info
 	 */
 	private function createWopiSessionForPublicLink(array $docInfo) : array {
-		$currentUser = $this->getCurrentUserUID();
+		$editorUid = $this->getCurrentUserUID();
 		$ownerUid = $docInfo['owner'];
 		$fileId = $docInfo['fileid'];
 		$mimetype = $docInfo['mimetype'];
@@ -832,7 +835,7 @@ class DocumentController extends Controller {
 			'fileId' => $fileId,
 			'version' => $version ]);
 
-		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
+		$this->updateDocumentEncryptionAccessList($ownerUid, $editorUid, $path);
 
 		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 
@@ -843,17 +846,12 @@ class DocumentController extends Controller {
 		$wopiSrc = $this->discoveryService->getWopiSrc($mimetype);
 		if (($allowEdit === true) && isset($wopiSrc['action'])
 				&& ($wopiSrc['action'] === 'edit' || $wopiSrc['action'] === 'view_comment')
-				&& ($version === '0')) {
+				&& ($version === 0)) {
 			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_CAN_UPDATE;
 		}
 
 		$row = new Db\Wopi();
-		/*
-		 * Version is a string here, and arg 2 (version) should be an int.
-		 * As long as the string is just a number, all is good.
-		 */
-		/* @phan-suppress-next-line PhanTypeMismatchArgument */
-		$tokenArray = $row->generateToken($fileId, $version, $wopiSessionAttr, $serverHost, $ownerUid, $currentUser);
+		$tokenArray = $row->generateToken($fileId, $version, $wopiSessionAttr, $serverHost, $ownerUid, $editorUid);
 
 		// Return the token.
 		$result = [
@@ -896,11 +894,6 @@ class DocumentController extends Controller {
 		$this->updateDocumentEncryptionAccessList($ownerUid, $editor, $path);
 
 		$row = new Db\Wopi();
-		/*
-		 * Version is a string here, and arg 2 (version) should be an int.
-		 * As long as the string is just a number, all is good.
-		 */
-		/* @phan-suppress-next-line PhanTypeMismatchArgument */
 		$tokenArray = $row->generateToken($fileId, $version, $wopiSessionAttr, $serverHost, $ownerUid, $editor);
 
 		// Return the token.

@@ -140,7 +140,7 @@ class WopiController extends Controller {
 		$ownerId = $res['owner'];
 
 		// get user info
-		if ($res['editor'] && $res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			// file editing as local logged in user
 			$editor = $this->userManager->get($res['editor']);
 
@@ -148,7 +148,7 @@ class WopiController extends Controller {
 			$userFriendlyName = $editor->getDisplayName();
 			$userEmail = $editor->getEMailAddress();
 			$isAnonymousUser = false;
-		} elseif ($res['editor'] && $res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+		} elseif ($res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			// federated share needs to access file as incognito (remote user) as
 			// currently it is not supported to set federated user as file editor
 
@@ -194,7 +194,7 @@ class WopiController extends Controller {
 		}
 
 		// cannot write relative when public link or federated access, or when parent folder is not writable
-		if ($res['editor'] && $res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			$userCanNotWriteRelative = !$file->getParent()->isCreatable();
 		} else {
 			$userCanNotWriteRelative = true;
@@ -222,7 +222,7 @@ class WopiController extends Controller {
 		$result = [
 			'BaseFileName' => $file->getName(),
 			'Size' => $file->getSize(),
-			'Version' => $version,
+			'Version' => \strval($version),
 			'OwnerId' => $ownerId,
 			'UserId' => $userId,
 			'IsAnonymousUser' => $isAnonymousUser,
@@ -304,7 +304,7 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		if ($res['editor'] && $res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
 		} else {
 			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
@@ -354,7 +354,7 @@ class WopiController extends Controller {
 			'wopiHeaderTime' => $wopiHeaderTime
 		]);
 
-		if ($res['editor'] && $res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
 		} else {
 			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
@@ -424,7 +424,7 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		if ($res['editor'] && $res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
 		} else {
 			$this->logger->warning('PutFileRelative: Unexpected call for function for anonymous access', ['app' => $this->appName]);
@@ -438,7 +438,7 @@ class WopiController extends Controller {
 
 		// Retrieve suggested target
 		$suggested = $this->request->getHeader('X-WOPI-SuggestedTarget');
-		$suggested = \iconv('utf-7', 'utf-8', $suggested);
+		$suggested = \iconv('utf-7', 'utf-8', $suggested); // TODO: is really needed?
 
 		if ($suggested[0] === '.') {
 			$path = \dirname($file->getPath()) . '/New File' . $suggested;
@@ -516,7 +516,7 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		if ($res['editor'] && $res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
 		} else {
 			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
@@ -539,10 +539,10 @@ class WopiController extends Controller {
 		// handle non-existing lock
 		if (empty($locks)) {
 			// get locking user
-			if ($res['editor'] && $res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 				$editor = $this->userManager->get($res['editor']);
 				$lockUser = $this->l10n->t('%s via Office Collabora', [$editor->getDisplayName()]);
-			} elseif ($res['editor'] && $res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			} elseif ($res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 				$lockUser = $this->l10n->t('%s via Office Collabora', [$res['editor']]);
 			} else {
 				$lockUser = $this->l10n->t('Public Link User via Collabora Online');
@@ -613,7 +613,7 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		if ($res['editor'] && $res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
 		} else {
 			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
@@ -696,7 +696,7 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		if ($res['editor'] && $res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
 		} else {
 			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
@@ -781,7 +781,7 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		if ($res['editor'] && $res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
 		} else {
 			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
@@ -828,10 +828,10 @@ class WopiController extends Controller {
 		$this->logger->debug('UnlockAndRelock: unlocking the old lock and locking with new lock.', ['app' => $this->appName]);
 
 		// get re-locking user
-		if ($res['editor'] && $res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			$editor = $this->userManager->get($res['editor']);
 			$lockUser = $this->l10n->t('%s via Office Collabora', [$editor->getDisplayName()]);
-		} elseif ($res['editor'] && $res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+		} elseif ($res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			$lockUser = $this->l10n->t('%s via Office Collabora', [$res['editor']]);
 		} else {
 			$lockUser = $this->l10n->t('Public Link User via Collabora Online');
@@ -876,7 +876,7 @@ class WopiController extends Controller {
 		}
 
 		// check if the token is for the given file
-		if ($res['fileid'] != $fileId) {
+		if ($res['fileid'] !== $fileId) {
 			$this->logger->debug('Provided wopi token for a wrong file.', ['app' => $this->appName]);
 			return null;
 		}

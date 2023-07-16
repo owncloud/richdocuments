@@ -133,6 +133,16 @@ class FileService {
 		return null;
 	}
 
+	/**
+	 * Create new file - uses privileged access to original file handle as user
+	 * for given fileId
+	 *
+	 * @param string $path original file path
+	 * @param string $ownerUID original file owner
+	 * @param string $editorUID file editor
+	 *
+	 * @return File|null
+	 */
 	public function newFile(string $path, string $ownerUID, string $editorUID): ?File {
 		if ($path === '') {
 			return null;

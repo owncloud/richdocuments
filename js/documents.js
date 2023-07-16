@@ -655,6 +655,9 @@ var documentsMain = {
 	onStartup: function() {
 		documentsMain.UI.init();
 
+		// TODO: needs invesitigation why comparison operator for null of return
+		// for getURLParamager need to be != 'null', ref. core/js/js.js 
+
 		// Does anything indicate that we need to autostart a session?
 		var fileId = getURLParameter('fileId');
 		if (fileId != 'null')

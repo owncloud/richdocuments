@@ -178,7 +178,7 @@ class DocumentService {
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $fileId;
-			$ret['version'] = '0'; // latest
+			$ret['version'] = 0; // original file
 
 			if ($isSharedFile && $isSecureModeEnabled) {
 				/** @var \OCA\Files_Sharing\SharedStorage $storage */
@@ -263,7 +263,7 @@ class DocumentService {
 			}
 
 			$node = $share->getNode();
-			if ($node->getType() == FileInfo::TYPE_FILE) {
+			if ($node->getType() === FileInfo::TYPE_FILE) {
 				/** @var \OCP\Files\File|null $node */
 				$document = $node;
 			} elseif ($fileId !== null) {
@@ -292,7 +292,7 @@ class DocumentService {
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $document->getId();
-			$ret['version'] = '0'; // latest
+			$ret['version'] = 0; // original file
 
 			return $ret;
 		} catch (ShareNotFound $e) {
@@ -323,7 +323,7 @@ class DocumentService {
 			}
 
 			$node = $share->getNode();
-			if ($node->getType() == FileInfo::TYPE_FILE) {
+			if ($node->getType() === FileInfo::TYPE_FILE) {
 				/** @var \OCP\Files\File|null $node */
 				$document = $node;
 			} elseif ($path !== null) {
@@ -352,7 +352,7 @@ class DocumentService {
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $document->getId();
-			$ret['version'] = '0'; // latest
+			$ret['version'] = 0; // original file
 
 			return $ret;
 		} catch (ShareNotFound $e) {

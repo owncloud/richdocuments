@@ -24,24 +24,21 @@ namespace OCA\Richdocuments\Controller;
 
 use OCA\Richdocuments\Db\Wopi;
 use OCA\Richdocuments\DiscoveryService;
-use OCA\Richdocuments\FederationService;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\OCSController;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 
 class OCSFederationController extends OCSController {
 	private $discoveryService;
-	private $federationService;
 
 	public function __construct(
 		string $appName,
 		IRequest $request,
-		DiscoveryService $discoveryService,
-		FederationService $federationService
+		DiscoveryService $discoveryService
 	) {
 		parent::__construct($appName, $request);
 		$this->discoveryService = $discoveryService;
-		$this->federationService = $federationService;
 	}
 
 	/**
@@ -54,7 +51,7 @@ class OCSFederationController extends OCSController {
 			'wopi_url' => $wopiRemote
 		];
 		$headers = ['X-Frame-Options' => 'ALLOW'];
-		$response = new DataResponse(['data' => $data], 200, $headers);
+		$response = new DataResponse(['data' => $data], Http::STATUS_OK, $headers);
 		return $response;
 	}
 
@@ -73,14 +70,14 @@ class OCSFederationController extends OCSController {
 		$wopi = $row->getWopiForToken($token);
 
 		if ($wopi == false) {
-			return new DataResponse([], 404);
+			return new DataResponse([], Http::STATUS_NOT_FOUND);
 		}
 
 		return new DataResponse(['data' => [
-			'owner' => $this->federationService->generateFederatedCloudID($wopi['owner']),
-			'editor' => $this->federationService->generateFederatedCloudID($wopi['editor']),
+			'owner' => $wopi['owner'],
+			'editor' => $wopi['editor'],
 			'attributes' => $wopi['attributes'],
 			'server_host' => $wopi['server_host']
-		]], 200);
+		]], Http::STATUS_OK);
 	}
 }

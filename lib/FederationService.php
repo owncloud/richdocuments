@@ -107,7 +107,7 @@ class FederationService {
 			}
 			return null;
 		} catch (\Throwable $e) {
-			$this->logger->info('Cannot get the wopi info from remote server: ' . $remote, ['exception' => $e]);
+			$this->logger->error('Cannot get the wopi info from remote server: ' . $remote, ['exception' => $e]);
 		}
 
 		return null;
@@ -132,10 +132,6 @@ class FederationService {
 	 * @return string with the wopi src Url
 	 */
 	public function getRemoteWopiSrc($server) {
-		if (\strpos($server, 'http://') === false && \strpos($server, 'https://') === false) {
-			$server = 'https://' . $server;
-		}
-
 		if (!$this->isServerAllowed($server)) {
 			$this->logger->info("Server {server} is not allowed.", ["server" => $server]);
 			return '';
@@ -151,65 +147,20 @@ class FederationService {
 				return $data['ocs']['data']['wopi_url'];
 			}
 		} catch (\Throwable $e) {
-			$this->logger->info('Cannot get the wopiSrc of remote server: ' . $server, ['exception' => $e]);
+			$this->logger->error('Cannot get the wopiSrc of remote server: ' . $server, ['exception' => $e]);
 		}
 
 		return '';
 	}
 
 	/**
-	 * split user and remote from federated cloud id, null if not federated cloud id
+	 * Given local userId return federated cloud id
 	 *
 	 * @param string $userId user id
 	 * @return string
 	 */
 	public function generateFederatedCloudID(string $userId) : string {
-		if (\strpos($userId, '@') === false) {
-			// generate federated cloud id
-			$user =  $userId;
-			$remote = \preg_replace('|^(.*?://)|', '', \rtrim($this->urlGenerator->getAbsoluteURL('/'), '/'));
-			return "{$user}@{$remote}";
-		}
-
-		// Find the first character that is not allowed in user names
-		$id = \str_replace('\\', '/', $userId);
-		$posSlash = \strpos($id, '/');
-		$posColon = \strpos($id, ':');
-
-		if ($posSlash === false && $posColon === false) {
-			$invalidPos = \strlen($id);
-		} elseif ($posSlash === false) {
-			$invalidPos = $posColon;
-		} elseif ($posColon === false) {
-			$invalidPos = $posSlash;
-		} else {
-			$invalidPos = \min($posSlash, $posColon);
-		}
-
-		// Find the last @ before $invalidPos
-		$pos = $lastAtPos = 0;
-		while ($lastAtPos !== false && $lastAtPos <= $invalidPos) {
-			$pos = $lastAtPos;
-			$lastAtPos = \strpos($id, '@', $pos + 1);
-		}
-
-		if ($pos !== false) {
-			$user = \substr($id, 0, $pos);
-			$remote = \substr($id, $pos + 1);
-			$remote = \str_replace('\\', '/', $remote);
-			if ($fileNamePosition = \strpos($remote, '/index.php')) {
-				$remote = \substr($remote, 0, $fileNamePosition);
-			}
-			$remote = \rtrim($remote, '/');
-			if (!empty($user) && !empty($remote)) {
-				// already a federated cloud id
-				return $userId;
-			}
-		}
-
-		// generate federated cloud id
-		$user =  $userId;
 		$remote = \preg_replace('|^(.*?://)|', '', \rtrim($this->urlGenerator->getAbsoluteURL('/'), '/'));
-		return "{$user}@{$remote}";
+		return "{$userId}@{$remote}";
 	}
 }
