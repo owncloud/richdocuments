@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [4.0.0] - 2023-07-18
+## [3.9.0] - 2023-07-18
 
 ### Added
 
@@ -23,7 +23,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - [#464](https://github.com/owncloud/richdocuments/pull/464) - Replace deprecated String.prototype.substr()
 - [#462](https://github.com/owncloud/richdocuments/pull/462) - Adjust 'if' conditionals that were reported by phpstan
 - [#454](https://github.com/owncloud/richdocuments/pull/454) - Change Richdocuments app name to Collabora Online
-- Minimum core version 10.11, minimum php version 7.4
 
 ### Fixed
 
@@ -109,8 +108,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [2.4.0] - 2020-07-30
 
 
-[Unreleased]: https://github.com/owncloud/richdocuments/compare/v4.0.0...master
-[4.0.0]: https://github.com/owncloud/richdocuments/compare/v3.0.1...v4.0.0
+[Unreleased]: https://github.com/owncloud/richdocuments/compare/v3.9.0...master
+[3.9.0]: https://github.com/owncloud/richdocuments/compare/v3.0.1...v3.9.0
 [3.0.1]: https://github.com/owncloud/richdocuments/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/owncloud/richdocuments/compare/v2.7.0...v3.0.0
 [2.7.0]: https://github.com/owncloud/richdocuments/compare/v2.6.0...v2.7.0
