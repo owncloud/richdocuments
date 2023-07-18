@@ -11,7 +11,9 @@
 namespace OCA\Richdocuments\Tests\Controller;
 
 use OCA\Richdocuments\Controller\DocumentController;
+use OCA\Richdocuments\DocumentService;
 use OCA\Richdocuments\DiscoveryService;
+use OCA\Richdocuments\FederationService;
 use OCP\App\IAppManager;
 use OCP\IGroupManager;
 use OCP\INavigationManager;
@@ -22,7 +24,6 @@ use OCA\Richdocuments\AppConfig;
 use OCP\IL10N;
 use OCP\ICacheFactory;
 use OCP\ILogger;
-use OCA\Richdocuments\DocumentService;
 use OCP\IUserManager;
 
 /**
@@ -86,6 +87,10 @@ class DocumentControllerTest extends \Test\TestCase {
 	 */
 	private $navigationManager;
 	/**
+	 * @var FederationService
+	 */
+	private $federationService;
+	/**
 	 * @var DocumentController
 	 */
 	private $documentController;
@@ -105,6 +110,7 @@ class DocumentControllerTest extends \Test\TestCase {
 		$this->userManager = $this->createMock(IUserManager::class);
 		$this->previewManager = $this->createMock(IPreview::class);
 		$this->navigationManager = $this->createMock(INavigationManager::class);
+		$this->federationService = $this->createMock(FederationService::class);
 
 		$this->documentController = new DocumentController(
 			'richdocuments',
@@ -119,7 +125,8 @@ class DocumentControllerTest extends \Test\TestCase {
 			$this->groupManager,
 			$this->userManager,
 			$this->previewManager,
-			$this->navigationManager
+			$this->navigationManager,
+			$this->federationService
 		);
 	}
 

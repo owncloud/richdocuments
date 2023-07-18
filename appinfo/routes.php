@@ -25,6 +25,7 @@ $application->registerRoutes($this, [
 		// Collabora for OC10 legacy frontend
 		['name' => 'document#index', 'url' => 'documents.php/index', 'verb' => 'GET'],
 		["name" => 'document#public', 'url' => 'documents.php/public', "verb" => "GET"],
+		["name" => 'document#federated', 'url' => 'documents.php/federated', "verb" => "GET"],
 		// Collabora for Owncloud Web frontend
 		['name' => 'web_asset#get', 'url' => 'js/richdocuments.js', 'verb' => 'GET'],
 		// WOPI protocol implementation
@@ -32,5 +33,9 @@ $application->registerRoutes($this, [
 		['name' => 'wopi#wopiFileOperation', 'url' => 'wopi/files/{documentId}', 'verb' => 'POST'],
 		['name' => 'wopi#wopiGetFile', 'url' => 'wopi/files/{documentId}/contents', 'verb' => 'GET'],
 		['name' => 'wopi#wopiPutFile', 'url' => 'wopi/files/{documentId}/contents', 'verb' => 'POST'],
+	],
+	'ocs' => [
+		['name' => 'OCSFederation#index', 'url' => '/api/v1/federation', 'verb' => 'GET'],
+		['name' => 'OCSFederation#getWopiForToken', 'url' => '/api/v1/federation', 'verb' => 'POST'],
 	]
 ]);

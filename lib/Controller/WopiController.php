@@ -21,11 +21,9 @@
 
 namespace OCA\Richdocuments\Controller;
 
-use OC\Files\View;
+use OCP\Security\ISecureRandom;
 use OCA\Richdocuments\Db\Wopi;
 use OCP\AppFramework\Controller;
-use OCP\Files\IRootFolder;
-use OCP\Files\InvalidPathException;
 use OCP\Files\NotPermittedException;
 use OCP\Files\Storage\IPersistentLockingStorage;
 use OCP\IRequest;
@@ -71,11 +69,6 @@ class WopiController extends Controller {
 	private $fileService;
 
 	/**
-	 * @var IRootFolder
-	 */
-	private $rootFolder;
-
-	/**
 	 * @var IURLGenerator
 	 */
 	private $urlGenerator;
@@ -84,6 +77,11 @@ class WopiController extends Controller {
 	 * @var IUserManager
 	 */
 	private $userManager;
+
+	/**
+	 * @var ISecureRandom
+	 */
+	private $secureRandom;
 
 	// Signifies LOOL that document has been changed externally in this storage
 	public const LOOL_STATUS_DOC_CHANGED = 1010;
@@ -96,9 +94,9 @@ class WopiController extends Controller {
 		IL10N $l10n,
 		ILogger $logger,
 		FileService $fileService,
-		IRootFolder $rootFolder,
 		IURLGenerator $urlGenerator,
-		IUserManager $userManager
+		IUserManager $userManager,
+		ISecureRandom $secureRandom
 	) {
 		parent::__construct($appName, $request);
 		$this->l10n = $l10n;
@@ -106,9 +104,9 @@ class WopiController extends Controller {
 		$this->appConfig = $appConfig;
 		$this->logger = $logger;
 		$this->fileService = $fileService;
-		$this->rootFolder = $rootFolder;
 		$this->urlGenerator = $urlGenerator;
 		$this->userManager = $userManager;
+		$this->secureRandom = $secureRandom;
 	}
 
 	/**
@@ -122,28 +120,64 @@ class WopiController extends Controller {
 	 * and general information about the capabilities that the WOPI host has on the file.
 	 */
 	public function wopiCheckFileInfo(string $documentId): JSONResponse {
-		$token = $this->request->getParam('access_token');
+		$wopiToken = $this->request->getParam('access_token');
 
-		list($fileId, , $version, $sessionId) = Helper::parseDocumentId($documentId);
-		$this->logger->info('CheckFileInfo: Getting info about file {fileId}, version {version} by token {token}.', [
+		$this->logger->debug('CheckFileInfo: documentId {documentId}.', [
 			'app' => $this->appName,
-			'fileId' => $fileId,
-			'version' => $version,
-			'token' => $token ]);
+			'documentId' => $documentId
+		]);
 
-		$row = new Db\Wopi();
-		$row->loadBy('token', $token);
-
-		$res = $row->getWopiForToken($token);
+		$res = $this->getWopiInfoForToken($documentId, $wopiToken);
 		if (!$res) {
 			$this->logger->debug('CheckFileInfo: get token failed.', ['app' => $this->appName]);
-			return new JSONResponse([], Http::STATUS_NOT_FOUND);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		// get origin
+		$postMessageOrigin = $res['server_host'];
+
+		// get owner info
+		$ownerId = $res['owner'];
+
+		// get user info
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			// file editing as local logged in user
+			$editor = $this->userManager->get($res['editor']);
+
+			$userId = $editor->getUID();
+			$userFriendlyName = $editor->getDisplayName();
+			$userEmail = $editor->getEMailAddress();
+			$isAnonymousUser = false;
+		} elseif ($res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			// federated share needs to access file as incognito (remote user) as
+			// currently it is not supported to set federated user as file editor
+
+			// FIXME: knowing federated user we could get its friendly name (userFriendlyName) from DAV contacts
+
+			$userId = $res['editor'];
+			$userFriendlyName = $res['editor'];
+			$userEmail = null;
+			$isAnonymousUser = true;
+		} else {
+			// public link needs to access file as incognito (remote user)
+			$userId = 'public-link-user-' . $this->secureRandom->generate(8);
+			$userFriendlyName = $this->l10n->t('Public Link User');
+			$userEmail = null;
+			$isAnonymousUser = true;
+		}
+
+		// get file handle
+		$fileId = $res['fileid'];
+		$version = $res['version'];
+		if ($isAnonymousUser) {
+			$file = $this->fileService->getFileHandle($fileId, $ownerId, null);
+		} else {
+			$file = $this->fileService->getFileHandle($fileId, $ownerId, $userId);
 		}
 
 		// make sure file can be read when checking file info
-		$file = $this->fileService->getFileHandle($fileId, $res['owner'], $res['editor']);
 		if (!$file) {
-			$this->logger->error('CheckFileInfo: Could not retrieve file', ['app' => $this->appName]);
+			$this->logger->error('File not found or user unauthorized.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
@@ -152,34 +186,30 @@ class WopiController extends Controller {
 		try {
 			$file->fopen('rb');
 		} catch (NotPermittedException $e) {
-			$this->logger->error('CheckFileInfo: Could not open file - {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
+			$this->logger->error('Could not open file - {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		} catch (\Exception $e) {
-			$this->logger->error('CheckFileInfo: Unexpected Exception - {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
+			$this->logger->error('CheckFileInfo: unexpected exception - {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
 			return new JSONResponse([], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
 
-		if ($res['editor'] && $res['editor'] !== '') {
-			$editor = $this->userManager->get($res['editor']);
-			$editorId = $editor->getUID();
-			$editorDisplayName = $editor->getDisplayName();
-			$editorEmail = $editor->getEMailAddress();
+		// cannot write relative when public link or federated access, or when parent folder is not writable
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			$userCanNotWriteRelative = !$file->getParent()->isCreatable();
 		} else {
-			$editorId = $this->l10n->t('remote user');
-			$editorDisplayName = $this->l10n->t('remote user');
-			$editorEmail = null;
 			$userCanNotWriteRelative = true;
 		}
 
+		// check permissions
 		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
 		$canPrint = $res['attributes'] & WOPI::ATTR_CAN_PRINT;
 		$canExport = $res['attributes'] & WOPI::ATTR_CAN_EXPORT;
 
+		// check watermark text
 		if ($res['attributes'] & WOPI::ATTR_HAS_WATERMARK) {
 			$watermark = \str_replace(
 				'{viewer-email}',
-				$editorEmail === null ? $editorDisplayName : $editorEmail,
+				$userEmail === null ? $userFriendlyName : $userEmail,
 				$this->appConfig->getAppValue('watermark_text')
 			);
 		} else {
@@ -192,15 +222,16 @@ class WopiController extends Controller {
 		$result = [
 			'BaseFileName' => $file->getName(),
 			'Size' => $file->getSize(),
-			'Version' => $version,
-			'OwnerId' => $res['owner'],
-			'UserId' => $editorId,
-			'UserFriendlyName' => $editorDisplayName,
+			'Version' => \strval($version),
+			'OwnerId' => $ownerId,
+			'UserId' => $userId,
+			'IsAnonymousUser' => $isAnonymousUser,
+			'UserFriendlyName' => $userFriendlyName,
 			'UserCanWrite' => $canWrite,
 			'SupportsGetLock' => false,
 			'SupportsLocks' => $supportsLocks,
 			'UserCanNotWriteRelative' => $userCanNotWriteRelative,
-			'PostMessageOrigin' => $res['server_host'],
+			'PostMessageOrigin' => $postMessageOrigin,
 			'LastModifiedTime' => Helper::toISO8601($file->getMTime()),
 			'DisablePrint' => !$canPrint,
 			'HidePrintOption' => !$canPrint,
@@ -212,7 +243,6 @@ class WopiController extends Controller {
 		];
 		
 		$this->logger->debug("CheckFileInfo: Result: {result}", ['app' => $this->appName, 'result' => $result]);
-
 		return new JSONResponse($result, Http::STATUS_OK);
 	}
 
@@ -261,25 +291,25 @@ class WopiController extends Controller {
 	 * The GetFile operation retrieves a file from a host.
 	 */
 	public function wopiGetFile(string $documentId): Response {
-		$token = $this->request->getParam('access_token');
+		$wopiToken = $this->request->getParam('access_token');
 
-		list($fileId, , , ) = Helper::parseDocumentId($documentId);
-		$this->logger->info('GetFile: File {fileId}, token {token}.', [
+		$this->logger->debug('GetFile: documentId {documentId}.', [
 			'app' => $this->appName,
-			'fileId' => $fileId,
-			'token' => $token ]);
+			'documentId' => $documentId
+		]);
 
-		$row = new Db\Wopi();
-		$row->loadBy('token', $token);
-
-		//TODO: Support X-WOPIMaxExpectedSize header.
-		$res = $row->getWopiForToken($token);
+		$res = $this->getWopiInfoForToken($documentId, $wopiToken);
 		if (!$res) {
 			$this->logger->debug('GetFile: get token failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		$file = $this->fileService->getFileHandle($fileId, $res['owner'], $res['editor']);
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+		} else {
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
+		}
+
 		if (!$file) {
 			$this->logger->warning('GetFile: Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
@@ -298,19 +328,14 @@ class WopiController extends Controller {
 	 * The PutFile operation updates a file’s binary contents.
 	 */
 	public function wopiPutFile(string $documentId): JSONResponse {
-		$token = $this->request->getParam('access_token');
+		$wopiToken = $this->request->getParam('access_token');
 
-		list($fileId, , , ) = Helper::parseDocumentId($documentId);
-		$this->logger->debug('PutFile: file {fileId}, token {token}.', [
+		$this->logger->debug('PutFile: documentId {documentId}.', [
 			'app' => $this->appName,
-			'fileId' => $fileId,
-			'token' => $token
+			'documentId' => $documentId
 		]);
 
-		$row = new Db\Wopi();
-		$row->loadBy('token', $token);
-
-		$res = $row->getWopiForToken($token);
+		$res = $this->getWopiInfoForToken($documentId, $wopiToken);
 		if (!$res) {
 			$this->logger->debug('PutFile: get token failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
@@ -329,11 +354,12 @@ class WopiController extends Controller {
 			'wopiHeaderTime' => $wopiHeaderTime
 		]);
 
-		// get owner and editor uid's
-		$owner = $res['owner'];
-		$editor = $res['editor'];
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+		} else {
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
+		}
 
-		$file = $this->fileService->getFileHandle($fileId, $owner, $editor);
 		if (!$file) {
 			$this->logger->warning('PutFile: Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
@@ -353,16 +379,16 @@ class WopiController extends Controller {
 		}
 
 		// Read the contents of the file from the POST body and store.
-		$content = \fopen('php://input', 'r');
 		$this->logger->debug(
 			'PutFile: storing file {fileId}, editor: {editor}, owner: {owner}.',
 			[
 				'app' => $this->appName,
-				'fileId' => $fileId,
-				'editor' => $editor,
-				'owner' => $owner
+				'fileId' => $res['fileid'],
+				'editor' => $res['editor'],
+				'owner' => $res['owner']
 			]
 		);
+		$content = \fopen('php://input', 'r');
 		$file->putContent($content);
 
 		$this->logger->debug('PutFile: mtime', ['app' => $this->appName]);
@@ -379,18 +405,14 @@ class WopiController extends Controller {
 	 * The Files endpoint operation PutFileRelative.
 	 */
 	public function wopiPutFileRelative(string $documentId): JSONResponse {
-		$token = $this->request->getParam('access_token');
+		$wopiToken = $this->request->getParam('access_token');
 
-		list($fileId, , , ) = Helper::parseDocumentId($documentId);
-		$this->logger->debug('PutFileRelative: file {fileId}, token {token}.', [
+		$this->logger->debug('PutFileRelative: documentId {documentId}.', [
 			'app' => $this->appName,
-			'fileId' => $fileId,
-			'token' => $token]);
+			'documentId' => $documentId
+		]);
 
-		$row = new Db\Wopi();
-		$row->loadBy('token', $token);
-
-		$res = $row->getWopiForToken($token);
+		$res = $this->getWopiInfoForToken($documentId, $wopiToken);
 		if (!$res) {
 			$this->logger->debug('PutFileRelative: get token failed.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
@@ -402,74 +424,51 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		// get owner and editor uid's
-		$owner = $res['owner'];
-		$editor = $res['editor'];
-
-		// Retrieve suggested target
-		$suggested = $this->request->getHeader('X-WOPI-SuggestedTarget');
-		$suggested = \iconv('utf-7', 'utf-8', $suggested);
-		
-		$file = $this->fileService->getFileHandle($fileId, $owner, $editor);
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+		} else {
+			$this->logger->warning('PutFileRelative: Unexpected call for function for anonymous access', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_INTERNAL_SERVER_ERROR);
+		}
 
 		if (!$file) {
-			$this->logger->warning('PutFileRelative: could not retrieve file', ['app' => $this->appName]);
+			$this->logger->warning('PutFileRelative: Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
-		$path = '';
+		// Retrieve suggested target
+		$suggested = $this->request->getHeader('X-WOPI-SuggestedTarget');
+		$suggested = \iconv('utf-7', 'utf-8', $suggested); // TODO: is really needed?
+
 		if ($suggested[0] === '.') {
 			$path = \dirname($file->getPath()) . '/New File' . $suggested;
 		} elseif ($suggested[0] !== '/') {
 			$path = \dirname($file->getPath()) . '/' . $suggested;
 		} else {
-			$path = $this->rootFolder->getUserFolder($editor)->getPath() . $suggested;
-		}
-
-		if ($path === '') {
-			return new JSONResponse([
-				'status' => 'error',
-				'message' => 'Cannot create the file'
-			], Http::STATUS_BAD_REQUEST);
-		}
-
-		// create the folder first
-		if (!$this->rootFolder->nodeExists(\dirname($path))) {
-			$this->rootFolder->newFolder(\dirname($path));
-		}
-
-		try {
-			$view = new View('/' . $editor . '/files');
-			$view->verifyPath($path, $suggested);
-		} catch (InvalidPathException $e) {
-			return new JSONResponse([
-				'status' => 'error',
-				'message' => $this->l10n->t('Invalid filename'),
-			], Http::STATUS_BAD_REQUEST);
+			$this->logger->debug('PutFileRelative: Suggested path {suggested} not supported', ['app' => $this->appName, 'suggested' => $suggested]);
+			return new JSONResponse([], Http::STATUS_BAD_REQUEST);
 		}
 
 		// create a unique new file
-		$path = $this->rootFolder->getNonExistingName($path);
-		$file = $this->rootFolder->newFile($path);
-		$file = $this->fileService->getFileHandle($file->getId(), $owner, $editor);
-		if (!$file) {
-			$this->logger->warning('PutFileRelative: could not retrieve file', ['app' => $this->appName]);
+		$newFile = $this->fileService->newFile($path, $res['owner'], $res['editor']);
+		if (!$newFile) {
+			$this->logger->warning('PutFileRelative: could not create new file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
 		// Read the contents of the file from the POST body and store.
 		$content = \fopen('php://input', 'r');
 
-		$file->putContent($content);
-		$mtime = $file->getMtime();
+		$newFile->putContent($content);
+		$mtime = $newFile->getMtime();
 
 		$this->logger->debug(
 			'PutFileRelative: storing file {fileId}, editor: {editor}, owner: {owner}, mtime: {mtime}.',
 			[
 			'app' => $this->appName,
-			'fileId' => $fileId,
-			'editor' => $editor,
-			'owner' => $owner,
+			'fileId' => $newFile->getId(),
+			'editor' => $res['editor'],
+			'owner' => $res['owner'],
 			'mtime' => $mtime
 			]
 		);
@@ -481,47 +480,50 @@ class WopiController extends Controller {
 
 		// Continue editing
 		$attributes = WOPI::ATTR_CAN_VIEW | WOPI::ATTR_CAN_UPDATE | WOPI::ATTR_CAN_PRINT;
-		// generate a token for the new file
-		$tokenArray = $row->generateToken($file->getId(), 0, $attributes, $serverHost, $owner, $editor);
 
-		$wopi = 'index.php/apps/richdocuments/wopi/files/' . $file->getId() . '_' . $this->settings->getSystemValue('instanceid') . '?access_token=' . $tokenArray['access_token'];
+		// generate a token for the new file
+		$row = new Db\Wopi();
+		$tokenArray = $row->generateToken($newFile->getId(), 0, $attributes, $serverHost, $res['owner'], $res['editor']);
+
+		$wopi = 'index.php/apps/richdocuments/wopi/files/' . $newFile->getId() . '_' . $this->settings->getSystemValue('instanceid') . '?access_token=' . $tokenArray['access_token'];
 		$url = $this->urlGenerator->getAbsoluteURL($wopi);
 
-		return new JSONResponse([ 'Name' => $file->getName(), 'Url' => $url ], Http::STATUS_OK);
+		return new JSONResponse([ 'Name' => $newFile->getName(), 'Url' => $url ], Http::STATUS_OK);
 	}
 
 	/**
 	 * The Files endpoint operation Lock.
 	 */
 	public function wopiLock(string $documentId): JSONResponse {
-		$token = $this->request->getParam('access_token');
-
-		// get wopi lock token
+		$wopiToken = $this->request->getParam('access_token');
 		$wopiLock = $this->request->getHeader('X-WOPI-Lock');
 
-		list($fileId, , , ) = Helper::parseDocumentId($documentId);
-		$this->logger->debug('Lock: file {fileId}, wopiLock {wopiLock}, token {token}.', [
+		$this->logger->debug('Lock: documentId {documentId}, wopiLock {wopiLock}.', [
 			'app' => $this->appName,
-			'fileId' => $fileId,
+			'documentId' => $documentId,
 			'wopiLock' => $wopiLock,
-			'token' => $token]);
+		]);
 
-		$row = new Db\Wopi();
-		$row->loadBy('token', $token);
-		$res = $row->getWopiForToken($token);
+		$res = $this->getWopiInfoForToken($documentId, $wopiToken);
 		if (!$res) {
 			$this->logger->debug('Lock: get token failed.', ['app' => $this->appName]);
-			return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		// get owner and editor uid's
-		$owner = $res['owner'];
-		$editor = $res['editor'];
-		
-		$file = $this->fileService->getFileHandle($fileId, $owner, $editor);
+		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
+		if (!$canWrite) {
+			$this->logger->debug('Lock: not allowed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+		} else {
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
+		}
 
 		if (!$file) {
-			$this->logger->warning('Lock: could not retrieve file', ['app' => $this->appName]);
+			$this->logger->warning('Lock: Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
@@ -535,35 +537,27 @@ class WopiController extends Controller {
 		$locks = $storage->getLocks($file->getInternalPath(), false);
 
 		// handle non-existing lock
-
 		if (empty($locks)) {
-			// set new lock
-			if (isset($editor) && $editor !== '') {
-				$this->logger->debug('Lock: locking the file for user.', ['app' => $this->appName]);
-				$user = $this->userManager->get($editor);
-
-				/**
-				 * @var IPersistentLockingStorage $storage
-				 * @phpstan-ignore-next-line
-				*/
-				'@phan-var IPersistentLockingStorage $storage';
-				$storage->lockNodePersistent($file->getInternalPath(), [
-					'token' => $wopiLock,
-					'owner' => $this->l10n->t('%s via Office Collabora', [$user->getDisplayName()])
-				]);
+			// get locking user
+			if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+				$editor = $this->userManager->get($res['editor']);
+				$lockUser = $this->l10n->t('%s via Office Collabora', [$editor->getDisplayName()]);
+			} elseif ($res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+				$lockUser = $this->l10n->t('%s via Office Collabora', [$res['editor']]);
 			} else {
-				$this->logger->debug('Lock: locking the file for public link.', ['app' => $this->appName]);
-
-				/**
-				 * @var IPersistentLockingStorage $storage
-				 * @phpstan-ignore-next-line
-				*/
-				'@phan-var IPersistentLockingStorage $storage';
-				$storage->lockNodePersistent($file->getInternalPath(), [
-					'token' => $wopiLock,
-					'owner' => $this->l10n->t('Public Link User via Collabora Online')
-				]);
+				$lockUser = $this->l10n->t('Public Link User via Collabora Online');
 			}
+
+			// set new lock
+			/**
+			 * @var IPersistentLockingStorage $storage
+			 * @phpstan-ignore-next-line
+			 */
+			'@phan-var IPersistentLockingStorage $storage';
+			$storage->lockNodePersistent($file->getInternalPath(), [
+				'token' => $wopiLock,
+				'owner' => $lockUser
+			]);
 			return new JSONResponse([], Http::STATUS_OK);
 		}
 
@@ -598,34 +592,35 @@ class WopiController extends Controller {
 	 * The Files endpoint operation Unlock.
 	 */
 	public function wopiUnlock(string $documentId): JSONResponse {
-		$token = $this->request->getParam('access_token');
-
-		// get wopi lock token
+		$wopiToken = $this->request->getParam('access_token');
 		$wopiLock = $this->request->getHeader('X-WOPI-Lock');
 
-		list($fileId, , , ) = Helper::parseDocumentId($documentId);
-		$this->logger->debug('Unlock: file {fileId}, wopiLock {wopiLock}, token {token}.', [
+		$this->logger->debug('Unlock: documentId {documentId}, wopiLock {wopiLock}.', [
 			'app' => $this->appName,
-			'fileId' => $fileId,
+			'documentId' => $documentId,
 			'wopiLock' => $wopiLock,
-			'token' => $token]);
+		]);
 
-		$row = new Db\Wopi();
-		$row->loadBy('token', $token);
-		$res = $row->getWopiForToken($token);
+		$res = $this->getWopiInfoForToken($documentId, $wopiToken);
 		if (!$res) {
 			$this->logger->debug('Unlock: get token failed.', ['app' => $this->appName]);
-			return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		// get owner and editor uid's
-		$owner = $res['owner'];
-		$editor = $res['editor'];
-		
-		$file = $this->fileService->getFileHandle($fileId, $owner, $editor);
+		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
+		if (!$canWrite) {
+			$this->logger->debug('Unlock: not allowed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+		} else {
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
+		}
 
 		if (!$file) {
-			$this->logger->warning('Unlock: could not retrieve file', ['app' => $this->appName]);
+			$this->logger->warning('Unlock: Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
@@ -680,34 +675,35 @@ class WopiController extends Controller {
 	 * The Files endpoint operation RefreshLock.
 	 */
 	public function wopiRefreshLock(string $documentId): JSONResponse {
-		$token = $this->request->getParam('access_token');
-
-		// get wopi lock token
+		$wopiToken = $this->request->getParam('access_token');
 		$wopiLock = $this->request->getHeader('X-WOPI-Lock');
 
-		list($fileId, , , ) = Helper::parseDocumentId($documentId);
-		$this->logger->debug('RefreshLock: file {fileId}, wopiLock {wopiLock}, token {token}.', [
+		$this->logger->debug('RefreshLock: documentId {documentId}, wopiLock {wopiLock}.', [
 			'app' => $this->appName,
-			'fileId' => $fileId,
+			'documentId' => $documentId,
 			'wopiLock' => $wopiLock,
-			'token' => $token]);
+		]);
 
-		$row = new Db\Wopi();
-		$row->loadBy('token', $token);
-		$res = $row->getWopiForToken($token);
+		$res = $this->getWopiInfoForToken($documentId, $wopiToken);
 		if (!$res) {
 			$this->logger->debug('RefreshLock: get token failed.', ['app' => $this->appName]);
-			return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		// get owner and editor uid's
-		$owner = $res['owner'];
-		$editor = $res['editor'];
-		
-		$file = $this->fileService->getFileHandle($fileId, $owner, $editor);
+		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
+		if (!$canWrite) {
+			$this->logger->debug('RefreshLock: not allowed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+		} else {
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
+		}
 
 		if (!$file) {
-			$this->logger->warning('RefreshLock: could not retrieve file', ['app' => $this->appName]);
+			$this->logger->warning('Unlock: Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
@@ -762,36 +758,37 @@ class WopiController extends Controller {
 	 * The Files endpoint operation UnlockAndRelock.
 	 */
 	public function wopiUnlockAndRelock(string $documentId): JSONResponse {
-		$token = $this->request->getParam('access_token');
-
-		// get wopi lock token
+		$wopiToken = $this->request->getParam('access_token');
 		$wopiLock = $this->request->getHeader('X-WOPI-Lock');
 		$wopiLockOld = $this->request->getHeader('X-WOPI-OldLock');
 
-		list($fileId, , , ) = Helper::parseDocumentId($documentId);
-		$this->logger->debug('UnlockAndRelock: file {fileId}, wopiLock {wopiLock}, wopiLockOld {wopiLockOld}, token {token}.', [
+		$this->logger->debug('Unlock: documentId {documentId}, wopiLock {wopiLock}, wopiLockOld {wopiLockOld}.', [
 			'app' => $this->appName,
-			'fileId' => $fileId,
+			'documentId' => $documentId,
 			'wopiLock' => $wopiLock,
 			'wopiLockOld' => $wopiLockOld,
-			'token' => $token]);
+		]);
 
-		$row = new Db\Wopi();
-		$row->loadBy('token', $token);
-		$res = $row->getWopiForToken($token);
+		$res = $this->getWopiInfoForToken($documentId, $wopiToken);
 		if (!$res) {
-			$this->logger->debug('UnlockAndRelock: get token failed.', ['app' => $this->appName]);
-			return new JSONResponse([], Http::STATUS_UNAUTHORIZED);
+			$this->logger->debug('Unlock: get token failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
-		// get owner and editor uid's
-		$owner = $res['owner'];
-		$editor = $res['editor'];
-		
-		$file = $this->fileService->getFileHandle($fileId, $owner, $editor);
+		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
+		if (!$canWrite) {
+			$this->logger->debug('Unlock: not allowed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+		} else {
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
+		}
 
 		if (!$file) {
-			$this->logger->warning('UnlockAndRelock: could not retrieve file', ['app' => $this->appName]);
+			$this->logger->warning('Unlock: Could not retrieve file', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_NOT_FOUND);
 		}
 
@@ -830,6 +827,16 @@ class WopiController extends Controller {
 
 		$this->logger->debug('UnlockAndRelock: unlocking the old lock and locking with new lock.', ['app' => $this->appName]);
 
+		// get re-locking user
+		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			$editor = $this->userManager->get($res['editor']);
+			$lockUser = $this->l10n->t('%s via Office Collabora', [$editor->getDisplayName()]);
+		} elseif ($res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			$lockUser = $this->l10n->t('%s via Office Collabora', [$res['editor']]);
+		} else {
+			$lockUser = $this->l10n->t('Public Link User via Collabora Online');
+		}
+
 		/**
 		 * @var IPersistentLockingStorage $storage
 		 * @phpstan-ignore-next-line
@@ -839,32 +846,41 @@ class WopiController extends Controller {
 			'token' => $wopiLockOld,
 		]);
 
-		if (isset($editor) && $editor !== '') {
-			$this->logger->debug('UnlockAndRelock: locking the file for user.', ['app' => $this->appName]);
-			$user = $this->userManager->get($editor);
-
-			/**
-			 * @var IPersistentLockingStorage $storage
-			 * @phpstan-ignore-next-line
-			*/
-			'@phan-var IPersistentLockingStorage $storage';
-			$storage->lockNodePersistent($file->getInternalPath(), [
-				'token' => $wopiLock,
-				'owner' => $this->l10n->t('%s via Office Collabora', [$user->getDisplayName()])
-			]);
-		} else {
-			$this->logger->debug('UnlockAndRelock: locking the file for public link.', ['app' => $this->appName]);
-
-			/**
-			 * @var IPersistentLockingStorage $storage
-			 * @phpstan-ignore-next-line
-			*/
-			'@phan-var IPersistentLockingStorage $storage';
-			$storage->lockNodePersistent($file->getInternalPath(), [
-				'token' => $wopiLock,
-				'owner' => $this->l10n->t('Public Link User via Collabora Online')
-			]);
-		}
+		/**
+		 * @var IPersistentLockingStorage $storage
+		 * @phpstan-ignore-next-line
+		 */
+		'@phan-var IPersistentLockingStorage $storage';
+		$storage->lockNodePersistent($file->getInternalPath(), [
+			'token' => $wopiLock,
+			'owner' => $lockUser
+		]);
 		return new JSONResponse([], Http::STATUS_OK);
+	}
+
+	private function getWopiInfoForToken(string $documentId, $wopiToken): ?array {
+		$token = $this->request->getParam('access_token');
+
+		list($fileId, , $version, $sessionId) = Helper::parseDocumentId($documentId);
+		$this->logger->debug('Getting wopi token {token} info for file {fileId}, version {version},', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'version' => $version,
+			'token' => $token ]);
+
+		$row = new Db\Wopi();
+		$res = $row->getWopiForToken($wopiToken);
+		if (!$res) {
+			$this->logger->debug('Cannot find token.', ['app' => $this->appName]);
+			return null;
+		}
+
+		// check if the token is for the given file
+		if ($res['fileid'] !== $fileId) {
+			$this->logger->debug('Provided wopi token for a wrong file.', ['app' => $this->appName]);
+			return null;
+		}
+
+		return $res;
 	}
 }
