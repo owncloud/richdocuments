@@ -4,10 +4,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [4.0.0] - 2023-07-12
+## [4.0.0] - 2023-07-18
 
 ### Added
 
+- [#498](https://github.com/owncloud/richdocuments/pull/498) - Federated shares support v1
 - [#497](https://github.com/owncloud/richdocuments/pull/497) - handle federated share mount to display error and further refactor
 - [#486](https://github.com/owncloud/richdocuments/pull/486) - E5515 feature/wopi locks
 - [#456](https://github.com/owncloud/richdocuments/pull/456) - web: add Drawing filetype and add it to + menu
