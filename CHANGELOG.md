@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [3.9.0] - 2023-07-18
 
+This is a PTF release for compatibility with special deployments.
+In almost all cases, please use version 4.0.0 instead. 
+
 ### Added
 
 - [#498](https://github.com/owncloud/richdocuments/pull/498) - Federated shares support v1
