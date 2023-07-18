@@ -82,25 +82,25 @@ class FileService {
 	 *
 	 * @param int $fileId original file id
 	 * @param string $ownerUID original file owner
-	 * @param string $userUID file editor
+	 * @param string|null $editorUID file editor (provide null if incognito mode)
 	 *
-	 * @return null|File
+	 * @return File|null
 	 */
-	public function getFileHandle(int $fileId, string $ownerUID, string $userUID): ?File {
+	public function getFileHandle(int $fileId, string $ownerUID, ?string $editorUID): ?File {
 		if (!$ownerUID) {
 			$this->logger->warning('getFileHandle(): owner must be provided', ['app' => 'richdocuments']);
 			return null;
 		}
 
-		if ($userUID) {
-			$user = $this->userManager->get($userUID);
+		if ($editorUID) {
+			$user = $this->userManager->get($editorUID);
 			if (!$user) {
 				$this->logger->warning('getFileHandle(): No such user', ['app' => 'richdocuments']);
 				return null;
 			}
 
 			// Make sure editor session is opened for registering activity over file handle
-			$this->logger->debug('getFileHandle(): Register session as ' . $userUID, ['app' => 'richdocuments']);
+			$this->logger->debug('getFileHandle(): Register session as ' . $editorUID, ['app' => 'richdocuments']);
 			if (!$this->appConfig->encryptionEnabled()) {
 				// Set session for a user
 				$this->userSession->setUser($user);
@@ -110,7 +110,7 @@ class FileService {
 				$this->userSession->setUser($user);
 
 				// emit login event to allow decryption of files via master key
-				$afterEvent = new GenericEvent(null, ['loginType' => 'password', 'user' => $user, 'uid' => $userUID, 'password' => '']);
+				$afterEvent = new GenericEvent(null, ['loginType' => 'password', 'user' => $user, 'uid' => $editorUID, 'password' => '']);
 				$this->eventDispatcher->dispatch($afterEvent, 'user.afterlogin');
 			} else {
 				// other type of encryption is enabled (e.g. user-key) that does not allow to decrypt files without incognito access to files
@@ -131,6 +131,65 @@ class FileService {
 			return $files[0];
 		}
 		return null;
+	}
+
+	/**
+	 * Create new file - uses privileged access to original file handle as user
+	 * for given fileId
+	 *
+	 * @param string $path original file path
+	 * @param string $ownerUID original file owner
+	 * @param string $editorUID file editor
+	 *
+	 * @return File|null
+	 */
+	public function newFile(string $path, string $ownerUID, string $editorUID): ?File {
+		if ($path === '') {
+			return null;
+		}
+
+		if ($editorUID) {
+			$user = $this->userManager->get($editorUID);
+			if (!$user) {
+				$this->logger->warning('newFile(): No such user', ['app' => 'richdocuments']);
+				return null;
+			}
+
+			// Make sure editor session is opened for registering activity over file handle
+			$this->logger->debug('newFile(): Register session as ' . $editorUID, ['app' => 'richdocuments']);
+			if (!$this->appConfig->encryptionEnabled()) {
+				// Set session for a user
+				$this->userSession->setUser($user);
+			} elseif ($this->appConfig->masterEncryptionEnabled()) {
+				// With master encryption, decryption is based on master key (no user password needed)
+				// make sure audit/activity is triggered for editor session
+				$this->userSession->setUser($user);
+
+				// emit login event to allow decryption of files via master key
+				$afterEvent = new GenericEvent(null, ['loginType' => 'password', 'user' => $user, 'uid' => $editorUID, 'password' => '']);
+				$this->eventDispatcher->dispatch($afterEvent, 'user.afterlogin');
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
+
+		// Setup FS of original file file-handle to be able to generate
+		// file versions and write files with user session set for editor
+		// take 1st mount as here we access original version of the file from owner
+		$this->setupFS($ownerUID);
+
+		// create the folder first
+		if (!$this->rootFolder->nodeExists(\dirname($path))) {
+			$this->rootFolder->newFolder(\dirname($path));
+		}
+
+		// create a unique new file
+		$path = $this->rootFolder->getNonExistingName($path);
+		$file = $this->rootFolder->newFile($path);
+
+		return $file;
 	}
 
 	/**

@@ -76,7 +76,8 @@ $.widget('oc.documentGrid', {
 	},
 
 	_load : function (fileId){
-		if (fileId){
+		var isShare = getURLParameter('shareToken');
+		if (fileId || isShare) {
 			documentsMain.initSession();
 			return null;
 		}
@@ -654,17 +655,29 @@ var documentsMain = {
 	onStartup: function() {
 		documentsMain.UI.init();
 
+		// TODO: needs invesitigation why comparison operator for null of return
+		// for getURLParamager need to be != 'null', ref. core/js/js.js 
+
 		// Does anything indicate that we need to autostart a session?
 		var fileId = getURLParameter('fileId');
 		if (fileId != 'null')
 			documentsMain.fileId = fileId;
+
 		var dir = getURLParameter('dir');
 		if (dir != 'null')
 			documentsMain.returnToDir = dir;
-		var shareToken = getURLParameter('shareToken');
-		if (shareToken != 'null')
-			documentsMain.returnToShare = shareToken;
 
+		var shareToken = getURLParameter('shareToken');
+		if (shareToken != 'null') {
+			// check if local share or federated share
+			var server = getURLParameter('server');
+			if (server != 'null') {
+				documentsMain.returnToServer = server;
+			} else {
+				documentsMain.returnToShare = shareToken;
+			}
+		}
+		
 		// this will launch the document with given fileId
 		documentsMain.show(documentsMain.fileId);
 
@@ -827,6 +840,9 @@ var documentsMain = {
 		if (documentsMain.returnToDir) {
 			documentsMain.overlay.documentOverlay('show');
 			window.location = OC.generateUrl('apps/files?dir={dir}', {dir: documentsMain.returnToDir}, {escape: false});
+		} else if (documentsMain.returnToServer) {
+			documentsMain.overlay.documentOverlay('show');
+			window.location = documentsMain.returnToServer;
 		} else if (documentsMain.returnToShare) {
 			documentsMain.overlay.documentOverlay('show');
 			window.location = OC.generateUrl('s/{shareToken}', {shareToken: documentsMain.returnToShare}, {escape: false});

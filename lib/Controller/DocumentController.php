@@ -2,6 +2,7 @@
 /**
  * @author Victor Dubiniuk <victor.dubiniuk@gmail.com>
  * @author Piotr Mrowczynski <piotr@owncloud.com>
+ * @author Szymon Kłos <szymon.klos@collabora.com>
  *
  * @copyright Copyright (c) 2023, ownCloud GmbH
  * @license AGPL-3.0
@@ -26,12 +27,14 @@ use OCA\Richdocuments\Db;
 use OCA\Richdocuments\Db\Wopi;
 use OCA\Richdocuments\DiscoveryService;
 use OCA\Richdocuments\DocumentService;
+use OCA\Richdocuments\FederationService;
 use OCA\Richdocuments\Helper;
 use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\ContentSecurityPolicy;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Http\RedirectResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\Files\InvalidPathException;
 use OCP\IGroupManager;
@@ -82,6 +85,11 @@ class DocumentController extends Controller {
 	private $discoveryService;
 
 	/**
+	 * @var FederationService The federation service
+	 */
+	private $federationService;
+
+	/**
 	 * @var IGroupManager The group manager service
 	 */
 	private $groupManager;
@@ -119,7 +127,8 @@ class DocumentController extends Controller {
 		IGroupManager $groupManager,
 		IUserManager $userManager,
 		IPreview $previewManager,
-		INavigationManager $navigationManager
+		INavigationManager $navigationManager,
+		FederationService $federationService
 	) {
 		parent::__construct($appName, $request);
 		$this->l10n = $l10n;
@@ -133,6 +142,7 @@ class DocumentController extends Controller {
 		$this->userManager = $userManager;
 		$this->previewManager = $previewManager;
 		$this->navigationManager = $navigationManager;
+		$this->federationService = $federationService;
 	}
 
 	private function responseError($message, $hint = '') {
@@ -176,71 +186,66 @@ class DocumentController extends Controller {
 
 		// Get doc index if possible
 		if ($fileId !== null) {
-			try {
-				// Normal editing or share by user/group
-				$docinfo = $this->documentService->getDocumentByUserId($this->getCurrentUserUID(), $fileId, $dir);
-				if (!$docinfo) {
-					$this->logger->warning("Cannot retrieve document with fileid {fileid} in dir {dir}", ["fileid" => $fileId, "dir" => $dir]);
-					return $this->responseError(
-						$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
-						$this->l10n->t('Please contact the administrator.', [])
-					);
-				}
-
-				if (isset($docinfo['federatedServer'], $docinfo['federatedToken'])) {
-					return $this->responseError(
-						$this->l10n->t('Collabora Online: Federated shares not supported yet.', []),
-						$this->l10n->t('Please contact the administrator.', [])
-					);
-				}
-
-				// Get document discovery
-				$wopiSrc = $this->discoveryService->getWopiSrc($docinfo['mimetype']);
-				if (!$wopiSrc) {
-					$this->logger->error("Cannot retrieve discovery for document", []);
-					return $this->responseError(
-						$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
-						$this->l10n->t('Please contact the administrator.', [])
-					);
-				}
-	
-				// Decide max upload size
-				$maxUploadFilesize = \OCP\Util::maxUploadFilesize("/");
-
-				// Get wopi access info
-				$wopiAccessInfo = $this->createWopiSessionForAuthUser($docinfo);
-
-				// Create document index
-				$docRetVal = [
-					'uploadMaxFilesize' => $maxUploadFilesize,
-					'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
-					'title' => $docinfo['name'],
-					'fileId' => $docinfo['fileid'],
-					'instanceId' => $this->settings->getSystemValue('instanceid'),
-					'locale' => $this->getLocale(),
-					'version' => $docinfo['version'],
-					'sessionId' => $wopiAccessInfo['sessionid'],
-					'access_token' => $wopiAccessInfo['access_token'],
-					'access_token_ttl' => $wopiAccessInfo['access_token_ttl'],
-					'default_action' => $wopiSrc['action'],
-					'urlsrc' => $wopiSrc['urlsrc'],
-					'path' => $docinfo['path']
-				];
-			} catch (\Exception $e) {
-				$this->logger->error('Collabora Online: Encountered error {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
+			// Normal editing or share by user/group/federated
+			$docinfo = $this->documentService->getDocumentByUserId($this->getCurrentUserUID(), $fileId, $dir);
+			if (!$docinfo) {
+				$this->logger->warning("Cannot retrieve document with fileid {fileid} in dir {dir}", ["fileid" => $fileId, "dir" => $dir]);
 				return $this->responseError(
-					$this->l10n->t('Collabora Online: Cannot open document due to unexpected error.'),
+					$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
 					$this->l10n->t('Please contact the administrator.', [])
 				);
 			}
+
+			// Get wopi access info
+			$wopiAccessInfo = $this->createWopiSessionForAuthUser($docinfo);
+
+			// If federated share mount redirect to remote server for WOPI editing,
+			// providing also access token for OCS federated handshake
+			if (isset($docinfo['federatedShareToken'], $docinfo['federatedShareRelativePath'], $docinfo['federatedServer'])) {
+				$remoteFileUrl = $this->federationService->getRemoteFileUrl(
+					$docinfo['federatedShareToken'],
+					$docinfo['federatedShareRelativePath'],
+					$docinfo['federatedServer'],
+					$wopiAccessInfo['access_token']
+				);
+				$response = new RedirectResponse($remoteFileUrl);
+				$response->addHeader('X-Frame-Options', 'ALLOW');
+				return $response;
+			}
+
+			// Get document discovery for this server
+			$wopiSrc = $this->discoveryService->getWopiSrc($docinfo['mimetype']);
+			if (!$wopiSrc) {
+				$this->logger->error("Cannot retrieve discovery for document", []);
+				return $this->responseError(
+					$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
+					$this->l10n->t('Please contact the administrator.', [])
+				);
+			}
+	
+			// Decide max upload size
+			$maxUploadFilesize = \OCP\Util::maxUploadFilesize("/");
+
+			// Create document index
+			$docRetVal = [
+				'uploadMaxFilesize' => $maxUploadFilesize,
+				'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
+				'title' => $docinfo['name'],
+				'fileId' => $docinfo['fileid'],
+				'instanceId' => $this->settings->getSystemValue('instanceid'),
+				'locale' => $this->getLocale(),
+				'version' => \strval($docinfo['version']),
+				'sessionId' => $wopiAccessInfo['sessionid'],
+				'access_token' => $wopiAccessInfo['access_token'],
+				'access_token_ttl' => $wopiAccessInfo['access_token_ttl'],
+				'default_action' => $wopiSrc['action'],
+				'urlsrc' => $wopiSrc['urlsrc'],
+				'path' => $docinfo['path']
+			];
 		} else {
 			// base template
 			$docRetVal = [];
 		}
-
-		// Normal editing and user/group share editing
-		// Parameter $dir is not used during indexing, but might be used by Document Server
-		$renderAs = 'user';
 
 		// Handle general response
 		$wopiRemote = $this->discoveryService->getWopiUrl();
@@ -263,6 +268,10 @@ class DocumentController extends Controller {
 		
 		// set active navigation entry
 		$this->navigationManager->setActiveEntry('richdocuments_index');
+
+		// Normal editing and user/group share editing
+		// Parameter $dir is not used during indexing, but might be used by Document Server
+		$renderAs = 'user';
 
 		// prepare template response
 		$response = new TemplateResponse('richdocuments', 'documents', $retVal, $renderAs);
@@ -294,33 +303,18 @@ class DocumentController extends Controller {
 			return $this->responseError($this->l10n->t('Invalid request parameters'));
 		}
 
-		// Public share link (folder or file)
-		$renderAs = 'base';
-
-		// Handle general response
-		$wopiRemote = $this->discoveryService->getWopiUrl();
-		$webSocket = $this->parseWopiSocket($wopiRemote);
-		if (!$webSocket) {
-			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', [$wopiRemote]), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
+		// Share by link in public folder or file
+		$docinfo = $this->documentService->getDocumentByShareToken($shareToken, $fileId);
+		if (!$docinfo) {
+			$this->logger->warning("Cannot retrieve document from share {token} that has fileid {fileId}", ["token" => $shareToken, "fileId" => $fileId]);
+			return $this->responseError(
+				$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
+				$this->l10n->t('Please contact the administrator.', [])
+			);
 		}
 
-		try {
-			// Share by link in public folder or file
-			$docinfo = $this->documentService->getDocumentByShareToken($shareToken, $fileId);
-			if (!$docinfo) {
-				$this->logger->warning("Cannot retrieve document from share {token} that has fileid {fileId}", ["token" => $shareToken, "fileId" => $fileId]);
-				return $this->responseError(
-					$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
-					$this->l10n->t('Please contact the administrator.', [])
-				);
-			}
-
-			// Get wopi token
-			$wopiAccessInfo = $this->createWopiSessionForPublicLink($docinfo);
-		} catch (\Exception $e) {
-			$this->logger->error('Collabora Online: Encountered error {error}', ['app' => $this->appName, 'error' => $e->getMessage()]);
-			return $this->responseError($this->l10n->t('Collabora Online: Cannot open document.'), $e->getMessage());
-		}
+		// Get wopi token
+		$wopiAccessInfo = $this->createWopiSessionForPublicLink($docinfo);
 
 		// Get document discovery
 		$wopiSrc = $this->discoveryService->getWopiSrc($docinfo['mimetype']);
@@ -332,8 +326,18 @@ class DocumentController extends Controller {
 			);
 		}
 
+		// Handle general response
+		$wopiRemote = $this->discoveryService->getWopiUrl();
+		$webSocket = $this->parseWopiSocket($wopiRemote);
+		if (!$webSocket) {
+			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', [$wopiRemote]), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
+		}
+
 		// FIXME: In public links allow max 100MB
-		$maxUploadFilesize = 100000000;
+		$maxUploadFilesize = 100*1000*1000;
+
+		// Public share link (folder or file)
+		$renderAs = 'base';
 
 		$this->navigationManager->setActiveEntry('richdocuments_index');
 		$retVal = [
@@ -342,7 +346,7 @@ class DocumentController extends Controller {
 			'title' => $docinfo['name'],
 			'fileId' => $docinfo['fileid'],
 			'locale' => $this->getLocale(),
-			'version' => $docinfo['version'],
+			'version' => \strval($docinfo['version']),
 			'sessionId' => $wopiAccessInfo['sessionid'],
 			'access_token' => $wopiAccessInfo['access_token'],
 			'access_token_ttl' => $wopiAccessInfo['access_token_ttl'],
@@ -358,6 +362,97 @@ class DocumentController extends Controller {
 		];
 
 		$response = new TemplateResponse('richdocuments', 'documents', $retVal, $renderAs);
+		$policy = new ContentSecurityPolicy();
+		$policy->addAllowedFrameDomain($this->domainOnly($wopiRemote));
+		$policy->allowInlineScript(true);
+		$response->setContentSecurityPolicy($policy);
+
+		return $response;
+	}
+	
+	/**
+	 * Get collabora document for remote (e.g. federated) share by token:
+	 * - file shared by public link (shareToken points directly to file)
+	 * - file in public folder shared by link (shareToken points to shared folder, and file to get is identified by fileId)
+	 *
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 * @PublicPage
+	*/
+	public function federated($shareToken, $shareRelativePath, $server, $accessToken) {
+		if (!\is_string($shareToken) || $shareToken === '') {
+			return $this->responseError($this->l10n->t('Invalid request parameters'));
+		}
+
+		$docinfo = $this->documentService->getDocumentByFederatedToken($shareToken, $shareRelativePath);
+		if (!$docinfo) {
+			$this->logger->warning("Cannot retrieve document from share {token} that has path {path}", ["token" => $shareToken, "path" => $shareRelativePath]);
+			return $this->responseError(
+				$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
+				$this->l10n->t('Please contact the administrator.', [])
+			);
+		}
+
+		// Call federated server to get wopi information (editor/permissions etc)
+		$remoteWopiInfo = $this->federationService->getWopiForToken($server, $accessToken);
+		if (!$remoteWopiInfo) {
+			$this->logger->error("Cannot retrieve federated document wopi session metadata", []);
+			return $this->responseError(
+				$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
+				$this->l10n->t('Please contact the administrator.', [])
+			);
+		}
+
+		// Get wopi token
+		$wopiAccessInfo = $this->createWopiSessionForFederatedShare($docinfo, $remoteWopiInfo);
+		
+		// Get document discovery
+		$wopiSrc = $this->discoveryService->getWopiSrc($docinfo['mimetype']);
+		if (!$wopiSrc) {
+			$this->logger->error("Cannot retrieve discovery for document", []);
+			return $this->responseError(
+				$this->l10n->t('Collabora Online: Error encountered while opening the document.', []),
+				$this->l10n->t('Please contact the administrator.', [])
+			);
+		}
+
+		// Handle general response
+		$wopiRemote = $this->discoveryService->getWopiUrl();
+		$webSocket = $this->parseWopiSocket($wopiRemote);
+		if (!$webSocket) {
+			return $this->responseError($this->l10n->t('Collabora Online: Invalid URL "%s".', [$wopiRemote]), $this->l10n->t('Please ask your administrator to check the Collabora Online server setting.'));
+		}
+
+		// FIXME: In federated shares allow max 100MB
+		$maxUploadFilesize = 100*1000*1000;
+
+		$this->navigationManager->setActiveEntry('richdocuments_index');
+		$retVal = [
+			'uploadMaxFilesize' => $maxUploadFilesize,
+			'uploadMaxHumanFilesize' => \OCP\Util::humanFileSize($maxUploadFilesize),
+			'title' => $docinfo['name'],
+			'fileId' => $docinfo['fileid'],
+			'locale' => $this->getLocale(),
+			'version' => \strval($docinfo['version']),
+			'sessionId' => $wopiAccessInfo['sessionid'],
+			'access_token' => $wopiAccessInfo['access_token'],
+			'access_token_ttl' => $wopiAccessInfo['access_token_ttl'],
+			'urlsrc' => $wopiSrc['urlsrc'],
+			'default_action' => $wopiSrc['action'],
+			'path' => $docinfo['path'],
+			'enable_previews' => $this->settings->getSystemValue('enable_previews', true),
+			'wopi_url' => $webSocket,
+			'doc_format' => $this->appConfig->getAppValue('doc_format'),
+			'instanceId' => $this->settings->getSystemValue('instanceid'),
+			'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
+			'show_custom_header' => true // federated share should show a customer header without buttons
+		];
+
+		// Federated share is a user coming from remote instance so cannot show base template
+		$renderAs = 'empty';
+
+		$response = new TemplateResponse('richdocuments', 'documents', $retVal, $renderAs);
+		$response->addHeader('X-Frame-Options', 'ALLOW');
 		$policy = new ContentSecurityPolicy();
 		$policy->addAllowedFrameDomain($this->domainOnly($wopiRemote));
 		$policy->allowInlineScript(true);
@@ -411,7 +506,7 @@ class DocumentController extends Controller {
 				'fileId' => $docinfo['fileid'],
 				'instanceId' => $this->settings->getSystemValue('instanceid'),
 				'locale' => $this->getLocale(),
-				'version' => $docinfo['version'],
+				'version' => \strval($docinfo['version']),
 				'sessionId' => $wopiAccessInfo['sessionid'],
 				'access_token' => $wopiAccessInfo['access_token'],
 				'access_token_ttl' => $wopiAccessInfo['access_token_ttl'],
@@ -594,7 +689,8 @@ class DocumentController extends Controller {
 	 * @throws \Exception
 	 */
 	private function createWopiSessionForAuthUser(array $docInfo) : array {
-		$currentUser = $this->getCurrentUserUID();
+		$origin = $this->request->getHeader('ORIGIN');
+		$editorUid = $this->getCurrentUserUID();
 		$ownerUid = $docInfo['owner'];
 		$allowEdit = $docInfo['allowEdit'];
 		$allowExport = $docInfo['allowExport'];
@@ -605,6 +701,7 @@ class DocumentController extends Controller {
 		$fileId = $docInfo['fileid'];
 		$path = $docInfo['path'];
 		$version = $docInfo['version'];
+		$federatedServer = $docInfo['federatedServer'];
 
 		$this->logger->info('Generating WOPI Token for file {fileId}, version {version}.', [
 			'app' => $this->appName,
@@ -614,6 +711,7 @@ class DocumentController extends Controller {
 		// default shared session id
 		$sessionid = '0';
 
+		// decice wopi sessin attributes
 		$wopiSessionAttr = WOPI::ATTR_CAN_VIEW;
 
 		// Check if edit allowed for document
@@ -623,7 +721,7 @@ class DocumentController extends Controller {
 		$wopiSrc = $this->discoveryService->getWopiSrc($mimetype);
 		if (($allowEdit === true) && isset($wopiSrc['action'])
 				&& ($wopiSrc['action'] === 'edit' || $wopiSrc['action'] === 'view_comment')
-				&& ($this->isAllowedEditor($currentUser) === true) && ($version === '0')) {
+				&& ($this->isAllowedEditor($editorUid) === true) && ($version === 0)) {
 			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_CAN_UPDATE;
 		}
 
@@ -642,36 +740,43 @@ class DocumentController extends Controller {
 			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_HAS_WATERMARK;
 		}
 
+		// mark federated session if such
+		if ($federatedServer !== null) {
+			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_FEDERATED;
+		}
+
 		// if secureViewId is set, then it is a dedicated shared session
 		// it should not be possible that users associated with that secureViewId see activities of other users
 		// (e.g. their edits)
 		if ($secureView === true && isset($secureViewId)) {
 			$sessionid = \strval($secureViewId);
 		}
-
-		$this->logger->debug('File {fileid} is updateable? {allowEdit}', [
-			'app' => $this->appName,
-			'fileid' => $fileId,
-			'allowEdit' => $allowEdit ]);
-		$origin = $this->request->getHeader('ORIGIN');
-		$serverHost = null;
-		if ($origin === null) {
-			$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
-		} else {
+		
+		if ($federatedServer !== null) {
+			// federated share mount access where we would redirect to remote server,
+			// we need to assign server host to be remote server where the editing will happen
+			$serverHost = $federatedServer;
+		} elseif ($origin !== null) {
 			// COOL needs to know postMessageOrigin -- in case it's an external app like ownCloud Web
 			// origin will be different therefore postMessages needs to target $origin instead of serverHost
 			$serverHost = $origin;
+		} else {
+			// default
+			$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 		}
 
-		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
+		if ($federatedServer !== null) {
+			// federated share mount access where we would redirect to remote server:
+			// - current user should have federated cloud id assigned
+			// - owner of federated share has federated cloud id already
+			$editorUid = $this->federationService->generateFederatedCloudID($editorUid);
+		} else {
+			// local editing, we need to update document encryption access list for editor
+			$this->updateDocumentEncryptionAccessList($ownerUid, $editorUid, $path);
+		}
 
 		$row = new Db\Wopi();
-		/*
-		 * Version is a string here, and arg 2 (version) should be an int.
-		 * As long as the string is just a number, all is good.
-		 */
-		/* @phan-suppress-next-line PhanTypeMismatchArgument */
-		$tokenArray = $row->generateToken($fileId, $version, $wopiSessionAttr, $serverHost, $ownerUid, $currentUser);
+		$tokenArray = $row->generateToken($fileId, $version, $wopiSessionAttr, $serverHost, $ownerUid, $editorUid);
 
 		// Return the token.
 		$result = [
@@ -684,7 +789,7 @@ class DocumentController extends Controller {
 		return $result;
 	}
 
-	private function updateDocumentEncryptionAccessList($owner, $currentUser, $path) {
+	private function updateDocumentEncryptionAccessList($owner, $editorUid, $path) {
 		$encryptionManager = \OC::$server->getEncryptionManager();
 		if ($encryptionManager->isEnabled()) {
 			// Update the current file to be accessible with system public
@@ -693,7 +798,7 @@ class DocumentController extends Controller {
 			$absPath = '/' . $owner . '/files' .  $path;
 			$accessList = \OC::$server->getEncryptionFilesHelper()->getAccessList($absPath);
 			$accessList['public'] = true;
-			$encryptionManager->getEncryptionModule()->update($absPath, $currentUser, $accessList);
+			$encryptionManager->getEncryptionModule()->update($absPath, $editorUid, $accessList);
 		}
 	}
 	
@@ -717,7 +822,7 @@ class DocumentController extends Controller {
 	 * @return array wopi access info
 	 */
 	private function createWopiSessionForPublicLink(array $docInfo) : array {
-		$currentUser = $this->getCurrentUserUID();
+		$editorUid = $this->getCurrentUserUID();
 		$ownerUid = $docInfo['owner'];
 		$fileId = $docInfo['fileid'];
 		$mimetype = $docInfo['mimetype'];
@@ -730,7 +835,7 @@ class DocumentController extends Controller {
 			'fileId' => $fileId,
 			'version' => $version ]);
 
-		$this->updateDocumentEncryptionAccessList($ownerUid, $currentUser, $path);
+		$this->updateDocumentEncryptionAccessList($ownerUid, $editorUid, $path);
 
 		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
 
@@ -741,17 +846,55 @@ class DocumentController extends Controller {
 		$wopiSrc = $this->discoveryService->getWopiSrc($mimetype);
 		if (($allowEdit === true) && isset($wopiSrc['action'])
 				&& ($wopiSrc['action'] === 'edit' || $wopiSrc['action'] === 'view_comment')
-				&& ($version === '0')) {
+				&& ($version === 0)) {
 			$wopiSessionAttr = $wopiSessionAttr | WOPI::ATTR_CAN_UPDATE;
 		}
 
 		$row = new Db\Wopi();
-		/*
-		 * Version is a string here, and arg 2 (version) should be an int.
-		 * As long as the string is just a number, all is good.
-		 */
-		/* @phan-suppress-next-line PhanTypeMismatchArgument */
-		$tokenArray = $row->generateToken($fileId, $version, $wopiSessionAttr, $serverHost, $ownerUid, $currentUser);
+		$tokenArray = $row->generateToken($fileId, $version, $wopiSessionAttr, $serverHost, $ownerUid, $editorUid);
+
+		// Return the token.
+		$result = [
+			'access_token' => $tokenArray['access_token'],
+			'access_token_ttl' => $tokenArray['access_token_ttl'],
+			'sessionid' => '0' // default shared session
+		];
+		$this->logger->debug('Issued token: {result}', ['app' => $this->appName, 'result' => $result]);
+		return $result;
+	}
+
+	/**
+	 * Generates and returns an wopi access info containing token for a given fileId.
+	 *
+	 * @param array $docInfo doc index as retrieved from DocumentService
+	 * @param array $remoteWopiInfo wopi info as retrieved from OCS API
+	 * @return array wopi access info
+	 */
+	private function createWopiSessionForFederatedShare(array $docInfo, array $remoteWopiInfo) : array {
+		// base doc details
+		$ownerUid = $docInfo['owner'];
+		$fileId = $docInfo['fileid'];
+		$path = $docInfo['path'];
+		$version = $docInfo['version'];
+
+		// editor is federated user
+		$editor = $remoteWopiInfo['editor'];
+
+		// server host where the edit session is created
+		$serverHost = $this->request->getServerProtocol() . '://' . $this->request->getServerHost();
+
+		// take attributes for session from remote wopi info
+		$wopiSessionAttr = $remoteWopiInfo['attributes'];
+
+		$this->logger->info('Generating WOPI Token for file {fileId}, version {version}.', [
+			'app' => $this->appName,
+			'fileId' => $fileId,
+			'version' => $version ]);
+
+		$this->updateDocumentEncryptionAccessList($ownerUid, $editor, $path);
+
+		$row = new Db\Wopi();
+		$tokenArray = $row->generateToken($fileId, $version, $wopiSessionAttr, $serverHost, $ownerUid, $editor);
 
 		// Return the token.
 		$result = [

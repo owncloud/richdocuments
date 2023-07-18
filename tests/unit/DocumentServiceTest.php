@@ -160,7 +160,8 @@ class DocumentServiceTest extends TestCase {
 			'secureView' => false,
 			'secureViewId' => null,
 			'federatedServer' => null,
-			'federatedToken' => null,
+			'federatedShareToken' => null,
+			'federatedShareRelativePath' => null,
 		];
 		$this->assertEquals($expected, $result);
 	}
@@ -272,7 +273,8 @@ class DocumentServiceTest extends TestCase {
 			'secureView' => true,
 			'secureViewId' => 567,
 			'federatedServer' => null,
-			'federatedToken' => null,
+			'federatedShareToken' => null,
+			'federatedShareRelativePath' => null,
 		];
 		$this->assertEquals($expected, $result);
 	}
@@ -335,12 +337,15 @@ class DocumentServiceTest extends TestCase {
 		$fileMount->expects($this->once())
 			->method('getPath')
 			->willReturn('/path/to/file.txt');
-		$rootFolder->expects($this->once())
-			->method('getRelativePath')
-			->with($this->equalTo('/path/to/file.txt'))
+		$fileMount->expects($this->once())
+			->method('getInternalPath')
 			->willReturn('file.txt');
 		$fileMount->expects($this->once())
 			->method('getName')
+			->willReturn('file.txt');
+		$rootFolder->expects($this->once())
+			->method('getRelativePath')
+			->with($this->equalTo('/path/to/file.txt'))
 			->willReturn('file.txt');
 
 		// Call the method being tested
@@ -360,7 +365,8 @@ class DocumentServiceTest extends TestCase {
 			'secureView' => false,
 			'secureViewId' => null,
 			'federatedServer' => 'fedinstance',
-			'federatedToken' => 'fedsharetoken',
+			'federatedShareToken' => 'fedsharetoken',
+			'federatedShareRelativePath' => 'file.txt',
 		];
 		$this->assertEquals($expected, $result);
 	}
@@ -449,7 +455,8 @@ class DocumentServiceTest extends TestCase {
 			'secureView' => false,
 			'secureViewId' => null,
 			'federatedServer' => null,
-			'federatedToken' => null,
+			'federatedShareToken' => null,
+			'federatedShareRelativePath' => null,
 		];
 		$this->assertEquals($expected, $result);
 	}
