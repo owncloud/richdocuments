@@ -58,6 +58,7 @@ OC.L10N.register(
     "Can't create document" : "Can't create document",
     "Saved" : "Saved",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "Saved with error: Collabora Online should use the same protocol as the server installation.",
+    "Public Link User" : "Public Link User",
     "%s via Office Collabora" : "%s via Office Collabora",
     "Public Link User via Collabora Online" : "Public Link User via Collabora Online",
     "Collabora Online" : "Collabora Online",
