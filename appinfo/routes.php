@@ -24,6 +24,7 @@ $application->registerRoutes($this, [
 		// Collabora Settings API
 		['name' => 'Settings#list', 'url' => 'ajax/settings/list', 'verb' => 'GET'],
 		['name' => 'Settings#update', 'url' => 'ajax/settings/update', 'verb' => 'POST'],
+		['name' => 'Settings#setPersonalSettings', 'url' => 'ajax/settings/setPersonalSettings', 'verb' => 'POST'],
 		// Collabora for OC10 legacy frontend
 		['name' => 'Document#index', 'url' => 'documents.php/index', 'verb' => 'GET'],
 		["name" => 'Document#public', 'url' => 'documents.php/public', "verb" => "GET"],

@@ -11,26 +11,43 @@
 
 namespace OCA\Richdocuments\Controller;
 
-use \OCP\AppFramework\Controller;
-use \OCP\IRequest;
-use \OCP\IL10N;
+use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\DataResponse;
+use OCP\IRequest;
+use OCP\IL10N;
+use OCP\IUserSession;
 use \OCP\AppFramework\Http\TemplateResponse;
 
-use \OCA\Richdocuments\AppConfig;
+use OCA\Richdocuments\AppConfig;
 
 class SettingsController extends Controller {
+	/** @var IL10N */
 	private $l10n;
+
+	/** @var AppConfig */
 	private $appConfig;
 
+	/** @var IUserSession */
+	private $userSession;
+
+	/**
+	 * @param string $appName
+	 * @param IRequest $request
+	 * @param IL10N $l10n
+	 * @param AppConfig $appConfig
+	 * @param IUserSession $userSession
+	 */
 	public function __construct(
 		string $appName,
 		IRequest $request,
 		IL10N $l10n,
-		AppConfig $appConfig
+		AppConfig $appConfig,
+		IUserSession $userSession
 	) {
 		parent::__construct($appName, $request);
 		$this->l10n = $l10n;
 		$this->appConfig = $appConfig;
+		$this->userSession = $userSession;
 	}
 
 	/**
@@ -151,5 +168,29 @@ class SettingsController extends Controller {
 		];
 
 		return $response;
+	}
+
+	/**
+	 * @NoAdminRequired
+	 * @UseSession
+	 *
+	 * @param string $zoteroAPIPrivateKey
+	 * @return DataResponse
+	 */
+	public function setPersonalSettings($zoteroAPIPrivateKey) {
+		$message = $this->l10n->t('Saved');
+		
+		$uid = $this->userSession->getUser()->getUID();
+
+		if ($zoteroAPIPrivateKey !== null) {
+			$this->appConfig->setUserValue($uid, 'zoteroAPIPrivateKey', $zoteroAPIPrivateKey);
+		}
+
+		return new DataResponse(
+			[
+				'status' => 'success',
+				'data' => ['message' => (string) $message]
+			]
+		);
 	}
 }

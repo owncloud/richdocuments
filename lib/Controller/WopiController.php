@@ -232,6 +232,13 @@ class WopiController extends Controller {
 		$storage = $file->getStorage();
 		$supportsLocks = $canWrite && $storage->instanceOfStorage(IPersistentLockingStorage::class);
 
+		// check
+		if ($res['editor'] !== '') {
+			$zoteroAPIPrivateKey = $this->appConfig->getUserValue($res['editor'], 'zoteroAPIPrivateKey');
+		} else {
+			$zoteroAPIPrivateKey = null;
+		}
+
 		$result = [
 			// standard WOPI options
 			'BaseFileName' => $file->getName(),
@@ -255,6 +262,9 @@ class WopiController extends Controller {
 			'DisableCopy' => !$canExport, // disallow copying in document
 			// custom Collabora Online options
 			'WatermarkText' => $watermark,
+			'UserPrivateInfo' => [
+				'ZoteroAPIKey' => $zoteroAPIPrivateKey
+			]
 		];
 		
 		$this->logger->debug("CheckFileInfo: Result: {result}", ['app' => $this->appName, 'result' => $result]);
