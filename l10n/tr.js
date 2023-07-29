@@ -58,6 +58,7 @@ OC.L10N.register(
     "Can't create document" : "Belge oluşturulamıyor",
     "Saved" : "Kaydedildi",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "Hata ile kaydedildi: Collabora Online, sunucu kurulumuyla aynı protokolü kullanmalıdır.",
+    "Public Link User" : "Herkese Açık Bağlantı Kullanıcısı",
     "%s via Office Collabora" : "%s, Office Collabora aracılığıyla",
     "Public Link User via Collabora Online" : "Collabora Online aracılığıyla Herkese Açık Bağlantı Kullanıcısı",
     "Collabora Online" : "Collabora Online",
