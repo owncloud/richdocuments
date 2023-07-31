@@ -31,6 +31,7 @@ You can also edit your documents off-line with the Collabora Office app from the
 		<job>OCA\Richdocuments\BackgroundJob\CleanupExpiredWopiTokens</job>
 	</background-jobs>
 	<settings>
+		<admin>OCA\Richdocuments\Panels\Admin</admin>
 		<personal>OCA\Richdocuments\Panels\Personal</personal>
 	</settings>
 </info>

@@ -10,7 +10,7 @@ var documentsSettings = {
 
 		OC.msg.startAction('#documents-admin-msg', t('richdocuments', 'Saving...'));
 		$.post(
-			OC.generateUrl("apps/richdocuments/ajax/settings/update"),
+			OC.generateUrl("apps/richdocuments/ajax/settings/setAdminSettings"),
 			data,
 			documentsSettings.afterSave
 		);
@@ -22,14 +22,14 @@ var documentsSettings = {
 		};
 
 		$.post(
-			OC.generateUrl("apps/richdocuments/ajax/settings/update"),
+			OC.generateUrl("apps/richdocuments/ajax/settings/setAdminSettings"),
 			data
 		);
 	},
 
 	saveDocFormat: function(format) {
 		$.post(
-			OC.generateUrl("apps/richdocuments/ajax/settings/update"),
+			OC.generateUrl("apps/richdocuments/ajax/settings/setAdminSettings"),
 			{ 'doc_format': format }
 		);
 	},
@@ -42,7 +42,7 @@ var documentsSettings = {
 
 		OC.msg.startAction('#test-documents-admin-msg', t('richdocuments', 'Saving...'));
 		$.post(
-			OC.generateUrl("apps/richdocuments/ajax/settings/update"),
+			OC.generateUrl("apps/richdocuments/ajax/settings/setAdminSettings"),
 			data,
 			documentsSettings.afterSaveTestWopi
 		);
@@ -55,21 +55,21 @@ var documentsSettings = {
 
 		console.log('saving new webroot: ' + value);
 		$.post(
-			OC.generateUrl("apps/richdocuments/ajax/settings/update"),
+			OC.generateUrl("apps/richdocuments/ajax/settings/setAdminSettings"),
 			data
 		);
 	},
 
 	saveMenuOption: function(value) {
 		$.post(
-			OC.generateUrl("apps/richdocuments/ajax/settings/update"),
+			OC.generateUrl("apps/richdocuments/ajax/settings/setAdminSettings"),
 			{ 'menu_option': value }
 		);
 	},
 
 	saveWatermarkText: function(value) {
 		$.post(
-			OC.generateUrl("apps/richdocuments/ajax/settings/update"),
+			OC.generateUrl("apps/richdocuments/ajax/settings/setAdminSettings"),
 			{ 'watermark_text': value }
 		);
 
@@ -78,28 +78,28 @@ var documentsSettings = {
 
 	saveSecureViewOption: function(value) {
 		$.post(
-			OC.generateUrl("apps/richdocuments/ajax/settings/update"),
+			OC.generateUrl("apps/richdocuments/ajax/settings/setAdminSettings"),
 			{ 'secure_view_option': value }
 		);
 	},
 
 	saveSecureViewOpenActionDefault: function(value) {
 		$.post(
-			OC.generateUrl("apps/richdocuments/ajax/settings/update"),
+			OC.generateUrl("apps/richdocuments/ajax/settings/setAdminSettings"),
 			{ 'secure_view_open_action_default': value }
 		);
 	},
 
 	saveCanPrintDefaultOption: function(value) {
 		$.post(
-			OC.generateUrl("apps/richdocuments/ajax/settings/update"),
+			OC.generateUrl("apps/richdocuments/ajax/settings/setAdminSettings"),
 			{ 'secure_view_can_print_default': value }
 		);
 	},
 
 	saveHasWatermarkDefaultOption: function(value) {
 		$.post(
-			OC.generateUrl("apps/richdocuments/ajax/settings/update"),
+			OC.generateUrl("apps/richdocuments/ajax/settings/setAdminSettings"),
 			{ 'secure_view_has_watermark_default': value }
 		);
 	},
