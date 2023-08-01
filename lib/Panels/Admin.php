@@ -80,6 +80,7 @@ class Admin implements ISettings {
 		$template->assign('secure_view_has_watermark_default', $this->appConfig->secureViewHasWatermarkDefaultEnabled() ? 'true' : 'false');
 		$template->assign('secure_view_can_print_default', $this->appConfig->secureViewCanPrintDefaultEnabled() ? 'true' : 'false');
 		$template->assign('watermark_text', $this->appConfig->getAppValue('watermark_text'));
+		$template->assign('zotero', $this->appConfig->getAppValue('zotero'));
 
 		return $template;
 	}

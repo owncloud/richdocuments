@@ -118,5 +118,15 @@
 		<p style="max-width: 50em;"><em><?php p($l->t('Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save.')) ?></em></p>
 		<input type="text" style="width: 400px" id="secure_view_watermark-richdocuments" value="<?php p($_['watermark_text'] !== null ? $_['watermark_text']: $l->t('Strictly confidential. Only for ').'{viewer-email}') ?>">
 	</div>
+	
+	<h2 class="app-name has-documentation"><?php p($l->t('Zotero for Collabora Online')) ?></h2>
+	<a target="_blank" rel="noreferrer" class="icon-info"
+                title="<?php p($l->t('Open documentation'));?>"
+                ref="https://github.com/owncloud/richdocuments/wiki"></a>
+
+	<br/>
+
+	<input type="checkbox" id="enable_zotero-richdocuments" <?php p($_['zotero'] !== 'false' ? 'checked' : '') ?> />
+	<label for="enable_zotero-richdocuments"><?php p($l->t('Enable Zotero for all users')) ?></label>
 
 </form>

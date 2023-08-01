@@ -68,7 +68,7 @@ class SettingsController extends Controller {
 	 *
 	 * @return DataResponse
 	 */
-	public function setAdminSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option, $secure_view_option, $secure_view_open_action_default, $secure_view_can_print_default, $secure_view_has_watermark_default, $watermark_text) {
+	public function setAdminSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option, $secure_view_option, $secure_view_open_action_default, $secure_view_can_print_default, $secure_view_has_watermark_default, $watermark_text, $zotero) {
 		$message = $this->l10n->t('Saved');
 
 		if ($wopi_url !== null) {
@@ -122,6 +122,10 @@ class SettingsController extends Controller {
 
 		if ($watermark_text !== null) {
 			$this->appConfig->setAppValue('watermark_text', $watermark_text);
+		}
+
+		if ($zotero !== null) {
+			$this->appConfig->setAppValue('zotero', $watermark_text);
 		}
 
 		$richMemCache = \OC::$server->getMemCacheFactory()->create('richdocuments');

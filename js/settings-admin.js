@@ -216,6 +216,20 @@
 			});
 		},
 
+		initEnableZotero: function() {
+
+			$('input:checkbox[id="enable_zotero-richdocuments"]').on('change', function() {
+				var enabled = this.checked;
+				OCA.RichdocumentsAdminSettings.setAdminSettings(
+					{
+						'zotero': enabled
+					},
+					function (response) {},
+					function (response) {}
+				);
+			});
+		},
+
 		setAdminSettings: function(data, doneCallback, failCallback) {
 			$.post(
 				OC.generateUrl("apps/richdocuments/ajax/settings/setAdminSettings"),
@@ -238,8 +252,9 @@
 		OCA.RichdocumentsAdminSettings.initSaveWopiTestServer();
 		OCA.RichdocumentsAdminSettings.initEnableEditOnlyForGroups();
 		OCA.RichdocumentsAdminSettings.initEnableOOXMLByDefaultForNewFiles();
-		OCA.RichdocumentsAdminSettings.initEnableMenuOption();
 		OCA.RichdocumentsAdminSettings.initEnableCanonicalWebroot();
+		OCA.RichdocumentsAdminSettings.initEnableMenuOption();
+		OCA.RichdocumentsAdminSettings.initEnableZotero();
 	});
 
 })(jQuery, OC, OCA);
