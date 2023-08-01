@@ -28,6 +28,7 @@ class AppConfig {
 		'start_grace_period' => 'false',
 		'watermark_text' => '',
 		'test_server_groups' => '',
+		'canonical_webroot' => '',
 	];
 
 	private $config;
