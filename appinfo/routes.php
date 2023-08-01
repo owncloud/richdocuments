@@ -23,7 +23,7 @@ $application->registerRoutes($this, [
 		['name' => 'DocumentRevision#list', 'url' => 'ajax/documents/revisions/{fileId}', 'verb' => 'GET'],
 		// Collabora Settings API
 		['name' => 'Settings#getWopiSettings', 'url' => 'ajax/settings/getWopiSettings', 'verb' => 'GET'],
-		['name' => 'Settings#setAdminSettings', 'url' => 'ajax/settings/update', 'verb' => 'POST'],
+		['name' => 'Settings#setAdminSettings', 'url' => 'ajax/settings/setAdminSettings', 'verb' => 'POST'],
 		['name' => 'Settings#setPersonalSettings', 'url' => 'ajax/settings/setPersonalSettings', 'verb' => 'POST'],
 		// Collabora for OC10 legacy frontend
 		['name' => 'Document#index', 'url' => 'documents.php/index', 'verb' => 'GET'],

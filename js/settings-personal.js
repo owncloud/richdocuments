@@ -1,6 +1,6 @@
 /*global OC, $ */
 
-OC.Richdocuments = _.extend(OC.Richdocuments || {}, {
+OCA.RichdocumentsPersonalSettings = _.extend(OC.RichdocumentsPersonalSettings || {}, {
 	updateZoteroAPIPrivateKey: function () {
 		var zoteroAPIPrivateKey = $('input:text[id="changeAPIPrivateKey"]').val();
 		OC.msg.startSaving('#richdocuments .msg');
@@ -14,7 +14,7 @@ OC.Richdocuments = _.extend(OC.Richdocuments || {}, {
 			$('button:button[name="submitChangeAPIPrivateKey"]').attr("disabled", "true");
 		})
 		.fail(function (jqXHR) {
-			OC.msg.finishedError('#richdocuments .msg', JSON.parse(jqXHR.responseText).message);
+			OC.msg.finishedError('#richdocuments .msg', JSON.parse(jqXHR.responseText).data.message);
 		});
 	}
 });
@@ -28,13 +28,13 @@ $(document).ready(function () {
 		if (changeAPIPrivateKey !== '') {
 			$('button:button[name="submitChangeAPIPrivateKey"]').removeAttr("disabled");
 			if (event.which === 13) {
-				OC.Richdocuments.updateZoteroAPIPrivateKey();
+				OC.RichdocumentsPersonalSettings.updateZoteroAPIPrivateKey();
 			}
 		}
 	});
 
 	$('button:button[name="submitChangeAPIPrivateKey"]').click(function () {
-		OC.Richdocuments.updateZoteroAPIPrivateKey();
+		OC.RichdocumentsPersonalSettings.updateZoteroAPIPrivateKey();
 	});
 
 });
