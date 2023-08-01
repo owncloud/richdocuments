@@ -65,9 +65,12 @@ class Personal implements ISettings {
 	public function getPanel() {
 		$uid = $this->userSession->getUser()->getUID();
 
+		$zoteroEnabled = $this->appConfig->getAppValue('zotero');
 		$zoteroAPIPrivateKey = $this->appConfig->getUserValue($uid, 'zoteroAPIPrivateKey');
 
 		$template = new Template('richdocuments', 'settings-personal');
+
+		$template->assign('zotero', $zoteroEnabled);
 		if ($zoteroAPIPrivateKey !== null) {
 			$template->assign('zoteroAPIPrivateKey', $zoteroAPIPrivateKey);
 		}

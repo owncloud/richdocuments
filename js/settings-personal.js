@@ -22,23 +22,23 @@
 	OCA.RichdocumentsPersonalSettings = {
 
 		initZoteroAPIPrivateKey: function () {
-			$('input:text[name="changeAPIPrivateKey"]').keyup(function (event) {
-				var zoteroAPIPrivateKey = $('input:text[id="changeAPIPrivateKey"]').val();
+			$('input:text[id="change_zotero_key-richdocuments"]').keyup(function (event) {
+				var zoteroAPIPrivateKey = $('input:text[id="change_zotero_key-richdocuments"]').val();
 				if (zoteroAPIPrivateKey !== '') {
-					$('button:button[name="submitChangeAPIPrivateKey"]').removeAttr("disabled");
+					$('button:button[id="save_zotero_key-richdocuments"]').removeAttr("disabled");
 					if (event.which === 13) {
 						OCA.RichdocumentsPersonalSettings.updateZoteroAPIPrivateKey();
 					}
 				}
 			});
 		
-			$('button:button[name="submitChangeAPIPrivateKey"]').click(function () {
+			$('button:button[name="save_zotero_key-richdocuments"]').click(function () {
 				OCA.RichdocumentsPersonalSettings.updateZoteroAPIPrivateKey();
 			});
 		},
 	
 		updateZoteroAPIPrivateKey: function () {
-			var zoteroAPIPrivateKey = $('input:text[id="changeAPIPrivateKey"]').val();
+			var zoteroAPIPrivateKey = $('input:text[id="change_zotero_key-richdocuments"]').val();
 			OC.msg.startSaving('#richdocuments .msg');
 	
 			OCA.RichdocumentsPersonalSettings.setPersonalSettings(
@@ -47,7 +47,7 @@
 				},
 				function (response) {
 					OC.msg.finishedSuccess('#richdocuments .msg', response.data.message);
-					$('button:button[name="submitChangeAPIPrivateKey"]').attr("disabled", "true");
+					$('button:button[id="save_zotero_key-richdocuments"]').attr("disabled", "true");
 				},
 				function (jqXHR) {
 					OC.msg.finishedError('#richdocuments .msg', JSON.parse(jqXHR.responseText).data.message);

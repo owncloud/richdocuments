@@ -125,7 +125,7 @@ class SettingsController extends Controller {
 		}
 
 		if ($zotero !== null) {
-			$this->appConfig->setAppValue('zotero', $watermark_text);
+			$this->appConfig->setAppValue('zotero', $zotero);
 		}
 
 		$richMemCache = \OC::$server->getMemCacheFactory()->create('richdocuments');
