@@ -13,8 +13,8 @@
 		p($l->t("Zotero integration is disabled, ask your administrator to enable it."));
 	} ?></p>
 	<p id="change_zotero_key_section-richdocuments" class="indent <?php if ($_['zotero'] !== 'true') {
-    	p('hidden');
-    } ?>">
+		p('hidden');
+	} ?>">
 		<br />
 		<label for="change_zotero_key-richdocuments"><?php p($l->t('Zotero Personal API Key:')) ?></label>
 		<input

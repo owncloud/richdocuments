@@ -20,34 +20,21 @@
  */
 namespace OCA\Richdocuments\Panels;
 
-use OCP\ILogger;
-use OCP\IUserSession;
 use OCP\Settings\ISettings;
 use OCP\Template;
 
 use OCA\Richdocuments\AppConfig;
 
 class Admin implements ISettings {
-	/** @var ILogger */
-	protected $logger;
-
-	/** @var IUserSession */
-	private $userSession;
-
 	/** @var AppConfig */
 	private $appConfig;
 
 	/**
-	 * @param ILogger $logger
-	 * @param IUserSession $userSession
+	 * @param AppConfig $appConfig
 	 */
 	public function __construct(
-		ILogger $logger,
-		IUserSession $userSession,
 		AppConfig $appConfig
 	) {
-		$this->logger = $logger;
-		$this->userSession = $userSession;
 		$this->appConfig = $appConfig;
 	}
 
