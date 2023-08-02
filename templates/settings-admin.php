@@ -100,7 +100,7 @@
 		<p style="max-width: 50em;"><em><?php p($l->t('Preferences')) ?></em></p>
 
 		<input type="checkbox" id="enable_secure_view_open_action_default_cb-richdocuments" <?php p($_['secure_view_open_action_default'] === 'true' ? 'checked' : '') ?> />
-		<label for="enable_secure_view_open_action_default_cb-richdocuments"><?php p($l->t('Enforce to open documents always in Secure View mode, regardless of permissions.')) ?></label>
+		<label for="enable_secure_view_open_action_default_cb-richdocuments"><?php p($l->t('Enforce to open documents always in Secure View mode with watermark')) ?></label>
 		<br/>
 		<input type="checkbox" id="secure_view_can_print_default_option_cb-richdocuments" <?php p($_['secure_view_can_print_default'] === 'true' ? 'checked' : '')  ?> <?php p($_['secure_view_has_watermark_default'] === 'false' ? 'disabled' : '')  ?>  />
 		<label for="secure_view_can_print_default_option_cb-richdocuments"><?php p($l->t('Set "can print/export" as default share permission')) ?></label>

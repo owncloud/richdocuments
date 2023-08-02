@@ -234,12 +234,17 @@
 			$('button:button[id="save_secure_view_watermark-richdocuments"]').click(function() {
 				var watermarkText = $('input:text[id="secure_view_watermark-richdocuments"]').val();
 				
+				OC.msg.startAction('#save-secure-view-watermark-admin-msg', t('richdocuments', 'Saving...'));
 				OCA.RichdocumentsAdminSettings.setAdminSettings(
 					{
 						'watermark_text': watermarkText
 					},
-					function (response) {},
-					function (response) {}
+					function (response) {
+						OC.msg.finishedAction('#save-secure-view-watermark-admin-msg', response);
+					},
+					function (response) {
+						OC.msg.finishedError('#save-secure-view-watermark-admin-msg', response.data.message);
+					}
 				);
 			});
 

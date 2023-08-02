@@ -27,7 +27,7 @@
 				id="save_zotero_key-richdocuments"
 				disabled><?php p($l->t("Save")); ?>
 		</button>
-		<span class="msg"></span>
+		<span id="richdocuments-zotero-personal-msg" class="msg"></span>
 		<br />
 		<em><?php p($l->t("To generate the API key navigate in Zotero to")); ?> <a href="https://www.zotero.org/settings/keys" target="_blank"><?php p($l->t('Home > Settings > Feeds/API > Create new private key')); ?></a></em>
 		<br />

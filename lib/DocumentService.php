@@ -164,6 +164,7 @@ class DocumentService {
 			$isSecureModeEnabled = $this->appConfig->secureViewOptionEnabled();
 			$isWatermarkEnforced = $this->appConfig->secureViewOpenActionDefaultEnabled();
 
+
 			// Base file info
 			$ret = [];
 			$ret['owner'] = $document->getOwner()->getUID();

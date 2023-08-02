@@ -32,25 +32,25 @@
 				}
 			});
 		
-			$('button:button[name="save_zotero_key-richdocuments"]').click(function () {
+			$('button:button[id="save_zotero_key-richdocuments"]').click(function () {
 				OCA.RichdocumentsPersonalSettings.updateZoteroAPIPrivateKey();
 			});
 		},
 	
 		updateZoteroAPIPrivateKey: function () {
 			var zoteroAPIPrivateKey = $('input:text[id="change_zotero_key-richdocuments"]').val();
-			OC.msg.startSaving('#richdocuments .msg');
+			OC.msg.startAction('#richdocuments-zotero-personal-msg', t('richdocuments', 'Saving...'));
 	
 			OCA.RichdocumentsPersonalSettings.setPersonalSettings(
 				{
 					zoteroAPIPrivateKey: zoteroAPIPrivateKey
 				},
 				function (response) {
-					OC.msg.finishedSuccess('#richdocuments .msg', response.data.message);
+					OC.msg.finishedSuccess('#richdocuments-zotero-personal-msg', response.data.message);
 					$('button:button[id="save_zotero_key-richdocuments"]').attr("disabled", "true");
 				},
 				function (jqXHR) {
-					OC.msg.finishedError('#richdocuments .msg', JSON.parse(jqXHR.responseText).data.message);
+					OC.msg.finishedError('#richdocuments-zotero-personal-msg', JSON.parse(jqXHR.responseText).data.message);
 				}
 			);
 		},
