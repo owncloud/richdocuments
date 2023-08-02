@@ -73,12 +73,8 @@
 							'test_wopi_url': '',
 							'test_server_groups': ''
 						},
-						function (response) {
-							OC.msg.finishedAction('#test-documents-admin-msg', response);
-						},
-						function (response) {
-							OC.msg.finishedError('#test-documents-admin-msg', response.data.message);
-						}
+						function (response) {},
+						function (response) {}
 					);
 				}
 			});
@@ -168,9 +164,6 @@
 		},
 
 		initEnableCanonicalWebroot: function() {
-			//
-			//'canonical_webroot': value
-
 			$('input:checkbox[id="enable_canonical_webroot_cb-richdocuments"]').on('change', function() {
 				$('#enable_canonical_webroot_section-richdocuments').toggleClass('hidden', !this.checked);
 				if (!this.checked) {
@@ -216,6 +209,85 @@
 			});
 		},
 
+		initEnableSecureViewOption: function() {
+
+			$('input:checkbox[id="enable_secure_view_option_cb-richdocuments"]').on('change', function() {
+				var watermarkText = $('input:text[id="secure_view_watermark-richdocuments"]').val();
+				if (this.checked && watermarkText === '') {
+					// set default watermark text
+					watermarkText = t('richdocuments', 'Strictly confidential. Only for {viewer-email}');
+					$('input:text[id="secure_view_watermark-richdocuments"]').val(watermarkText);
+				}
+
+				OCA.RichdocumentsAdminSettings.setAdminSettings(
+					{
+						'secure_view_option': this.checked,
+						'watermark_text': watermarkText
+					},
+					function (response) {},
+					function (response) {}
+				);
+				$('#richdocuments-secure-view-preferences-section').toggleClass('hidden', !this.checked);
+				$('#richdocuments-watermark-section').toggleClass('hidden', !this.checked);
+			});
+
+			$('button:button[id="save_secure_view_watermark-richdocuments"]').click(function() {
+				var watermarkText = $('input:text[id="secure_view_watermark-richdocuments"]').val();
+				
+				OCA.RichdocumentsAdminSettings.setAdminSettings(
+					{
+						'watermark_text': watermarkText
+					},
+					function (response) {},
+					function (response) {}
+				);
+			});
+
+			$('input:checkbox[id="enable_secure_view_open_action_default_cb-richdocuments"]').on('change', function() {
+				OCA.RichdocumentsAdminSettings.setAdminSettings(
+					{
+						'secure_view_open_action_default': this.checked
+					},
+					function (response) {},
+					function (response) {}
+				);
+			});
+
+			$('input:checkbox[id="secure_view_can_print_default_option_cb-richdocuments"]').on('change', function() {
+				OCA.RichdocumentsAdminSettings.setAdminSettings(
+					{
+						'secure_view_can_print_default': this.checked
+					},
+					function (response) {},
+					function (response) {}
+				);
+			});
+
+			$('input:checkbox[id="secure_view_has_watermark_default_option_cb-richdocuments"]').on('change', function() {
+				// on change of secure-view checkbox make sure print checkbox is checked to rollback to default
+				$('input:checkbox[id="secure_view_can_print_default_option_cb-richdocuments"]').prop('checked', true);
+				
+				// if secure-view checkbox is unchecked disable print checkbox (click action disabled)
+				// because this permission is only available together with secure-view permission
+				if (!this.checked) {
+					$('input:checkbox[id="secure_view_can_print_default_option_cb-richdocuments"]').prop('disabled', true);
+				} else {
+					$('input:checkbox[id="secure_view_can_print_default_option_cb-richdocuments"]').prop('disabled', false);
+				}
+
+				// save secure-view (changed) and print (true) options
+				OCA.RichdocumentsAdminSettings.setAdminSettings(
+					{
+						'secure_view_can_print_default': true,
+						'secure_view_has_watermark_default': this.checked
+
+					},
+					function (response) {},
+					function (response) {}
+				);
+			});
+		},
+
 		initEnableZotero: function() {
 
 			$('input:checkbox[id="enable_zotero-richdocuments"]').on('change', function() {
@@ -254,6 +326,7 @@
 		OCA.RichdocumentsAdminSettings.initEnableOOXMLByDefaultForNewFiles();
 		OCA.RichdocumentsAdminSettings.initEnableCanonicalWebroot();
 		OCA.RichdocumentsAdminSettings.initEnableMenuOption();
+		OCA.RichdocumentsAdminSettings.initEnableSecureViewOption();
 		OCA.RichdocumentsAdminSettings.initEnableZotero();
 	});
 

@@ -25,6 +25,4 @@ use OCA\Richdocuments\AppInfo\Application;
 $app = new Application();
 $app->registerScripts();
 
-//\OCP\App::registerAdmin('richdocuments', 'admin');
-
 \OCP\Util::connectHook('\OCP\Config', 'js', '\OCA\Files\App', 'extendJsConfig');

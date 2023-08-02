@@ -26,7 +26,7 @@
 
     <input type="checkbox" class="test-server-enable" id="test_server_enable-richdocuments" />
     <label for="test-server-enable-richdocuments"><?php p($l->t('Enable test server for specific groups')) ?></label>
-    <p id="test_server_section-richdocuments" class="indent <?php if ($_['test_server_groups'] === '' || $_['test_wopi_url'] === '') {
+    <p id="test_server_section-richdocuments" style="padding-left: 28px;" class="indent <?php if ($_['test_server_groups'] === '' || $_['test_wopi_url'] === '') {
     	p('hidden');
     } ?>">
         <label for="test_server_group_select-richdocuments"><?php p($l->t('Groups')) ?></label>
@@ -57,7 +57,7 @@
 
 	<input type="checkbox" id="enable_canonical_webroot_cb-richdocuments" <?php p($_['canonical_webroot'] !== '' ? 'checked' : '') ?> />
 	<label for="canonical_webroot_cb-richdocuments"><?php p($l->t('Use Canonical webroot')) ?></label>
-	<div id="enable_canonical_webroot_section-richdocuments" class="indent <?php if ($_['canonical_webroot'] === '') {
+	<div id="enable_canonical_webroot_section-richdocuments" style="padding-left: 28px;" class="indent <?php if ($_['canonical_webroot'] === '') {
 		p('hidden');
 	} ?>" >
 		<input type="text" id="canonical_webroot-richdocuments" value="<?php p($_['canonical_webroot']) ?>">
@@ -93,31 +93,34 @@
 	} else {
 		p($l->t('Enable Secure View'));
 	}?></label>
-	<div id="enable-open-action-with-secure-view-default" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
+
+	<div id="richdocuments-secure-view-preferences-section" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
 		p('hidden');
 	} ?>" >
-		<p style="max-width: 50em;"><em><?php p($l->t('Settings')) ?></em></p>
+		<p style="max-width: 50em;"><em><?php p($l->t('Preferences')) ?></em></p>
+
 		<input type="checkbox" id="enable_secure_view_open_action_default_cb-richdocuments" <?php p($_['secure_view_open_action_default'] === 'true' ? 'checked' : '') ?> />
-		<label for="enable_secure_view_open_action_default_cb-richdocuments"><?php p($l->t('Open documents in Secure View with watermark by default')) ?></label>
-	</div>
-	<br/>
-	<div id="enable-share-attributes-defaults" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
-		p('hidden');
-	} ?>" >
-		<p style="max-width: 50em;"><em><?php p($l->t('Set default share permissions for all users (available for shares without edit permission)')) ?></em></p>
+		<label for="enable_secure_view_open_action_default_cb-richdocuments"><?php p($l->t('Enforce to open documents always in Secure View mode, regardless of permissions.')) ?></label>
+		<br/>
 		<input type="checkbox" id="secure_view_can_print_default_option_cb-richdocuments" <?php p($_['secure_view_can_print_default'] === 'true' ? 'checked' : '')  ?> <?php p($_['secure_view_has_watermark_default'] === 'false' ? 'disabled' : '')  ?>  />
-		<label for="secure_view_can_print_default_option_cb-richdocuments"><?php p($l->t('can print/export')) ?></label>
+		<label for="secure_view_can_print_default_option_cb-richdocuments"><?php p($l->t('Set "can print/export" as default share permission')) ?></label>
 		<br/>
 		<input type="checkbox" id="secure_view_has_watermark_default_option_cb-richdocuments" <?php p($_['secure_view_has_watermark_default'] === 'true' ? 'checked' : '') ?> />
-		<label for="secure_view_has_watermark_default_option_cb-richdocuments"><?php p($l->t('Secure View (with watermarks)')) ?></label>
+		<label for="secure_view_has_watermark_default_option_cb-richdocuments"><?php p($l->t('Set "Secure View (with watermarks)" as default share permission')) ?></label>
 	</div>
+
 	<br/>
-	<div id="enable-watermark-section" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
+
+	<div id="richdocuments-watermark-section" style="padding-left: 28px;" class="indent <?php if ($_['secure_view_option'] !== 'true') {
 		p('hidden');
 	} ?>" >
-		<p style="max-width: 50em;"><em><?php p($l->t('Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable. Click outside the text field to save.')) ?></em></p>
-		<input type="text" style="width: 400px" id="secure_view_watermark-richdocuments" value="<?php p($_['watermark_text'] !== null ? $_['watermark_text']: $l->t('Strictly confidential. Only for ').'{viewer-email}') ?>">
+		<p style="max-width: 50em;"><em><?php p($l->t('Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable.')) ?></em></p>
+		<input type="text" style="width: 400px" id="secure_view_watermark-richdocuments" value="<?php p(($_['watermark_text'] !== '' && $_['watermark_text'] !== null) ? $_['watermark_text']: '') ?>">
+        <button type="button" id="save_secure_view_watermark-richdocuments"><?php p($l->t('Save')) ?></button>
+        <span id="save-secure-view-watermark-admin-msg" class="msg"></span>
 	</div>
+
+	<br/>
 	
 	<h2 class="app-name has-documentation"><?php p($l->t('Zotero for Collabora Online')) ?></h2>
 	<a target="_blank" rel="noreferrer" class="icon-info"
