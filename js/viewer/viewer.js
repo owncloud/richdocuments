@@ -259,8 +259,8 @@ $(document).ready(function() {
 			$("#preview").append(button);
 		}
 
+		// register file menu for logged in user, do not register public links
 		if (!$("#isPublic").val()) {
-			// Dont register file menu with public links
 			$.get(
 				OC.generateUrl("apps/richdocuments/ajax/settings/list"),
 				{},

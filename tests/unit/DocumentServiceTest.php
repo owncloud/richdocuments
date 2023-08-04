@@ -156,7 +156,7 @@ class DocumentServiceTest extends TestCase {
 			'path' => 'file.txt',
 			'name' => 'file.txt',
 			'fileid' => 123,
-			'version' => '0',
+			'version' => 0,
 			'secureView' => false,
 			'secureViewId' => null,
 			'federatedServer' => null,
@@ -166,8 +166,7 @@ class DocumentServiceTest extends TestCase {
 		$this->assertEquals($expected, $result);
 	}
 
-	// TODO
-	public function testGetDocumentByUserIdWithGroupShare(): void {
+	public function testGetDocumentByUserIdWithSecureGroupShare(): void {
 		// Mock the root folder
 		$rootFolder = $this->createMock(Folder::class);
 		$this->rootFolder->expects($this->once())
@@ -196,7 +195,7 @@ class DocumentServiceTest extends TestCase {
 					case 'view-with-watermark':
 						return true;
 					default:
-						return false;
+						return null;
 				}
 			});
 
@@ -210,6 +209,7 @@ class DocumentServiceTest extends TestCase {
 			->willReturn($shareAttributes);
 
 		$this->appConfig->method('secureViewOptionEnabled')->willReturn(true);
+		$this->appConfig->method('secureViewOpenActionDefaultEnabled')->willReturn(false);
 
 		$storage = $this->createMock('\OCA\Files_Sharing\SharedStorage');
 		$storage->expects($this->any())
@@ -269,9 +269,207 @@ class DocumentServiceTest extends TestCase {
 			'path' => 'file.txt',
 			'name' => 'file.txt',
 			'fileid' => 123,
-			'version' => '0',
+			'version' => 0,
 			'secureView' => true,
 			'secureViewId' => 567,
+			'federatedServer' => null,
+			'federatedShareToken' => null,
+			'federatedShareRelativePath' => null,
+		];
+		$this->assertEquals($expected, $result);
+	}
+
+	public function testGetDocumentByUserIdWithSecureGroupShareDownloadNotPossible(): void {
+		// Mock the root folder
+		$rootFolder = $this->createMock(Folder::class);
+		$this->rootFolder->expects($this->once())
+			->method('getUserFolder')
+			->with($this->equalTo('testuser'))
+			->willReturn($rootFolder);
+
+		// Mock the file mount
+		$fileMount = $this->createMock(File::class);
+		$fileMounts = [$fileMount];
+		$rootFolder->expects($this->once())
+			->method('getById')
+			->with($this->equalTo(123))
+			->willReturn($fileMounts);
+
+		// Mock the share attributes
+		$shareAttributes = $this->createMock(IAttributes::class);
+		$shareAttributes->expects($this->any())
+			->method('getAttribute')
+			->willReturnCallback(function (string $scope, string $key) {
+				switch ($key) {
+					case 'download':
+						return false; // do not allow download
+					case 'view-with-watermark':
+						return false; // do not allow watermark
+					default:
+						return null;
+				}
+			});
+
+		// Mock the share
+		$share = $this->createMock(IShare::class);
+		$share->expects($this->any())
+			->method('getId')
+			->willReturn(567);
+		$share->expects($this->any())
+			->method('getAttributes')
+			->willReturn($shareAttributes);
+
+		$this->appConfig->method('secureViewOptionEnabled')->willReturn(true);
+		$this->appConfig->method('secureViewOpenActionDefaultEnabled')->willReturn(false);
+
+		$storage = $this->createMock('\OCA\Files_Sharing\SharedStorage');
+		$storage->expects($this->any())
+			->method('instanceOfStorage')
+			->willReturnCallback(function (string $instance) {
+				switch ($instance) {
+					case '\OCA\Files_Sharing\SharedStorage':
+						return true;
+					case '\OCA\Files_Sharing\External\Storage':
+						return false;
+					default:
+						return true;
+				}
+			});
+		$storage->expects($this->any())
+			->method('getShare')
+			->willReturn($share);
+
+		// Mock the document
+		$owner = $this->createMock(IUser::class);
+		$owner->expects($this->once())
+			->method('getUID')
+			->willReturn('owner');
+		$fileMount->expects($this->once())
+			->method('getStorage')
+			->willReturn($storage);
+		$fileMount->expects($this->once())
+			->method('getOwner')
+			->willReturn($owner);
+		$fileMount->expects($this->once())
+			->method('isUpdateable')
+			->willReturn(true);
+		$fileMount->expects($this->once())
+			->method('getMimeType')
+			->willReturn('text/plain');
+		$fileMount->expects($this->once())
+			->method('getPath')
+			->willReturn('/path/to/file.txt');
+		$rootFolder->expects($this->once())
+			->method('getRelativePath')
+			->with($this->equalTo('/path/to/file.txt'))
+			->willReturn('file.txt');
+		$fileMount->expects($this->once())
+			->method('getName')
+			->willReturn('file.txt');
+
+		// Call the method being tested
+		$result = $this->documentService->getDocumentByUserId('testuser', 123, null);
+
+		$this->assertEquals(null, $result);
+	}
+
+	public function testGetDocumentByUserIdWithEnforcedWatermarkGroupShare(): void {
+		// Mock the root folder
+		$rootFolder = $this->createMock(Folder::class);
+		$this->rootFolder->expects($this->once())
+			->method('getUserFolder')
+			->with($this->equalTo('testuser'))
+			->willReturn($rootFolder);
+
+		// Mock the file mount
+		$fileMount = $this->createMock(File::class);
+		$fileMounts = [$fileMount];
+		$rootFolder->expects($this->once())
+			->method('getById')
+			->with($this->equalTo(123))
+			->willReturn($fileMounts);
+
+		// Mock the share attributes
+		$shareAttributes = $this->createMock(IAttributes::class);
+		$shareAttributes->expects($this->any())
+			->method('getAttribute')
+			->willReturnCallback(function (string $scope, string $key) {
+				return null;
+			});
+
+		// Mock the share
+		$share = $this->createMock(IShare::class);
+		$share->expects($this->any())
+			->method('getId')
+			->willReturn(567);
+		$share->expects($this->any())
+			->method('getAttributes')
+			->willReturn($shareAttributes);
+
+		$this->appConfig->method('secureViewOptionEnabled')->willReturn(true);
+		$this->appConfig->method('secureViewOpenActionDefaultEnabled')->willReturn(true);
+
+		$storage = $this->createMock('\OCA\Files_Sharing\SharedStorage');
+		$storage->expects($this->any())
+			->method('instanceOfStorage')
+			->willReturnCallback(function (string $instance) {
+				switch ($instance) {
+					case '\OCA\Files_Sharing\SharedStorage':
+						return true;
+					case '\OCA\Files_Sharing\External\Storage':
+						return false;
+					default:
+						return true;
+				}
+			});
+		$storage->expects($this->any())
+			->method('getShare')
+			->willReturn($share);
+
+		// Mock the document
+		$owner = $this->createMock(IUser::class);
+		$owner->expects($this->once())
+			->method('getUID')
+			->willReturn('owner');
+		$fileMount->expects($this->once())
+			->method('getStorage')
+			->willReturn($storage);
+		$fileMount->expects($this->once())
+			->method('getOwner')
+			->willReturn($owner);
+		$fileMount->expects($this->once())
+			->method('isUpdateable')
+			->willReturn(true);
+		$fileMount->expects($this->once())
+			->method('getMimeType')
+			->willReturn('text/plain');
+		$fileMount->expects($this->once())
+			->method('getPath')
+			->willReturn('/path/to/file.txt');
+		$rootFolder->expects($this->once())
+			->method('getRelativePath')
+			->with($this->equalTo('/path/to/file.txt'))
+			->willReturn('file.txt');
+		$fileMount->expects($this->once())
+			->method('getName')
+			->willReturn('file.txt');
+
+		// Call the method being tested
+		$result = $this->documentService->getDocumentByUserId('testuser', 123, null);
+
+		// Assert the result
+		$expected = [
+			'owner' => 'owner',
+			'allowEdit' => true,
+			'allowExport' => true,
+			'allowPrint' => true,
+			'mimetype' => 'text/plain',
+			'path' => 'file.txt',
+			'name' => 'file.txt',
+			'fileid' => 123,
+			'version' => 0,
+			'secureView' => true,
+			'secureViewId' => null,
 			'federatedServer' => null,
 			'federatedShareToken' => null,
 			'federatedShareRelativePath' => null,
@@ -361,7 +559,7 @@ class DocumentServiceTest extends TestCase {
 			'path' => 'file.txt',
 			'name' => 'file.txt',
 			'fileid' => 123,
-			'version' => '0',
+			'version' => 0,
 			'secureView' => false,
 			'secureViewId' => null,
 			'federatedServer' => 'fedinstance',
@@ -451,7 +649,7 @@ class DocumentServiceTest extends TestCase {
 			'path' => '/testdir/file.txt',
 			'name' => 'file.txt',
 			'fileid' => 123,
-			'version' => '0',
+			'version' => 0,
 			'secureView' => false,
 			'secureViewId' => null,
 			'federatedServer' => null,
@@ -490,7 +688,7 @@ class DocumentServiceTest extends TestCase {
 			'path' => '/path/to/document.pdf',
 			'name' => 'document.pdf',
 			'fileid' => 123,
-			'version' => '0'
+			'version' => 0
 		];
 
 		$this->assertEquals($expected, $this->documentService->getDocumentByShareToken('testtoken', null));
@@ -530,7 +728,7 @@ class DocumentServiceTest extends TestCase {
 			'path' => '/path/to/document.pdf',
 			'name' => 'document.pdf',
 			'fileid' => 123,
-			'version' => '0'
+			'version' => 0
 		];
 
 		$this->assertEquals($expected, $this->documentService->getDocumentByShareToken('testtoken', 1));
@@ -574,7 +772,7 @@ class DocumentServiceTest extends TestCase {
 			'path' => '/path/to/document.pdf',
 			'name' => 'document.pdf',
 			'fileid' => 123,
-			'version' => '0'
+			'version' => 0
 		];
 
 		$this->assertEquals($expected, $this->documentService->getDocumentByShareToken('testtoken', null));

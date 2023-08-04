@@ -216,10 +216,12 @@ class WopiController extends Controller {
 			$watermark = null;
 		}
 
+		// check if storage supports locking
 		$storage = $file->getStorage();
 		$supportsLocks = $canWrite && $storage->instanceOfStorage(IPersistentLockingStorage::class);
 
 		$result = [
+			// standard WOPI options
 			'BaseFileName' => $file->getName(),
 			'Size' => $file->getSize(),
 			'Version' => \strval($version),
@@ -239,6 +241,7 @@ class WopiController extends Controller {
 			'HideExportOption' => !$canExport,
 			'HideSaveOption' => !$canExport, // dont show the §save to OC§ option as user cannot download file
 			'DisableCopy' => !$canExport, // disallow copying in document
+			// custom Collabora Online options
 			'WatermarkText' => $watermark,
 		];
 		

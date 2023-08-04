@@ -83,7 +83,7 @@ class AppConfig {
 	 * @param string $value
 	 */
 	public function setUserValue($userId, $key, $value) {
-		$this->config->setAppValue($this->appName, $key, $value);
+		$this->config->setUserValue($userId, $this->appName, $key, $value);
 	}
 
 	/**
