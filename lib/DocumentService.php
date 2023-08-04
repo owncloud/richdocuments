@@ -162,6 +162,7 @@ class DocumentService {
 			$isSharedFile = $storage->instanceOfStorage('\OCA\Files_Sharing\SharedStorage');
 			$isFederatedShare = $storage->instanceOfStorage('\OCA\Files_Sharing\External\Storage');
 			$isSecureModeEnabled = $this->appConfig->secureViewOptionEnabled();
+			$isWatermarkEnforced = $this->appConfig->secureViewOpenActionDefaultEnabled();
 
 			// Base file info
 			$ret = [];
@@ -222,6 +223,12 @@ class DocumentService {
 				//  - in case of shared file it would be name of the shared file
 				/* @phan-suppress-next-line PhanUndeclaredMethod */
 				$ret['federatedShareRelativePath'] = $document->getInternalPath();
+			}
+
+			if ($isSecureModeEnabled && $isWatermarkEnforced) {
+				// enable watermarking but do not enforce dedicated secure session
+				$ret['secureView'] = true;
+				$ret['secureViewId'] = null;
 			}
 
 			return $ret;
