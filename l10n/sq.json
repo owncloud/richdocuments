@@ -56,6 +56,7 @@
     "Can't create document" : "S’krijohet dot dokumenti",
     "Saved" : "U ruajt",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "U ruajt me gabim: Collabora Online do të duhej të përdorte të njëjtin protokoll si instalimi i shërbyesit.",
+    "Public Link User" : "Përdorues Lidhjeje Publike",
     "%s via Office Collabora" : "%s përmes Office Collabora",
     "Public Link User via Collabora Online" : "Përdorues Lidhjeje Publike përmes Collabora Online",
     "Collabora Online" : "Collabora Online",
