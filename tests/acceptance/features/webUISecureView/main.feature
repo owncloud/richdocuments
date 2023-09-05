@@ -332,7 +332,7 @@ Feature: Secure View
     And the user re-logs in as "Brian" using the webUI
     And the user shares folder "simple-folder" with user "Carol" using the webUI
     And user "Brian" gets the info of the last share using the sharing API
-    Then the fields of the last response to user "Brian" should include
+    And the fields of the last response to user "Brian" should include
       | permissions | read |
     And the additional sharing attributes for the response should include
       | scope         | key                 | enabled |
@@ -352,7 +352,7 @@ Feature: Secure View
     And the user sets the sharing permissions of user "Brian" for "simple-folder" using the webUI to
       | edit        | no  |
       | secure-view | yes |
-    When the user re-logs in as "Brian" using the webUI
+    And the user re-logs in as "Brian" using the webUI
     Then it should not be possible to share folder "simple-folder" using the webUI
     When the user re-logs in as "Alice" using the webUI
     And the user sets the sharing permissions of user "Brian" for "simple-folder" using the webUI to
