@@ -81,12 +81,13 @@ class FileService {
 	 * for given fileId
 	 *
 	 * @param int $fileId original file id
+	 * @param string $version version of the file
 	 * @param string $ownerUID original file owner
 	 * @param string|null $editorUID file editor (provide null if incognito mode)
 	 *
 	 * @return File|null
 	 */
-	public function getFileHandle(int $fileId, string $ownerUID, ?string $editorUID): ?File {
+	public function getFileHandle(int $fileId, string $version, string $ownerUID, ?string $editorUID): ?File {
 		if (!$ownerUID) {
 			$this->logger->warning('getFileHandle(): owner must be provided', ['app' => 'richdocuments']);
 			return null;
@@ -120,6 +121,8 @@ class FileService {
 			// Public link access
 			$this->setIncognitoMode(true);
 		}
+
+		// FIXME: implement handling versions
 
 		// Setup FS of original file file-handle to be able to generate
 		// file versions and write files with user session set for editor

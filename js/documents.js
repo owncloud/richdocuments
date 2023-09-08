@@ -391,6 +391,9 @@ var documentsMain = {
 
 			// append current document first
 			documentsMain.UI.addRevision(documentsMain.fileId, 0, t('richdocuments', 'Just now'), documentPath);
+			
+			// For a test
+			documentsMain.UI.addRevision(documentsMain.fileId, 1, t('richdocuments', 'Test version'), documentPath);
 
 			// add "Show more versions" button
 			$('#show-more-versions').click(function(e) {

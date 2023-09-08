@@ -170,9 +170,9 @@ class WopiController extends Controller {
 		$fileId = $res['fileid'];
 		$version = $res['version'];
 		if ($isAnonymousUser) {
-			$file = $this->fileService->getFileHandle($fileId, $ownerId, null);
+			$file = $this->fileService->getFileHandle($fileId, $version, $ownerId, null);
 		} else {
-			$file = $this->fileService->getFileHandle($fileId, $ownerId, $userId);
+			$file = $this->fileService->getFileHandle($fileId, $version, $ownerId, $userId);
 		}
 
 		// make sure file can be read when checking file info
@@ -308,9 +308,9 @@ class WopiController extends Controller {
 		}
 
 		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['version'], $res['owner'], $res['editor']);
 		} else {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['version'], $res['owner'], null);
 		}
 
 		if (!$file) {
@@ -344,6 +344,11 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
+		if ($res['version'] !== '0') {
+			$this->logger->debug('PutFile: not allowed for versions.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
 		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
 		if (!$canWrite) {
 			$this->logger->debug('PutFile: not allowed.', ['app' => $this->appName]);
@@ -358,9 +363,9 @@ class WopiController extends Controller {
 		]);
 
 		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['version'], $res['owner'], $res['editor']);
 		} else {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['version'], $res['owner'], null);
 		}
 
 		if (!$file) {
@@ -421,6 +426,11 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
+		if ($res['version'] !== '0') {
+			$this->logger->debug('PutFileRelative: not allowed for versions.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
 		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
 		if (!$canWrite) {
 			$this->logger->debug('PutFileRelative: not allowed.', ['app' => $this->appName]);
@@ -428,7 +438,7 @@ class WopiController extends Controller {
 		}
 
 		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['version'], $res['owner'], $res['editor']);
 		} else {
 			$this->logger->warning('PutFileRelative: Unexpected call for function for anonymous access', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_INTERNAL_SERVER_ERROR);
@@ -513,6 +523,11 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
+		if ($res['version'] !== '0') {
+			$this->logger->debug('Lock: not allowed for versions.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
 		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
 		if (!$canWrite) {
 			$this->logger->debug('Lock: not allowed.', ['app' => $this->appName]);
@@ -520,9 +535,9 @@ class WopiController extends Controller {
 		}
 
 		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['version'], $res['owner'], $res['editor']);
 		} else {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['version'], $res['owner'], null);
 		}
 
 		if (!$file) {
@@ -610,6 +625,11 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
+		if ($res['version'] !== '0') {
+			$this->logger->debug('Unlock: not allowed for versions.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
 		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
 		if (!$canWrite) {
 			$this->logger->debug('Unlock: not allowed.', ['app' => $this->appName]);
@@ -617,9 +637,9 @@ class WopiController extends Controller {
 		}
 
 		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['version'], $res['owner'], $res['editor']);
 		} else {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['version'], $res['owner'], null);
 		}
 
 		if (!$file) {
@@ -693,6 +713,11 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
+		if ($res['version'] !== '0') {
+			$this->logger->debug('RefreshLock: not allowed for versions.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
 		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
 		if (!$canWrite) {
 			$this->logger->debug('RefreshLock: not allowed.', ['app' => $this->appName]);
@@ -700,9 +725,9 @@ class WopiController extends Controller {
 		}
 
 		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['version'], $res['owner'], $res['editor']);
 		} else {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['version'], $res['owner'], null);
 		}
 
 		if (!$file) {
@@ -778,6 +803,11 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
+		if ($res['version'] !== '0') {
+			$this->logger->debug('Unlock: not allowed for versions.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
 		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
 		if (!$canWrite) {
 			$this->logger->debug('Unlock: not allowed.', ['app' => $this->appName]);
@@ -785,9 +815,9 @@ class WopiController extends Controller {
 		}
 
 		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['version'], $res['owner'], $res['editor']);
 		} else {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
+			$file = $this->fileService->getFileHandle($res['fileid'], $res['version'], $res['owner'], null);
 		}
 
 		if (!$file) {
@@ -872,7 +902,13 @@ class WopiController extends Controller {
 			'token' => $token ]);
 
 		$row = new Db\Wopi();
-		$res = $row->getWopiForToken($wopiToken);
+		if ($version === '0') {
+			$res = $row->getWopiForToken($wopiToken);
+		} else {
+			// NOTE: version is a string representing timestamp of the version file, where 0 means current version
+			$res = $row->getWopiRevForToken($wopiToken, $version);
+		}
+
 		if (!$res) {
 			$this->logger->debug('Cannot find token.', ['app' => $this->appName]);
 			return null;
