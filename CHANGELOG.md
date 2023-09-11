@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- [#508](https://github.com/owncloud/richdocuments/pull/508) - CollaboraOnline#6546 enable automatic color in default paragraph style
 - [#496](https://github.com/owncloud/richdocuments/pull/496) - Migrate to oC Web v7
 - [#494](https://github.com/owncloud/richdocuments/pull/494) - Refactor API and most critical parts of the code
 - [#493](https://github.com/owncloud/richdocuments/pull/493) - make sure to retrieve correct supershare based on current dir context
@@ -27,6 +28,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- [#507](https://github.com/owncloud/richdocuments/pull/507) - fix regressions introduced with refactors for new major release and add tests
 - [#457](https://github.com/owncloud/richdocuments/pull/457) - typo fix (templates/documents.php)
 - [#455](https://github.com/owncloud/richdocuments/pull/455) - ensure ODG Drawing compatibility across integration
 - [#451](https://github.com/owncloud/richdocuments/pull/451) - disable secure view js and settings when not available
