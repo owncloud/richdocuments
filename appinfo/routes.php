@@ -19,6 +19,7 @@ $application->registerRoutes($this, [
 		['name' => 'document#create', 'url' => 'ajax/documents/create', 'verb' => 'POST'],
 		['name' => 'document#listAll', 'url' => 'ajax/documents/list', 'verb' => 'GET'],
 		['name' => 'document#get', 'url' => 'ajax/documents/index/{fileId}', 'verb' => 'GET'],
+		['name' => 'document#getVersions', 'url' => 'ajax/documents/index/{fileId}/v', 'verb' => 'GET'],
 		// Collabora Settings API
 		['name' => 'settings#list', 'url' => 'ajax/settings/list', 'verb' => 'GET'],
 		['name' => 'settings#update', 'url' => 'ajax/settings/update', 'verb' => 'POST'],

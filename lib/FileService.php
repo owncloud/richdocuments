@@ -122,8 +122,6 @@ class FileService {
 			$this->setIncognitoMode(true);
 		}
 
-		// FIXME: implement handling versions
-
 		// Setup FS of original file file-handle to be able to generate
 		// file versions and write files with user session set for editor
 		// take 1st mount as here we access original version of the file from owner
@@ -131,8 +129,19 @@ class FileService {
 		$root = $this->rootFolder->getUserFolder($ownerUID);
 		$files = $root->getById($fileId);
 		if ($files !== [] && $files[0] instanceof File) {
-			return $files[0];
+			$file = $files[0];
+
+			if ($version !== '0') {
+				// versions are in a separate folder /files_versions instead of /files
+				$versionsFolder = $root->getParent()->get("files_versions");
+				$version = $versionsFolder->get($root->getRelativePath($file->getPath()) . ".v" . $version);
+				return $version;
+			}
+
+			// original file
+			return $file;
 		}
+
 		return null;
 	}
 
@@ -194,6 +203,34 @@ class FileService {
 
 		return $file;
 	}
+
+	// private function getVersionFolder($user) {
+    //     $userRoot = $this->rootFolder->getUserFolder($user->getUID())->getParent();
+    //     try {
+    //         $folder = $userRoot->get("files_versions");
+    //         return $folder;
+    //     } catch (NotFoundException $e) {
+    //         \OC::$server->getLogger()->logException($e, ["message" => "VersionManager: not found user version folder " . $user->getUID(), "app" => $this->appName]);
+    //         return null;
+    //     }
+    // }
+
+    // /**
+    //  * Get file version
+    //  *
+    //  * @param IUser $user - file owner
+    //  * @param FileInfo $sourceFile - file
+    //  * @param integer $version - file version
+    //  *
+    //  * @return File
+    //  */
+    // public function getVersionFile($user, $sourceFile, $version) {
+    //     $userFolder = $this->rootFolder->getUserFolder($user->getUID());
+    //     $versionsFolder = $this->getVersionFolder($user);
+
+    //     $file = $versionsFolder->get($userFolder->getRelativePath($sourceFile->getPath()) . ".v" . $version);
+    //     return $file;
+    // }
 
 	/**
 	 * Set the incognito mode

@@ -352,25 +352,41 @@ var documentsMain = {
 
 		fetchAndFillRevisions: function(documentPath) {
 			// fill #rev-history with file versions
-			// FIXME: this is no longer supported in OC10
-			$.get(OC.generateUrl('apps/files_versions/ajax/getVersions.php?source={documentPath}&start={start}',
-			                     { documentPath: documentPath, start: documentsMain.UI.revisionsStart }),
-				  function(result) {
-					  for(var key in result.data.versions) {
-						  documentsMain.UI.addRevision(documentsMain.fileId,
-						                               result.data.versions[key].version,
-						                               result.data.versions[key].humanReadableTimestamp,
-						                               documentPath);
-					  }
+			// // FIXME: this is no longer supported in OC10
+			// $.get(OC.generateUrl('apps/files_versions/ajax/getVersions.php?source={documentPath}&start={start}',
+			//                      { documentPath: documentPath, start: documentsMain.UI.revisionsStart }),
+			// 	  function(result) {
+			// 		  for(var key in result.data.versions) {
+			// 			  documentsMain.UI.addRevision(documentsMain.fileId,
+			// 			                               result.data.versions[key].version,
+			// 			                               result.data.versions[key].humanReadableTimestamp,
+			// 			                               documentPath);
+			// 		  }
 
-					  // owncloud only gives 5 version at max in one go
-					  documentsMain.UI.revisionsStart += 5;
+			// 		  // owncloud only gives 5 version at max in one go
+			// 		  documentsMain.UI.revisionsStart += 5;
 
-					  if (result.data.endReached) {
-						  // Remove 'More versions' button
-						  $('#show-more-versions').addClass('hidden');
-					  }
-				  });
+			// 		  if (result.data.endReached) {
+			// 			  // Remove 'More versions' button
+			// 			  $('#show-more-versions').addClass('hidden');
+			// 		  }
+			// 	  });
+		var that = this;
+		var ocurl = OC.generateUrl('apps/richdocuments/ajax/documents/index/{fileId}/v', {
+			fileId: documentsMain.fileId
+		});
+		return $.getJSON(ocurl)
+			.done(function (result) {
+				if (!result || result.status === 'error') {
+					console.log(t('richdocuments','Failed to load document versions.'));
+				}
+				
+				var versions = result;
+				$('#show-more-versions').addClass('hidden');
+			})
+			.fail(function(data){
+				console.log(t('richdocuments','Failed to load document versions.'));
+			});
 		},
 
 		showRevHistory: function(documentPath) {
@@ -390,13 +406,15 @@ var documentsMain = {
 			documentsMain.UI.addRevision(documentsMain.fileId, 0, t('richdocuments', 'Just now'), documentPath);
 			
 			// For a test
-			documentsMain.UI.addRevision(documentsMain.fileId, 1, t('richdocuments', 'Test version'), documentPath);
+			//documentsMain.UI.addRevision(documentsMain.fileId, 1695388024, t('richdocuments', 'Test version'), documentPath);
 
-			// add "Show more versions" button
-			$('#show-more-versions').click(function(e) {
-				e.preventDefault();
-				documentsMain.UI.fetchAndFillRevisions(documentPath);
-			});
+			// // add "Show more versions" button
+			// $('#show-more-versions').click(function(e) {
+			// 	e.preventDefault();
+			// 	documentsMain.UI.fetchAndFillRevisions(documentPath);
+			// });
+
+			documentsMain.UI.fetchAndFillRevisions(documentPath);
 
 			// fake click to load first 5 versions
 			$('#show-more-versions').click();
