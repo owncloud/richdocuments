@@ -33,7 +33,7 @@ class Wopi extends \OCA\Richdocuments\Db {
 	protected $loadStatement = 'SELECT * FROM `*PREFIX*richdocuments_wopi` WHERE `token`= ?';
 
 	/**
-	 * Generate token for document being shared with public link
+	 * Generate token for document
 	 *
 	 * @param int $fileId
 	 * @param int $version
@@ -93,38 +93,6 @@ class Wopi extends \OCA\Richdocuments\Db {
 		\OC::$server->getLogger()->debug('Loaded WOPI Token record: {row}.', [
 			'app' => self::appName,
 			'row' => $row ]);
-		if (!isset($row['expiry']) || $row['expiry'] <= \time()) {
-			return null;
-		}
-
-		return [
-			'fileid' => $row['fileid'],
-			'version' => $row['version'],
-			'owner' => $row['owner_uid'],
-			'editor' => $row['editor_uid'],
-			'attributes' => $row['attributes'],
-			'server_host' => $row['server_host']
-		];
-	}
-
-	/**
-	 * @param string $token
-	 * @param string $revision
-	 * @return array|null
-	 */
-	public function getWopiRevForToken($token, $revision) : ?array {
-		// NOTE: version access of the original file has the same attirbutes 
-		// with exception that it cannot be updated, thus reuse the same token
-		// but annotate with verions and adjust permissions
-		$wopi = new Wopi();
-		$row = $wopi->loadBy('token', $token)->getData();
-		$row['version'] = $revision;
-		$row['attributes'] = $row['attributes'] & ~WOPI::ATTR_CAN_UPDATE;
-
-		\OC::$server->getLogger()->debug('Loaded WOPI Token record: {row}.', [
-			'app' => self::appName,
-			'row' => $row ]);
-
 		if (!isset($row['expiry']) || $row['expiry'] <= \time()) {
 			return null;
 		}

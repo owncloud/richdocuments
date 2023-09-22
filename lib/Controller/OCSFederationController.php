@@ -66,7 +66,6 @@ class OCSFederationController extends OCSController {
 	 */
 	public function getWopiForToken($token) {
 		$row = new Wopi();
-		$row->loadBy('token', $token);
 		$wopi = $row->getWopiForToken($token);
 
 		if ($wopi == false) {

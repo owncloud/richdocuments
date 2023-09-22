@@ -22,15 +22,24 @@ class WopiTest extends TestCase {
 	}
 
 	public function testGenerateToken() {
-		$tokenResult = $this->wopi->generateToken(
+		$token = $this->wopi->generateToken(
 			1,
 			0,
 			7,
-			'ttp://localhost',
+			'http://localhost',
 			'user',
 			'user'
 		);
-		$this->assertArrayHasKey('access_token', $tokenResult);
-		$this->assertArrayHasKey('access_token_ttl', $tokenResult);
+		$this->assertArrayHasKey('access_token', $token);
+		$this->assertArrayHasKey('access_token_ttl', $token);
+
+		$wopi = $this->wopi->getWopiForToken($token['access_token']);
+		$this->assertSame('1', $wopi['fileid']); // convertion to string when retrieving
+		$this->assertSame('0', $wopi['version']); // convertion to string when retrieving
+		$this->assertSame('7', $wopi['attributes']); // convertion to string when retrieving
+		$this->assertSame('http://localhost', $wopi['server_host']);
+		$this->assertSame('user', $wopi['owner']);
+		$this->assertSame('user', $wopi['editor']);
+
 	}
 }

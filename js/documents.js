@@ -330,11 +330,8 @@ var documentsMain = {
 				downloadUrl = OC.generateUrl('apps/files/download'+ documentPath);
 			} else {
 				// FIXME: this is no longer supported in OC10
-				downloadUrl = OC.generateUrl('apps/files_versions/download.php?file={file}&revision={revision}',
-				                             {file: documentPath, revision: version});
-				fileId = fileId + '_' + version;
-				restoreUrl = OC.generateUrl('apps/files_versions/ajax/rollbackVersion.php?file={file}&revision={revision}',
-				                            {file: documentPath, revision: version});
+				downloadUrl = '';
+				restoreUrl = '';
 			}
 
 			var revHistoryItemTemplate = Handlebars.compile(documentsMain.UI.revHistoryItemTemplate);

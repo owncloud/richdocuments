@@ -902,12 +902,7 @@ class WopiController extends Controller {
 			'token' => $token ]);
 
 		$row = new Db\Wopi();
-		if ($version === '0') {
-			$res = $row->getWopiForToken($wopiToken);
-		} else {
-			// NOTE: version is a string representing timestamp of the version file, where 0 means current version
-			$res = $row->getWopiRevForToken($wopiToken, $version);
-		}
+		$res = $row->getWopiForToken($wopiToken);
 
 		if (!$res) {
 			$this->logger->debug('Cannot find token.', ['app' => $this->appName]);
@@ -918,6 +913,18 @@ class WopiController extends Controller {
 		if ($res['fileid'] !== $fileId) {
 			$this->logger->debug('Provided wopi token for a wrong file.', ['app' => $this->appName]);
 			return null;
+		}
+
+		// if token and fileid matches but not version then allow in read-only mode
+		// this is because currently Collabora Online uses same token for accessing versions
+		if ($res['version'] !== $version) {
+			// version access of the original file has the same attributes 
+			// with exception that it cannot be updated, thus reuse the same token
+			// but annotate with version and adjust permissions
+			$res['version'] = $version;
+			$res['attributes'] = $res['attributes'] & ~WOPI::ATTR_CAN_UPDATE;
+
+			$this->logger->debug('Provided wopi token for a version of the file, triggering read-only mode.', ['app' => $this->appName]);
 		}
 
 		return $res;
