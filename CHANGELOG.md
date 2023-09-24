@@ -4,17 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - 2023-07-18
+## [Unreleased]
+
+- 
+
+
+## [4.0.0] - 2023-09-22
 
 ### Added
 
 - [#498](https://github.com/owncloud/richdocuments/pull/498) - Federated shares support v1
-- [#497](https://github.com/owncloud/richdocuments/pull/497) - handle federated share mount to display error and further refactor
+- [#497](https://github.com/owncloud/richdocuments/pull/497) - Handle federated share mount to display error and further refactor
 - [#486](https://github.com/owncloud/richdocuments/pull/486) - E5515 feature/wopi locks
-- [#456](https://github.com/owncloud/richdocuments/pull/456) - web: add Drawing filetype and add it to + menu
+- [#456](https://github.com/owncloud/richdocuments/pull/456) - Web: add Drawing filetype and add it to + menu
 
 ### Changed
 
+- [#508](https://github.com/owncloud/richdocuments/pull/508) - CollaboraOnline#6546 enable automatic color in default paragraph style
 - [#496](https://github.com/owncloud/richdocuments/pull/496) - Migrate to oC Web v7
 - [#494](https://github.com/owncloud/richdocuments/pull/494) - Refactor API and most critical parts of the code
 - [#493](https://github.com/owncloud/richdocuments/pull/493) - make sure to retrieve correct supershare based on current dir context
@@ -27,9 +33,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
-- [#457](https://github.com/owncloud/richdocuments/pull/457) - typo fix (templates/documents.php)
-- [#455](https://github.com/owncloud/richdocuments/pull/455) - ensure ODG Drawing compatibility across integration
-- [#451](https://github.com/owncloud/richdocuments/pull/451) - disable secure view js and settings when not available
+- [#517](https://github.com/owncloud/richdocuments/pull/517) - Fix issue with null return
+- [#516](https://github.com/owncloud/richdocuments/pull/516) - Fix #515: Upload button overlaps with document icon
+- [#507](https://github.com/owncloud/richdocuments/pull/507) - Fix regressions introduced with refactors for new major release and add tests
+- [#457](https://github.com/owncloud/richdocuments/pull/457) - Typo fix (templates/documents.php)
+- [#455](https://github.com/owncloud/richdocuments/pull/455) - Ensure ODG Drawing compatibility across integration
+- [#451](https://github.com/owncloud/richdocuments/pull/451) - Disable secure view js and settings when not available
 - [#468](https://github.com/owncloud/richdocuments/pull/468) - Upload button overlaps with a document icon in the second row
 
 

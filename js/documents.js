@@ -76,8 +76,8 @@ $.widget('oc.documentGrid', {
 	},
 
 	_load : function (fileId){
-		var isShare = getURLParameter('shareToken');
-		if (fileId || isShare) {
+		var shareToken = getURLParameter('shareToken');
+		if (fileId != 'null' || shareToken != 'null') {
 			documentsMain.initSession();
 			return null;
 		}
@@ -655,8 +655,9 @@ var documentsMain = {
 	onStartup: function() {
 		documentsMain.UI.init();
 
-		// TODO: needs invesitigation why comparison operator for null of return
+		// we need comparison operator for null of return like below
 		// for getURLParamager need to be != 'null', ref. core/js/js.js 
+		// null in here is a string but can be also null object
 
 		// Does anything indicate that we need to autostart a session?
 		var fileId = getURLParameter('fileId');
@@ -669,6 +670,7 @@ var documentsMain = {
 
 		var shareToken = getURLParameter('shareToken');
 		if (shareToken != 'null') {
+
 			// check if local share or federated share
 			var server = getURLParameter('server');
 			if (server != 'null') {
@@ -679,9 +681,9 @@ var documentsMain = {
 		}
 		
 		// this will launch the document with given fileId
-		documentsMain.show(documentsMain.fileId);
+		documentsMain.show(fileId);
 
-		if (documentsMain.fileId) {
+		if (fileId != 'null') {
 			documentsMain.overlay.documentOverlay('show');
 			documentsMain.prepareSession();
 		}
