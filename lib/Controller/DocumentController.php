@@ -524,44 +524,6 @@ class DocumentController extends Controller {
 	}
 
 	/**
-	 * Get collabora document for:
-	 * - the base template if fileId is null
-	 * - file in user folder (also shared by user/group) if fileId not null
-	 *
-	 * @NoAdminRequired
-	 */
-	public function getVersions($fileId) {
-		try {
-			if (\is_numeric($fileId)) {
-				// parse fileId pointing to file
-				$fileId = (int) $fileId;
-			} else {
-				return $this->responseError($this->l10n->t('Invalid request parameters'));
-			}
-			
-			$dir = $this->request->getParam('dir');
-
-			// Normal editing or share by user/group
-			$docversionsinfo = $this->documentService->getDocumentVersionsByUserId($this->getCurrentUserUID(), $fileId, $dir);
-			if ($docversionsinfo === null) {
-				$this->logger->warning("Cannot retrieve document versions with fileid {fileid}", ["fileid" => $fileId]);
-				return null;
-			}
-
-			// Create document versions index
-			$docRetVal = [
-				'versions' => []
-			];
-			return new JSONResponse($docRetVal);
-		} catch (\Exception $e) {
-			return new JSONResponse([
-				'status' => 'error',
-				'message' => 'Document versions index could not be found'
-			], Http::STATUS_BAD_REQUEST);
-		}
-	}
-
-	/**
 	 * Get current user locale
 	 */
 	private function getLocale() : string {

@@ -239,53 +239,6 @@ class DocumentService {
 		}
 	}
 
-	/**
-	 * Retrieve document versions info for file in the user directory (also shared file or within shared folder).
-	 *
-	 * If share is invalid or file does not exist, null is returned
-	 *
-	 * @param string $userId
-	 * @param int $fileId
-	 * @param string|null $dir
-	 * @return array|null
-	 */
-	public function getDocumentVersionsByUserId(string $userId, int $fileId, ?string $dir) : ?array {
-		$root = $this->rootFolder->getUserFolder($userId);
-
-		try {
-			// if dir is set, then we need to check fileId in that folder,
-			// as in case of user/group shares we can have multiple file mounts with same id
-			// return these fileMounts
-			if ($dir !== null) {
-				/** @var \OCP\Files\Folder $parentFolder */
-				$parentFolder = $root->get($dir);
-
-				/** @phpstan-ignore-next-line */
-				'@phan-var \OCP\Files\Folder $parentFolder';
-				$fileMounts = $parentFolder->getById($fileId);
-			} else {
-				$fileMounts = $root->getById($fileId);
-			}
-			
-			$document = $fileMounts[0] ?? null;
-			if ($document === null) {
-				return $this->reportError('Document for the fileId ' . $fileId . 'not found');
-			}
-
-			// versions are in a separate folder /files_versions instead of /files
-			$versionsFolder = $root->getParent()->get("files_versions");
-			//$versions = $versionsFolder->search($root->getRelativePath($document->getPath()));
-
-			$ret = [];
-
-			return $ret;
-		} catch (InvalidPathException $e) {
-			return $this->reportError($e->getMessage());
-		} catch (NotFoundException $e) {
-			return $this->reportError($e->getMessage());
-		}
-	}
-
 	private function isShareAuthValid(IShare $share) {
 		// check if password authentication has been passed
 		// (calling directly from API, password form cannot be enforced, so check is needed)
