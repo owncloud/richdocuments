@@ -219,7 +219,6 @@ class DocumentRevisionController extends Controller {
 			'@phan-var IVersionedStorage | IStorage $storage';
 			$internalPath = $document->getInternalPath();
 			$versions = $storage->getVersions($internalPath);
-
 		} catch (InvalidPathException $e) {
 			return new JSONResponse([
 				'status' => 'error',
@@ -231,7 +230,7 @@ class DocumentRevisionController extends Controller {
 				'message' => 'Document revisions could not be retrieved'
 			], Http::STATUS_INTERNAL_SERVER_ERROR);
 		}
-
+		
 		$ret = [];
 		foreach ($versions as $version) {
 			$ret[] = [

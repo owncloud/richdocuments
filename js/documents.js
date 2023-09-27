@@ -346,21 +346,20 @@ var documentsMain = {
 			});
 			$('#revViewerContainer').prepend(revHistoryContainer);
 
+			// show loading screen
+			$('#revPanelContainer').hide();
+			documentsMain.overlay.documentOverlay('show');
+
 			// append current document first
 			documentsMain.UI.addRevision(documentsMain.fileId, 0, t('richdocuments', 'Just now'));
 			
-			// append all revisions
+			// load revisions
 			$.getJSON(
 				OC.generateUrl('apps/richdocuments/ajax/documents/revisions/{fileId}', {
 					fileId: documentsMain.fileId
 				})
 			).done(function (result) {
-					if (!result || result.status === 'error') {
-						console.error(result);
-						documentsMain.UI.notify(t('richdocuments', 'Failed to load document revisions'));
-						return;
-					}
-
+					// add revisions
 					for(var key in result.revisions) {
 						documentsMain.UI.addRevision(
 							documentsMain.fileId,
@@ -370,7 +369,14 @@ var documentsMain = {
 					}
 			}).fail(function(result){
 				console.error(result);
-				documentsMain.UI.notify(t('richdocuments', 'Failed to load document revisions'));
+				documentsMain.UI.notify(t('richdocuments', 'Cannot load document revisions'));
+			}).always(function(){
+				// show revisions container after loading
+				documentsMain.overlay.documentOverlay('hide');
+				$('#revPanelContainer').show();
+
+				// fake click on first revision (i.e current revision)
+				$('#revisionsContainer li').first().find('.versionPreview').click();
 			});
 
 			// make these revisions clickable/attach functionality
@@ -383,9 +389,6 @@ var documentsMain = {
 				$(e.currentTarget.parentElement.parentElement).find('li').removeClass('active');
 				$(e.currentTarget.parentElement).addClass('active');
 			});
-
-			// fake click on first revision (i.e current revision)
-			$('#revisionsContainer li').first().find('.versionPreview').click();
 		},
 
 		showEditor : function(action){
