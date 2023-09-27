@@ -356,11 +356,11 @@ var documentsMain = {
 				})
 			).done(function (result) {
 					if (!result || result.status === 'error') {
-						console.log(t('richdocuments','Failed to load document revisions.'));
-						console.log(result);
+						console.error(result);
+						documentsMain.UI.notify(t('richdocuments', 'Failed to load document revisions'));
 						return;
 					}
-					
+
 					for(var key in result.revisions) {
 						documentsMain.UI.addRevision(
 							documentsMain.fileId,
@@ -369,8 +369,8 @@ var documentsMain = {
 						);
 					}
 			}).fail(function(result){
-				console.log(t('richdocuments','Failed to load document revisions.'));
-				console.log(result);
+				console.error(result);
+				documentsMain.UI.notify(t('richdocuments', 'Failed to load document revisions'));
 			});
 
 			// make these revisions clickable/attach functionality

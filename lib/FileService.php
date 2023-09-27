@@ -20,21 +20,23 @@
  */
 namespace OCA\Richdocuments;
 
-use OCP\Files\IRootFolder;
-use OCP\IUserSession;
+use OCA\Richdocuments\AppConfig;
 use OCP\Files\File;
+use OCP\Files\IRootFolder;
+use OCP\Files\Storage\IStorage;
+use OCP\Files\Storage\IVersionedStorage;
 use OCP\ILogger;
 use OCP\IUserManager;
-use OCA\Richdocuments\AppConfig;
-use Symfony\Component\EventDispatcher\GenericEvent;
+use OCP\IUserSession;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\GenericEvent;
 
 class FileService {
 	/**
 	 * @var ILogger
 	 */
 	private $logger;
-	
+
 	/**
 	 * @var AppConfig
 	 */
@@ -59,7 +61,7 @@ class FileService {
 	 * @var IRootFolder
 	 */
 	private $rootFolder;
-	
+
 	public function __construct(
 		ILogger $logger,
 		AppConfig $appConfig,
@@ -87,7 +89,8 @@ class FileService {
 	 *
 	 * @return File|null
 	 */
-	public function getFileHandle(int $fileId, string $version, string $ownerUID, ?string $editorUID): ?File {
+	public function getFileHandle(int $fileId, string $ownerUID, ?string $editorUID): ?File
+	{
 		if (!$ownerUID) {
 			$this->logger->warning('getFileHandle(): owner must be provided', ['app' => 'richdocuments']);
 			return null;
@@ -129,20 +132,48 @@ class FileService {
 		$root = $this->rootFolder->getUserFolder($ownerUID);
 		$files = $root->getById($fileId);
 		if ($files !== [] && $files[0] instanceof File) {
-			$file = $files[0];
-
-			if ($version !== '0') {
-				// versions are in a separate folder /files_versions instead of /files
-				$versionsFolder = $root->getParent()->get("files_versions");
-				$version = $versionsFolder->get($root->getRelativePath($file->getPath()) . ".v" . $version);
-				return $version;
-			}
-
 			// original file
-			return $file;
+			return $files[0];
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get privileged access to original file handle as user
+	 * for given fileId
+	 *
+	 * @param int $fileId original file id
+	 * @param string $version version of the file
+	 * @param string $ownerUID original file owner
+	 * @param string|null $editorUID file editor (provide null if incognito mode)
+	 *
+	 * @return File|null
+	 */
+	public function getFileVersionHandle(int $fileId, string $version, string $ownerUID, ?string $editorUID): ?File
+	{
+		// original file
+		$file = $this->getFileHandle($fileId, $ownerUID, $editorUID);
+
+		// get versions storage information
+		/** @var IStorage $storage */
+		$storage = $file->getStorage();
+		if (!$storage->instanceOfStorage(IVersionedStorage::class)) {
+			// storage does not support versions
+			return null;
+		}
+
+		// retrieve version
+		/** @var IVersionedStorage | IStorage $storage */
+		'@phan-var IVersionedStorage | IStorage $storage';
+		$versionMetadata = $storage->getVersion(
+			$file->getInternalPath(),
+			$version
+		);
+
+		$root = $this->rootFolder->getUserFolder($ownerUID);
+		$version = $root->getParent()->get($versionMetadata["storage_location"]);
+		return $version;
 	}
 
 	/**
@@ -155,7 +186,8 @@ class FileService {
 	 *
 	 * @return File|null
 	 */
-	public function newFile(string $path, string $ownerUID, string $editorUID): ?File {
+	public function newFile(string $path, string $ownerUID, string $editorUID): ?File
+	{
 		if ($path === '') {
 			return null;
 		}
@@ -204,40 +236,13 @@ class FileService {
 		return $file;
 	}
 
-	// private function getVersionFolder($user) {
-    //     $userRoot = $this->rootFolder->getUserFolder($user->getUID())->getParent();
-    //     try {
-    //         $folder = $userRoot->get("files_versions");
-    //         return $folder;
-    //     } catch (NotFoundException $e) {
-    //         \OC::$server->getLogger()->logException($e, ["message" => "VersionManager: not found user version folder " . $user->getUID(), "app" => $this->appName]);
-    //         return null;
-    //     }
-    // }
-
-    // /**
-    //  * Get file version
-    //  *
-    //  * @param IUser $user - file owner
-    //  * @param FileInfo $sourceFile - file
-    //  * @param integer $version - file version
-    //  *
-    //  * @return File
-    //  */
-    // public function getVersionFile($user, $sourceFile, $version) {
-    //     $userFolder = $this->rootFolder->getUserFolder($user->getUID());
-    //     $versionsFolder = $this->getVersionFolder($user);
-
-    //     $file = $versionsFolder->get($userFolder->getRelativePath($sourceFile->getPath()) . ".v" . $version);
-    //     return $file;
-    // }
-
 	/**
 	 * Set the incognito mode
 	 *
 	 * @param bool $status Flag to enable or disable incognito mode
 	 */
-	protected function setIncognitoMode(bool $status): void {
+	protected function setIncognitoMode(bool $status): void
+	{
 		\OC_User::setIncognitoMode($status);
 	}
 
@@ -246,7 +251,8 @@ class FileService {
 	 *
 	 * @param string $uid User ID
 	 */
-	protected function setupFS($uid): void {
+	protected function setupFS($uid): void
+	{
 		\OC_Util::tearDownFS();
 		\OC_Util::setupFS($uid);
 	}

@@ -40,8 +40,7 @@ use OCP\IPreview;
 use OCP\IRequest;
 use OCP\IUserManager;
 
-class DocumentRevisionController extends Controller
-{
+class DocumentRevisionController extends Controller {
 	/**
 	 * @var IL10N The localization service
 	 */
@@ -237,9 +236,9 @@ class DocumentRevisionController extends Controller
 		foreach ($versions as $version) {
 			$ret[] = [
 				// version number
-				'version' => $version['version'], 
+				'version' => $version['version'],
 				// version creation timestamp
-				'humanReadableTimestamp' => $version['humanReadableTimestamp'], 
+				'humanReadableTimestamp' => $version['humanReadableTimestamp'],
 				// version size
 				'size' => $version['size'],
 			];
