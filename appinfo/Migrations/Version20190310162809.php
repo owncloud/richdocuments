@@ -38,7 +38,7 @@ class Version20190310162809 implements ISchemaMigration {
 
 		// create richdocuments wopi tokens table, which will be used for
 		// wopi session tokens for the users
-		$table = $schema->createTable("${prefix}richdocuments_wopi");
+		$table = $schema->createTable("{$prefix}richdocuments_wopi");
 
 		// Document owner UserId - a textual user identifier
 		$table->addColumn('owner_uid', 'text', [
