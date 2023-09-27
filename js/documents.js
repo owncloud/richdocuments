@@ -359,14 +359,14 @@ var documentsMain = {
 					fileId: documentsMain.fileId
 				})
 			).done(function (result) {
-					// add revisions
-					for(var key in result.revisions) {
-						documentsMain.UI.addRevision(
-							documentsMain.fileId,
-							result.revisions[key].version,
-							result.revisions[key].humanReadableTimestamp
-						);
-					}
+				// add revisions
+				for(var key in result.revisions) {
+					documentsMain.UI.addRevision(
+						documentsMain.fileId,
+						result.revisions[key].version,
+						result.revisions[key].humanReadableTimestamp
+					);
+				}
 			}).fail(function(result){
 				console.error(result);
 				documentsMain.UI.notify(t('richdocuments', 'Cannot load document revisions'));

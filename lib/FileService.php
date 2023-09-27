@@ -23,7 +23,6 @@ namespace OCA\Richdocuments;
 use OCA\Richdocuments\AppConfig;
 use OCP\Files\File;
 use OCP\Files\IRootFolder;
-use OCP\Files\Storage\IStorage;
 use OCP\Files\Storage\IVersionedStorage;
 use OCP\ILogger;
 use OCP\IUserManager;
@@ -83,14 +82,12 @@ class FileService {
 	 * for given fileId
 	 *
 	 * @param int $fileId original file id
-	 * @param string $version version of the file
 	 * @param string $ownerUID original file owner
 	 * @param string|null $editorUID file editor (provide null if incognito mode)
 	 *
 	 * @return File|null
 	 */
-	public function getFileHandle(int $fileId, string $ownerUID, ?string $editorUID): ?File
-	{
+	public function getFileHandle(int $fileId, string $ownerUID, ?string $editorUID): ?File {
 		if (!$ownerUID) {
 			$this->logger->warning('getFileHandle(): owner must be provided', ['app' => 'richdocuments']);
 			return null;
@@ -150,13 +147,11 @@ class FileService {
 	 *
 	 * @return File|null
 	 */
-	public function getFileVersionHandle(int $fileId, string $version, string $ownerUID, ?string $editorUID): ?File
-	{
+	public function getFileVersionHandle(int $fileId, string $version, string $ownerUID, ?string $editorUID): ?File {
 		// original file
 		$file = $this->getFileHandle($fileId, $ownerUID, $editorUID);
 
 		// get versions storage information
-		/** @var IStorage $storage */
 		$storage = $file->getStorage();
 		if (!$storage->instanceOfStorage(IVersionedStorage::class)) {
 			// storage does not support versions
@@ -164,8 +159,8 @@ class FileService {
 		}
 
 		// retrieve version
-		/** @var IVersionedStorage | IStorage $storage */
-		'@phan-var IVersionedStorage | IStorage $storage';
+		/** @var IVersionedStorage $storage */
+		/* @phan-suppress-next-line PhanUndeclaredMethod */
 		$versionMetadata = $storage->getVersion(
 			$file->getInternalPath(),
 			$version
@@ -173,7 +168,12 @@ class FileService {
 
 		$root = $this->rootFolder->getUserFolder($ownerUID);
 		$version = $root->getParent()->get($versionMetadata["storage_location"]);
-		return $version;
+	
+		// return version
+		if ($version instanceof File) {
+			return $version;
+		}
+		return null;
 	}
 
 	/**
@@ -186,8 +186,7 @@ class FileService {
 	 *
 	 * @return File|null
 	 */
-	public function newFile(string $path, string $ownerUID, string $editorUID): ?File
-	{
+	public function newFile(string $path, string $ownerUID, string $editorUID): ?File {
 		if ($path === '') {
 			return null;
 		}
@@ -241,8 +240,7 @@ class FileService {
 	 *
 	 * @param bool $status Flag to enable or disable incognito mode
 	 */
-	protected function setIncognitoMode(bool $status): void
-	{
+	protected function setIncognitoMode(bool $status): void {
 		\OC_User::setIncognitoMode($status);
 	}
 
@@ -251,8 +249,7 @@ class FileService {
 	 *
 	 * @param string $uid User ID
 	 */
-	protected function setupFS($uid): void
-	{
+	protected function setupFS($uid): void {
 		\OC_Util::tearDownFS();
 		\OC_Util::setupFS($uid);
 	}

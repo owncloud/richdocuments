@@ -24,6 +24,8 @@ use OC\User\Session;
 use OCP\Files\IRootFolder;
 use OCP\Files\Folder;
 use OCP\Files\File;
+use OCP\Files\Storage\IStorage;
+use OCP\Files\Storage\IVersionedStorage;
 use OCP\IUser;
 use OCP\ILogger;
 use OCP\IUserManager;
@@ -288,5 +290,60 @@ class FileServiceTest extends TestCase {
 		$returnedFile = $this->fileService->getFileHandle($fileId, $owner, $editor);
 
 		$this->assertEquals($returnedFile->getId(), $fileId);
+	}
+
+	public function testGetFileVersionHandleNotVersionedStorage() {
+		$fileId = 1;
+		$owner = 'owner';
+		$editor = 'editor';
+
+		$this->fileService->expects($this->never())
+			->method('setIncognitoMode');
+		$this->fileService->expects($this->any())
+			->method('setupFS')
+			->with($owner);
+
+		$this->appConfig->expects($this->once())
+			->method('encryptionEnabled')
+			->willReturn(false);
+
+		$this->userSession->expects($this->once())
+			->method('setUser');
+
+		$user = $this->createMock(IUser::class);
+		$this->userManager->expects($this->once())
+			->method('get')
+			->with($editor)
+			->willReturn($user);
+
+		$file = $this->createMock(File::class);
+		$file->expects($this->any())
+			->method('getId')
+			->willReturn($fileId);
+
+		$userFolder = $this->createMock(Folder::class);
+		$userFolder->expects($this->any())
+			->method('getById')
+			->with($fileId)
+			->willReturn([$file]);
+
+		$this->rootFolder->expects($this->any())
+			->method('getUserFolder')
+			->with($owner)
+			->willReturn($userFolder);
+
+		$storage = $this->createMock(IStorage::class);
+		$storage->expects($this->any())
+			->method('instanceOfStorage')
+			->with(IVersionedStorage::class)
+			->willReturn(false);
+
+		$file->expects($this->any())
+			->method('getStorage')
+			->willReturn($storage);
+			
+		$returnedFile = $this->fileService->getFileVersionHandle($fileId, '', $owner, $editor);
+
+		$this->assertEquals($returnedFile, null);
 	}
 }

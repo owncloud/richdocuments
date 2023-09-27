@@ -174,15 +174,15 @@ class WopiController extends Controller {
 		$version = $res['version'];
 		if ($version === '0') {
 			$file = $this->fileService->getFileHandle(
-				$fileId, 
-				$ownerId, 
+				$fileId,
+				$ownerId,
 				$editorId
 			);
 		} else {
 			$file = $this->fileService->getFileVersionHandle(
-				$fileId, 
+				$fileId,
 				$version,
-				$ownerId, 
+				$ownerId,
 				$editorId
 			);
 		}
@@ -340,15 +340,15 @@ class WopiController extends Controller {
 		$version = $res['version'];
 		if ($version === '0') {
 			$file = $this->fileService->getFileHandle(
-				$fileId, 
-				$ownerId, 
+				$fileId,
+				$ownerId,
 				$editorId
 			);
 		} else {
 			$file = $this->fileService->getFileVersionHandle(
-				$fileId, 
+				$fileId,
 				$version,
-				$ownerId, 
+				$ownerId,
 				$editorId
 			);
 		}
@@ -956,9 +956,10 @@ class WopiController extends Controller {
 		}
 
 		// if token and fileid matches but not version then allow in read-only mode
-		// this is because currently Collabora Online uses same token for accessing versions
+		// this is because currently Collabora Online uses same token
+		// for accessing documents and its revision history
 		if ($res['version'] !== $version) {
-			// version access of the original file has the same attributes 
+			// version access of the original file has the same attributes
 			// with exception that it cannot be updated, thus reuse the same token
 			// but annotate with version and adjust permissions
 			$res['version'] = $version;

@@ -20,127 +20,45 @@
  */
 namespace OCA\Richdocuments\Controller;
 
-use OCA\Richdocuments\AppConfig;
-use OCA\Richdocuments\DiscoveryService;
-use OCA\Richdocuments\DocumentService;
-use OCA\Richdocuments\FederationService;
-use OCP\App\IAppManager;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Files\InvalidPathException;
-use OCP\Files\Storage\IStorage;
+use OCP\Files\IRootFolder;
 use OCP\Files\Storage\IVersionedStorage;
-use OCP\IConfig;
-use OCP\IGroupManager;
-use OCP\IL10N;
-use OCP\ILogger;
-use OCP\INavigationManager;
-use OCP\IPreview;
 use OCP\IRequest;
-use OCP\IUserManager;
+use OCP\IUserSession;
 
 class DocumentRevisionController extends Controller {
 	/**
-	 * @var IL10N The localization service
+	 * @var IUserSession The user session service
 	 */
-	private $l10n;
+	private $userSession;
 
 	/**
-	 * @var IConfig The ownCloud configuration service
+	 * @var IRootFolder The root folder service
 	 */
-	private $settings;
-
-	/**
-	 * @var AppConfig The Richdocuments app configuration service
-	 */
-	private $appConfig;
-
-	/**
-	 * @var ILogger The logger service
-	 */
-	private $logger;
-
-	/**
-	 * @var IAppManager The app manager service
-	 */
-	private $appManager;
-
-	/**
-	 * @var DocumentService The document service
-	 */
-	private $documentService;
-
-	/**
-	 * @var DiscoveryService The document service
-	 */
-	private $discoveryService;
-
-	/**
-	 * @var FederationService The federation service
-	 */
-	private $federationService;
-
-	/**
-	 * @var IGroupManager The group manager service
-	 */
-	private $groupManager;
-
-	/**
-	 * @var IUserManager The user manager service
-	 */
-	private $userManager;
-
-	/**
-	 * @var IPreview The user manager service
-	 */
-	private $previewManager;
-
-	/**
-	 * @var INavigationManager The user manager service
-	 */
-	private $navigationManager;
+	private $rootFolder;
 
 	public function __construct(
 		string $appName,
 		IRequest $request,
-		IConfig $settings,
-		AppConfig $appConfig,
-		IL10N $l10n,
-		ILogger $logger,
-		DocumentService $documentService,
-		DiscoveryService $discoveryService,
-		IAppManager $appManager,
-		IGroupManager $groupManager,
-		IUserManager $userManager,
-		IPreview $previewManager,
-		INavigationManager $navigationManager,
-		FederationService $federationService
+		IUserSession $userSession,
+		IRootFolder $rootFolder
 	) {
 		parent::__construct($appName, $request);
-		$this->l10n = $l10n;
-		$this->settings = $settings;
-		$this->appConfig = $appConfig;
-		$this->logger = $logger;
-		$this->documentService = $documentService;
-		$this->discoveryService = $discoveryService;
-		$this->appManager = $appManager;
-		$this->groupManager = $groupManager;
-		$this->userManager = $userManager;
-		$this->previewManager = $previewManager;
-		$this->navigationManager = $navigationManager;
-		$this->federationService = $federationService;
+		$this->userSession = $userSession;
+		$this->rootFolder = $rootFolder;
 	}
 
 	/**
-	 * Get collabora document revisions for:
+	 * Get collabora document non-current revisions for:
 	 * - the base template if fileId is null
 	 * - file in user folder (also shared by user/group) if fileId not null
 	 *
 	 * @NoAdminRequired
 	 */
-	public function list($fileId)
-	{
+	public function list($fileId) {
 		if (\is_numeric($fileId)) {
 			// parse fileId pointing to file
 			$fileId = (int) $fileId;
@@ -154,7 +72,7 @@ class DocumentRevisionController extends Controller {
 		$dir = $this->request->getParam('dir');
 
 		// get current user
-		$user = \OC::$server->getUserSession()->getUser();
+		$user = $this->userSession->getUser();
 		if ($user === null) {
 			return new JSONResponse([
 				'status' => 'error',
@@ -164,7 +82,7 @@ class DocumentRevisionController extends Controller {
 
 		try {
 			// get current user root
-			$currentUserFolder = \OC::$server->getRootFolder()->getUserFolder($user->getUID());
+			$currentUserFolder = $this->rootFolder->getUserFolder($user->getUID());
 			if ($dir !== null) {
 				// if dir is set, then we need to check fileId in that folder,
 				// as in case of user/group shares we can have multiple file mounts with same id
@@ -192,7 +110,7 @@ class DocumentRevisionController extends Controller {
 
 			// get owner of the file to be able to access versions
 			$owner = $sourceDocument->getOwner();
-			$ownerUserFolder = \OC::$server->getRootFolder()->getUserFolder($owner->getUID());
+			$ownerUserFolder = $this->rootFolder->getUserFolder($owner->getUID());
 
 			// get original document
 			$ownerFileMounts = $ownerUserFolder->getById($fileId, true);
@@ -205,7 +123,6 @@ class DocumentRevisionController extends Controller {
 			}
 
 			// get versions storage information
-			/** @var IStorage $storage */
 			$storage = $document->getStorage();
 			if (!$storage->instanceOfStorage(IVersionedStorage::class)) {
 				return new JSONResponse([
@@ -215,9 +132,9 @@ class DocumentRevisionController extends Controller {
 			}
 
 			// retrieve versions
-			/** @var IVersionedStorage | IStorage $storage */
-			'@phan-var IVersionedStorage | IStorage $storage';
 			$internalPath = $document->getInternalPath();
+			/** @var IVersionedStorage $storage */
+			/* @phan-suppress-next-line PhanUndeclaredMethod */
 			$versions = $storage->getVersions($internalPath);
 		} catch (InvalidPathException $e) {
 			return new JSONResponse([

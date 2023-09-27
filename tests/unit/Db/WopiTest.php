@@ -40,6 +40,5 @@ class WopiTest extends TestCase {
 		$this->assertSame('http://localhost', $wopi['server_host']);
 		$this->assertSame('user', $wopi['owner']);
 		$this->assertSame('user', $wopi['editor']);
-
 	}
 }
