@@ -74,71 +74,73 @@ class SettingsController extends Controller {
 	/**
 	 * @AdminRequired
 	 *
+	 * @param array $settings
 	 * @return DataResponse
 	 */
-	public function setAdminSettings($wopi_url, $edit_groups, $doc_format, $test_wopi_url, $test_server_groups, $external_apps, $canonical_webroot, $menu_option, $secure_view_option, $secure_view_open_action_default, $secure_view_can_print_default, $secure_view_has_watermark_default, $watermark_text, $zotero) {
+	public function setAdminSettings($settings) {
 		$message = $this->l10n->t('Saved');
 
-		if ($wopi_url !== null) {
-			$this->appConfig->setAppValue('wopi_url', $wopi_url);
+		if (isset($settings['wopi_url'])) {
+			$this->appConfig->setAppValue('wopi_url', $settings['wopi_url']);
 
-			$colon = \strpos($wopi_url, ':', 0);
-			if (\OC::$server->getRequest()->getServerProtocol() !== \substr($wopi_url, 0, $colon)) {
+			$colon = \strpos($settings['wopi_url'], ':', 0);
+			if (\OC::$server->getRequest()->getServerProtocol() !== \substr($settings['wopi_url'], 0, $colon)) {
 				$message = $this->l10n->t('Saved with error: Collabora Online should use the same protocol as the server installation.');
 			}
 		}
 
-		if ($edit_groups !== null) {
-			$this->appConfig->setAppValue('edit_groups', $edit_groups);
+		if (isset($settings['edit_groups'])) {
+			$this->appConfig->setAppValue('edit_groups', $settings['edit_groups']);
 		}
 
-		if ($doc_format !== null) {
-			$this->appConfig->setAppValue('doc_format', $doc_format);
+		if (isset($settings['doc_format'])) {
+			$this->appConfig->setAppValue('doc_format', $settings['doc_format']);
 		}
 
-		if ($test_wopi_url !== null) {
-			$this->appConfig->setAppValue('test_wopi_url', $test_wopi_url);
+		if (isset($settings['test_wopi_url'])) {
+			$this->appConfig->setAppValue('test_wopi_url', $settings['test_wopi_url']);
 		}
 
-		if ($test_server_groups !== null) {
-			$this->appConfig->setAppValue('test_server_groups', $test_server_groups);
+		if (isset($settings['test_server_groups'])) {
+			$this->appConfig->setAppValue('test_server_groups', $settings['test_server_groups']);
 		}
 
-		if ($canonical_webroot !== null) {
-			$this->appConfig->setAppValue('canonical_webroot', $canonical_webroot);
+		if (isset($settings['canonical_webroot'])) {
+			$this->appConfig->setAppValue('canonical_webroot', $settings['canonical_webroot']);
 		}
 
-		if ($menu_option !== null) {
-			$this->appConfig->setAppValue('menu_option', $menu_option);
+		if (isset($settings['menu_option'])) {
+			$this->appConfig->setAppValue('menu_option', $settings['menu_option']);
 		}
 
-		if ($secure_view_option !== null) {
-			$this->appConfig->setAppValue('secure_view_option', $secure_view_option);
+		if (isset($settings['secure_view_option'])) {
+			$this->appConfig->setAppValue('secure_view_option', $settings['secure_view_option']);
 		}
 
-		if ($secure_view_open_action_default !== null) {
-			$this->appConfig->setAppValue('secure_view_open_action_default', $secure_view_open_action_default);
+		if (isset($settings['secure_view_open_action_default'])) {
+			$this->appConfig->setAppValue('secure_view_open_action_default', $settings['secure_view_open_action_default']);
 		}
 
-		if ($secure_view_can_print_default !== null) {
-			$this->appConfig->setAppValue('secure_view_can_print_default', $secure_view_can_print_default);
+		if (isset($settings['secure_view_can_print_default'])) {
+			$this->appConfig->setAppValue('secure_view_can_print_default', $settings['secure_view_can_print_default']);
 		}
 
-		if ($secure_view_has_watermark_default !== null) {
-			$this->appConfig->setAppValue('secure_view_has_watermark_default', $secure_view_has_watermark_default);
+		if (isset($settings['secure_view_has_watermark_default'])) {
+			$this->appConfig->setAppValue('secure_view_has_watermark_default', $settings['secure_view_has_watermark_default']);
 		}
 
-		if ($watermark_text !== null) {
-			$this->appConfig->setAppValue('watermark_text', $watermark_text);
+		if (isset($settings['watermark_text'])) {
+			$this->appConfig->setAppValue('watermark_text', $settings['watermark_text']);
 		}
 
-		if ($zotero !== null) {
-			$this->appConfig->setAppValue('zotero', $zotero);
+		if (isset($settings['zotero'])) {
+			$this->appConfig->setAppValue('zotero', $settings['zotero']);
 		}
 
 		$richMemCache = \OC::$server->getMemCacheFactory()->create('richdocuments');
 		$richMemCache->clear('discovery.xml');
 
+		// FIXME: this is a workaround, translations in messages should be handled by the client
 		return new DataResponse([
 			'status' => 'success',
 			'data' => ['message' => (string) $message]
@@ -149,18 +151,19 @@ class SettingsController extends Controller {
 	 * @NoAdminRequired
 	 * @UseSession
 	 *
-	 * @param string $zoteroAPIPrivateKey
+	 * @param array $settings
 	 * @return DataResponse
 	 */
-	public function setPersonalSettings($zoteroAPIPrivateKey) {
+	public function setPersonalSettings($settings) {
 		$message = $this->l10n->t('Saved');
 		
 		$uid = $this->userSession->getUser()->getUID();
 
-		if ($zoteroAPIPrivateKey !== null) {
-			$this->appConfig->setUserValue($uid, 'zoteroAPIPrivateKey', $zoteroAPIPrivateKey);
+		if (isset($settings['zoteroAPIPrivateKey'])) {
+			$this->appConfig->setUserValue($uid, 'zoteroAPIPrivateKey', $settings['zoteroAPIPrivateKey']);
 		}
 
+		// FIXME: this is a workaround, translations in messages should be handled by the client
 		return new DataResponse(
 			[
 				'status' => 'success',

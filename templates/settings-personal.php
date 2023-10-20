@@ -21,7 +21,7 @@
 				type="text"
 				id="change_zotero_key-richdocuments" 
 				style="width: 350px; max-width: 100%"
-				value="<?php echo($_['zoteroAPIPrivateKey'] ? $_['zoteroAPIPrivateKey'] : ''); ?>"/>
+				value="<?php p($_['zoteroAPIPrivateKey'] ? $_['zoteroAPIPrivateKey'] : ''); ?>"/>
 		<button
 				type="button"
 				id="save_zotero_key-richdocuments"

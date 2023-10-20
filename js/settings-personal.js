@@ -19,7 +19,15 @@
  */
 (function ($, OC, OCA) {
 
-	OCA.RichdocumentsPersonalSettings = {
+	OCA.Richdocuments = _.extend({}, OCA.Richdocuments);
+	if (!OCA.Richdocuments) {
+		/**
+		 * @namespace
+		 */
+		OCA.Richdocuments = {};
+	}
+
+	OCA.Richdocuments.SettingsPersonal = {
 
 		initZoteroAPIPrivateKey: function () {
 			$('input:text[id="change_zotero_key-richdocuments"]').keyup(function (event) {
@@ -27,13 +35,13 @@
 				if (zoteroAPIPrivateKey !== '') {
 					$('button:button[id="save_zotero_key-richdocuments"]').removeAttr("disabled");
 					if (event.which === 13) {
-						OCA.RichdocumentsPersonalSettings.updateZoteroAPIPrivateKey();
+						OCA.Richdocuments.SettingsPersonal.updateZoteroAPIPrivateKey();
 					}
 				}
 			});
 		
 			$('button:button[id="save_zotero_key-richdocuments"]').click(function () {
-				OCA.RichdocumentsPersonalSettings.updateZoteroAPIPrivateKey();
+				OCA.Richdocuments.SettingsPersonal.updateZoteroAPIPrivateKey();
 			});
 		},
 	
@@ -41,9 +49,11 @@
 			var zoteroAPIPrivateKey = $('input:text[id="change_zotero_key-richdocuments"]').val();
 			OC.msg.startAction('#richdocuments-zotero-personal-msg', t('richdocuments', 'Saving...'));
 	
-			OCA.RichdocumentsPersonalSettings.setPersonalSettings(
+			OCA.Richdocuments.SettingsPersonal.setPersonalSettings(
 				{
-					zoteroAPIPrivateKey: zoteroAPIPrivateKey
+					settings: {
+						zoteroAPIPrivateKey: zoteroAPIPrivateKey
+					}
 				},
 				function (response) {
 					OC.msg.finishedSuccess('#richdocuments-zotero-personal-msg', response.data.message);
@@ -71,7 +81,7 @@
 	};
 
 	$(document).ready(function () {
-		OCA.RichdocumentsPersonalSettings.initZoteroAPIPrivateKey();
+		OCA.Richdocuments.SettingsPersonal.initZoteroAPIPrivateKey();
 	});
 
 })(jQuery, OC, OCA);

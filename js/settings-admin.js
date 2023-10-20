@@ -19,17 +19,25 @@
  */
 (function ($, OC, OCA) {
 
-	OCA.RichdocumentsAdminSettings = {
+	OCA.Richdocuments = _.extend({}, OCA.Richdocuments);
+	if (!OCA.Richdocuments) {
+		/**
+		 * @namespace
+		 */
+		OCA.Richdocuments = {};
+	}
+
+	OCA.Richdocuments.SettingsAdmin = {
 
 		initSaveWopiServer: function() {
 			$('button:button[id="wopi_url_save-richdocuments"]').click(function () {
 				$('button:button[id="wopi_url_save-richdocuments"]').attr('disabled', true);
 				var data = {
-					wopi_url  : $('#wopi_url').val().replace(/\/$/, '')
+					wopi_url  : $('#wopi_url-richdocuments').val().replace(/\/$/, '')
 				};
 
 				OC.msg.startAction('#documents-admin-msg', t('richdocuments', 'Saving...'));
-				OCA.RichdocumentsAdminSettings.setAdminSettings(
+				OCA.Richdocuments.SettingsAdmin.setAdminSettings(
 					data,
 					function (response) {
 						OC.msg.finishedAction('#documents-admin-msg', response);
@@ -68,13 +76,11 @@
 					$select.select2('destroy');
 					$('input:text[id="test_wopi_url-richdocuments"]').val('');
 			
-					OCA.RichdocumentsAdminSettings.setAdminSettings(
+					OCA.Richdocuments.SettingsAdmin.setAdminSettings(
 						{
 							'test_wopi_url': '',
 							'test_server_groups': ''
-						},
-						function (response) {},
-						function (response) {}
+						}
 					);
 				}
 			});
@@ -90,7 +96,7 @@
 
 					OC.msg.startAction('#test-documents-admin-msg', t('richdocuments', 'Saving...'));
 					$('button:button[id="test_wopi_url_save-richdocuments"]').attr('disabled', true);
-					OCA.RichdocumentsAdminSettings.setAdminSettings(
+					OCA.Richdocuments.SettingsAdmin.setAdminSettings(
 						{
 							'test_wopi_url': testserver,
 							'test_server_groups': groups
@@ -138,12 +144,10 @@
 			$('input:hidden[id="edit_group_select-richdocuments"]').on('change', function() {
 				var $select = $('input:hidden[id="edit_group_select-richdocuments"]');
 				var groups = $select.val();
-				OCA.RichdocumentsAdminSettings.setAdminSettings(
+				OCA.Richdocuments.SettingsAdmin.setAdminSettings(
 					{
 						'edit_groups': groups
-					},
-					function (response) {},
-					function (response) {}
+					}
 				);
 			});
 
@@ -153,12 +157,10 @@
 
 			$('input:checkbox[id="doc_format_ooxml_enable-richdocuments"]').on('change', function() {
 				var ooxml = this.checked;
-				OCA.RichdocumentsAdminSettings.setAdminSettings(
+				OCA.Richdocuments.SettingsAdmin.setAdminSettings(
 					{
 						'doc_format': ooxml ? 'ooxml' : 'odf'
-					},
-					function (response) {},
-					function (response) {}
+					}
 				);
 			});
 		},
@@ -167,12 +169,10 @@
 			$('input:checkbox[id="enable_canonical_webroot_cb-richdocuments"]').on('change', function() {
 				$('#enable_canonical_webroot_section-richdocuments').toggleClass('hidden', !this.checked);
 				if (!this.checked) {
-					OCA.RichdocumentsAdminSettings.setAdminSettings(
+					OCA.Richdocuments.SettingsAdmin.setAdminSettings(
 						{
 							'canonical_webroot': ''
-						},
-						function (response) {},
-						function (response) {}
+						}
 					);
 				}
 			});
@@ -181,7 +181,7 @@
 
 				OC.msg.startAction('#cannonical-webroot-admin-msg', t('richdocuments', 'Saving...'));
 				var val = $('input:text[id="canonical_webroot-richdocuments"]').val();
-				OCA.RichdocumentsAdminSettings.setAdminSettings(
+				OCA.Richdocuments.SettingsAdmin.setAdminSettings(
 					{
 						'canonical_webroot': val
 					},
@@ -199,12 +199,10 @@
 
 			$('input:checkbox[id="enable_menu_option_cb-richdocuments"]').on('change', function() {
 				var enabled = this.checked;
-				OCA.RichdocumentsAdminSettings.setAdminSettings(
+				OCA.Richdocuments.SettingsAdmin.setAdminSettings(
 					{
 						'menu_option': enabled
-					},
-					function (response) {},
-					function (response) {}
+					}
 				);
 			});
 		},
@@ -219,13 +217,11 @@
 					$('input:text[id="secure_view_watermark-richdocuments"]').val(watermarkText);
 				}
 
-				OCA.RichdocumentsAdminSettings.setAdminSettings(
+				OCA.Richdocuments.SettingsAdmin.setAdminSettings(
 					{
 						'secure_view_option': this.checked,
 						'watermark_text': watermarkText
-					},
-					function (response) {},
-					function (response) {}
+					}
 				);
 				$('#richdocuments-secure-view-preferences-section').toggleClass('hidden', !this.checked);
 				$('#richdocuments-watermark-section').toggleClass('hidden', !this.checked);
@@ -235,7 +231,7 @@
 				var watermarkText = $('input:text[id="secure_view_watermark-richdocuments"]').val();
 				
 				OC.msg.startAction('#save-secure-view-watermark-admin-msg', t('richdocuments', 'Saving...'));
-				OCA.RichdocumentsAdminSettings.setAdminSettings(
+				OCA.Richdocuments.SettingsAdmin.setAdminSettings(
 					{
 						'watermark_text': watermarkText
 					},
@@ -249,22 +245,18 @@
 			});
 
 			$('input:checkbox[id="enable_secure_view_open_action_default_cb-richdocuments"]').on('change', function() {
-				OCA.RichdocumentsAdminSettings.setAdminSettings(
+				OCA.Richdocuments.SettingsAdmin.setAdminSettings(
 					{
 						'secure_view_open_action_default': this.checked
-					},
-					function (response) {},
-					function (response) {}
+					}
 				);
 			});
 
 			$('input:checkbox[id="secure_view_can_print_default_option_cb-richdocuments"]').on('change', function() {
-				OCA.RichdocumentsAdminSettings.setAdminSettings(
+				OCA.Richdocuments.SettingsAdmin.setAdminSettings(
 					{
 						'secure_view_can_print_default': this.checked
-					},
-					function (response) {},
-					function (response) {}
+					}
 				);
 			});
 
@@ -281,14 +273,12 @@
 				}
 
 				// save secure-view (changed) and print (true) options
-				OCA.RichdocumentsAdminSettings.setAdminSettings(
+				OCA.Richdocuments.SettingsAdmin.setAdminSettings(
 					{
 						'secure_view_can_print_default': true,
 						'secure_view_has_watermark_default': this.checked
 
-					},
-					function (response) {},
-					function (response) {}
+					}
 				);
 			});
 		},
@@ -297,12 +287,10 @@
 
 			$('input:checkbox[id="enable_zotero-richdocuments"]').on('change', function() {
 				var enabled = this.checked;
-				OCA.RichdocumentsAdminSettings.setAdminSettings(
+				OCA.Richdocuments.SettingsAdmin.setAdminSettings(
 					{
 						'zotero': enabled
-					},
-					function (response) {},
-					function (response) {}
+					}
 				);
 			});
 		},
@@ -310,29 +298,33 @@
 		setAdminSettings: function(data, doneCallback, failCallback) {
 			$.post(
 				OC.generateUrl("apps/richdocuments/ajax/settings/setAdminSettings"),
-				data
+				{ settings : data }
 			).done(function (response) {
-				doneCallback(response);
+				if (doneCallback) {
+					doneCallback(response);
+				}
 			})
 			.fail(function (jqXHR) {
 				var response = JSON.parse(jqXHR.responseText);
 				console.log(response);
-				failCallback(response);
+				if (failCallback) {
+					failCallback(response);
+				}
 			});
 		},
 
 	};
 
 	$(document).ready(function () {
-		OCA.RichdocumentsAdminSettings.initSaveWopiServer();
-		OCA.RichdocumentsAdminSettings.initEnableTestServer();
-		OCA.RichdocumentsAdminSettings.initSaveWopiTestServer();
-		OCA.RichdocumentsAdminSettings.initEnableEditOnlyForGroups();
-		OCA.RichdocumentsAdminSettings.initEnableOOXMLByDefaultForNewFiles();
-		OCA.RichdocumentsAdminSettings.initEnableCanonicalWebroot();
-		OCA.RichdocumentsAdminSettings.initEnableMenuOption();
-		OCA.RichdocumentsAdminSettings.initEnableSecureViewOption();
-		OCA.RichdocumentsAdminSettings.initEnableZotero();
+		OCA.Richdocuments.SettingsAdmin.initSaveWopiServer();
+		OCA.Richdocuments.SettingsAdmin.initEnableTestServer();
+		OCA.Richdocuments.SettingsAdmin.initSaveWopiTestServer();
+		OCA.Richdocuments.SettingsAdmin.initEnableEditOnlyForGroups();
+		OCA.Richdocuments.SettingsAdmin.initEnableOOXMLByDefaultForNewFiles();
+		OCA.Richdocuments.SettingsAdmin.initEnableCanonicalWebroot();
+		OCA.Richdocuments.SettingsAdmin.initEnableMenuOption();
+		OCA.Richdocuments.SettingsAdmin.initEnableSecureViewOption();
+		OCA.Richdocuments.SettingsAdmin.initEnableZotero();
 	});
 
 })(jQuery, OC, OCA);
