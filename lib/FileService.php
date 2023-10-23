@@ -20,21 +20,22 @@
  */
 namespace OCA\Richdocuments;
 
-use OCP\Files\IRootFolder;
-use OCP\IUserSession;
+use OCA\Richdocuments\AppConfig;
 use OCP\Files\File;
+use OCP\Files\IRootFolder;
+use OCP\Files\Storage\IVersionedStorage;
 use OCP\ILogger;
 use OCP\IUserManager;
-use OCA\Richdocuments\AppConfig;
-use Symfony\Component\EventDispatcher\GenericEvent;
+use OCP\IUserSession;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\GenericEvent;
 
 class FileService {
 	/**
 	 * @var ILogger
 	 */
 	private $logger;
-	
+
 	/**
 	 * @var AppConfig
 	 */
@@ -59,7 +60,7 @@ class FileService {
 	 * @var IRootFolder
 	 */
 	private $rootFolder;
-	
+
 	public function __construct(
 		ILogger $logger,
 		AppConfig $appConfig,
@@ -128,7 +129,49 @@ class FileService {
 		$root = $this->rootFolder->getUserFolder($ownerUID);
 		$files = $root->getById($fileId);
 		if ($files !== [] && $files[0] instanceof File) {
+			// original file
 			return $files[0];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get privileged access to original file handle as user
+	 * for given fileId
+	 *
+	 * @param int $fileId original file id
+	 * @param string $version version of the file
+	 * @param string $ownerUID original file owner
+	 * @param string|null $editorUID file editor (provide null if incognito mode)
+	 *
+	 * @return File|null
+	 */
+	public function getFileVersionHandle(int $fileId, string $version, string $ownerUID, ?string $editorUID): ?File {
+		// original file
+		$file = $this->getFileHandle($fileId, $ownerUID, $editorUID);
+
+		// get versions storage information
+		$storage = $file->getStorage();
+		if (!$storage->instanceOfStorage(IVersionedStorage::class)) {
+			// storage does not support versions
+			return null;
+		}
+
+		// retrieve version
+		/** @var IVersionedStorage $storage */
+		/* @phan-suppress-next-line PhanUndeclaredMethod */
+		$versionMetadata = $storage->getVersion(
+			$file->getInternalPath(),
+			$version
+		);
+
+		$root = $this->rootFolder->getUserFolder($ownerUID);
+		$version = $root->getParent()->get($versionMetadata["storage_location"]);
+	
+		// return version
+		if ($version instanceof File) {
+			return $version;
 		}
 		return null;
 	}

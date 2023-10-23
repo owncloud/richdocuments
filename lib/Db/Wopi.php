@@ -33,7 +33,7 @@ class Wopi extends \OCA\Richdocuments\Db {
 	protected $loadStatement = 'SELECT * FROM `*PREFIX*richdocuments_wopi` WHERE `token`= ?';
 
 	/**
-	 * Generate token for document being shared with public link
+	 * Generate token for document
 	 *
 	 * @param int $fileId
 	 * @param int $version
@@ -97,12 +97,14 @@ class Wopi extends \OCA\Richdocuments\Db {
 			return null;
 		}
 
+		// below casting to string is needed because some
+		// databases (e.g. Postgres) return integer, and other strings
 		return [
-			'fileid' => $row['fileid'],
-			'version' => $row['version'],
+			'fileid' => \strval($row['fileid']),
+			'version' => \strval($row['version']),
 			'owner' => $row['owner_uid'],
 			'editor' => $row['editor_uid'],
-			'attributes' => $row['attributes'],
+			'attributes' => \strval($row['attributes']),
 			'server_host' => $row['server_host']
 		];
 	}

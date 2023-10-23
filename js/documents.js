@@ -245,20 +245,14 @@ var documentsMain = {
 			'<div id="revisionsContainer" class="loleaflet-font">' +
 			'<ul></ul>' +
 			'</div>' +
-			'<input type="button" id="show-more-versions" class="loleaflet-font" value="{{moreVersionsLabel}}" />' +
 			'</div>',
 
 		revHistoryItemTemplate: '<li>' +
-			'<a href="{{downloadUrl}}" class="downloadVersion has-tooltip" title="' + t('richdocuments', 'Download this revision') + '"><img src="{{downloadIconUrl}}" />' +
 			'<a class="versionPreview"><span class="versiondate has-tooltip" title="{{formattedTimestamp}}">{{relativeTimestamp}}</span></a>' +
-			'<a href="{{restoreUrl}}" class="restoreVersion has-tooltip" title="' + t('richdocuments', 'Restore this revision') + '"><img src="{{restoreIconUrl}}" />' +
-			'</a>' +
 			'</li>',
 
 		/* Previous window title */
 		mainTitle : '',
-		/* Number of revisions already loaded */
-		revisionsStart: 0,
 
 		init : function(){
 			documentsMain.UI.mainTitle = $('title').text();
@@ -320,29 +314,18 @@ var documentsMain = {
 			});
 		},
 
-		addRevision: function(fileId, version, relativeTimestamp, documentPath) {
-			var formattedTimestamp = OC.Util.formatDate(parseInt(version) * 1000);
+		addRevision: function(fileId, version, relativeTimestamp) {
+			var formattedTimestamp;
 			var fileName = documentsMain.fileName.substring(0, documentsMain.fileName.indexOf('.'));
-			var downloadUrl, restoreUrl;
 
 			if (version === 0) {
 				formattedTimestamp = t('richdocuments', 'Latest revision');
-				downloadUrl = OC.generateUrl('apps/files/download'+ documentPath);
 			} else {
-				// FIXME: this is no longer supported in OC10
-				downloadUrl = OC.generateUrl('apps/files_versions/download.php?file={file}&revision={revision}',
-				                             {file: documentPath, revision: version});
-				fileId = fileId + '_' + version;
-				restoreUrl = OC.generateUrl('apps/files_versions/ajax/rollbackVersion.php?file={file}&revision={revision}',
-				                            {file: documentPath, revision: version});
+				formattedTimestamp = OC.Util.formatDate(parseInt(version) * 1000)
 			}
 
 			var revHistoryItemTemplate = Handlebars.compile(documentsMain.UI.revHistoryItemTemplate);
 			var html = revHistoryItemTemplate({
-				downloadUrl: downloadUrl,
-				downloadIconUrl: OC.imagePath('core', 'actions/download'),
-				restoreUrl: restoreUrl,
-				restoreIconUrl: OC.imagePath('core', 'actions/history'),
 				relativeTimestamp: relativeTimestamp,
 				formattedTimestamp: formattedTimestamp
 			});
@@ -353,53 +336,48 @@ var documentsMain = {
 			$('#revisionsContainer ul').append(html);
 		},
 
-		fetchAndFillRevisions: function(documentPath) {
-			// fill #rev-history with file versions
-			// FIXME: this is no longer supported in OC10
-			$.get(OC.generateUrl('apps/files_versions/ajax/getVersions.php?source={documentPath}&start={start}',
-			                     { documentPath: documentPath, start: documentsMain.UI.revisionsStart }),
-				  function(result) {
-					  for(var key in result.data.versions) {
-						  documentsMain.UI.addRevision(documentsMain.fileId,
-						                               result.data.versions[key].version,
-						                               result.data.versions[key].humanReadableTimestamp,
-						                               documentPath);
-					  }
-
-					  // owncloud only gives 5 version at max in one go
-					  documentsMain.UI.revisionsStart += 5;
-
-					  if (result.data.endReached) {
-						  // Remove 'More versions' button
-						  $('#show-more-versions').addClass('hidden');
-					  }
-				  });
-		},
-
 		showRevHistory: function(documentPath) {
 			$(document.body).prepend(documentsMain.UI.viewContainer);
 
 			var revHistoryContainerTemplate = Handlebars.compile(documentsMain.UI.revHistoryContainerTemplate);
 			var revHistoryContainer = revHistoryContainerTemplate({
 				filename: documentsMain.fileName,
-				moreVersionsLabel: t('richdocuments', 'More versions...'),
 				closeButtonUrl: OC.imagePath('core', 'actions/close')
 			});
 			$('#revViewerContainer').prepend(revHistoryContainer);
 
-			documentsMain.UI.revisionsStart = 0;
+			// show loading screen
+			$('#revPanelContainer').hide();
+			documentsMain.overlay.documentOverlay('show');
 
 			// append current document first
-			documentsMain.UI.addRevision(documentsMain.fileId, 0, t('richdocuments', 'Just now'), documentPath);
+			documentsMain.UI.addRevision(documentsMain.fileId, 0, t('richdocuments', 'Just now'));
+			
+			// load revisions
+			$.getJSON(
+				OC.generateUrl('apps/richdocuments/ajax/documents/revisions/{fileId}', {
+					fileId: documentsMain.fileId
+				})
+			).done(function (result) {
+				// add revisions
+				for(var key in result.revisions) {
+					documentsMain.UI.addRevision(
+						documentsMain.fileId,
+						result.revisions[key].version,
+						result.revisions[key].humanReadableTimestamp
+					);
+				}
+			}).fail(function(result){
+				console.error(result);
+				documentsMain.UI.notify(t('richdocuments', 'Cannot load document revisions'));
+			}).always(function(){
+				// show revisions container after loading
+				documentsMain.overlay.documentOverlay('hide');
+				$('#revPanelContainer').show();
 
-			// add "Show more versions" button
-			$('#show-more-versions').click(function(e) {
-				e.preventDefault();
-				documentsMain.UI.fetchAndFillRevisions(documentPath);
+				// fake click on first revision (i.e current revision)
+				$('#revisionsContainer li').first().find('.versionPreview').click();
 			});
-
-			// fake click to load first 5 versions
-			$('#show-more-versions').click();
 
 			// make these revisions clickable/attach functionality
 			$('#revisionsContainer').on('click', '.versionPreview', function(e) {
@@ -411,42 +389,6 @@ var documentsMain = {
 				$(e.currentTarget.parentElement.parentElement).find('li').removeClass('active');
 				$(e.currentTarget.parentElement).addClass('active');
 			});
-
-			$('#revisionsContainer').on('click', '.restoreVersion', function(e) {
-				e.preventDefault();
-
-				// close the viewer
-				documentsMain.onCloseViewer();
-
-				documentsMain.WOPIPostMessage($('#loleafletframe')[0], 'Host_VersionRestore', {Status: 'Pre_Restore'});
-
-				documentsMain.$deferredVersionRestoreAck = $.Deferred();
-				jQuery.when(documentsMain.$deferredVersionRestoreAck).
-					done(function(args) {
-						// restore selected version
-						$.ajax({
-							type: 'GET',
-							url: e.currentTarget.href,
-							success: function(response) {
-								if (response.status === 'error') {
-									documentsMain.UI.notify(t('richdocuments', 'Failed to revert the document to older version'));
-								}
-
-								// load the file again, it should get reverted now
-								window.location.reload();
-								documentsMain.overlay.documentOverlay('hide');
-							}
-						});
-					});
-
-				// resolve the deferred object immediately if client doesn't support version states
-				if (!documentsMain.wopiClientFeatures || !documentsMain.wopiClientFeatures.VersionStates) {
-					documentsMain.$deferredVersionRestoreAck.resolve();
-				}
-			});
-
-			// fake click on first revision (i.e current revision)
-			$('#revisionsContainer li').first().find('.versionPreview').click();
 		},
 
 		showEditor : function(action){
@@ -859,7 +801,6 @@ var documentsMain = {
 		$('#revPanelContainer').remove();
 		$('#revViewerContainer').remove();
 		documentsMain.isViewerMode = false;
-		documentsMain.UI.revisionsStart = 0;
 
 		$('#loleafletframe').focus();
 	},

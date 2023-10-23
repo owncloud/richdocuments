@@ -179,7 +179,7 @@ class DocumentService {
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $fileId;
-			$ret['version'] = 0; // original file
+			$ret['version'] = 0;  // original file, uses 0 as DB column cannot be null
 
 			if ($isSharedFile && $isSecureModeEnabled) {
 				/** @var \OCA\Files_Sharing\SharedStorage $storage */
@@ -299,7 +299,7 @@ class DocumentService {
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $document->getId();
-			$ret['version'] = 0; // original file
+			$ret['version'] = 0;  // original file, uses 0 as DB column cannot be null
 
 			return $ret;
 		} catch (ShareNotFound $e) {
@@ -359,7 +359,7 @@ class DocumentService {
 			$ret['path'] = $root->getRelativePath($document->getPath());
 			$ret['name'] = $document->getName();
 			$ret['fileid'] = $document->getId();
-			$ret['version'] = 0; // original file
+			$ret['version'] = 0; // original file, uses 0 as DB column cannot be null
 
 			return $ret;
 		} catch (ShareNotFound $e) {

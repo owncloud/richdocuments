@@ -143,36 +143,48 @@ class WopiController extends Controller {
 		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			// file editing as local logged in user
 			$editor = $this->userManager->get($res['editor']);
+			$editorId = $res['editor'];
 
+			// user information displayed for local user
 			$userId = $editor->getUID();
 			$userFriendlyName = $editor->getDisplayName();
 			$userEmail = $editor->getEMailAddress();
-			$isAnonymousUser = false;
 		} elseif ($res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
 			// federated share needs to access file as incognito (remote user) as
 			// currently it is not supported to set federated user as file editor
+			$editorId = null;
 
+			// user information displayed for federated user
 			// FIXME: knowing federated user we could get its friendly name (userFriendlyName) from DAV contacts
-
 			$userId = $res['editor'];
 			$userFriendlyName = $res['editor'];
 			$userEmail = null;
-			$isAnonymousUser = true;
 		} else {
 			// public link needs to access file as incognito (remote user)
+			$editorId = null;
+
+			// user information displayed for public link
 			$userId = 'public-link-user-' . $this->secureRandom->generate(8);
 			$userFriendlyName = $this->l10n->t('Public Link User');
 			$userEmail = null;
-			$isAnonymousUser = true;
 		}
 
 		// get file handle
 		$fileId = $res['fileid'];
 		$version = $res['version'];
-		if ($isAnonymousUser) {
-			$file = $this->fileService->getFileHandle($fileId, $ownerId, null);
+		if ($version === '0') {
+			$file = $this->fileService->getFileHandle(
+				$fileId,
+				$ownerId,
+				$editorId
+			);
 		} else {
-			$file = $this->fileService->getFileHandle($fileId, $ownerId, $userId);
+			$file = $this->fileService->getFileVersionHandle(
+				$fileId,
+				$version,
+				$ownerId,
+				$editorId
+			);
 		}
 
 		// make sure file can be read when checking file info
@@ -227,7 +239,7 @@ class WopiController extends Controller {
 			'Version' => \strval($version),
 			'OwnerId' => $ownerId,
 			'UserId' => $userId,
-			'IsAnonymousUser' => $isAnonymousUser,
+			'IsAnonymousUser' => $editorId === null ? true : false,
 			'UserFriendlyName' => $userFriendlyName,
 			'UserCanWrite' => $canWrite,
 			'SupportsGetLock' => false,
@@ -307,10 +319,38 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
+		// get owner info
+		$ownerId = $res['owner'];
+
+		// get user info
 		if ($res['editor'] !== '' && !($res['attributes'] & WOPI::ATTR_FEDERATED)) {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], $res['editor']);
+			// file editing as local logged in user
+			$editorId = $res['editor'];
+		} elseif ($res['editor'] !== '' && ($res['attributes'] & WOPI::ATTR_FEDERATED)) {
+			// federated share needs to access file as incognito (remote user) as
+			// currently it is not supported to set federated user as file editor
+			$editorId = null;
 		} else {
-			$file = $this->fileService->getFileHandle($res['fileid'], $res['owner'], null);
+			// public link needs to access file as incognito (remote user)
+			$editorId = null;
+		}
+
+		// get file handle
+		$fileId = $res['fileid'];
+		$version = $res['version'];
+		if ($version === '0') {
+			$file = $this->fileService->getFileHandle(
+				$fileId,
+				$ownerId,
+				$editorId
+			);
+		} else {
+			$file = $this->fileService->getFileVersionHandle(
+				$fileId,
+				$version,
+				$ownerId,
+				$editorId
+			);
 		}
 
 		if (!$file) {
@@ -341,6 +381,11 @@ class WopiController extends Controller {
 		$res = $this->getWopiInfoForToken($documentId, $wopiToken);
 		if (!$res) {
 			$this->logger->debug('PutFile: get token failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		if ($res['version'] !== '0') {
+			$this->logger->debug('PutFile: not allowed for versions.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
@@ -418,6 +463,11 @@ class WopiController extends Controller {
 		$res = $this->getWopiInfoForToken($documentId, $wopiToken);
 		if (!$res) {
 			$this->logger->debug('PutFileRelative: get token failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		if ($res['version'] !== '0') {
+			$this->logger->debug('PutFileRelative: not allowed for versions.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
@@ -510,6 +560,11 @@ class WopiController extends Controller {
 		$res = $this->getWopiInfoForToken($documentId, $wopiToken);
 		if (!$res) {
 			$this->logger->debug('Lock: get token failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		if ($res['version'] !== '0') {
+			$this->logger->debug('Lock: not allowed for versions.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
@@ -610,6 +665,11 @@ class WopiController extends Controller {
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
+		if ($res['version'] !== '0') {
+			$this->logger->debug('Unlock: not allowed for versions.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
 		$canWrite = $res['attributes'] & WOPI::ATTR_CAN_UPDATE;
 		if (!$canWrite) {
 			$this->logger->debug('Unlock: not allowed.', ['app' => $this->appName]);
@@ -690,6 +750,11 @@ class WopiController extends Controller {
 		$res = $this->getWopiInfoForToken($documentId, $wopiToken);
 		if (!$res) {
 			$this->logger->debug('RefreshLock: get token failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		if ($res['version'] !== '0') {
+			$this->logger->debug('RefreshLock: not allowed for versions.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
@@ -775,6 +840,11 @@ class WopiController extends Controller {
 		$res = $this->getWopiInfoForToken($documentId, $wopiToken);
 		if (!$res) {
 			$this->logger->debug('Unlock: get token failed.', ['app' => $this->appName]);
+			return new JSONResponse([], Http::STATUS_FORBIDDEN);
+		}
+
+		if ($res['version'] !== '0') {
+			$this->logger->debug('Unlock: not allowed for versions.', ['app' => $this->appName]);
 			return new JSONResponse([], Http::STATUS_FORBIDDEN);
 		}
 
@@ -873,6 +943,7 @@ class WopiController extends Controller {
 
 		$row = new Db\Wopi();
 		$res = $row->getWopiForToken($wopiToken);
+
 		if (!$res) {
 			$this->logger->debug('Cannot find token.', ['app' => $this->appName]);
 			return null;
@@ -882,6 +953,19 @@ class WopiController extends Controller {
 		if ($res['fileid'] !== $fileId) {
 			$this->logger->debug('Provided wopi token for a wrong file.', ['app' => $this->appName]);
 			return null;
+		}
+
+		// if token and fileid matches but not version then allow in read-only mode
+		// this is because currently Collabora Online uses same token
+		// for accessing documents and its revision history
+		if ($res['version'] !== $version) {
+			// version access of the original file has the same attributes
+			// with exception that it cannot be updated, thus reuse the same token
+			// but annotate with version and adjust permissions
+			$res['version'] = $version;
+			$res['attributes'] = $res['attributes'] & ~WOPI::ATTR_CAN_UPDATE;
+
+			$this->logger->debug('Provided wopi token for a version of the file, triggering read-only mode.', ['app' => $this->appName]);
 		}
 
 		return $res;
