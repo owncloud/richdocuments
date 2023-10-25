@@ -12,6 +12,7 @@ OC.L10N.register(
     " File upload failed" : "Ngarkimi i kartelës dështoi",
     "Latest revision" : "Rishikimi më i ri",
     "Just now" : "Mu tani",
+    "Cannot load document revisions" : "S’ngarkohen dot rishikime dokumenti",
     "Please enter filename to which this document should be stored." : "Ju lutemi, jepni emër kartele nën të cilin duhet ruajtur ky dokument.",
     "Save As" : "Ruaje Si",
     "New filename" : "Emër i ri kartele",
