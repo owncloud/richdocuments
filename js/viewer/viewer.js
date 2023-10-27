@@ -262,7 +262,7 @@ $(document).ready(function() {
 		// register file menu for logged in user, do not register public links
 		if (!$("#isPublic").val()) {
 			$.get(
-				OC.generateUrl("apps/richdocuments/ajax/settings/list"),
+				OC.generateUrl("apps/richdocuments/ajax/settings/getWopiSettings"),
 				{},
 				odfViewer.registerFilesMenu
 			);

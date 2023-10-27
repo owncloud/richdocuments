@@ -26,8 +26,10 @@ class AppConfig {
 		'secure_view_has_watermark_default' => 'true',
 		'open_in_new_tab' => 'true',
 		'start_grace_period' => 'false',
+		'zotero' => 'false',
 		'watermark_text' => '',
 		'test_server_groups' => '',
+		'canonical_webroot' => '',
 	];
 
 	private $config;
