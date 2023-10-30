@@ -77,6 +77,7 @@ OC.L10N.register(
     "Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance." : "Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolised webroot if this instance is accessed by both shibbolised and non-shibbolised webroots. You can ignore this setting if only one webroot is used to access this instance.",
     "Use Menu option" : "Use Menu option",
     "Enable Secure View (requires Enterprise edition)" : "Enable Secure View (requires Enterprise edition)",
-    "Enable Secure View" : "Enable Secure View"
+    "Enable Secure View" : "Enable Secure View",
+    "Preferences" : "Preferences"
 },
 "nplurals=2; plural=(n != 1);");

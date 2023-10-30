@@ -24,6 +24,7 @@
     "Saving..." : "Po ruhet …",
     "None" : "Asnjë",
     "All" : "Krejt",
+    "Strictly confidential. Only for {viewer-email}" : "Rreptësisht i rezervuar. Vetëm për {viewer-email}",
     "Secure View (with watermarks)" : "Parje e Sigurt (me watermark-ë)",
     "can print / export" : "mund të shtypë / eksportojë",
     "Open in Collabora with Secure View" : "Hape Collabora-n me Pamje të Siguruar",
@@ -75,8 +76,15 @@
     "Use Canonical webroot" : "Përdor webroot Canonical",
     "Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance." : "Webroot Canonical, në rast se ka të shumëfishtë, për përdorim nga Collabora. Ofroni atë me më pak kufizime. P.sh.: Përdor webroot pa Shibboleth, nëse te kjo instancë hyhet nga webroot-e me ose pa përdorim të Shibboleth-it. Këtë rregullim mund ta shpërfillni, nëse për hyrje në këtë instancë përdoret vetëm një webroot.",
     "Use Menu option" : "Përdor mundësinë Menu",
+    "Secure View for Collabora Online" : "Parje e Siguruar, për Collabora Online",
     "Enable Secure View (requires Enterprise edition)" : "Aktivizoni Parje të Sigurt (lyp versionin Enterprise)",
     "Enable Secure View" : "Aktivizo Parje të Sigurt",
-    "Preferences" : "Parapëlqime"
+    "Preferences" : "Parapëlqime",
+    "Enforce to open documents always in Secure View mode with watermark" : "Detyro hapje dokumentesh përherë nën mënyrën Parje e Siguruar me “watermark”",
+    "Zotero for Collabora Online" : "Zotero për Collabora Online",
+    "Enable Zotero for all users" : "Aktivizoje Zotero-n për krejt përdoruesit",
+    "Zotero Personal API Key:" : "Kyç Personal API Zotero-je:",
+    "To generate the API key navigate in Zotero to" : "Që të prodhohet kyçi APi, kaloni në Zotero, te",
+    "Home > Settings > Feeds/API > Create new private key" : "Shtëpi > Rregullime >Prurje/API > Krijo kyç të ri privat"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }
