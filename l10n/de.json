@@ -6,6 +6,7 @@
     " File upload failed" : "Upload der Datei fehlgeschlagen",
     "Latest revision" : "Letzte Version",
     "Just now" : "Gerade ebend",
+    "Cannot load document revisions" : "Revisionen des Dokuments können nicht geladen werden.",
     "Please enter filename to which this document should be stored." : "Bitte geben Sie den Dateinamen ein, unter dem dieses Dokument gespeichert werden soll.",
     "Save As" : "Speichern als",
     "New filename" : "Neuer Dateiname",
@@ -23,6 +24,7 @@
     "Saving..." : "Speichervorgang…",
     "None" : "Keine",
     "All" : "Alle",
+    "Strictly confidential. Only for {viewer-email}" : "Streng vertraulich. Nur für {viewer-email}",
     "Secure View (with watermarks)" : "Secure View (mit Wasserzeichen)",
     "can print / export" : "kann drucken / exportieren",
     "Open in Collabora with Secure View" : "In Collabora mit Secure View öffnen",
@@ -74,8 +76,20 @@
     "Use Canonical webroot" : "Benutze ein regelkonformes Web-Stammverzeichnis",
     "Canonical webroot, in case there are multiple, for Collabora to use. Provide the one with least restrictions. Eg: Use non-shibbolized webroot if this instance is accessed by both shibbolized and non-shibbolized webroots. You can ignore this setting if only one webroot is used to access this instance." : "Regelkonformes Web-Stammverzeichnis zur Nutzung von Collabora, falls mehrere existieren. Geben Sie dasjenige mit den wenigsten Restriktionen an. Zum Beispiel: Benutzen Sie Web-Stammverzeichnisse ohne Shibboleth, wenn diese Instanz gleichzeitig von Stammverzeichnissen zugegriffen werden soll die sowohl Shibboleth enthalten, als auch solche ohne. Sie können diese Einstellung ignorieren wenn nur ein Stammverzeichnis benutzt wird, um auf diese Instanz zuzugreifen.",
     "Use Menu option" : "Menü-Option aktivieren",
+    "Secure View for Collabora Online" : "Secure View für Collabora Online",
     "Enable Secure View (requires Enterprise edition)" : "Secure View aktivieren (benötigt Enterprise Edition)",
     "Enable Secure View" : "Secure View aktivieren",
-    "Preferences" : "Einstellungen"
+    "Preferences" : "Einstellungen",
+    "Enforce to open documents always in Secure View mode with watermark" : "Öffnen von Dokumenten im Secure-View-Modus mit Wasserzeichen erzwingen.",
+    "Set \"can print/export\" as default share permission" : "Die Berechtigung \"kann drucken/exportieren\" als Standard setzen.",
+    "Set \"Secure View (with watermarks)\" as default share permission" : "\"Secure View (mit Wasserzeichen)\" als Standard-Berechtigung setzen.",
+    "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable." : "Wasserzeichen-Text für Secure View einstellen. Um die E-Mail-Adresse des Nutzers dynamisch einzufügen, nutze die {viewer-email}-Variable.",
+    "Zotero for Collabora Online" : "Zotero für Collabora Online",
+    "Enable Zotero for all users" : "Zotero für alle Benutzer aktivieren",
+    "Connect Zotero for Bibliography and Citation inside Collabora Online." : "Zotero für Quellenverzeichnis und Zitate in Collabora Online verbinden.",
+    "Zotero integration is disabled, ask your administrator to enable it." : "Zotero-Integration ist deaktiviert, bitte die Administration, diese zu aktivieren.",
+    "Zotero Personal API Key:" : "Persönlicher API-Schlüssel für Zotero:",
+    "To generate the API key navigate in Zotero to" : "Um den API-Schlüssel zu erstellen, gehe in Zotero zu ",
+    "Home > Settings > Feeds/API > Create new private key" : "Start > Einstellungen > Feeds/API > Neuen privaten Schlüssel erstellen"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
 }

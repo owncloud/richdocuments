@@ -83,6 +83,8 @@ OC.L10N.register(
     "Enable Secure View" : "Aktivizo Parje të Sigurt",
     "Preferences" : "Parapëlqime",
     "Enforce to open documents always in Secure View mode with watermark" : "Detyro hapje dokumentesh përherë nën mënyrën Parje e Siguruar me “watermark”",
+    "Set \"can print/export\" as default share permission" : "Caktoni “mund të shtypë/eksportojë” si leje parazgjedhje për pjesën",
+    "Set \"Secure View (with watermarks)\" as default share permission" : "Caktoni “Parje e Siguruar (me watermark-e)” si leje parazgjedhje për pjesën",
     "Zotero for Collabora Online" : "Zotero për Collabora Online",
     "Enable Zotero for all users" : "Aktivizoje Zotero-n për krejt përdoruesit",
     "Zotero Personal API Key:" : "Kyç Personal API Zotero-je:",
