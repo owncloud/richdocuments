@@ -83,8 +83,11 @@
     "Enforce to open documents always in Secure View mode with watermark" : "Detyro hapje dokumentesh përherë nën mënyrën Parje e Siguruar me “watermark”",
     "Set \"can print/export\" as default share permission" : "Caktoni “mund të shtypë/eksportojë” si leje parazgjedhje për pjesën",
     "Set \"Secure View (with watermarks)\" as default share permission" : "Caktoni “Parje e Siguruar (me watermark-e)” si leje parazgjedhje për pjesën",
+    "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable." : "Caktoni tekst “watermark” për Parje të Siguruar. Që të përfshihet në mënyrë dinamike adresa email e përdoruesit, përdorni ndryshoren {viewer-email}.",
     "Zotero for Collabora Online" : "Zotero për Collabora Online",
     "Enable Zotero for all users" : "Aktivizoje Zotero-n për krejt përdoruesit",
+    "Connect Zotero for Bibliography and Citation inside Collabora Online." : "Lidheni me Zotero-n, për Bibliografi dhe Citime brenda Collabora Online.",
+    "Zotero integration is disabled, ask your administrator to enable it." : "Integrimi i Zotero-s është i çaktivizuar, kërkojini përgjegjësit tuaj ta aktivizojë.",
     "Zotero Personal API Key:" : "Kyç Personal API Zotero-je:",
     "To generate the API key navigate in Zotero to" : "Që të prodhohet kyçi APi, kaloni në Zotero, te",
     "Home > Settings > Feeds/API > Create new private key" : "Shtëpi > Rregullime >Prurje/API > Krijo kyç të ri privat"
