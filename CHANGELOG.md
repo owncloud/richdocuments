@@ -4,9 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
 
-- 
+## [4.1.0] - 2023-11-03
+
+### Added
+
+- [#505](https://github.com/owncloud/richdocuments/pull/505) - Zotero integration + refactor and bug fixes of admin/personal panel
+
+### Fixed
+
+- [#522](https://github.com/owncloud/richdocuments/pull/522) - Bugfix: broken version revision
+- [#520](https://github.com/owncloud/richdocuments/pull/520) - fix: drop usage of ${}
 
 
 ## [4.0.0] - 2023-09-22
@@ -118,7 +126,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [2.4.0] - 2020-07-30
 
 
-[Unreleased]: https://github.com/owncloud/richdocuments/compare/v4.0.0...master
+[Unreleased]: https://github.com/owncloud/richdocuments/compare/v4.1.0...master
+[4.1.0]: https://github.com/owncloud/richdocuments/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/owncloud/richdocuments/compare/v3.0.1...v4.0.0
 [3.0.1]: https://github.com/owncloud/richdocuments/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/owncloud/richdocuments/compare/v2.7.0...v3.0.0
