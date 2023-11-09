@@ -66,10 +66,12 @@
 		},
 	
 		setPersonalSettings: function(data, doneCallback, failCallback) {
-			$.post(
-				OC.generateUrl("apps/richdocuments/ajax/settings/setPersonalSettings"),
-				data
-			).done(function (response) {
+			$.ajax(OC.generateUrl("apps/richdocuments/ajax/settings/setPersonalSettings"), {
+				type: 'POST',
+				data: JSON.stringify(data),
+				contentType: 'application/json',
+				dataType: 'json'
+			}).done(function (response) {
 				doneCallback(response);
 			})
 			.fail(function (jqXHR) {

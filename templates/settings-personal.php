@@ -21,11 +21,12 @@
 				type="text"
 				id="change_zotero_key-richdocuments" 
 				style="width: 350px; max-width: 100%"
-				value="<?php p($_['zoteroAPIPrivateKey'] ? $_['zoteroAPIPrivateKey'] : ''); ?>"/>
+				placeholder="<?php p($_['zoteroAPIPrivateKeySet'] ? p($l->t('Update the existing key or save empty to delete')) : p($l->t('Add new key'))); ?>"
+		/>
 		<button
 				type="button"
 				id="save_zotero_key-richdocuments"
-				disabled><?php p($l->t("Save")); ?>
+				><?php p($l->t("Save")); ?>
 		</button>
 		<span id="richdocuments-zotero-personal-msg" class="msg"></span>
 		<br />
