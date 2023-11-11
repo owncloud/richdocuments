@@ -13,7 +13,7 @@
     "@ownclouders/prettier-config": "0.0.1",
     "@ownclouders/tsconfig": "0.0.4",
     "@types/node": "^20.2.3",
-    "axios": "^0.27.2",
+    "axios": "^1.6.0",
     "easygettext": "https://github.com/owncloud/easygettext/archive/refs/tags/v2.18.2-oc.tar.gz",
     "eslint": "8.31.0",
     "prettier": "2.6.2",
