@@ -905,7 +905,7 @@ $(document).ready(function() {
 	documentsMain.docs = $('.documentslist').documentGrid();
 	documentsMain.overlay = $('<div id="documents-overlay" class="icon-loading"></div><div id="documents-overlay-below" class="icon-loading-dark"></div>').documentOverlay();
 
-	$('li.document a').tipsy({fade: true, live: true});
+	$('li.document a').tooltip();
 
 	$('.documentslist').on('click', 'li:not(.add-document)', function(event) {
 		event.preventDefault();
