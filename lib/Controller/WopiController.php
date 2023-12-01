@@ -236,7 +236,9 @@ class WopiController extends Controller {
 		$userPrivateInfo = [];
 		if ($res['editor'] !== '') {
 			$zoteroAPIPrivateKey = $this->appConfig->getUserValue($res['editor'], 'zoteroAPIPrivateKey');
-			$userPrivateInfo['ZoteroAPIKey'] = $zoteroAPIPrivateKey;
+			if (!empty($zoteroAPIPrivateKey)) {
+				$userPrivateInfo['ZoteroAPIKey'] = $zoteroAPIPrivateKey;
+			}
 		}
 
 		$result = [
