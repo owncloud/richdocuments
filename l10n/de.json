@@ -124,7 +124,7 @@
     "Enable Zotero for all users" : "Zotero für alle Benutzer aktivieren",
     "Zotero integration is disabled, ask your administrator to enable it." : "Zotero-Integration ist deaktiviert, bitte die Administration, diese zu aktivieren.",
     "Zotero Personal API Key:" : "Persönlicher API-Schlüssel für Zotero:",
-    "Update the existing key or save empty to delete" : "Den existierende API-Schlüssel erneuern durch leer Abspeichern löschen.",
+    "Update the existing key or save empty to delete" : "API-Schlüssel erneuern oder löschen durch leer Abspeichern",
     "Add new key" : "API-Schlüssel hinzufügen.",
     "To generate the API key navigate in Zotero to" : "Um den API-Schlüssel zu erstellen, gehe in Zotero zu ",
     "Home > Settings > Feeds/API > Create new private key" : "Start > Einstellungen > Feeds/API > Neuen privaten Schlüssel erstellen"
