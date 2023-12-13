@@ -33,7 +33,6 @@
 			$('input:text[id="change_zotero_key-richdocuments"]').keyup(function (event) {
 				var zoteroAPIPrivateKey = $('input:text[id="change_zotero_key-richdocuments"]').val();
 				if (zoteroAPIPrivateKey !== '') {
-					$('button:button[id="save_zotero_key-richdocuments"]').removeAttr("disabled");
 					if (event.which === 13) {
 						OCA.Richdocuments.SettingsPersonal.updateZoteroAPIPrivateKey();
 					}
@@ -57,7 +56,6 @@
 				},
 				function (response) {
 					OC.msg.finishedSuccess('#richdocuments-zotero-personal-msg', response.data.message);
-					$('button:button[id="save_zotero_key-richdocuments"]').attr("disabled", "true");
 				},
 				function (jqXHR) {
 					OC.msg.finishedError('#richdocuments-zotero-personal-msg', JSON.parse(jqXHR.responseText).data.message);
@@ -66,10 +64,12 @@
 		},
 	
 		setPersonalSettings: function(data, doneCallback, failCallback) {
-			$.post(
-				OC.generateUrl("apps/richdocuments/ajax/settings/setPersonalSettings"),
-				data
-			).done(function (response) {
+			$.ajax(OC.generateUrl("apps/richdocuments/ajax/settings/setPersonalSettings"), {
+				type: 'POST',
+				data: JSON.stringify(data),
+				contentType: 'application/json',
+				dataType: 'json'
+			}).done(function (response) {
 				doneCallback(response);
 			})
 			.fail(function (jqXHR) {

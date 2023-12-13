@@ -65,9 +65,7 @@ class Personal implements ISettings {
 		$template = new Template('richdocuments', 'settings-personal');
 
 		$template->assign('zotero', $zoteroEnabled);
-		if ($zoteroAPIPrivateKey !== null) {
-			$template->assign('zoteroAPIPrivateKey', $zoteroAPIPrivateKey);
-		}
+		$template->assign('zoteroAPIPrivateKeySet', !empty($zoteroAPIPrivateKey));
 		return $template;
 	}
 }

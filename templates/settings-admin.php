@@ -128,6 +128,8 @@
                 ref="https://github.com/owncloud/richdocuments/wiki"></a>
 
 	<br/>
+	<em><?php p($l->t("Connect Zotero for Bibliography and Citation inside Collabora Online.")); ?><a href="https://www.collaboraoffice.com/collabora-online-22-05-release-notes/" target="_blank"> <?php p($l->t("Collabora Online 22.05.10 and above required")); ?> </a></em>
+	<br/>
 
 	<input type="checkbox" id="enable_zotero-richdocuments" <?php p($_['zotero'] !== 'false' ? 'checked' : '') ?> />
 	<label for="enable_zotero-richdocuments"><?php p($l->t('Enable Zotero for all users')) ?></label>
