@@ -49,7 +49,7 @@ class Application extends App {
 					return [
 						'id' => 'richdocuments_index',
 						'order' => 2,
-						'href' => $container->query('ServerContainer')->getURLGenerator()->linkToRoute('richdocuments.document.index'),
+						'href' => $container->query('ServerContainer')->getURLGenerator()->linkToRoute('richdocuments.Document.index'),
 						'icon' => $container->query('ServerContainer')->getURLGenerator()->imagePath('richdocuments', 'app.svg'),
 						'name' => $container->query('L10N')->t('Office')
 					];
