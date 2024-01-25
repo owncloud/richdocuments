@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
-## [Unreleased] -
+## [Unreleased] - 
+
+
+
+## [4.2.0] - 2024-01-24
+
+### Fixed
+
+- [535](https://github.com/owncloud/richdocuments/pull/535) - Update route to documents.php/index
 
 
 ## [4.1.0] - 2023-12-01
@@ -129,7 +137,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [2.4.0] - 2020-07-30
 
 
-[Unreleased]: https://github.com/owncloud/richdocuments/compare/v4.1.0...master
+[Unreleased]: https://github.com/owncloud/richdocuments/compare/v4.2.0...master
+[4.2.0]: https://github.com/owncloud/richdocuments/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/owncloud/richdocuments/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/owncloud/richdocuments/compare/v3.0.1...v4.0.0
 [3.0.1]: https://github.com/owncloud/richdocuments/compare/v3.0.0...v3.0.1
