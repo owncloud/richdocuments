@@ -86,9 +86,12 @@
     "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable." : "Set watermark text for Secure View. To include the user email address dynamically, use the {viewer-email} variable.",
     "Zotero for Collabora Online" : "Zotero for Collabora Online",
     "Connect Zotero for Bibliography and Citation inside Collabora Online." : "Connect Zotero for Bibliography and Citation inside Collabora Online.",
+    "Collabora Online 22.05.10 and above required" : "Collabora Online 22.05.10 and above required",
     "Enable Zotero for all users" : "Enable Zotero for all users",
     "Zotero integration is disabled, ask your administrator to enable it." : "Zotero integration is disabled, ask your administrator to enable it.",
     "Zotero Personal API Key:" : "Zotero Personal API Key:",
+    "Update the existing key or save empty to delete" : "Update the existing key or save empty to delete",
+    "Add new key" : "Add new key",
     "To generate the API key navigate in Zotero to" : "To generate the API key navigate in Zotero to",
     "Home > Settings > Feeds/API > Create new private key" : "Home > Settings > Feeds/API > Create new private key"
 },"pluralForm" :"nplurals=2; plural=(n != 1);"
