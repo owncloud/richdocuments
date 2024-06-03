@@ -140,17 +140,20 @@ class DocumentService {
 		try {
 			// if dir is set, then we need to check fileId in that folder,
 			// as in case of user/group shares we can have multiple file mounts with same id
-			// return these fileMounts
-			if ($dir !== null) {
-				/** @var \OCP\Files\Folder $parentFolder */
-				$parentFolder = $root->get($dir);
+			// return these fileMounts based on fileId
+			$fileMounts = $root->getById($fileId);
 
-				/** @phpstan-ignore-next-line */
-				'@phan-var \OCP\Files\Folder $parentFolder';
-				$fileMounts = $parentFolder->getById($fileId);
-			} else {
-				$fileMounts = $root->getById($fileId);
-			}
+//			// return these fileMounts
+//			if ($dir !== null) {
+//				/** @var \OCP\Files\Folder $parentFolder */
+//				$parentFolder = $root->get($dir);
+//
+//				/** @phpstan-ignore-next-line */
+//				'@phan-var \OCP\Files\Folder $parentFolder';
+//				$fileMounts = $parentFolder->getById($fileId);
+//			} else {
+//				$fileMounts = $root->getById($fileId);
+//			}
 			
 			$document = $fileMounts[0] ?? null;
 			if ($document === null) {
