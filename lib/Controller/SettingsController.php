@@ -81,10 +81,17 @@ class SettingsController extends Controller {
 		$message = $this->l10n->t('Saved');
 
 		if (isset($settings['wopi_url'])) {
+			$url_scheme = parse_url($settings['wopi_url'], PHP_URL_SCHEME);
+			if (!\in_array($url_scheme, ['http', 'https'], true)) {
+				$message = $this->l10n->t('Invalid WOPI Url. Only http or https scheme is allowed.');
+				return new DataResponse([
+					'status' => 'error',
+					'data' => ['message' => (string) $message]
+				]);
+			}
 			$this->appConfig->setAppValue('wopi_url', $settings['wopi_url']);
 
-			$colon = \strpos($settings['wopi_url'], ':', 0);
-			if (\OC::$server->getRequest()->getServerProtocol() !== \substr($settings['wopi_url'], 0, $colon)) {
+			if (\OC::$server->getRequest()->getServerProtocol() !== $url_scheme) {
 				$message = $this->l10n->t('Saved with error: Collabora Online should use the same protocol as the server installation.');
 			}
 		}
