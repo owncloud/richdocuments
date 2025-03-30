@@ -54,6 +54,7 @@ OC.L10N.register(
     "Collabora Online: Unable to read WOPI discovery for given document" : "Collabora Online: não é possível ler a descoberta WOPI para determinado documento",
     "Can't create document" : "Impedido de criar documentos",
     "Saved" : "Salvo",
+    "Invalid WOPI Url. Only http or https scheme is allowed." : "URL WOPI inválido. Somente os esquemas http ou https são permitidos.",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "Salvo com erro: Collabora Online deve usar o mesmo protocolo que a instalação do servidor.",
     "Public Link User" : "Usuário de Link Público",
     "%s via Office Collabora" : "%s via Office Collabora",
