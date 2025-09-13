@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@ownclouders/web-pkg':
         specifier: ^0.0.3
-        version: 0.0.3(@casl/ability@6.5.0)(@casl/vue@2.2.1(@casl/ability@6.5.0)(vue@3.3.4))(axios@1.8.2)(filesize@9.0.11)(fuse.js@6.6.2)(lodash-es@4.17.21)(luxon@2.5.2)(mark.js@8.11.1)(qs@6.11.2)(uuid@9.0.0)(vue-concurrency@4.0.1(vue@3.3.4))(vue-router@4.2.0(vue@3.3.4))(vue3-gettext@2.5.0-alpha.1(@vue/compiler-sfc@3.3.4)(vue@3.3.4))(vuex@4.1.0(vue@3.3.4))
+        version: 0.0.3(@casl/ability@6.5.0)(@casl/vue@2.2.1(@casl/ability@6.5.0)(vue@3.3.4))(axios@1.12.0)(filesize@9.0.11)(fuse.js@6.6.2)(lodash-es@4.17.21)(luxon@2.5.2)(mark.js@8.11.1)(qs@6.11.2)(uuid@9.0.0)(vue-concurrency@4.0.1(vue@3.3.4))(vue-router@4.2.0(vue@3.3.4))(vue3-gettext@2.5.0-alpha.1(@vue/compiler-sfc@3.3.4)(vue@3.3.4))(vuex@4.1.0(vue@3.3.4))
     devDependencies:
       '@ownclouders/eslint-config':
         specifier: 0.0.1
@@ -28,8 +28,8 @@ importers:
         specifier: ^20.2.3
         version: 20.2.3
       axios:
-        specifier: ^1.8.2
-        version: 1.8.2
+        specifier: ^1.12.0
+        version: 1.12.0
       easygettext:
         specifier: https://github.com/owncloud/easygettext/archive/refs/tags/v2.18.2-oc.tar.gz
         version: https://github.com/owncloud/easygettext/archive/refs/tags/v2.18.2-oc.tar.gz(typescript@4.9.5)
@@ -329,8 +329,8 @@ packages:
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
 
-  '@eslint-community/eslint-utils@4.5.0':
-    resolution: {integrity: sha512-RoV8Xs9eNwiDvhv7M+xcL4PWyRyIXRY/FLp3buU4h1EYfdF7unWUy3dOjPqb3C7rMUewIcqwW850PgS8h1o1yg==}
+  '@eslint-community/eslint-utils@4.9.0':
+    resolution: {integrity: sha512-ayVFHdtZ+hsq1t2Dy24wCmGXGe4q9Gu3smhLYALJrr473ZH27MsnSL+LKUlimp4BWJqMDMLmPpx/Q9R3OAlL4g==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
       eslint: ^6.0.0 || ^7.0.0 || >=8.0.0
@@ -679,8 +679,8 @@ packages:
     resolution: {integrity: sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==}
     engines: {node: '>= 0.4'}
 
-  axios@1.8.2:
-    resolution: {integrity: sha512-ls4GYBm5aig9vWx8AWDSGLpnpDQRtWAfrjU+EuytuODrFBkqesN2RkOQCBzrA1RQNHw1SmRMSDDDSwzNAYQ6Rg==}
+  axios@1.12.0:
+    resolution: {integrity: sha512-oXTDccv8PcfjZmPGlWsPSwtOJCZ/b6W5jAMCNcfwJbCzDckwG0jrYJFaWH1yvivfCXjVzV/SPDEhMB3Q+DSurg==}
 
   babel-walk@3.0.0-canary-5:
     resolution: {integrity: sha512-GAwkz0AihzY5bkwIY5QDR+LvsRQgB/B+1foMPvi0FZPMl5fjD7ICiznUiBdLYMH1QYe6vqu4gWYytZOccLouFw==}
@@ -1181,8 +1181,8 @@ packages:
     engines: {node: '>=4'}
     hasBin: true
 
-  follow-redirects@1.15.9:
-    resolution: {integrity: sha512-gew4GsXizNgdoRyqmyfMHyAmXsZDk6mHkSxZFCzW9gwlbtOW44CDtYavM+y+72qD/Vq2l550kMF52DT8fOLJqQ==}
+  follow-redirects@1.15.11:
+    resolution: {integrity: sha512-deG2P0JfjrTxl50XGCDyfI97ZGVCxIpfKYmfyrQ54n5FO/0gfIES8C/Psl6kWVDolizcaaxZJnTS0QSMxvnsBQ==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
@@ -1193,8 +1193,8 @@ packages:
   for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
 
-  form-data@4.0.2:
-    resolution: {integrity: sha512-hGfm/slu0ZabnNt4oaRZ6uREyfCj6P4fT/n6A1rGV+Z0VdGXjfOhVUpkn6qVQONHGIFwmveGXyDs75+nr6FM8w==}
+  form-data@4.0.4:
+    resolution: {integrity: sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==}
     engines: {node: '>= 6'}
 
   fs.realpath@1.0.0:
@@ -1857,8 +1857,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  semver@7.7.1:
-    resolution: {integrity: sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA==}
+  semver@7.7.2:
+    resolution: {integrity: sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -2370,7 +2370,7 @@ snapshots:
       eslint: 8.31.0
       eslint-visitor-keys: 3.4.1
 
-  '@eslint-community/eslint-utils@4.5.0(eslint@8.31.0)':
+  '@eslint-community/eslint-utils@4.9.0(eslint@8.31.0)':
     dependencies:
       eslint: 8.31.0
       eslint-visitor-keys: 3.4.3
@@ -2481,11 +2481,11 @@ snapshots:
 
   '@ownclouders/tsconfig@0.0.4': {}
 
-  '@ownclouders/web-pkg@0.0.3(@casl/ability@6.5.0)(@casl/vue@2.2.1(@casl/ability@6.5.0)(vue@3.3.4))(axios@1.8.2)(filesize@9.0.11)(fuse.js@6.6.2)(lodash-es@4.17.21)(luxon@2.5.2)(mark.js@8.11.1)(qs@6.11.2)(uuid@9.0.0)(vue-concurrency@4.0.1(vue@3.3.4))(vue-router@4.2.0(vue@3.3.4))(vue3-gettext@2.5.0-alpha.1(@vue/compiler-sfc@3.3.4)(vue@3.3.4))(vuex@4.1.0(vue@3.3.4))':
+  '@ownclouders/web-pkg@0.0.3(@casl/ability@6.5.0)(@casl/vue@2.2.1(@casl/ability@6.5.0)(vue@3.3.4))(axios@1.12.0)(filesize@9.0.11)(fuse.js@6.6.2)(lodash-es@4.17.21)(luxon@2.5.2)(mark.js@8.11.1)(qs@6.11.2)(uuid@9.0.0)(vue-concurrency@4.0.1(vue@3.3.4))(vue-router@4.2.0(vue@3.3.4))(vue3-gettext@2.5.0-alpha.1(@vue/compiler-sfc@3.3.4)(vue@3.3.4))(vuex@4.1.0(vue@3.3.4))':
     dependencies:
       '@casl/ability': 6.5.0
       '@casl/vue': 2.2.1(@casl/ability@6.5.0)(vue@3.3.4)
-      axios: 1.8.2
+      axios: 1.12.0
       filesize: 9.0.11
       fuse.js: 6.6.2
       lodash-es: 4.17.21
@@ -2790,10 +2790,10 @@ snapshots:
 
   available-typed-arrays@1.0.5: {}
 
-  axios@1.8.2:
+  axios@1.12.0:
     dependencies:
-      follow-redirects: 1.15.9
-      form-data: 4.0.2
+      follow-redirects: 1.15.11
+      form-data: 4.0.4
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
@@ -2827,7 +2827,7 @@ snapshots:
 
   builtins@5.1.0:
     dependencies:
-      semver: 7.7.1
+      semver: 7.7.2
 
   caf@15.0.1: {}
 
@@ -2838,7 +2838,7 @@ snapshots:
 
   call-bind@1.0.2:
     dependencies:
-      function-bind: 1.1.1
+      function-bind: 1.1.2
       get-intrinsic: 1.3.0
 
   callsites@3.1.0: {}
@@ -3197,7 +3197,7 @@ snapshots:
 
   eslint-plugin-es-x@6.2.1(eslint@8.31.0):
     dependencies:
-      '@eslint-community/eslint-utils': 4.5.0(eslint@8.31.0)
+      '@eslint-community/eslint-utils': 4.9.0(eslint@8.31.0)
       '@eslint-community/regexpp': 4.12.1
       eslint: 8.31.0
 
@@ -3244,7 +3244,7 @@ snapshots:
 
   eslint-plugin-n@16.0.0(eslint@8.31.0):
     dependencies:
-      '@eslint-community/eslint-utils': 4.5.0(eslint@8.31.0)
+      '@eslint-community/eslint-utils': 4.9.0(eslint@8.31.0)
       builtins: 5.1.0
       eslint: 8.31.0
       eslint-plugin-es-x: 6.2.1(eslint@8.31.0)
@@ -3252,7 +3252,7 @@ snapshots:
       is-core-module: 2.16.1
       minimatch: 3.1.2
       resolve: 1.22.10
-      semver: 7.7.1
+      semver: 7.7.2
 
   eslint-plugin-node@11.1.0(eslint@8.31.0):
     dependencies:
@@ -3455,17 +3455,18 @@ snapshots:
       pirates: 3.0.2
       vlq: 0.2.3
 
-  follow-redirects@1.15.9: {}
+  follow-redirects@1.15.11: {}
 
   for-each@0.3.3:
     dependencies:
       is-callable: 1.2.7
 
-  form-data@4.0.2:
+  form-data@4.0.4:
     dependencies:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       es-set-tostringtag: 2.1.0
+      hasown: 2.0.2
       mime-types: 2.1.35
 
   fs.realpath@1.0.0: {}
@@ -3492,7 +3493,7 @@ snapshots:
 
   get-intrinsic@1.2.1:
     dependencies:
-      function-bind: 1.1.1
+      function-bind: 1.1.2
       has: 1.0.3
       has-proto: 1.0.1
       has-symbols: 1.0.3
@@ -3726,7 +3727,7 @@ snapshots:
       available-typed-arrays: 1.0.5
       call-bind: 1.0.2
       for-each: 0.3.3
-      gopd: 1.0.1
+      gopd: 1.2.0
       has-tostringtag: 1.0.2
 
   is-weakmap@2.0.1: {}
@@ -3873,7 +3874,7 @@ snapshots:
     dependencies:
       call-bind: 1.0.2
       define-properties: 1.2.0
-      has-symbols: 1.0.3
+      has-symbols: 1.1.0
       object-keys: 1.1.1
 
   object.values@1.1.6:
@@ -4148,7 +4149,7 @@ snapshots:
     dependencies:
       lru-cache: 6.0.0
 
-  semver@7.7.1: {}
+  semver@7.7.2: {}
 
   shebang-command@2.0.0:
     dependencies:
@@ -4257,7 +4258,7 @@ snapshots:
     dependencies:
       call-bind: 1.0.2
       has-bigints: 1.0.2
-      has-symbols: 1.0.3
+      has-symbols: 1.1.0
       which-boxed-primitive: 1.0.2
 
   update-browserslist-db@1.0.11(browserslist@4.21.7):
@@ -4359,7 +4360,7 @@ snapshots:
       available-typed-arrays: 1.0.5
       call-bind: 1.0.2
       for-each: 0.3.3
-      gopd: 1.0.1
+      gopd: 1.2.0
       has-tostringtag: 1.0.2
       is-typed-array: 1.1.10
 
