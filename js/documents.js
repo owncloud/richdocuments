@@ -444,7 +444,7 @@ var documentsMain = {
 			    '</form>';
 
 			// iframe that contains the Collabora Online
-			var frame = '<iframe id="loleafletframe" name="loleafletframe" allow="fullscreen; clipboard-read *; clipboard-write *" style="width:100%;height:100%;position:absolute;" onload="this.contentWindow.focus()"/>';
+			var frame = '<iframe id="loleafletframe" name="loleafletframe" allow="fullscreen *; clipboard-read *; clipboard-write *;" style="width:100%;height:100%;position:absolute;" onload="this.contentWindow.focus()"/>';
 
 			$('#mainContainer').append(form);
 			$('#mainContainer').append(frame);
