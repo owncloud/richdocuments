@@ -158,7 +158,7 @@ export default defineComponent({
         '" type="hidden"/>' +
         '</form>'
       const frameHTML =
-        '<iframe id="loleafletframe" name="loleafletframe" class="oc-width-1-1 oc-height-1-1" allow="fullscreen *; clipboard-read *; clipboard-write *" onload="this.contentWindow.focus()"/>'
+        '<iframe id="loleafletframe" name="loleafletframe" class="oc-width-1-1 oc-height-1-1" allow="fullscreen *; clipboard-read *; clipboard-write *;" onload="this.contentWindow.focus()"/>'
       const mainContainer = document.getElementById('mainContainer')
       mainContainer.insertAdjacentHTML('beforeend', formHTML)
       mainContainer.insertAdjacentHTML('beforeend', frameHTML)
