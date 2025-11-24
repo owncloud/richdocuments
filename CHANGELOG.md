@@ -5,9 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
-## [Unreleased] - 
+## [4.2.2] - 2025-11-19
 
+### Fixed
 
+- [562](https://github.com/owncloud/richdocuments/pull/562) - Fullscreen permissions weren't applied properly
+- [560](https://github.com/owncloud/richdocuments/pull/560) - Allow async clipboard access
+- [558](https://github.com/owncloud/richdocuments/pull/558) - Bump vite from 4.5.6 to 5.4.21
+- [557](https://github.com/owncloud/richdocuments/pull/557) - Remove references to talk.owncloud.com
+- [556](https://github.com/owncloud/richdocuments/pull/556) - Bump axios from 1.8.2 to 1.12.0
 
 ## [4.2.1] - 2025-03-11
 
