@@ -52,6 +52,7 @@
     "Collabora Online: Unable to read WOPI discovery for given document" : "Collabora Online: Невозможно прочитать WOPI discovery для данного документа",
     "Can't create document" : "Невозможно создать документ",
     "Saved" : "Сохранено",
+    "Invalid WOPI Url. Only http or https scheme is allowed." : "Неверный адрес WOPI-сервера. Допустимы только http или https-адреса.",
     "Saved with error: Collabora Online should use the same protocol as the server installation." : "Сохранено с ошибкой: В Collabra Online должен использоваться тот же протокол, что в установке сервера.",
     "Public Link User" : "Публичная ссылка пользователя",
     "%s via Office Collabora" : "%s через Office Collabora",
