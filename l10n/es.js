@@ -95,6 +95,7 @@ OC.L10N.register(
     "Zotero Personal API Key:" : "Clave de la API personal Zotero:",
     "Update the existing key or save empty to delete" : "Actualizar la clave existente o dejarla vacía para borrar",
     "Add new key" : "Añadir nueva clave",
-    "To generate the API key navigate in Zotero to" : "Para generar la clave API, navegue en Zotero a"
+    "To generate the API key navigate in Zotero to" : "Para generar la clave API, navegue en Zotero a",
+    "Home > Settings > Feeds/API > Create new private key" : "Inicio > Configuración > Feeds/API > Crear nueva clave privada"
 },
 "nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;");
