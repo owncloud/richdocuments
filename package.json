@@ -8,7 +8,7 @@
     "build:w": "pnpm vite build --watch --mode development"
   },
   "devDependencies": {
-    "@ownclouders/eslint-config": "0.0.1",
+    "@ownclouders/eslint-config": "12.3.0",
     "@ownclouders/extension-sdk": "0.0.1-alpha.4",
     "@ownclouders/prettier-config": "0.0.1",
     "@ownclouders/tsconfig": "0.0.4",
