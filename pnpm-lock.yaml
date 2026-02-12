@@ -16,8 +16,8 @@ importers:
         specifier: 0.0.1
         version: 0.0.1(@babel/core@7.22.1)(eslint-plugin-n@16.0.0(eslint@9.26.0(hono@4.11.7)))(eslint@9.26.0(hono@4.11.7))
       '@ownclouders/extension-sdk':
-        specifier: 0.0.1-alpha.4
-        version: 0.0.1-alpha.4(sass@1.62.0)(vite@5.4.21(@types/node@20.2.3)(sass@1.62.0))(vue@3.3.4)
+        specifier: 12.3.0
+        version: 12.3.0(vite@5.4.21(@types/node@20.2.3)(sass@1.62.0))(vue@3.3.4)
       '@ownclouders/prettier-config':
         specifier: 0.0.1
         version: 0.0.1
@@ -440,11 +440,10 @@ packages:
     peerDependencies:
       eslint: ^8.25.0
 
-  '@ownclouders/extension-sdk@0.0.1-alpha.4':
-    resolution: {integrity: sha512-G0kkfSICxJqyUmtHUhk9xVqDS53NhjzGCHXEO9L2FQyhLnIrdi/Q9FDYn6gth5SF1w4kIXcKPXQFSosWL0YhRQ==}
+  '@ownclouders/extension-sdk@12.3.0':
+    resolution: {integrity: sha512-m2qxNMhbuiqtMa/d/nQGLF9SOaTBWDXn9urVTEKZ+1XKdRDzrygt8+ODkBLOZ1hZujuk8U95YE+ZMXPtRokUQA==}
     peerDependencies:
-      sass: 1.62.0
-      vite: ^4.1.1
+      vite: ^5 || ^6.0.0 || ^7.0.0
 
   '@ownclouders/prettier-config@0.0.1':
     resolution: {integrity: sha512-vTQ11OCFgUxPJxAAIcGk05KByZL6F2fmdoUCKVuyMspsGvap3H0KjCIHY5c+Gz390tBfZf6vsnuoJkhGOOBgQw==}
@@ -471,6 +470,9 @@ packages:
       vuex: 4.1.0
       web-client: npm:@ownclouders/web-client@0.0.1
       web-pkg: npm:@ownclouders/web-pkg@0.0.3
+
+  '@rolldown/pluginutils@1.0.0-rc.2':
+    resolution: {integrity: sha512-izyXV/v+cHiRfozX62W9htOAvwMo4/bXKDrQ+vom1L1qRuexPock/7VZDAhnpHCLNejd3NJ6hiab+tO0D44Rgw==}
 
   '@rollup/rollup-android-arm-eabi@4.52.5':
     resolution: {integrity: sha512-8c1vW4ocv3UOMp9K+gToY5zL2XiiVw3k7f1ksf4yO1FlDFQ1C2u72iACFnSOceJFsWskc2WZNqeRhFRPzv+wtQ==}
@@ -679,11 +681,11 @@ packages:
   '@ucast/mongo@2.4.3':
     resolution: {integrity: sha512-XcI8LclrHWP83H+7H2anGCEeDq0n+12FU2mXCTz6/Tva9/9ddK/iacvvhCyW6cijAAOILmt0tWplRyRhVyZLsA==}
 
-  '@vitejs/plugin-vue@4.2.1':
-    resolution: {integrity: sha512-ZTZjzo7bmxTRTkb8GSTwkPOYDIP7pwuyV+RV53c9PYUouwcbkIZIvWvNWlX2b1dYZqtOv7D6iUAnJLVNGcLrSw==}
-    engines: {node: ^14.18.0 || >=16.0.0}
+  '@vitejs/plugin-vue@6.0.4':
+    resolution: {integrity: sha512-uM5iXipgYIn13UUQCZNdWkYk+sysBeA97d5mHsAoAt1u/wpN3+zxOmsVJWosuzX+IMGRzeYUNytztrYznboIkQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
-      vite: ^4.0.0
+      vite: ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0
       vue: ^3.2.25
 
   '@vue/compiler-core@3.3.4':
@@ -1327,9 +1329,6 @@ packages:
     resolution: {integrity: sha512-MMdARuVEQziNTeJD8DgMqmhwR11BRQ/cBP+pLtYdSTnf3MIO8fFeiINEbX36ZdNlfU/7A9f3gUw49B3oQsvwBA==}
     engines: {node: '>=4.0'}
 
-  estree-walker@0.6.1:
-    resolution: {integrity: sha512-SqmZANLWS0mnatqbSfRP5g8OXZC12Fgg1IwNtLsyHDzJizORW4khDfjPqJZsemPWBB2uqykUah5YpQ6epsqC/w==}
-
   estree-walker@2.0.2:
     resolution: {integrity: sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==}
 
@@ -1804,9 +1803,6 @@ packages:
     resolution: {integrity: sha512-Yg7/RDp4nedqmLgyH0LwgGRvMEKVzKbUdkBYyCosbHgJ+kaOUx0qzSiSatVc3DFygnirTPYnMM2P5dg2uH1WvA==}
     engines: {node: '>=12'}
 
-  magic-string@0.25.9:
-    resolution: {integrity: sha512-RmF0AsMzgt25qzqqLc1+MbHmhdx0ojF2Fvs4XnOqz2ZOBXzzkEwc/dJQZCYHAn7v1jbVOjAZfK8msRn4BxO4VQ==}
-
   magic-string@0.30.0:
     resolution: {integrity: sha512-LA+31JYDJLs82r2ScLrlz1GjSgu66ZV518eyWT+S8VhyQn/JL0u9MeBOvQMGYiPk1DBiSN9DDMOcXvigJZaViQ==}
     engines: {node: '>=12'}
@@ -1850,9 +1846,9 @@ packages:
     resolution: {integrity: sha512-Lbgzdk0h4juoQ9fCKXW4by0UJqj+nOOrI9MJ1sSj4nI8aI2eo1qmvQEie4VD1glsS250n15LsWsYtCugiStS5A==}
     engines: {node: '>=18'}
 
-  mime@3.0.0:
-    resolution: {integrity: sha512-jSCU7/VB1loIWBZe14aEYHU/+1UMEHoaO7qxCOVJOw9GgH72VAWppxNcjU+x9a2k3GSIBXNKxXQFqRvvZ7vr3A==}
-    engines: {node: '>=10.0.0'}
+  mime@4.1.0:
+    resolution: {integrity: sha512-X5ju04+cAzsojXKes0B/S4tcYtFAJ6tTMuSPBEn9CPGlrWr8Fiw7qYeLT0XyH80HSoAoqWCaz+MWKh22P7G1cw==}
+    engines: {node: '>=16'}
     hasBin: true
 
   minimatch@3.1.2:
@@ -2137,18 +2133,8 @@ packages:
     resolution: {integrity: sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==}
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
 
-  rollup-plugin-inject@3.0.2:
-    resolution: {integrity: sha512-ptg9PQwzs3orn4jkgXJ74bfs5vYz1NCZlSQMBUA0wKcGp5i5pA1AO3fOUEte8enhGUC+iapTCzEWw2jEFFUO/w==}
-    deprecated: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-inject.
-
-  rollup-plugin-node-polyfills@0.2.1:
-    resolution: {integrity: sha512-4kCrKPTJ6sK4/gLL/U5QzVT8cxJcofO0OU74tnB19F40cmuAKSzH5/siithxlofFEjwvw1YAhPmbvGNA6jEroA==}
-
-  rollup-plugin-serve@2.0.2:
-    resolution: {integrity: sha512-ALqyTbPhlf7FZ5RzlbDvMYvbKuCHWginJkTo6dMsbgji/a78IbsXox+pC83HENdkTRz8OXrTj+aShp3+3ratpg==}
-
-  rollup-pluginutils@2.8.2:
-    resolution: {integrity: sha512-EEp9NhnUkwY8aif6bxgovPHMoMoNr2FulJziTndpt5H9RdwC47GSGuII9XxpSdzVGM0GWrNPHV6ie1LTNJPaLQ==}
+  rollup-plugin-serve@3.0.0:
+    resolution: {integrity: sha512-DjVRhbwC0OgP1Q1sj8Lvx12ee60UTZM767kkjT61sYKHw/wLpANAw3VZN5ZMa5NlvO8bYpfTaqiUrW+icAjXFg==}
 
   rollup@4.52.5:
     resolution: {integrity: sha512-3GuObel8h7Kqdjt0gxkEzaifHTqLVW56Y/bjN7PSQtkKr0w3V/QYSdt6QWYtd7A1xUtYQigtdUfgj1RvWVtorw==}
@@ -2236,10 +2222,6 @@ packages:
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
-
-  sourcemap-codec@1.4.8:
-    resolution: {integrity: sha512-9NykojV5Uih4lgo5So5dtw+f0JgJX30KCNI8gwhz2J9A15wD0Ml6tjHKwf6fTSa6fAdVBdZeNOs9eJ71qCk8vA==}
-    deprecated: Please use @jridgewell/sourcemap-codec instead
 
   statuses@2.0.2:
     resolution: {integrity: sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw==}
@@ -2881,12 +2863,10 @@ snapshots:
       - jest
       - supports-color
 
-  '@ownclouders/extension-sdk@0.0.1-alpha.4(sass@1.62.0)(vite@5.4.21(@types/node@20.2.3)(sass@1.62.0))(vue@3.3.4)':
+  '@ownclouders/extension-sdk@12.3.0(vite@5.4.21(@types/node@20.2.3)(sass@1.62.0))(vue@3.3.4)':
     dependencies:
-      '@vitejs/plugin-vue': 4.2.1(vite@5.4.21(@types/node@20.2.3)(sass@1.62.0))(vue@3.3.4)
-      rollup-plugin-node-polyfills: 0.2.1
-      rollup-plugin-serve: 2.0.2
-      sass: 1.62.0
+      '@vitejs/plugin-vue': 6.0.4(vite@5.4.21(@types/node@20.2.3)(sass@1.62.0))(vue@3.3.4)
+      rollup-plugin-serve: 3.0.0
       vite: 5.4.21(@types/node@20.2.3)(sass@1.62.0)
     transitivePeerDependencies:
       - vue
@@ -2913,6 +2893,8 @@ snapshots:
       vue-router: 4.2.0(vue@3.3.4)
       vue3-gettext: 2.5.0-alpha.1(@vue/compiler-sfc@3.3.4)(vue@3.3.4)
       vuex: 4.1.0(vue@3.3.4)
+
+  '@rolldown/pluginutils@1.0.0-rc.2': {}
 
   '@rollup/rollup-android-arm-eabi@4.52.5':
     optional: true
@@ -3101,8 +3083,9 @@ snapshots:
     dependencies:
       '@ucast/core': 1.10.2
 
-  '@vitejs/plugin-vue@4.2.1(vite@5.4.21(@types/node@20.2.3)(sass@1.62.0))(vue@3.3.4)':
+  '@vitejs/plugin-vue@6.0.4(vite@5.4.21(@types/node@20.2.3)(sass@1.62.0))(vue@3.3.4)':
     dependencies:
+      '@rolldown/pluginutils': 1.0.0-rc.2
       vite: 5.4.21(@types/node@20.2.3)(sass@1.62.0)
       vue: 3.3.4
 
@@ -3240,6 +3223,7 @@ snapshots:
     dependencies:
       normalize-path: 3.0.0
       picomatch: 2.3.1
+    optional: true
 
   argparse@2.0.1: {}
 
@@ -3303,7 +3287,8 @@ snapshots:
 
   balanced-match@1.0.2: {}
 
-  binary-extensions@2.3.0: {}
+  binary-extensions@2.3.0:
+    optional: true
 
   body-parser@2.2.2:
     dependencies:
@@ -3410,6 +3395,7 @@ snapshots:
       readdirp: 3.6.0
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   color-convert@1.9.3:
     dependencies:
@@ -3938,8 +3924,6 @@ snapshots:
 
   estraverse@5.3.0: {}
 
-  estree-walker@0.6.1: {}
-
   estree-walker@2.0.2: {}
 
   esutils@2.0.3: {}
@@ -4229,7 +4213,8 @@ snapshots:
 
   ignore@5.3.2: {}
 
-  immutable@4.3.7: {}
+  immutable@4.3.7:
+    optional: true
 
   import-fresh@3.3.1:
     dependencies:
@@ -4273,6 +4258,7 @@ snapshots:
   is-binary-path@2.1.0:
     dependencies:
       binary-extensions: 2.3.0
+    optional: true
 
   is-boolean-object@1.1.2:
     dependencies:
@@ -4432,10 +4418,6 @@ snapshots:
 
   luxon@2.5.2: {}
 
-  magic-string@0.25.9:
-    dependencies:
-      sourcemap-codec: 1.4.8
-
   magic-string@0.30.0:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.4.15
@@ -4467,7 +4449,7 @@ snapshots:
     dependencies:
       mime-db: 1.54.0
 
-  mime@3.0.0: {}
+  mime@4.1.0: {}
 
   minimatch@3.1.2:
     dependencies:
@@ -4489,7 +4471,8 @@ snapshots:
 
   node-releases@2.0.12: {}
 
-  normalize-path@3.0.0: {}
+  normalize-path@3.0.0:
+    optional: true
 
   nth-check@2.1.1:
     dependencies:
@@ -4737,6 +4720,7 @@ snapshots:
   readdirp@3.6.0:
     dependencies:
       picomatch: 2.3.1
+    optional: true
 
   regexp.prototype.flags@1.5.0:
     dependencies:
@@ -4764,24 +4748,10 @@ snapshots:
 
   reusify@1.0.4: {}
 
-  rollup-plugin-inject@3.0.2:
+  rollup-plugin-serve@3.0.0:
     dependencies:
-      estree-walker: 0.6.1
-      magic-string: 0.25.9
-      rollup-pluginutils: 2.8.2
-
-  rollup-plugin-node-polyfills@0.2.1:
-    dependencies:
-      rollup-plugin-inject: 3.0.2
-
-  rollup-plugin-serve@2.0.2:
-    dependencies:
-      mime: 3.0.0
+      mime: 4.1.0
       opener: 1.5.2
-
-  rollup-pluginutils@2.8.2:
-    dependencies:
-      estree-walker: 0.6.1
 
   rollup@4.52.5:
     dependencies:
@@ -4838,6 +4808,7 @@ snapshots:
       chokidar: 3.6.0
       immutable: 4.3.7
       source-map-js: 1.2.1
+    optional: true
 
   semver@6.3.0: {}
 
@@ -4919,8 +4890,6 @@ snapshots:
   source-map-js@1.0.2: {}
 
   source-map-js@1.2.1: {}
-
-  sourcemap-codec@1.4.8: {}
 
   statuses@2.0.2: {}
 
