@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@ownclouders/eslint-config": "0.0.1",
-    "@ownclouders/extension-sdk": "0.0.1-alpha.4",
+    "@ownclouders/extension-sdk": "12.3.0",
     "@ownclouders/prettier-config": "0.0.1",
     "@ownclouders/tsconfig": "0.0.4",
     "@types/node": "^20.2.3",
