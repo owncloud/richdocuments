@@ -33,7 +33,7 @@ abstract class Db {
 	 * @return mixed
 	 */
 	public function insert() {
-		$result = $this->execute($this->insertStatement);
+		$result = $this->executeStatement($this->insertStatement);
 		return $result;
 	}
 	
@@ -55,8 +55,8 @@ abstract class Db {
 			$value = [$value];
 		}
 		
-		$result = $this->execute($this->loadStatement, $value);
-		$data = $result->fetch();
+		$result = $this->executeQuery($this->loadStatement, $value);
+		$data = $result->fetchAssociative();
 		if (!\is_array($data)) {
 			$data = [];
 		}
@@ -75,8 +75,8 @@ abstract class Db {
 		if (!\is_array($value)) {
 			$value = [$value];
 		}
-		$result = $this->execute('SELECT * FROM ' . $this->tableName . ' WHERE `'. $field .'` =?', $value);
-		$data = $result->fetchAll();
+		$result = $this->executeQuery('SELECT * FROM ' . $this->tableName . ' WHERE `'. $field .'` =?', $value);
+		$data = $result->fetchAllAssociative();
 		if (!\is_array($data) || !\count($data)) {
 			$this->data = [];
 		} elseif (\count($data)!=1) {
@@ -101,10 +101,10 @@ abstract class Db {
 		if ($count===0) {
 			return;
 		} elseif ($count===1) {
-			$this->execute('DELETE FROM ' . $this->tableName . ' WHERE `'. $field .'` =?', $value);
+			$this->executeStatement('DELETE FROM ' . $this->tableName . ' WHERE `'. $field .'` =?', $value);
 		} else {
 			$stmt = $this->buildInQuery($field, $value);
-			$this->execute('DELETE FROM ' . $this->tableName . ' WHERE ' . $stmt, $value);
+			$this->executeStatement('DELETE FROM ' . $this->tableName . ' WHERE ' . $stmt, $value);
 		}
 	}
 	
@@ -113,7 +113,7 @@ abstract class Db {
 	 * @return array
 	 */
 	public function getCollection() {
-		$result = $this->execute('SELECT * FROM ' . $this->tableName);
+		$result = $this->executeQuery('SELECT * FROM ' . $this->tableName);
 		$data = $result->fetchAll();
 		if (!\is_array($data)) {
 			$data = [];
@@ -135,13 +135,13 @@ abstract class Db {
 		if ($count===0) {
 			return [];
 		} elseif ($count===1) {
-			$result = $this->execute('SELECT * FROM ' . $this->tableName . ' WHERE `'. $field .'` =?', $value);
+			$result = $this->executeQuery('SELECT * FROM ' . $this->tableName . ' WHERE `'. $field .'` =?', $value);
 		} else {
 			$stmt = $this->buildInQuery($field, $value);
-			$result = $this->execute('SELECT * FROM ' . $this->tableName . ' WHERE '. $stmt, $value);
+			$result = $this->executeQuery('SELECT * FROM ' . $this->tableName . ' WHERE '. $stmt, $value);
 		}
 		
-		$data = $result->fetchAll();
+		$data = $result->fetchAllAssociative();
 		if (!\is_array($data)) {
 			$data = [];
 		}
@@ -192,18 +192,32 @@ abstract class Db {
 	 * If omited the query will be run on the current object $data
 	 * @return mixed (array/false)
 	 */
-	protected function execute($statement, $args = null) {
+	protected function executeQuery($statement, $args = null) {
 		$query = \OC::$server->getDatabaseConnection()->prepare($statement);
-		
+
 		if ($args !== null) {
-			$result = $query->execute($args);
+			$result = $query->executeQuery($args);
 		} elseif (\count($this->data)) {
-			$result = $query->execute($this->data);
+			$result = $query->executeQuery($this->data);
 		} else {
-			$result = $query->execute();
+			$result = $query->executeQuery();
 		}
-		
-		return $result ? $query : false;
+
+		return $result;
+	}
+
+	protected function executeStatement($statement, $args = null) {
+		$query = \OC::$server->getDatabaseConnection()->prepare($statement);
+
+		if ($args !== null) {
+			$result = $query->executeStatement($args);
+		} elseif (\count($this->data)) {
+			$result = $query->executeStatement($this->data);
+		} else {
+			$result = $query->executeStatement();
+		}
+
+		return $result;
 	}
 	
 	public function __call($name, $arguments) {
