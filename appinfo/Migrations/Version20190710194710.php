@@ -4,6 +4,7 @@ namespace OCA\richdocuments\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use OCP\Migration\ISchemaMigration;
 
 /**
@@ -18,7 +19,7 @@ class Version20190710194710 implements ISchemaMigration {
 		$fileidColumn = $table->getColumn('fileid');
 		if ($fileidColumn) {
 			/* @phan-suppress-next-line PhanDeprecatedClassConstant */
-			$fileidColumn->setType(Type::getType(Type::BIGINT));
+			$fileidColumn->setType(Type::getType(Types::BIGINT));
 			$fileidColumn->setOptions(['length' => 20]);
 		}
 	}
