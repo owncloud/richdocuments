@@ -45,7 +45,7 @@ class Storage extends \OCA\Richdocuments\Db {
 		$inStmt = $this->buildInQuery('mimetype', $mimeIds);
 		$query = 'SELECT * FROM `*PREFIX*filecache` WHERE `storage` =? AND ' . $inStmt . ' ORDER BY `mtime` DESC LIMIT ' . self::documentShowLimit;
 		$values = \array_merge([$storageId], $mimeIds);
-		$result = $this->execute($query, $values);
+		$result = $this->executeQuery($query, $values);
 		$files = [];
 		while ($row = $result->fetch()) {
 			$row['mimetype'] = $mimetypeLoader->getMimetypeById($row['mimetype']);
