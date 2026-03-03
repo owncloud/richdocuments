@@ -22,8 +22,8 @@ importers:
         specifier: 0.0.1
         version: 0.0.1
       '@ownclouders/tsconfig':
-        specifier: 0.0.4
-        version: 0.0.4
+        specifier: 0.0.6
+        version: 0.0.6
       '@types/node':
         specifier: ^20.2.3
         version: 20.2.3
@@ -449,8 +449,8 @@ packages:
   '@ownclouders/prettier-config@0.0.1':
     resolution: {integrity: sha512-vTQ11OCFgUxPJxAAIcGk05KByZL6F2fmdoUCKVuyMspsGvap3H0KjCIHY5c+Gz390tBfZf6vsnuoJkhGOOBgQw==}
 
-  '@ownclouders/tsconfig@0.0.4':
-    resolution: {integrity: sha512-95IArf5N19fr8ROR/ifm35f4iBV+2epcAGbDrl/fYWEb5X6SNAG3Hr3SGYwxZ/RD+LDPRbRCb1+cZYguyJY9pg==}
+  '@ownclouders/tsconfig@0.0.6':
+    resolution: {integrity: sha512-60BM0Syi8uHD0C+PmLFcS2e4upuOEL02itPw9wayznfOuu07sUasADSzkL0ud0zcr6je9TKQZR8hPLxZF1OTbQ==}
 
   '@ownclouders/web-pkg@0.0.3':
     resolution: {integrity: sha512-tipiCVLhkQ+RXTArnUYmUkDsL+F9h0cZizxpEovs/WOys/XshsC61uTzbWSxlhHAd5bg/wOj/s4gqM6GxqYkqw==}
@@ -1858,6 +1858,9 @@ packages:
   minimatch@3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
 
+  minimatch@3.1.5:
+    resolution: {integrity: sha512-VgjWUsnnT6n+NUk6eZq77zeFdpW2LWDzP6zFGrCbHXiYNul5Dzqk2HHQ5uFH2DNW5Xbp8+jVzaeNt94ssEEl4w==}
+
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
@@ -2895,7 +2898,7 @@ snapshots:
     dependencies:
       prettier: 2.8.8
 
-  '@ownclouders/tsconfig@0.0.4': {}
+  '@ownclouders/tsconfig@0.0.6': {}
 
   '@ownclouders/web-pkg@0.0.3(@casl/ability@6.5.0)(@casl/vue@2.2.1(@casl/ability@6.5.0)(vue@3.3.4))(axios@1.13.5)(filesize@9.0.11)(fuse.js@6.6.2)(lodash-es@4.17.21)(luxon@2.5.2)(mark.js@8.11.1)(qs@6.14.1)(uuid@9.0.0)(vue-concurrency@4.0.1(vue@3.3.4))(vue-router@4.2.0(vue@3.3.4))(vue3-gettext@2.5.0-alpha.1(@vue/compiler-sfc@3.3.4)(vue@3.3.4))(vuex@4.1.0(vue@3.3.4))':
     dependencies:
@@ -3787,7 +3790,7 @@ snapshots:
       eslint-plugin-es-x: 6.2.1(eslint@9.26.0(hono@4.11.7))
       ignore: 5.3.2
       is-core-module: 2.16.1
-      minimatch: 3.1.2
+      minimatch: 3.1.5
       resolve: 1.22.11
       semver: 7.7.4
 
@@ -4149,7 +4152,7 @@ snapshots:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.1.2
+      minimatch: 3.1.5
       once: 1.4.0
       path-is-absolute: 1.0.1
 
@@ -4470,6 +4473,10 @@ snapshots:
   mime@3.0.0: {}
 
   minimatch@3.1.2:
+    dependencies:
+      brace-expansion: 1.1.12
+
+  minimatch@3.1.5:
     dependencies:
       brace-expansion: 1.1.12
 
