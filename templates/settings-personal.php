@@ -1,8 +1,8 @@
 <?php
-	/** @var array $_ */
-	/** @var \OCP\IL10N $l */
-	script('richdocuments', 'settings-personal');
-	?>
+/** @var array $_ */
+/** @var \OCP\IL10N $l */
+script('richdocuments', 'settings-personal');
+?>
 <form id="richdocuments" class="section">
 
 	<h2 class="app-name"><?php p($l->t('Zotero for Collabora Online')) ?></h2>
