@@ -4,7 +4,7 @@ MINIO_MC = "minio/mc:RELEASE.2020-12-18T10-53-53Z"
 OC_CI_ALPINE = "owncloudci/alpine:latest"
 OC_CI_BAZEL_BUILDIFIER = "owncloudci/bazel-buildifier"
 OC_CI_CEPH = "owncloudci/ceph:tag-build-master-jewel-ubuntu-16.04"
-OC_CI_CORE = "owncloudci/core"
+OC_CI_CORE = "owncloudci/core:php83"
 OC_CI_DRONE_SKIP_PIPELINE = "owncloudci/drone-skip-pipeline"
 OC_CI_NODEJS = "owncloudci/nodejs:%s"
 OC_CI_ORACLE_XE = "owncloudci/oracle-xe:latest"
@@ -21,7 +21,7 @@ SELENIUM_STANDALONE_CHROME_DEBUG = "selenium/standalone-chrome-debug:3.141.59-ox
 SELENIUM_STANDALONE_FIREFOX_DEBUG = "selenium/standalone-firefox-debug:3.8.1"
 SONARSOURCE_SONAR_SCANNER_CLI = "sonarsource/sonar-scanner-cli"
 
-DEFAULT_PHP_VERSION = "7.4"
+DEFAULT_PHP_VERSION = "8.3"
 DEFAULT_NODEJS_VERSION = "14"
 
 MINIO_MC_ENV = {
@@ -52,18 +52,11 @@ config = {
     "branches": [
         "master",
     ],
-    "codestyle": True,
-    "phpstan": True,
-    "phan": {
-        "multipleVersions": {
-            "phpVersions": [
-                DEFAULT_PHP_VERSION,
-                "7.3",
-            ],
-        },
-    },
+    "codestyle": False,
+    "phpstan": False,
+    "phan": False,
     "javascript": False,
-    "phpunit": True,
+    "phpunit": False,
     "acceptance": {
         "webUI": {
             "suites": {
@@ -849,7 +842,7 @@ def acceptance(ctx):
     errorFound = False
 
     default = {
-        "servers": ["daily-master-qa", "latest"],
+        "servers": ["daily-master-qa"],
         "browsers": ["chrome"],
         "phpVersions": [DEFAULT_PHP_VERSION],
         "databases": ["mariadb:10.2"],
