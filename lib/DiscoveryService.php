@@ -24,7 +24,6 @@ use OCP\ICache;
 use OCP\ICacheFactory;
 use OCP\ILogger;
 use OCP\Http\Client\IClientService;
-use OCA\Richdocuments\AppConfig;
 use SimpleXMLElement;
 
 class DiscoveryService {
@@ -180,9 +179,7 @@ class DiscoveryService {
 			$this->logger->debug('{discoveryKey} found in cache', ['app' => 'richdocuments', 'discoveryKey' => $discoveryCacheKey]);
 		}
 
-		$loadEntities = \libxml_disable_entity_loader(true);
 		$discoveryXML = \simplexml_load_string($discovery);
-		\libxml_disable_entity_loader($loadEntities);
 
 		if ($discoveryXML === false) {
 			$this->cache->remove($discoveryCacheKey);
