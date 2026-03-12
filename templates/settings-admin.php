@@ -1,8 +1,8 @@
 <?php
-	/** @var array $_ */
-	/** @var \OCP\IL10N $l */
-	script('richdocuments', 'settings-admin');
-	?>
+/** @var array $_ */
+/** @var \OCP\IL10N $l */
+script('richdocuments', 'settings-admin');
+?>
 <form id="richdocuments" class="section">
 
 	<h2 class="app-name has-documentation"><?php p($l->t('Collabora Online')) ?></h2>

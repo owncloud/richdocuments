@@ -11,18 +11,15 @@
 
 namespace OCA\Richdocuments\Http;
 
-use \OCP\AppFramework\Http;
+use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Response;
 use OCP\Files\File;
-use \OCP\IRequest;
+use OCP\IRequest;
 
-class DownloadResponse extends \OCP\AppFramework\Http\Response {
-	private $request;
-	private $file;
+class DownloadResponse extends Response {
+	private IRequest $request;
+	private File $file;
 
-	/**
-	 * @param IRequest $request
-	 * @param File $file
-	 */
 	public function __construct(IRequest $request, File $file) {
 		$this->request = $request;
 		$this->file = $file;
@@ -102,6 +99,7 @@ class DownloadResponse extends \OCP\AppFramework\Http\Response {
 
 	protected function addContentDispositionHeader() {
 		$encodedName = \rawurlencode($this->file->getName());
+		/** @phpstan-ignore-next-line */
 		$isIE = \preg_match("/MSIE/", $this->request->server["HTTP_USER_AGENT"]);
 		if ($isIE) {
 			$this->addHeader(
