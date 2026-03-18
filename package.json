@@ -11,7 +11,7 @@
     "@ownclouders/eslint-config": "0.0.1",
     "@ownclouders/extension-sdk": "0.0.1-alpha.4",
     "@ownclouders/prettier-config": "0.0.1",
-    "@ownclouders/tsconfig": "0.0.4",
+    "@ownclouders/tsconfig": "0.0.6",
     "@types/node": "^20.2.3",
     "axios": "^1.13.5",
     "easygettext": "https://github.com/owncloud/easygettext/archive/refs/tags/v2.18.2-oc.tar.gz",
