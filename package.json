@@ -15,7 +15,7 @@
     "@types/node": "^20.2.3",
     "axios": "^1.13.5",
     "easygettext": "https://github.com/owncloud/easygettext/archive/refs/tags/v2.18.2-oc.tar.gz",
-    "eslint": "9.26.0",
+    "eslint": "10.0.3",
     "prettier": "3.8.1",
     "typescript": "4.9.5",
     "vite": "5.4.21",
