@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@ownclouders/web-pkg':
         specifier: ^0.0.3
-        version: 0.0.3(@casl/ability@6.5.0)(@casl/vue@2.2.1(@casl/ability@6.5.0)(vue@3.5.30(typescript@4.9.5)))(axios@1.13.5)(filesize@9.0.11)(fuse.js@6.6.2)(lodash-es@4.17.21)(luxon@2.5.2)(mark.js@8.11.1)(qs@6.14.1)(uuid@9.0.0)(vue-concurrency@4.0.1(vue@3.5.30(typescript@4.9.5)))(vue-router@4.2.0(vue@3.5.30(typescript@4.9.5)))(vue3-gettext@2.5.0-alpha.1(@vue/compiler-sfc@3.5.30)(vue@3.5.30(typescript@4.9.5)))(vuex@4.1.0(vue@3.5.30(typescript@4.9.5)))
+        version: 0.0.3(@casl/ability@6.5.0)(@casl/vue@2.2.1(@casl/ability@6.5.0)(vue@3.5.30(typescript@4.9.5)))(axios@1.14.0)(filesize@9.0.11)(fuse.js@6.6.2)(lodash-es@4.17.21)(luxon@2.5.2)(mark.js@8.11.1)(qs@6.14.1)(uuid@9.0.0)(vue-concurrency@4.0.1(vue@3.5.30(typescript@4.9.5)))(vue-router@4.2.0(vue@3.5.30(typescript@4.9.5)))(vue3-gettext@2.5.0-alpha.1(@vue/compiler-sfc@3.5.30)(vue@3.5.30(typescript@4.9.5)))(vuex@4.1.0(vue@3.5.30(typescript@4.9.5)))
     devDependencies:
       '@ownclouders/eslint-config':
         specifier: 0.0.1
@@ -28,8 +28,8 @@ importers:
         specifier: ^20.2.3
         version: 20.2.3
       axios:
-        specifier: ^1.13.5
-        version: 1.13.5
+        specifier: ^1.14.0
+        version: 1.14.0
       easygettext:
         specifier: https://github.com/owncloud/easygettext/archive/refs/tags/v2.18.2-oc.tar.gz
         version: https://github.com/owncloud/easygettext/archive/refs/tags/v2.18.2-oc.tar.gz(typescript@4.9.5)
@@ -872,8 +872,8 @@ packages:
     resolution: {integrity: sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==}
     engines: {node: '>= 0.4'}
 
-  axios@1.13.5:
-    resolution: {integrity: sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==}
+  axios@1.14.0:
+    resolution: {integrity: sha512-3Y8yrqLSwjuzpXuZ0oIYZ/XGgLwUIBU3uLvbcpb0pidD9ctpShJd43KSlEEkVQg6DS0G9NKyzOvBfUtDKEyHvQ==}
 
   babel-walk@3.0.0-canary-5:
     resolution: {integrity: sha512-GAwkz0AihzY5bkwIY5QDR+LvsRQgB/B+1foMPvi0FZPMl5fjD7ICiznUiBdLYMH1QYe6vqu4gWYytZOccLouFw==}
@@ -895,6 +895,9 @@ packages:
 
   brace-expansion@1.1.12:
     resolution: {integrity: sha512-9T9UjW3r0UW5c1Q7GTwllptXwhvYmEzFhzMfZ9H7FQWt+uZePjZPjBP/W1ZEyZ1twGWom5/56TF4lPcqjnDHcg==}
+
+  brace-expansion@1.1.13:
+    resolution: {integrity: sha512-9ZLprWS6EENmhEOpjCYW2c8VkmOvckIJZfkr7rBW6dObmfgJ/L1GpSYW5Hpo9lDz4D1+n0Ckz8rU7FwHDQiG/w==}
 
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
@@ -2091,8 +2094,9 @@ packages:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
     engines: {node: '>= 0.10'}
 
-  proxy-from-env@1.1.0:
-    resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
+  proxy-from-env@2.1.0:
+    resolution: {integrity: sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==}
+    engines: {node: '>=10'}
 
   pug-attrs@3.0.0:
     resolution: {integrity: sha512-azINV9dUtzPMFQktvTXciNAfAuVh/L/JCl0vtPCwvOA21uZrC08K/UnmrL+SXGEVc1FwzjW62+xw5S/uaLj6cA==}
@@ -2962,11 +2966,11 @@ snapshots:
 
   '@ownclouders/tsconfig@0.0.6': {}
 
-  '@ownclouders/web-pkg@0.0.3(@casl/ability@6.5.0)(@casl/vue@2.2.1(@casl/ability@6.5.0)(vue@3.5.30(typescript@4.9.5)))(axios@1.13.5)(filesize@9.0.11)(fuse.js@6.6.2)(lodash-es@4.17.21)(luxon@2.5.2)(mark.js@8.11.1)(qs@6.14.1)(uuid@9.0.0)(vue-concurrency@4.0.1(vue@3.5.30(typescript@4.9.5)))(vue-router@4.2.0(vue@3.5.30(typescript@4.9.5)))(vue3-gettext@2.5.0-alpha.1(@vue/compiler-sfc@3.5.30)(vue@3.5.30(typescript@4.9.5)))(vuex@4.1.0(vue@3.5.30(typescript@4.9.5)))':
+  '@ownclouders/web-pkg@0.0.3(@casl/ability@6.5.0)(@casl/vue@2.2.1(@casl/ability@6.5.0)(vue@3.5.30(typescript@4.9.5)))(axios@1.14.0)(filesize@9.0.11)(fuse.js@6.6.2)(lodash-es@4.17.21)(luxon@2.5.2)(mark.js@8.11.1)(qs@6.14.1)(uuid@9.0.0)(vue-concurrency@4.0.1(vue@3.5.30(typescript@4.9.5)))(vue-router@4.2.0(vue@3.5.30(typescript@4.9.5)))(vue3-gettext@2.5.0-alpha.1(@vue/compiler-sfc@3.5.30)(vue@3.5.30(typescript@4.9.5)))(vuex@4.1.0(vue@3.5.30(typescript@4.9.5)))':
     dependencies:
       '@casl/ability': 6.5.0
       '@casl/vue': 2.2.1(@casl/ability@6.5.0)(vue@3.5.30(typescript@4.9.5))
-      axios: 1.13.5
+      axios: 1.14.0
       filesize: 9.0.11
       fuse.js: 6.6.2
       lodash-es: 4.17.21
@@ -3392,11 +3396,11 @@ snapshots:
 
   available-typed-arrays@1.0.5: {}
 
-  axios@1.13.5:
+  axios@1.14.0:
     dependencies:
       follow-redirects: 1.15.11
       form-data: 4.0.5
-      proxy-from-env: 1.1.0
+      proxy-from-env: 2.1.0
     transitivePeerDependencies:
       - debug
 
@@ -3426,6 +3430,11 @@ snapshots:
   boolbase@1.0.0: {}
 
   brace-expansion@1.1.12:
+    dependencies:
+      balanced-match: 1.0.2
+      concat-map: 0.0.1
+
+  brace-expansion@1.1.13:
     dependencies:
       balanced-match: 1.0.2
       concat-map: 0.0.1
@@ -4586,7 +4595,7 @@ snapshots:
 
   minimatch@3.1.5:
     dependencies:
-      brace-expansion: 1.1.12
+      brace-expansion: 1.1.13
 
   minimist@1.2.8: {}
 
@@ -4756,7 +4765,7 @@ snapshots:
       forwarded: 0.2.0
       ipaddr.js: 1.9.1
 
-  proxy-from-env@1.1.0: {}
+  proxy-from-env@2.1.0: {}
 
   pug-attrs@3.0.0:
     dependencies:
