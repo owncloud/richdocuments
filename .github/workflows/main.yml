@@ -60,9 +60,4 @@ jobs:
     needs:
       - php-code-style
       - php-unit
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Build
-        run: make dist
+    uses: owncloud/reusable-workflows/.github/workflows/build.yml@main
