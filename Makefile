@@ -177,6 +177,11 @@ test-acceptance-webui: ## Run webUI acceptance tests
 test-acceptance-webui: $(acceptance_test_deps)
 	BEHAT_BIN=$(BEHAT_BIN) ../../tests/acceptance/run.sh --remote --type webUI
 
+# Installs dependencies and does any build actions needed for the app to run in CI
+.PHONY: ci
+ci: vendor
+	@echo dependencies and build actions for CI are completed
+
 #
 # Dependency management
 #--------------------------------------
