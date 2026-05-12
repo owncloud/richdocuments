@@ -14,6 +14,7 @@
 namespace OCA\Richdocuments\AppInfo;
 
 use OCA\Richdocuments\AppConfig;
+use OCA\Richdocuments\FederationService;
 use OCP\AppFramework\App;
 use OC\AppFramework\Utility\SimpleContainer;
 use OCP\Share;
@@ -35,6 +36,23 @@ class Application extends App {
 		 */
 		$container->registerService('L10N', function (SimpleContainer $c) use ($server) {
 			return $server->getL10N($c->query('AppName'));
+		});
+
+		/**
+		 * FederationService — inject TrustedServers only when the federation app is installed.
+		 * When null, FederationService::isServerAllowed() denies all remote servers (secure default).
+		 */
+		$container->registerService(FederationService::class, function () use ($server) {
+			$trustedServers = null;
+			if ($server->getAppManager()->isInstalled('federation')) {
+				$trustedServers = \OC::$server->query(\OCA\Federation\TrustedServers::class);
+			}
+			return new FederationService(
+				$server->getLogger(),
+				$server->getURLGenerator(),
+				$server->getHTTPClientService(),
+				$trustedServers
+			);
 		});
 	}
 
