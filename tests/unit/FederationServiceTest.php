@@ -21,6 +21,7 @@
  */
 namespace OCA\Richdocuments\Tests;
 
+use OCA\Federation\TrustedServers;
 use OCA\Richdocuments\FederationService;
 use OCP\Http\Client\IClientService;
 use OCP\ILogger;
@@ -29,57 +30,44 @@ use PHPUnit\Framework\MockObject\MockObject;
 use Test\TestCase;
 
 class FederationServiceTest extends TestCase {
-	/**
-	 * The ILogger instance.
-	 *
-	 * @var ILogger
-	 */
+	/** @var ILogger|MockObject */
 	private $logger;
 
-	/**
-	 * The IClientService instance.
-	 *
-	 * @var IClientService
-	 */
+	/** @var IClientService|MockObject */
 	private $httpClient;
 
-	/**
-	 * The IURLGenerator instance.
-	 *
-	 * @var IURLGenerator
-	 */
+	/** @var IURLGenerator|MockObject */
 	private $urlGenerator;
 
-	/**
-	 * @var FederationService|MockObject The discovery service mock object.
-	 */
+	/** @var TrustedServers|MockObject */
+	private $trustedServers;
+
+	/** @var FederationService */
 	private $federationService;
 
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->urlGenerator = $this->createMock(IURLGenerator::class);
-		$this->logger = $this->createMock(ILogger::class);
-		$this->httpClient = $this->createMock(IClientService::class);
+		$this->urlGenerator   = $this->createMock(IURLGenerator::class);
+		$this->logger         = $this->createMock(ILogger::class);
+		$this->httpClient     = $this->createMock(IClientService::class);
+		$this->trustedServers = $this->createMock(TrustedServers::class);
 
 		$this->federationService = new FederationService(
 			$this->logger,
 			$this->urlGenerator,
-			$this->httpClient
+			$this->httpClient,
+			$this->trustedServers
 		);
 	}
 
+	// -------------------------------------------------------------------------
+	// Existing tests
+	// -------------------------------------------------------------------------
+
 	public function dataGenerateFederatedCloudID() {
-		$userPrefix = [
-			'username',
-			'1234'
-		];
-		$remotes = [
-			'localhost',
-			'local.host',
-			'dev.local.host',
-			'127.0.0.1',
-		];
+		$userPrefix = ['username', '1234'];
+		$remotes    = ['localhost', 'local.host', 'dev.local.host', '127.0.0.1'];
 
 		$testCases = [];
 		foreach ($userPrefix as $user) {
@@ -92,9 +80,6 @@ class FederationServiceTest extends TestCase {
 
 	/**
 	 * @dataProvider dataGenerateFederatedCloudID
-	 *
-	 * @param string $userId
-	 * @param string $expectedFederatedCloudID
 	 */
 	public function testSplitUserRemote($userId, $remote) {
 		$this->urlGenerator->method('getAbsoluteUrl')
@@ -104,5 +89,71 @@ class FederationServiceTest extends TestCase {
 		$federatedCloudID = $this->federationService->generateFederatedCloudID($userId);
 
 		$this->assertSame("{$userId}@{$remote}", $federatedCloudID);
+	}
+
+	// -------------------------------------------------------------------------
+	// isServerAllowed() tests
+	// -------------------------------------------------------------------------
+
+	public function testIsServerAllowedReturnsFalseWhenTrustedServersIsNull(): void {
+		$service = new FederationService(
+			$this->logger,
+			$this->urlGenerator,
+			$this->httpClient,
+			null
+		);
+
+		$this->assertFalse($service->isServerAllowed('https://remote.example.com'));
+	}
+
+	public function testIsServerAllowedReturnsTrueForExactMatch(): void {
+		$this->trustedServers->method('isTrustedServer')
+			->willReturnCallback(fn($url) => $url === 'https://trusted.example.com');
+
+		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com'));
+	}
+
+	public function testIsServerAllowedStripsTrailingSlash(): void {
+		$this->trustedServers->method('isTrustedServer')
+			->willReturnCallback(fn($url) => $url === 'https://trusted.example.com');
+
+		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com/'));
+	}
+
+	public function testIsServerAllowedStripsMultipleTrailingSlashes(): void {
+		$this->trustedServers->method('isTrustedServer')
+			->willReturnCallback(fn($url) => $url === 'https://trusted.example.com');
+
+		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com///'));
+	}
+
+	public function testIsServerAllowedSwapsHttpToHttps(): void {
+		// Admin stored https://, request arrives as http://
+		$this->trustedServers->method('isTrustedServer')
+			->willReturnCallback(fn($url) => $url === 'https://trusted.example.com');
+
+		$this->assertTrue($this->federationService->isServerAllowed('http://trusted.example.com'));
+	}
+
+	public function testIsServerAllowedSwapsHttpsToHttp(): void {
+		// Admin stored http://, request arrives as https://
+		$this->trustedServers->method('isTrustedServer')
+			->willReturnCallback(fn($url) => $url === 'http://trusted.example.com');
+
+		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com'));
+	}
+
+	public function testIsServerAllowedReturnsFalseForUntrustedServer(): void {
+		$this->trustedServers->method('isTrustedServer')
+			->willReturn(false);
+
+		$this->assertFalse($this->federationService->isServerAllowed('https://evil.attacker.com'));
+	}
+
+	public function testIsServerAllowedReturnsFalseWhenListIsEmpty(): void {
+		$this->trustedServers->method('isTrustedServer')
+			->willReturn(false);
+
+		$this->assertFalse($this->federationService->isServerAllowed('https://any.server.com'));
 	}
 }

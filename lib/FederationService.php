@@ -21,34 +21,34 @@
  */
 namespace OCA\Richdocuments;
 
+use OCA\Federation\TrustedServers;
 use OCP\ILogger;
 use OCP\Http\Client\IClientService;
 use OCP\IURLGenerator;
 
 class FederationService {
-	/**
-	 * @var ILogger
-	 */
+	/** @var ILogger */
 	private $logger;
 
-	/**
-	 * @var IURLGenerator
-	 */
+	/** @var IURLGenerator */
 	private $urlGenerator;
 
-	/**
-	 * @var IClientService
-	 */
+	/** @var IClientService */
 	private $httpClient;
+
+	/** @var TrustedServers|null */
+	private $trustedServers;
 
 	public function __construct(
 		ILogger $logger,
 		IURLGenerator $urlGenerator,
-		IClientService $httpClient
+		IClientService $httpClient,
+		?TrustedServers $trustedServers
 	) {
-		$this->logger = $logger;
-		$this->urlGenerator = $urlGenerator;
-		$this->httpClient = $httpClient;
+		$this->logger         = $logger;
+		$this->urlGenerator   = $urlGenerator;
+		$this->httpClient     = $httpClient;
+		$this->trustedServers = $trustedServers;
 	}
 
 	/**
@@ -69,13 +69,12 @@ class FederationService {
 			'&accessToken=' . $accessToken;
 		return $remoteFileUrl;
 	}
-	
+
 	/**
-	*
-	* @param string $server addres of a remote server
-	* @param string $accessToken wopi access token from a remote server
-	* @return array|null with additional wopi information
-	*/
+	 * @param string $server address of a remote server
+	 * @param string $accessToken wopi access token from a remote server
+	 * @return array|null with additional wopi information
+	 */
 	public function getWopiForToken($server, $accessToken) {
 		$remote = $server;
 
@@ -114,15 +113,37 @@ class FederationService {
 	}
 
 	/**
-	 * Check if server is allowed
+	 * Check if the given server URL is in ownCloud's trusted-servers list.
+	 *
+	 * Returns false when the federation app is not installed ($trustedServers is null)
+	 * or when the server is not in the trusted list. Checks both the URL as-is (after
+	 * stripping trailing slashes) and the http/https scheme variant to tolerate minor
+	 * mismatches between how the admin stored the URL and how the request arrives.
 	 *
 	 * @param string $remote a remote url
-	 * @return bool indicating if given remote is allowed server
+	 * @return bool
 	 */
-	public function isServerAllowed($remote) {
-		// TODO: implement check for trusted server, for a moment all trusted
+	public function isServerAllowed(string $remote): bool {
+		if ($this->trustedServers === null) {
+			return false;
+		}
 
-		return true;
+		$normalized = \rtrim($remote, '/');
+
+		if ($this->trustedServers->isTrustedServer($normalized)) {
+			return true;
+		}
+
+		// swap scheme and try again
+		if (\strpos($normalized, 'https://') === 0) {
+			$swapped = 'http://' . \substr($normalized, 8);
+		} elseif (\strpos($normalized, 'http://') === 0) {
+			$swapped = 'https://' . \substr($normalized, 7);
+		} else {
+			return false;
+		}
+
+		return $this->trustedServers->isTrustedServer($swapped);
 	}
 
 	/**
