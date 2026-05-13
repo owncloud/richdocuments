@@ -45,7 +45,7 @@ class Application extends App {
 		$container->registerService(FederationService::class, function () use ($server) {
 			$trustedServers = null;
 			if ($server->getAppManager()->isInstalled('federation')) {
-				$trustedServers = \OC::$server->query(\OCA\Federation\TrustedServers::class);
+				$trustedServers = $server->query(\OCA\Federation\TrustedServers::class);
 			}
 			return new FederationService(
 				$server->getLogger(),

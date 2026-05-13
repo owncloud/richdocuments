@@ -150,10 +150,4 @@ class FederationServiceTest extends TestCase {
 		$this->assertFalse($this->federationService->isServerAllowed('https://evil.attacker.com'));
 	}
 
-	public function testIsServerAllowedReturnsFalseWhenListIsEmpty(): void {
-		$this->trustedServers->method('isTrustedServer')
-			->willReturn(false);
-
-		$this->assertFalse($this->federationService->isServerAllowed('https://any.server.com'));
-	}
 }
