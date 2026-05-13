@@ -45,6 +45,7 @@ class Application extends App {
 		$container->registerService(FederationService::class, function () use ($server) {
 			$trustedServers = null;
 			if ($server->getAppManager()->isInstalled('federation')) {
+				/* @phan-suppress-next-line PhanUndeclaredClassReference */
 				$trustedServers = $server->query(\OCA\Federation\TrustedServers::class);
 			}
 			return new FederationService(

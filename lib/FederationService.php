@@ -36,6 +36,7 @@ class FederationService {
 	/** @var IClientService */
 	private $httpClient;
 
+	/* @phan-suppress-next-line PhanUndeclaredTypeProperty */
 	/** @var TrustedServers|null */
 	private $trustedServers;
 
@@ -43,6 +44,7 @@ class FederationService {
 		ILogger $logger,
 		IURLGenerator $urlGenerator,
 		IClientService $httpClient,
+		/* @phan-suppress-next-line PhanUndeclaredTypeParameter */
 		?TrustedServers $trustedServers
 	) {
 		$this->logger         = $logger;
@@ -130,6 +132,7 @@ class FederationService {
 
 		$normalized = \rtrim($remote, '/');
 
+		/* @phan-suppress-next-line PhanUndeclaredClassMethod */
 		if ($this->trustedServers->isTrustedServer($normalized)) {
 			return true;
 		}
@@ -143,6 +146,7 @@ class FederationService {
 			return false;
 		}
 
+		/* @phan-suppress-next-line PhanUndeclaredClassMethod */
 		return $this->trustedServers->isTrustedServer($swapped);
 	}
 
