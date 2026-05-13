@@ -36,8 +36,8 @@ class FederationService {
 	/** @var IClientService */
 	private $httpClient;
 
-	/* @phan-suppress-next-line PhanUndeclaredTypeProperty */
 	/** @var TrustedServers|null */
+	/* @phan-suppress-next-line PhanUndeclaredTypeProperty */
 	private $trustedServers;
 
 	public function __construct(
