@@ -108,21 +108,21 @@ class FederationServiceTest extends TestCase {
 
 	public function testIsServerAllowedReturnsTrueForExactMatch(): void {
 		$this->trustedServers->method('isTrustedServer')
-			->willReturnCallback(fn($url) => $url === 'https://trusted.example.com');
+			->willReturnCallback(fn ($url) => $url === 'https://trusted.example.com');
 
 		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com'));
 	}
 
 	public function testIsServerAllowedStripsTrailingSlash(): void {
 		$this->trustedServers->method('isTrustedServer')
-			->willReturnCallback(fn($url) => $url === 'https://trusted.example.com');
+			->willReturnCallback(fn ($url) => $url === 'https://trusted.example.com');
 
 		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com/'));
 	}
 
 	public function testIsServerAllowedStripsMultipleTrailingSlashes(): void {
 		$this->trustedServers->method('isTrustedServer')
-			->willReturnCallback(fn($url) => $url === 'https://trusted.example.com');
+			->willReturnCallback(fn ($url) => $url === 'https://trusted.example.com');
 
 		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com///'));
 	}
@@ -130,7 +130,7 @@ class FederationServiceTest extends TestCase {
 	public function testIsServerAllowedSwapsHttpToHttps(): void {
 		// Admin stored https://, request arrives as http://
 		$this->trustedServers->method('isTrustedServer')
-			->willReturnCallback(fn($url) => $url === 'https://trusted.example.com');
+			->willReturnCallback(fn ($url) => $url === 'https://trusted.example.com');
 
 		$this->assertTrue($this->federationService->isServerAllowed('http://trusted.example.com'));
 	}
@@ -138,7 +138,7 @@ class FederationServiceTest extends TestCase {
 	public function testIsServerAllowedSwapsHttpsToHttp(): void {
 		// Admin stored http://, request arrives as https://
 		$this->trustedServers->method('isTrustedServer')
-			->willReturnCallback(fn($url) => $url === 'http://trusted.example.com');
+			->willReturnCallback(fn ($url) => $url === 'http://trusted.example.com');
 
 		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com'));
 	}
