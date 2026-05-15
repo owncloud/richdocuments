@@ -113,12 +113,10 @@ class FederationService {
 	}
 
 	/**
-	 * Check if the given server URL is in the richdocuments.federation_allowlist system config.
+	 * Check if the given server URL matches an entry in the richdocuments.federation_allowlist
+	 * system config. Allowlist entries are plain domain names (no scheme).
 	 *
-	 * Returns false when the key is absent, empty, or not an array. Each entry is
-	 * normalised (trailing slashes stripped) and checked against the incoming URL
-	 * both as-is and with the http/https scheme swapped, to tolerate minor
-	 * mismatches between how the admin stored the URL and how the request arrives.
+	 * Returns false when the key is absent, empty, or not an array.
 	 *
 	 * @param string $remote a remote url
 	 * @return bool
@@ -130,22 +128,10 @@ class FederationService {
 			return false;
 		}
 
-		$normalized = \rtrim($remote, '/');
-
-		if (\strpos($normalized, 'https://') === 0) {
-			$swapped = 'http://' . \substr($normalized, 8);
-		} elseif (\strpos($normalized, 'http://') === 0) {
-			$swapped = 'https://' . \substr($normalized, 7);
-		} else {
-			$swapped = null;
-		}
+		$domain = \rtrim(\preg_replace('|^https?://|', '', $remote), '/');
 
 		foreach ($allowlist as $entry) {
-			$e = \rtrim($entry, '/');
-			if ($normalized === $e) {
-				return true;
-			}
-			if ($swapped !== null && $swapped === $e) {
+			if ($domain === \rtrim((string)$entry, '/')) {
 				return true;
 			}
 		}
