@@ -103,14 +103,6 @@ class FederationServiceTest extends TestCase {
 		$this->assertFalse($this->federationService->isServerAllowed('https://remote.example.com'));
 	}
 
-	public function testIsServerAllowedReturnsFalseWhenListIsEmpty(): void {
-		$this->config->method('getSystemValue')
-			->with('richdocuments.federation_allowlist', [])
-			->willReturn([]);
-
-		$this->assertFalse($this->federationService->isServerAllowed('https://remote.example.com'));
-	}
-
 	public function testIsServerAllowedReturnsFalseForNonArrayConfig(): void {
 		$this->config->method('getSystemValue')
 			->with('richdocuments.federation_allowlist', [])

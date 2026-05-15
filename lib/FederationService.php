@@ -118,6 +118,9 @@ class FederationService {
 	 *
 	 * Returns false when the key is absent, empty, or not an array.
 	 *
+	 * Known limitation: path-prefixed installs (e.g. cloud.example.com/owncloud) are not
+	 * supported — the path component will prevent matching a bare domain entry.
+	 *
 	 * @param string $remote a remote url
 	 * @return bool
 	 */
@@ -128,7 +131,7 @@ class FederationService {
 			return false;
 		}
 
-		$domain = \rtrim(\preg_replace('|^https?://|', '', $remote), '/');
+		$domain = \rtrim((string)\preg_replace('|^https?://|', '', $remote), '/');
 
 		foreach ($allowlist as $entry) {
 			if ($domain === \rtrim((string)$entry, '/')) {
