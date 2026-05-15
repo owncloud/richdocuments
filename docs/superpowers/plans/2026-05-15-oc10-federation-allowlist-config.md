@@ -499,6 +499,77 @@ suppression. IConfig is a core ownCloud interface, always available."
 
 ---
 
+## Task 4: Pre-PR code style gate
+
+**Files:** none (verification only)
+
+All three make targets must pass before opening the PR. These run in CI, so a local pass is required first. Note: `test-php-phan` and `test-php-phpstan` require ownCloud core to be checked out at `../../` — if running in an isolated environment without core, skip those two and rely on CI to catch them (confirmed passing on previous PR). `test-php-style` can always be run locally.
+
+- [ ] **Step 1: Run PHP code style**
+
+```bash
+make test-php-style
+```
+
+Expected: exit 0, no files listed as needing fixes. If it fails, the error output will show a unified diff of what needs changing — apply it and re-run before continuing.
+
+- [ ] **Step 2: Run Phan (requires ownCloud core at `../../`)**
+
+```bash
+make test-php-phan 2>&1 | grep -E "^lib/|^appinfo/" | grep -v "^lib/Controller\|^lib/Db\|^lib/Document\|^lib/File\|^lib/Http\|^lib/Back\|^lib/Wopi" | head -20
+```
+
+Expected: no lines output (no new errors in `lib/FederationService.php` or `lib/AppInfo/Application.php`). If errors appear for our files specifically, fix them before continuing. Pre-existing errors in other files can be ignored.
+
+If core is not available locally, skip this step — CI will catch it.
+
+- [ ] **Step 3: Run PHPStan (requires ownCloud core at `../../`)**
+
+```bash
+make test-php-phpstan 2>&1 | tail -20
+```
+
+Expected: `[OK] No errors` or exit 0. If core is not available locally, skip — CI will catch it.
+
+- [ ] **Step 4: Open the PR in draft mode**
+
+```bash
+git push -u origin <branch-name>
+gh pr create --draft \
+  --title "feat(security): use richdocuments.federation_allowlist system config for federation server validation" \
+  --body "$(cat <<'EOF'
+## Summary
+
+- Replaces \`OCA\Federation\TrustedServers\` with a plain PHP array in \`config.php\` as the sole authority for permitted federation servers
+- Admins configure the allowlist via \`richdocuments.federation_allowlist\` system config key — no federation app dependency required
+- Absent, empty, or non-array values deny all federation requests (secure default)
+- URL matching applies trailing-slash stripping and http/https scheme swap, consistent with previous PR
+
+## Config
+
+\`\`\`php
+// config/config.php
+'richdocuments.federation_allowlist' => [
+    'https://collab1.example.com',
+    'https://collab2.example.com',
+],
+\`\`\`
+
+## Test plan
+
+- [ ] Unit tests cover: absent key, empty list, non-array value, exact match, trailing slash (single/multiple), http→https swap, https→http swap, untrusted server
+- [ ] \`make test-php-style\` passes
+- [ ] CI: PHP Code Style, Phan, PHPStan all green
+- [ ] Integration: add entry to \`config.php\`, verify trusted remote works; verify unlisted remote is denied with log entry
+- [ ] Integration: omit key entirely, verify all federation requests denied
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
+
+---
+
 ## Self-Review
 
 **Spec coverage:**
@@ -512,6 +583,7 @@ suppression. IConfig is a core ownCloud interface, always available."
 - ✅ Untrusted server → false — Task 2 + test in Task 1
 - ✅ DI registration simplified in Application.php — Task 3
 - ✅ All Phan suppressions removed — Task 2 (FederationService.php) + Task 3 (Application.php)
+- ✅ Pre-PR code style gate (test-php-style, test-php-phan, test-php-phpstan) — Task 4
 
 **Placeholder scan:** None found.
 
