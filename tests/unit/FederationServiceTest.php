@@ -21,9 +21,9 @@
  */
 namespace OCA\Richdocuments\Tests;
 
-use OCA\Federation\TrustedServers;
 use OCA\Richdocuments\FederationService;
 use OCP\Http\Client\IClientService;
+use OCP\IConfig;
 use OCP\ILogger;
 use OCP\IURLGenerator;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -39,8 +39,8 @@ class FederationServiceTest extends TestCase {
 	/** @var IURLGenerator|MockObject */
 	private $urlGenerator;
 
-	/** @var TrustedServers|MockObject */
-	private $trustedServers;
+	/** @var IConfig|MockObject */
+	private $config;
 
 	/** @var FederationService */
 	private $federationService;
@@ -48,16 +48,16 @@ class FederationServiceTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		$this->urlGenerator   = $this->createMock(IURLGenerator::class);
-		$this->logger         = $this->createMock(ILogger::class);
-		$this->httpClient     = $this->createMock(IClientService::class);
-		$this->trustedServers = $this->createMock(TrustedServers::class);
+		$this->urlGenerator = $this->createMock(IURLGenerator::class);
+		$this->logger       = $this->createMock(ILogger::class);
+		$this->httpClient   = $this->createMock(IClientService::class);
+		$this->config       = $this->createMock(IConfig::class);
 
 		$this->federationService = new FederationService(
 			$this->logger,
 			$this->urlGenerator,
 			$this->httpClient,
-			$this->trustedServers
+			$this->config
 		);
 	}
 
@@ -95,59 +95,75 @@ class FederationServiceTest extends TestCase {
 	// isServerAllowed() tests
 	// -------------------------------------------------------------------------
 
-	public function testIsServerAllowedReturnsFalseWhenTrustedServersIsNull(): void {
-		$service = new FederationService(
-			$this->logger,
-			$this->urlGenerator,
-			$this->httpClient,
-			null
-		);
+	public function testIsServerAllowedReturnsFalseWhenKeyIsAbsent(): void {
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn([]);
 
-		$this->assertFalse($service->isServerAllowed('https://remote.example.com'));
+		$this->assertFalse($this->federationService->isServerAllowed('https://remote.example.com'));
+	}
+
+	public function testIsServerAllowedReturnsFalseWhenListIsEmpty(): void {
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn([]);
+
+		$this->assertFalse($this->federationService->isServerAllowed('https://remote.example.com'));
+	}
+
+	public function testIsServerAllowedReturnsFalseForNonArrayConfig(): void {
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn('not-an-array');
+
+		$this->assertFalse($this->federationService->isServerAllowed('https://remote.example.com'));
 	}
 
 	public function testIsServerAllowedReturnsTrueForExactMatch(): void {
-		$this->trustedServers->method('isTrustedServer')
-			->willReturnCallback(fn ($url) => $url === 'https://trusted.example.com');
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn(['https://trusted.example.com']);
 
 		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com'));
 	}
 
 	public function testIsServerAllowedStripsTrailingSlash(): void {
-		$this->trustedServers->method('isTrustedServer')
-			->willReturnCallback(fn ($url) => $url === 'https://trusted.example.com');
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn(['https://trusted.example.com']);
 
 		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com/'));
 	}
 
 	public function testIsServerAllowedStripsMultipleTrailingSlashes(): void {
-		$this->trustedServers->method('isTrustedServer')
-			->willReturnCallback(fn ($url) => $url === 'https://trusted.example.com');
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn(['https://trusted.example.com']);
 
 		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com///'));
 	}
 
 	public function testIsServerAllowedSwapsHttpToHttps(): void {
-		// Admin stored https://, request arrives as http://
-		$this->trustedServers->method('isTrustedServer')
-			->willReturnCallback(fn ($url) => $url === 'https://trusted.example.com');
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn(['https://trusted.example.com']);
 
 		$this->assertTrue($this->federationService->isServerAllowed('http://trusted.example.com'));
 	}
 
 	public function testIsServerAllowedSwapsHttpsToHttp(): void {
-		// Admin stored http://, request arrives as https://
-		$this->trustedServers->method('isTrustedServer')
-			->willReturnCallback(fn ($url) => $url === 'http://trusted.example.com');
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn(['http://trusted.example.com']);
 
 		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com'));
 	}
 
 	public function testIsServerAllowedReturnsFalseForUntrustedServer(): void {
-		$this->trustedServers->method('isTrustedServer')
-			->willReturn(false);
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn(['https://trusted.example.com']);
 
 		$this->assertFalse($this->federationService->isServerAllowed('https://evil.attacker.com'));
 	}
-
 }

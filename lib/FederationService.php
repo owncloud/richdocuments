@@ -21,7 +21,7 @@
  */
 namespace OCA\Richdocuments;
 
-use OCA\Federation\TrustedServers;
+use OCP\IConfig;
 use OCP\ILogger;
 use OCP\Http\Client\IClientService;
 use OCP\IURLGenerator;
@@ -36,21 +36,19 @@ class FederationService {
 	/** @var IClientService */
 	private $httpClient;
 
-	/** @var TrustedServers|null */
-	/* @phan-suppress-next-line PhanUndeclaredTypeProperty */
-	private $trustedServers;
+	/** @var IConfig */
+	private $config;
 
 	public function __construct(
 		ILogger $logger,
 		IURLGenerator $urlGenerator,
 		IClientService $httpClient,
-		/* @phan-suppress-next-line PhanUndeclaredTypeParameter */
-		?TrustedServers $trustedServers
+		IConfig $config
 	) {
-		$this->logger         = $logger;
-		$this->urlGenerator   = $urlGenerator;
-		$this->httpClient     = $httpClient;
-		$this->trustedServers = $trustedServers;
+		$this->logger       = $logger;
+		$this->urlGenerator = $urlGenerator;
+		$this->httpClient   = $httpClient;
+		$this->config       = $config;
 	}
 
 	/**
@@ -115,39 +113,44 @@ class FederationService {
 	}
 
 	/**
-	 * Check if the given server URL is in ownCloud's trusted-servers list.
+	 * Check if the given server URL is in the richdocuments.federation_allowlist system config.
 	 *
-	 * Returns false when the federation app is not installed ($trustedServers is null)
-	 * or when the server is not in the trusted list. Checks both the URL as-is (after
-	 * stripping trailing slashes) and the http/https scheme variant to tolerate minor
+	 * Returns false when the key is absent, empty, or not an array. Each entry is
+	 * normalised (trailing slashes stripped) and checked against the incoming URL
+	 * both as-is and with the http/https scheme swapped, to tolerate minor
 	 * mismatches between how the admin stored the URL and how the request arrives.
 	 *
 	 * @param string $remote a remote url
 	 * @return bool
 	 */
 	public function isServerAllowed(string $remote): bool {
-		if ($this->trustedServers === null) {
+		$allowlist = $this->config->getSystemValue('richdocuments.federation_allowlist', []);
+
+		if (!\is_array($allowlist) || empty($allowlist)) {
 			return false;
 		}
 
 		$normalized = \rtrim($remote, '/');
 
-		/* @phan-suppress-next-line PhanUndeclaredClassMethod */
-		if ($this->trustedServers->isTrustedServer($normalized)) {
-			return true;
-		}
-
-		// swap scheme and try again
 		if (\strpos($normalized, 'https://') === 0) {
 			$swapped = 'http://' . \substr($normalized, 8);
 		} elseif (\strpos($normalized, 'http://') === 0) {
 			$swapped = 'https://' . \substr($normalized, 7);
 		} else {
-			return false;
+			$swapped = null;
 		}
 
-		/* @phan-suppress-next-line PhanUndeclaredClassMethod */
-		return $this->trustedServers->isTrustedServer($swapped);
+		foreach ($allowlist as $entry) {
+			$e = \rtrim($entry, '/');
+			if ($normalized === $e) {
+				return true;
+			}
+			if ($swapped !== null && $swapped === $e) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
