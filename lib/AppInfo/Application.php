@@ -38,21 +38,12 @@ class Application extends App {
 			return $server->getL10N($c->query('AppName'));
 		});
 
-		/**
-		 * FederationService — inject TrustedServers only when the federation app is installed.
-		 * When null, FederationService::isServerAllowed() denies all remote servers (secure default).
-		 */
 		$container->registerService(FederationService::class, function () use ($server) {
-			$trustedServers = null;
-			if ($server->getAppManager()->isInstalled('federation')) {
-				/* @phan-suppress-next-line PhanUndeclaredClassReference */
-				$trustedServers = $server->query(\OCA\Federation\TrustedServers::class);
-			}
 			return new FederationService(
 				$server->getLogger(),
 				$server->getURLGenerator(),
 				$server->getHTTPClientService(),
-				$trustedServers
+				$server->getConfig()
 			);
 		});
 	}
