@@ -23,63 +23,51 @@ namespace OCA\Richdocuments\Tests;
 
 use OCA\Richdocuments\FederationService;
 use OCP\Http\Client\IClientService;
+use OCP\IConfig;
 use OCP\ILogger;
 use OCP\IURLGenerator;
 use PHPUnit\Framework\MockObject\MockObject;
 use Test\TestCase;
 
 class FederationServiceTest extends TestCase {
-	/**
-	 * The ILogger instance.
-	 *
-	 * @var ILogger
-	 */
+	/** @var ILogger|MockObject */
 	private $logger;
 
-	/**
-	 * The IClientService instance.
-	 *
-	 * @var IClientService
-	 */
+	/** @var IClientService|MockObject */
 	private $httpClient;
 
-	/**
-	 * The IURLGenerator instance.
-	 *
-	 * @var IURLGenerator
-	 */
+	/** @var IURLGenerator|MockObject */
 	private $urlGenerator;
 
-	/**
-	 * @var FederationService|MockObject The discovery service mock object.
-	 */
+	/** @var IConfig|MockObject */
+	private $config;
+
+	/** @var FederationService */
 	private $federationService;
 
 	protected function setUp(): void {
 		parent::setUp();
 
 		$this->urlGenerator = $this->createMock(IURLGenerator::class);
-		$this->logger = $this->createMock(ILogger::class);
-		$this->httpClient = $this->createMock(IClientService::class);
+		$this->logger       = $this->createMock(ILogger::class);
+		$this->httpClient   = $this->createMock(IClientService::class);
+		$this->config       = $this->createMock(IConfig::class);
 
 		$this->federationService = new FederationService(
 			$this->logger,
 			$this->urlGenerator,
-			$this->httpClient
+			$this->httpClient,
+			$this->config
 		);
 	}
 
+	// -------------------------------------------------------------------------
+	// Existing tests
+	// -------------------------------------------------------------------------
+
 	public function dataGenerateFederatedCloudID() {
-		$userPrefix = [
-			'username',
-			'1234'
-		];
-		$remotes = [
-			'localhost',
-			'local.host',
-			'dev.local.host',
-			'127.0.0.1',
-		];
+		$userPrefix = ['username', '1234'];
+		$remotes    = ['localhost', 'local.host', 'dev.local.host', '127.0.0.1'];
 
 		$testCases = [];
 		foreach ($userPrefix as $user) {
@@ -92,9 +80,6 @@ class FederationServiceTest extends TestCase {
 
 	/**
 	 * @dataProvider dataGenerateFederatedCloudID
-	 *
-	 * @param string $userId
-	 * @param string $expectedFederatedCloudID
 	 */
 	public function testSplitUserRemote($userId, $remote) {
 		$this->urlGenerator->method('getAbsoluteUrl')
@@ -104,5 +89,73 @@ class FederationServiceTest extends TestCase {
 		$federatedCloudID = $this->federationService->generateFederatedCloudID($userId);
 
 		$this->assertSame("{$userId}@{$remote}", $federatedCloudID);
+	}
+
+	// -------------------------------------------------------------------------
+	// isServerAllowed() tests
+	// -------------------------------------------------------------------------
+
+	public function testIsServerAllowedReturnsFalseWhenKeyIsAbsent(): void {
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn([]);
+
+		$this->assertFalse($this->federationService->isServerAllowed('https://remote.example.com'));
+	}
+
+	public function testIsServerAllowedReturnsFalseForNonArrayConfig(): void {
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn('not-an-array');
+
+		$this->assertFalse($this->federationService->isServerAllowed('https://remote.example.com'));
+	}
+
+	public function testIsServerAllowedReturnsTrueForExactMatch(): void {
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn(['trusted.example.com']);
+
+		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com'));
+	}
+
+	public function testIsServerAllowedStripsTrailingSlash(): void {
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn(['trusted.example.com']);
+
+		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com/'));
+	}
+
+	public function testIsServerAllowedStripsMultipleTrailingSlashes(): void {
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn(['trusted.example.com']);
+
+		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com///'));
+	}
+
+	public function testIsServerAllowedMatchesHttps(): void {
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn(['trusted.example.com']);
+
+		$this->assertTrue($this->federationService->isServerAllowed('https://trusted.example.com'));
+	}
+
+	public function testIsServerAllowedMatchesHttp(): void {
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn(['trusted.example.com']);
+
+		$this->assertTrue($this->federationService->isServerAllowed('http://trusted.example.com'));
+	}
+
+	public function testIsServerAllowedReturnsFalseForUntrustedServer(): void {
+		$this->config->method('getSystemValue')
+			->with('richdocuments.federation_allowlist', [])
+			->willReturn(['trusted.example.com']);
+
+		$this->assertFalse($this->federationService->isServerAllowed('https://evil.attacker.com'));
 	}
 }

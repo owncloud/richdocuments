@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
+## [4.2.3] - 2026-05-18
+
+### Security
+
+- [599](https://github.com/owncloud/richdocuments/pull/599) - Fix SSRF in federation endpoint: validate remote server against richdocuments.federation_allowlist system config
+
 ## [4.2.2] - 2025-11-19
 
 ### Fixed

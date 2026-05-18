@@ -133,6 +133,13 @@ clean-deps:
 clean: clean-deps clean-dist clean-build
 
 ##-------------
+## CI
+##-------------
+
+.PHONY: ci
+ci: vendor ## Install dependencies for CI
+
+##-------------
 ## Tests
 ##-------------
 
