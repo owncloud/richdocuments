@@ -23,16 +23,9 @@ class Application extends App {
 	public function __construct(array $urlParams = []) {
 		parent::__construct('richdocuments', $urlParams);
 
-		$this->registerServices();
-	}
-
-	private function registerServices() {
 		$container = $this->getContainer();
 		$server = $container->getServer();
 
-		/**
-		 * Core
-		 */
 		$container->registerService('L10N', function (SimpleContainer $c) use ($server) {
 			return $server->getL10N($c->query('AppName'));
 		});
