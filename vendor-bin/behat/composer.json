@@ -1,11 +1,11 @@
 {
     "config" : {
         "platform": {
-            "php": "7.4"
+            "php": "8.3"
         }
     },
     "require": {
-        "behat/behat": "^3.13",
+        "behat/behat": "^3.31",
         "behat/mink": "1.7.1",
         "friends-of-behat/mink-extension": "^2.7",
         "behat/mink-selenium2-driver": "^1.5",
@@ -14,8 +14,8 @@
         "sensiolabs/behat-page-object-extension": "^2.3",
         "symfony/translation": "^5.4",
         "sabre/xml": "^2.2",
-        "guzzlehttp/guzzle": "^7.7",
+        "guzzlehttp/guzzle": "^7.12",
         "phpunit/phpunit": "^9.6",
-        "helmich/phpunit-json-assert": "^3.4"
+        "helmich/phpunit-json-assert": "^3.5"
     }
 }
