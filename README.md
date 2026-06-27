@@ -1,81 +1,138 @@
-ownCloud application to integrate Collabora Online
-==================================================
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=owncloud_richdocuments&metric=alert_status)](https://sonarcloud.io/dashboard?id=owncloud_richdocuments)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=owncloud_richdocuments&metric=security_rating)](https://sonarcloud.io/dashboard?id=owncloud_richdocuments)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=owncloud_richdocuments&metric=coverage)](https://sonarcloud.io/dashboard?id=owncloud_richdocuments)
+# Richdocuments (Collabora Online for ownCloud)
 
-Collabora Online for ownCloud provides collaborating editing functions for text documents, spreadsheets and presentations inside ownCloud for improved productivity.
+<!-- OSPO-managed README | Generated: 2026-04-16 | v2 -->
 
-See also: https://owncloud.com/collabora/collaborative-editing/
+[![License](https://img.shields.io/badge/License-See%20Repository-blue.svg)](LICENSE) [![ownCloud OSPO](https://img.shields.io/badge/OSPO-ownCloud-blue)](https://kiteworks.com/opensource) [![Docker Hub](https://img.shields.io/docker/pulls/owncloud)](https://hub.docker.com/r/owncloud/server)
 
-### Configuration
+Richdocuments integrates Collabora Online with ownCloud Server, enabling real-time collaborative editing of documents, spreadsheets and presentations directly within the ownCloud web interface. The app uses the WOPI (Web Application Open Platform Interface) protocol to bridge ownCloud's file storage with the Collabora Online document editing server.
 
-- Set WOPI Server URL
+## Part of Classic (OC10)
 
-    ```
-    $ occ config:app:set richdocuments wopi_url --value [your-host-public-ip]:8098 
-    ```
+This app is part of the [ownCloud Server (OC10)](https://github.com/owncloud/core) ecosystem, providing online document editing capabilities through the Collabora Online integration. It is available on the [ownCloud Marketplace](https://marketplace.owncloud.com/apps/richdocuments).
 
-- Enable/Disable Secure View and set its settings
+The ownCloud Server is available on [Docker Hub](https://hub.docker.com/r/owncloud/server).
 
-    ```
-    $ occ config:app:set richdocuments secure_view_option --value true
-    $ occ config:app:set richdocuments watermark_text --value "Restricted to {viewer-email}" 
-    $ occ config:app:set richdocuments secure_view_open_action_default --value true
-    ```
+## Getting Started
 
-### Developing
-
-The easiest way to integrate Collabora with development instance of ownCloud is by disabling SSL for Collabora.
-
-- Start Collabora Server with default settings
-
-    ```
-    $ docker run -t -d -p 9980:9980 -e "extra_params=--o:ssl.enable=false" -e "username=admin" -e "password=admin" --name collabora --cap-add MKNOD collabora/code:6.4.8.6
-    ```
-
-- Access Collabora Admin at `http://[your-host-public-ip]:9980/loleaflet/dist/admin/admin.html` e.g. `172.16.12.95`,
-
-- Set in `Settings -> Admin -> Additional -> Collabora Online server -> http://[your-host-public-ip]:9980`
-
+Follow the steps below to install and configure Collabora Online integration.
 
 ### Installation
 
-NOTE: Collabora server needs to be reachable from ownCloud server, and Collabora server needs to be able to reach ownCloud server
+Install from the [ownCloud Marketplace](https://marketplace.owncloud.com/apps/richdocuments), or manually:
 
-NOTE: it is possible to use Collabora Online’s integration with re-compiled and/or re-branded backends.
-
-## Installing connector for ownCloud Web
-
-You will need:
-* [ownCloud server](https://owncloud.com/download-server/#owncloud-server) with ownCloud Web (it can be compiled from source code or installed from the [official marketplace](https://marketplace.owncloud.com/apps/web)).
-* Official ownCloud Collabora Online integration app. You can install it from the [ownCloud marketplace](https://marketplace.owncloud.com/apps/richdocuments).
-
-To enable work within ownCloud web, register the connector in the ownCloud Web config.json:
-
-* If you installed ownCloud Web from the official marketplace, the path is `<owncloud-root-catalog>/config/config.json`
-* If you compiled it from source code yourself using [this instruction](https://owncloud.dev/clients/web/backend-oc10/#running-web), the path is `<owncloud-web-root-catalog>/config/config.json`.
-
-To register the connector, use these lines:
-
-```
-"external_apps": [
-    {
-        "id": "richdocuments",
-        "path": "http(s)://<owncloud-10-server-address>/index.php/apps/richdocuments/js/richdocuments.js"
-    }
-]
+```bash
+cd apps
+git clone https://github.com/owncloud/richdocuments.git
+php occ app:enable richdocuments
 ```
 
-## Compiling the connector for ownCloud Web
+### Configuration
 
-Build all the dependencies:
+Set the WOPI server URL:
 
+```bash
+occ config:app:set richdocuments wopi_url --value [your-host-public-ip]:8098
 ```
-yarn install
-```
-Build the resulting file `js/web/richdocuments.js`:
 
+Enable Secure View:
+
+```bash
+occ config:app:set richdocuments secure_view_option --value true
+occ config:app:set richdocuments watermark_text --value "Restricted to {viewer-email}"
+occ config:app:set richdocuments secure_view_open_action_default --value true
 ```
-yarn build
+
+### Development
+
+Start a Collabora server for development (SSL disabled):
+
+```bash
+docker run -t -d -p 9980:9980 -e "extra_params=--o:ssl.enable=false" \
+  -e "username=admin" -e "password=admin" \
+  --name collabora --cap-add MKNOD collabora/code:6.4.8.6
 ```
+
+Build the ownCloud Web connector:
+
+```bash
+pnpm install
+pnpm build
+```
+
+## Documentation
+
+- [Collabora Online for ownCloud](https://owncloud.com/collabora/collaborative-editing/)
+- [ownCloud Server Admin Manual](https://doc.owncloud.com/server/latest/admin_manual/)
+
+## Community & Support
+
+**[Star](https://github.com/owncloud/richdocuments)** this repo and **Watch** for release notifications!
+
+- [ownCloud Website](https://owncloud.com)
+- [Community Discussions](https://github.com/orgs/owncloud/discussions)
+- [Matrix Chat](https://app.element.io/#/room/#owncloud:matrix.org)
+- [Documentation](https://doc.owncloud.com)
+- [Enterprise Support](https://owncloud.com/contact-us/)
+- [OSPO Home](https://kiteworks.com/opensource)
+
+## Contributing
+
+We welcome contributions! Please read the [Contributing Guidelines](CONTRIBUTING.md)
+and our [Code of Conduct](CODE_OF_CONDUCT.md) before getting started.
+
+### Workflow
+
+- **Rebase Early, Rebase Often!** We use a rebase workflow. Always rebase on the target branch before submitting a PR.
+- **Dependabot**: Automated dependency updates are managed via Dependabot. Review and merge dependency PRs promptly.
+- **Signed Commits**: All commits **must** be PGP/GPG signed. See [GitHub's signing guide](https://docs.github.com/en/authentication/managing-commit-signature-verification).
+- **DCO Sign-off**: Every commit must carry a `Signed-off-by` line:
+  ```
+  git commit -s -S -m "your commit message"
+  ```
+- **GitHub Actions Policy**: Workflows may only use actions that are (a) owned by `owncloud`, (b) created by GitHub (`actions/*`), or (c) verified in the GitHub Marketplace.
+
+## Translations
+
+Help translate this project on Transifex:
+**<https://explore.transifex.com/owncloud-org/owncloud/>**
+
+Please submit translations via Transifex -- do not open pull requests for translation changes.
+
+## Security
+
+**Do not open a public GitHub issue for security vulnerabilities.**
+
+Report vulnerabilities at **<https://security.owncloud.com>** -- see [SECURITY.md](SECURITY.md).
+
+Bug bounty: [YesWeHack ownCloud Program](https://yeswehack.com/programs/owncloud-bug-bounty-program)
+
+## License
+
+See [LICENSE](LICENSE) for license details.
+
+## About the ownCloud OSPO
+
+The [Kiteworks Open Source Program Office](https://kiteworks.com/opensource), operating under
+the [ownCloud](https://owncloud.com) brand, launched on May 5, 2026, to steward the open source
+ecosystem around ownCloud's products. The OSPO ensures transparent governance, license compliance,
+community health, and sustainable collaboration between the open source community and
+[Kiteworks](https://www.kiteworks.com), which acquired ownCloud in 2023.
+
+- **OSPO Home**: <https://kiteworks.com/opensource>
+- **GitHub**: <https://github.com/owncloud>
+- **ownCloud**: <https://owncloud.com>
+
+For questions about the OSPO or licensing, contact ospo@kiteworks.com.
+
+### License Migration to Apache 2.0
+
+The OSPO is driving a strategic relicensing of ownCloud repositories toward the
+[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0), following
+the [Apache Software Foundation's third-party license policy](https://www.apache.org/legal/resolved.html).
+
+Individual repositories will migrate as their audit is completed. The LICENSE file
+in each repo reflects its **current** license status (not the target).
+
+**Current license: Not detected.** The OSPO will determine the current license status of this
+repository before planning any migration steps. If you know the intended license, please open an
+issue or contact ospo@kiteworks.com.
