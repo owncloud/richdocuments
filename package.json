@@ -16,7 +16,7 @@
     "axios": "^1.16.0",
     "easygettext": "https://github.com/owncloud/easygettext/archive/refs/tags/v2.18.2-oc.tar.gz",
     "eslint": "9.26.0",
-    "prettier": "3.9.5",
+    "prettier": "3.9.6",
     "typescript": "6.0.3",
     "vite": "^6.4.3",
     "vue": "3.5.40"
