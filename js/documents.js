@@ -227,6 +227,58 @@ var documentsMain = {
 		return window.location.protocol + '//' + window.location.host + ocurl;
 	},
 
+	// returns the given value if it is an absolute http(s) url, null otherwise.
+	// a path is fine, installations can live in a subdirectory
+	_absoluteHttpUrl: function(value) {
+		if (!value) {
+			return null;
+		}
+
+		var url;
+		try {
+			// no base url on purpose, only absolute urls are accepted
+			url = new URL(value);
+		} catch (exc) {
+			return null;
+		}
+
+		if ((url.protocol !== 'http:' && url.protocol !== 'https:') || !url.host) {
+			return null;
+		}
+
+		return url.href;
+	},
+
+	// origin of the Collabora Online server, taken from the discovery urlsrc.
+	// incoming post messages are only accepted from, and outgoing ones only
+	// sent to, that origin
+	_wopiOrigin: function() {
+		// without a urlsrc there is no known origin. new URL() would not throw
+		// here, an empty value resolves against the base url and would make this
+		// server its own Collabora Online origin
+		if (!documentsMain.urlsrc) {
+			return null;
+		}
+
+		var resolved;
+		try {
+			// urlsrc may be configured relative to this server, hence the base url
+			resolved = new URL(documentsMain.urlsrc, window.location.href);
+		} catch (exc) {
+			console.warn('Cannot determine the Collabora Online origin from ' + documentsMain.urlsrc);
+			return null;
+		}
+
+		// a urlsrc that is not http(s) has the opaque origin 'null', which is
+		// what a sandboxed frame reports as well, so it must never be returned
+		if (!documentsMain._absoluteHttpUrl(resolved.href)) {
+			console.warn('Cannot determine the Collabora Online origin from ' + documentsMain.urlsrc);
+			return null;
+		}
+
+		return resolved.origin;
+	},
+
 	UI : {
 		/* Editor wrapper HTML */
 		container : '<div id="mainContainer" class="claro">' +
@@ -452,6 +504,10 @@ var documentsMain = {
 			// Listen for App_LoadingStatus as soon as possible
 			$('#loleafletframe').ready(function() {
 				var editorInitListener = function(e) {
+					if (e.origin !== documentsMain._wopiOrigin()) {
+						return;
+					}
+
 					var msg = JSON.parse(e.data);
 					if (msg.MessageId === 'App_LoadingStatus') {
 						documentsMain.wopiClientFeatures = msg.Values.Features;
@@ -464,6 +520,10 @@ var documentsMain = {
 			$('#loleafletframe').load(function(){
 				// And start listening to incoming post messages
 				window.addEventListener('message', function(e){
+					if (e.origin !== documentsMain._wopiOrigin()) {
+						return;
+					}
+
 					if (documentsMain.isViewerMode) {
 						return;
 					}
@@ -613,9 +673,12 @@ var documentsMain = {
 		var shareToken = getURLParameter('shareToken');
 		if (shareToken != 'null') {
 
-			// check if local share or federated share
-			var server = getURLParameter('server');
-			if (server != 'null') {
+			// check if local share or federated share.
+			// the server is only ever supplied by the server side, and only for
+			// federated shares - never read it from the URL, it ends up in
+			// window.location in onClose()
+			var server = $('#return-to-server').val();
+			if (server) {
 				documentsMain.returnToServer = server;
 			} else {
 				documentsMain.returnToShare = shareToken;
@@ -633,13 +696,18 @@ var documentsMain = {
 
 	WOPIPostMessage: function(iframe, msgId, values) {
 		if (iframe) {
+			var targetOrigin = documentsMain._wopiOrigin();
+			if (!targetOrigin) {
+				return;
+			}
+
 			var msg = {
 				'MessageId': msgId,
 				'SendTime': Date.now(),
 				'Values': values
 			};
 
-			iframe.contentWindow.postMessage(JSON.stringify(msg), '*');
+			iframe.contentWindow.postMessage(JSON.stringify(msg), targetOrigin);
 		}
 	},
 
@@ -781,12 +849,18 @@ var documentsMain = {
 		documentsMain.UI.hideEditor();
 		$('#ocToolbar').remove();
 
+		// refuse to navigate to anything but an absolute http(s) url
+		var returnToServer = documentsMain._absoluteHttpUrl(documentsMain.returnToServer);
+		if (documentsMain.returnToServer && !returnToServer) {
+			console.warn('Not returning to ' + documentsMain.returnToServer + ', not an absolute http(s) url');
+		}
+
 		if (documentsMain.returnToDir) {
 			documentsMain.overlay.documentOverlay('show');
 			window.location = OC.generateUrl('apps/files?dir={dir}', {dir: documentsMain.returnToDir}, {escape: false});
-		} else if (documentsMain.returnToServer) {
+		} else if (returnToServer) {
 			documentsMain.overlay.documentOverlay('show');
-			window.location = documentsMain.returnToServer;
+			window.location = returnToServer;
 		} else if (documentsMain.returnToShare) {
 			documentsMain.overlay.documentOverlay('show');
 			window.location = OC.generateUrl('s/{shareToken}', {shareToken: documentsMain.returnToShare}, {escape: false});
