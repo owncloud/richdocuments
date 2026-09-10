@@ -65,6 +65,7 @@ style('richdocuments', 'style');
 	</ul>
 </div>
 <input type="hidden" id="wopi-url" name="wopi-url" value="<?php p($_['wopi_url']) ?>" />
+<input type="hidden" id="return-to-server" name="return-to-server" value="<?php p($_['return_to_server']) ?>" />
 <?php if ($_['enable_previews']): ?>
 <input type="hidden" id="previews_enabled" value="<?php p($_['enable_previews']) ?>" />
 <?php endif; ?>
