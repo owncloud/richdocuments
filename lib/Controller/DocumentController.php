@@ -166,6 +166,30 @@ class DocumentController extends Controller {
 	}
 
 	/**
+	 * Checks that the given value is an absolute http(s) URL with a non-empty host.
+	 *
+	 * The value is handed to the browser as a navigation target once the editor is
+	 * closed, so everything that is not an absolute http(s) URL has to be rejected -
+	 * most importantly the javascript: and data: schemes, and scheme relative URLs.
+	 *
+	 * @param mixed $url
+	 * @return bool
+	 */
+	private function isValidServerUrl($url) {
+		if (!\is_string($url) || $url === '') {
+			return false;
+		}
+		$parsed_url = \parse_url($url);
+		if (!\is_array($parsed_url) || !isset($parsed_url['scheme'], $parsed_url['host'])) {
+			return false;
+		}
+		if (!\in_array(\strtolower($parsed_url['scheme']), ['http', 'https'], true)) {
+			return false;
+		}
+		return $parsed_url['host'] !== '';
+	}
+
+	/**
 	 * Get collabora document for:
 	 * - the base template if fileId is null
 	 * - file in user folder (also shared by user/group) if fileId not null
@@ -261,7 +285,8 @@ class DocumentController extends Controller {
 				'doc_format' => $this->appConfig->getAppValue('doc_format'),
 				'instanceId' => $this->settings->getSystemValue('instanceid'),
 				'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
-				'show_custom_header' => false
+				'show_custom_header' => false,
+				'return_to_server' => '' // only federated shares return to a remote server
 			],
 			$docRetVal
 		);
@@ -358,7 +383,8 @@ class DocumentController extends Controller {
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
 			'instanceId' => $this->settings->getSystemValue('instanceid'),
 			'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
-			'show_custom_header' => true // public link should show a customer header without buttons
+			'show_custom_header' => true, // public link should show a customer header without buttons
+			'return_to_server' => '' // only federated shares return to a remote server
 		];
 
 		$response = new TemplateResponse('richdocuments', 'documents', $retVal, $renderAs);
@@ -381,6 +407,19 @@ class DocumentController extends Controller {
 	*/
 	public function federated($shareToken, $shareRelativePath, $server, $accessToken) {
 		if (!\is_string($shareToken) || $shareToken === '') {
+			return $this->responseError($this->l10n->t('Invalid request parameters'));
+		}
+
+		// the server is where the editor navigates back to once it is closed,
+		// see FederationService::getRemoteFileUrl(). this only checks the shape -
+		// that the value is an absolute http(s) url and therefore safe to hand to
+		// the browser. whether the host is trusted is decided further down by
+		// FederationService::isServerAllowed() via getWopiForToken(), which fails
+		// closed on an empty richdocuments.federation_allowlist. do not drop that
+		// call or move it behind the template response, on its own the check here
+		// accepts any host
+		if (!$this->isValidServerUrl($server)) {
+			$this->logger->warning("Rejecting federated request with invalid server {server}", ["server" => $server]);
 			return $this->responseError($this->l10n->t('Invalid request parameters'));
 		}
 
@@ -445,7 +484,8 @@ class DocumentController extends Controller {
 			'doc_format' => $this->appConfig->getAppValue('doc_format'),
 			'instanceId' => $this->settings->getSystemValue('instanceid'),
 			'canonical_webroot' => $this->appConfig->getAppValue('canonical_webroot'),
-			'show_custom_header' => true // federated share should show a customer header without buttons
+			'show_custom_header' => true, // federated share should show a customer header without buttons
+			'return_to_server' => $server
 		];
 
 		// Federated share is a user coming from remote instance so cannot show base template

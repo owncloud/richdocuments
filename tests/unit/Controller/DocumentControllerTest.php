@@ -15,6 +15,7 @@ use OCA\Richdocuments\DocumentService;
 use OCA\Richdocuments\DiscoveryService;
 use OCA\Richdocuments\FederationService;
 use OCP\App\IAppManager;
+use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IGroupManager;
 use OCP\INavigationManager;
 use OCP\IPreview;
@@ -172,5 +173,165 @@ class DocumentControllerTest extends \Test\TestCase {
 			["filename with\t tab"],
 			["filename with / slash"]
 		];
+	}
+
+	/**
+	 * The server parameter ends up as a navigation target in the browser, so
+	 * federated() has to reject everything that is not an absolute http(s) URL.
+	 *
+	 * @dataProvider invalidServerProvider
+	 * @param $server mixed
+	 */
+	public function testFederatedRejectsInvalidServer($server) {
+		// the request must not be processed any further
+		$this->documentService
+			->expects($this->never())
+			->method('getDocumentByFederatedToken');
+
+		$response = $this->documentController->federated('sharetoken', '/document.odt', $server, 'accesstoken');
+
+		$this->assertInstanceOf(TemplateResponse::class, $response);
+		$this->assertEquals('error', $response->getTemplateName());
+	}
+
+	public function invalidServerProvider(): array {
+		return [
+			'javascript scheme' => ['javascript:alert(document.domain)'],
+			'javascript scheme uppercase' => ['JaVaScRiPt:alert(document.domain)'],
+			'data scheme' => ['data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg=='],
+			'scheme relative' => ['//evil.tld'],
+			'scheme relative with path' => ['//evil.tld/owncloud'],
+			'relative path' => ['/index.php/apps/files'],
+			'no scheme' => ['remote.example.com'],
+			'scheme without host' => ['https://'],
+			'empty' => [''],
+			'null' => [null],
+			'not a string' => [42],
+		];
+	}
+
+	/**
+	 * A well formed remote server must pass the validation - in particular one
+	 * with a path, ownCloud can be installed in a subdirectory.
+	 *
+	 * @dataProvider validServerProvider
+	 * @param $server string
+	 */
+	public function testFederatedAcceptsValidServer(string $server) {
+		// reaching the document lookup means the server was accepted
+		$this->documentService
+			->expects($this->once())
+			->method('getDocumentByFederatedToken')
+			->with('sharetoken', '/document.odt')
+			->willReturn(null);
+
+		$response = $this->documentController->federated('sharetoken', '/document.odt', $server, 'accesstoken');
+
+		// the document cannot be resolved, so this is still an error response
+		$this->assertInstanceOf(TemplateResponse::class, $response);
+		$this->assertEquals('error', $response->getTemplateName());
+	}
+
+	public function validServerProvider(): array {
+		return [
+			'https' => ['https://remote.example.com'],
+			'http' => ['http://remote.example.com'],
+			'trailing slash' => ['https://remote.example.com/'],
+			'subdirectory install' => ['https://remote.example.com/owncloud'],
+			'with port' => ['https://remote.example.com:8443/owncloud'],
+			'uppercase scheme' => ['HTTPS://remote.example.com'],
+		];
+	}
+
+	/**
+	 * The validated server has to reach the template, that is where the JS picks
+	 * it up now instead of reading it from the URL.
+	 *
+	 * @group DB
+	 */
+	public function testFederatedPassesServerToTemplate() {
+		$server = 'https://remote.example.com/owncloud';
+
+		$this->documentService
+			->method('getDocumentByFederatedToken')
+			->willReturn($this->documentInfo());
+		$this->federationService
+			->method('getWopiForToken')
+			->with($server, 'accesstoken')
+			->willReturn(['editor' => 'alice@remote.example.com', 'attributes' => 1]);
+		$this->settings->method('getUserValue')->willReturn('en');
+		$this->mockDiscovery();
+
+		$response = $this->documentController->federated('sharetoken', '/document.odt', $server, 'accesstoken');
+
+		$this->assertInstanceOf(TemplateResponse::class, $response);
+		$this->assertEquals('documents', $response->getTemplateName());
+		$this->assertEquals($server, $response->getParams()['return_to_server']);
+	}
+
+	/**
+	 * A public link is never opened from a remote server, so it must not carry a
+	 * return_to_server value that the JS would navigate to.
+	 *
+	 * @group DB
+	 */
+	public function testPublicEmitsNoReturnToServer() {
+		$this->documentService
+			->method('getDocumentByShareToken')
+			->willReturn($this->documentInfo());
+		$this->settings->method('getUserValue')->willReturn('en');
+		$this->mockDiscovery();
+
+		$response = $this->documentController->public('sharetoken', null);
+
+		$this->assertInstanceOf(TemplateResponse::class, $response);
+		$this->assertEquals('documents', $response->getTemplateName());
+		$params = $response->getParams();
+		$this->assertArrayHasKey('return_to_server', $params);
+		$this->assertSame('', $params['return_to_server']);
+	}
+
+	/**
+	 * public() must not accept a server at all, so that no request parameter can
+	 * ever influence where the editor returns to.
+	 */
+	public function testPublicHasNoServerParameter() {
+		$parameters = (new \ReflectionMethod(DocumentController::class, 'public'))->getParameters();
+
+		$names = \array_map(static function (\ReflectionParameter $parameter) {
+			return $parameter->getName();
+		}, $parameters);
+
+		$this->assertEquals(['shareToken', 'fileId'], $names);
+	}
+
+	/**
+	 * Minimal document index as returned by the DocumentService.
+	 */
+	private function documentInfo(): array {
+		return [
+			'name' => 'document.odt',
+			'fileid' => 1234,
+			'path' => '/document.odt',
+			'owner' => 'alice',
+			'version' => 0,
+			'mimetype' => 'application/vnd.oasis.opendocument.text',
+			'allowEdit' => false,
+		];
+	}
+
+	/**
+	 * Let the discovery return a usable Collabora Online endpoint.
+	 */
+	private function mockDiscovery(): void {
+		$this->discoveryService
+			->method('getWopiSrc')
+			->willReturn([
+				'action' => 'view',
+				'urlsrc' => 'https://collabora.example.com/browser/abc/cool.html?',
+			]);
+		$this->discoveryService
+			->method('getWopiUrl')
+			->willReturn('https://collabora.example.com:9980');
 	}
 }
