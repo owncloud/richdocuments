@@ -13,7 +13,7 @@ frontend and a connector for ownCloud Web.
 - **Supported server versions:** `master` targets ownCloud 11 with PHP 8.3; branch `4.2` targets ownCloud 10.11+ with PHP 7.4 (see `appinfo/info.xml`)
 - **Primary language(s):** PHP, TypeScript/Vue, JavaScript
 - **Build system:** Composer, Make, pnpm + Vite
-- **Test framework:** PHPUnit (unit), Behat (webUI acceptance)
+- **Test framework:** PHPUnit (unit), karma + Jasmine (JavaScript unit), Behat (webUI acceptance)
 - **CI system:** GitHub Actions
 - **License:** AGPL-3.0
 
@@ -28,7 +28,7 @@ frontend and a connector for ownCloud Web.
 - `assets/` - Empty office document templates used when creating new files
 - `img/` - App icons and images
 - `l10n/` - Translations
-- `tests/` - PHPUnit and acceptance tests (`tests/unit/`, `tests/acceptance/`)
+- `tests/` - PHPUnit, JavaScript and acceptance tests (`tests/unit/`, `tests/js/`, `tests/acceptance/`)
 - `admin.php` / `settings.php` - Settings entry points
 - `Makefile` - Build and test automation
 - `composer.json` - PHP dependencies
@@ -70,6 +70,11 @@ pnpm build
 # Test (PHPUnit)
 make test-php-unit
 
+# Test (JavaScript unit, js/ only)
+make test-js
+# same, on a machine without Firefox
+KARMA_BROWSER=ChromeHeadless make test-js
+
 # Test (WebUI Acceptance)
 make test-acceptance-webui
 
@@ -92,7 +97,9 @@ make clean
 
 ## Important Constraints
 
-- **Tests need a core checkout:** `make test-php-unit` resolves PHPUnit at `../../lib/composer/bin/phpunit`, so the app must be checked out as `apps/richdocuments` inside an ownCloud Server tree. It cannot be run from a standalone clone.
+- **Tests need a core checkout:** `make test-php-unit` resolves PHPUnit at `../../lib/composer/bin/phpunit`, so the app must be checked out as `apps/richdocuments` inside an ownCloud Server tree. It cannot be run from a standalone clone. The same holds for `make test-js`: the scripts in `js/` expect the globals the server puts on the page, so `tests/js/karma.config.cjs` loads jQuery, jQuery UI and `OC` from the surrounding core checkout (`core/js/core.json`, `core/vendor/`, `core/js/tests/specHelper.js`). Core's node dependencies have to be installed there once (`make` in the core root), which is what creates the `core/vendor` symlink.
+- **Node dependencies need pnpm 9:** `pnpm-lock.yaml` is a pnpm 9 lockfile whose `easygettext` git tarball entry has no integrity hash, which pnpm 10 rejects (`ERR_PNPM_MISSING_TARBALL_INTEGRITY`). The Makefile therefore installs with `npx --yes pnpm@9`; use the same for a manual `pnpm install`.
+- **JavaScript unit tests only cover `js/`:** `tests/js/` runs the classic frontend. The Vue connector in `src/` has no unit tests yet; it needs a separate vitest setup, as used by `owncloud/web-extensions`.
 - **`make appstore` is release-only:** it unconditionally calls `occ integrity:sign-app` and needs a signing key and certificate in `~/.owncloud/certificates/`. Use `make dist` for a local build; `make dist` skips signing when no certificate is present.
 - **WOPI dependency:** Requires a running Collabora Online server that the ownCloud server can reach, and that can reach the ownCloud server in turn.
 - **Dual frontend:** Has both a classic frontend (`js/`) and an ownCloud Web connector (`src/`, built with Vite into `js/web/`). Frontend changes usually need to be made in both places.
