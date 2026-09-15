@@ -8,18 +8,18 @@
     "build:w": "pnpm vite build --watch --mode development"
   },
   "devDependencies": {
-    "@ownclouders/eslint-config": "0.0.1",
-    "@ownclouders/extension-sdk": "0.0.1-alpha.4",
+    "@ownclouders/eslint-config": "12.5.0",
+    "@ownclouders/extension-sdk": "12.5.0",
     "@ownclouders/prettier-config": "0.0.1",
-    "@ownclouders/tsconfig": "0.0.4",
-    "@types/node": "^20.2.3",
-    "axios": "^1.12.0",
+    "@ownclouders/tsconfig": "0.0.6",
+    "@types/node": "^26.1.1",
+    "axios": "^1.16.0",
     "easygettext": "https://github.com/owncloud/easygettext/archive/refs/tags/v2.18.2-oc.tar.gz",
-    "eslint": "8.31.0",
-    "prettier": "2.6.2",
-    "typescript": "4.9.5",
-    "vite": "5.4.21",
-    "vue": "3.3.4"
+    "eslint": "9.39.5",
+    "prettier": "3.9.6",
+    "typescript": "6.0.3",
+    "vite": "^6.4.3",
+    "vue": "3.5.40"
   },
   "peerDependencies": {
     "@ownclouders/web-pkg": "^0.0.3"
@@ -30,6 +30,29 @@
         "@ownclouders/web-*",
         "web-*"
       ]
+    },
+    "overrides": {
+      "@babel/core": "^7.29.6",
+      "@casl/ability": "^6.7.5",
+      "@hono/node-server": "^1.19.13",
+      "@modelcontextprotocol/sdk": "^1.26.0",
+      "axios": "^1.16.0",
+      "esbuild": "^0.25.0",
+      "fast-uri": "^3.1.2",
+      "flatted": "^3.4.2",
+      "follow-redirects": "^1.16.0",
+      "form-data": "^4.0.6",
+      "hono": "^4.12.25",
+      "js-yaml": "^4.2.0",
+      "lodash": "^4.18.0",
+      "lodash-es": "^4.18.0",
+      "minimatch": "^3.1.3",
+      "picomatch": "^2.3.2",
+      "postcss": "^8.5.10",
+      "qs": "^6.15.2",
+      "rollup": "^4.59.0",
+      "uuid": "^11.1.1",
+      "yaml": "^1.10.3"
     }
   }
 }
