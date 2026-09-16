@@ -1,8 +1,9 @@
 SHELL := /bin/bash
 
 COMPOSER_BIN := $(shell command -v composer 2> /dev/null)
-NPM := $(shell command -v npm 2> /dev/null)
-NODE_PREFIX=$(shell pwd)
+# pinned and resolved through npx on purpose: CI has node but not necessarily
+# pnpm. Override with PNPM=<command> to use a local one.
+PNPM ?= npx --yes pnpm@10
 
 app_name=richdocuments
 project_dir=$(CURDIR)/../$(app_name)
@@ -22,6 +23,9 @@ occ=$(CURDIR)/../core/occ
 # composer
 composer_deps=vendor
 acceptance_test_deps=vendor-bin/behat/vendor
+
+# node
+nodejs_deps=node_modules
 
 appstore:
 	mkdir -p $(sign_dir)
@@ -76,6 +80,7 @@ PHP_CODESNIFFER=vendor-bin/php_codesniffer/vendor/bin/phpcs
 PHAN=php -d zend.enable_gc=0 vendor-bin/phan/vendor/bin/phan
 PHPSTAN=php -d zend.enable_gc=0 vendor-bin/phpstan/vendor/bin/phpstan
 BEHAT_BIN=vendor-bin/behat/vendor/bin/behat
+KARMA=$(CURDIR)/node_modules/.bin/karma
 
 .DEFAULT_GOAL := help
 
@@ -86,14 +91,8 @@ help: ## Show this help message
 #
 # Node dependencies
 #
-$(nodejs_deps): package.json
-	$(NPM) install --prefix $(NODE_PREFIX) && touch $@
-
-$(BOWER): $(nodejs_deps)
-$(JSDOC): $(nodejs_deps)
-
-$(bower_deps): $(BOWER)
-	$(BOWER) install && touch $@
+$(nodejs_deps): package.json pnpm-lock.yaml
+	$(PNPM) install --frozen-lockfile && touch $@
 
 #
 # dist
@@ -133,13 +132,6 @@ clean-deps:
 clean: clean-deps clean-dist clean-build
 
 ##-------------
-## CI
-##-------------
-
-.PHONY: ci
-ci: vendor ## Install dependencies for CI
-
-##-------------
 ## Tests
 ##-------------
 
@@ -152,6 +144,16 @@ test-php-unit: vendor/bin/phpunit
 test-php-unit-dbg: ## Run php unit tests using phpdbg
 test-php-unit-dbg: vendor/bin/phpunit
 	$(PHPUNITDBG) --configuration ./phpunit.xml --testsuite unit
+
+.PHONY: test-js
+test-js: ## Run JavaScript unit tests
+test-js: $(nodejs_deps)
+	$(KARMA) start tests/js/karma.config.cjs --single-run
+
+.PHONY: test-js-debug
+test-js-debug: ## Run JavaScript unit tests and keep watching
+test-js-debug: $(nodejs_deps)
+	$(KARMA) start tests/js/karma.config.cjs
 
 .PHONY: test-php-style
 test-php-style: ## Run php-cs-fixer and check owncloud code-style
@@ -183,6 +185,11 @@ test-acceptance-api: $(acceptance_test_deps)
 test-acceptance-webui: ## Run webUI acceptance tests
 test-acceptance-webui: $(acceptance_test_deps)
 	BEHAT_BIN=$(BEHAT_BIN) ../../tests/acceptance/run.sh --remote --type webUI
+
+# Installs dependencies and does any build actions needed for the app to run in CI
+.PHONY: ci
+ci: vendor
+	@echo dependencies and build actions for CI are completed
 
 #
 # Dependency management

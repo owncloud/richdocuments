@@ -57,6 +57,17 @@ jobs:
       php-versions: ${{ needs.get-vars.outputs.php-versions }}
       core-ref-php74: '10.16'
 
+  js-unit:
+    name: JS Unit
+    needs:
+      - get-vars
+    uses: owncloud/reusable-workflows/.github/workflows/js-unit.yml@main
+    with:
+      app-name: ${{ needs.get-vars.outputs.app-name }}
+      php-version: '7.4'
+      # js-unit.yml has no core-ref-php74 input, it clones whatever core-ref says
+      core-ref: '10.16'
+
   build:
     name: Build
     needs:
