@@ -27,7 +27,7 @@
     "sinon": "^19.0.5",
     "typescript": "6.0.3",
     "vite": "^6.4.3",
-    "vue": "3.5.40"
+    "vue": "3.5.42"
   },
   "peerDependencies": {
     "@ownclouders/web-pkg": "^0.0.3"
