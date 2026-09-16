@@ -1,0 +1,28 @@
+name: Security Scan
+
+on:
+  push:
+    branches:
+      - '4.2'
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+  # No schedule here: GitHub only ever runs cron triggers on the default branch,
+  # so a weekly entry on this branch would silently never fire. Scheduled coverage
+  # of 4.2 needs a "ref" input on the reusable trivy workflow first, tracked
+  # separately; workflow_dispatch is the manual stand-in until then.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-scan-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trivy:
+    name: Trivy
+    uses: owncloud/reusable-workflows/.github/workflows/trivy.yml@main
