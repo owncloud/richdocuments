@@ -1,5 +1,17 @@
 version: 2
+
+# The entries below are duplicated per branch on purpose. Dependabot reads this
+# file only from the default branch, so the oc10 maintenance branch cannot carry
+# its own copy - it is covered by the "target-branch: 4.2" entries here.
+#
+# Note what that does and does not buy: target-branch produces weekly *version
+# update* PRs against 4.2, which is what keeps the branch from going stale.
+# Dependabot security *alerts* remain default-branch-only, and GitHub does not
+# create security updates for a target-branch at all. So 4.2 gets routine bumps
+# but never an alert; its scanning coverage is the Trivy job on that branch.
+
 updates:
+  # ---------------------------------------------------------------- master (oc11)
   - package-ecosystem: composer
     directory: "/"
     schedule:
@@ -30,6 +42,52 @@ updates:
 
   - package-ecosystem: github-actions
     directory: "/"
+    schedule:
+      interval: weekly
+      day: sunday
+      time: '22:00'
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  # ------------------------------------------------------------------- 4.2 (oc10)
+  - package-ecosystem: composer
+    directory: "/"
+    target-branch: "4.2"
+    schedule:
+      interval: weekly
+      day: sunday
+      time: '22:00'
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: npm
+    directory: "/"
+    target-branch: "4.2"
+    schedule:
+      interval: weekly
+      day: sunday
+      time: '22:00'
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    target-branch: "4.2"
     schedule:
       interval: weekly
       day: sunday
