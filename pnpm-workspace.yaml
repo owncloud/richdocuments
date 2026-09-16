@@ -1,0 +1,32 @@
+# pnpm settings. They live here rather than in the "pnpm" field of package.json
+# because pnpm >= 11 no longer reads that field, which silently drops the
+# overrides below - see https://pnpm.io/settings.
+
+peerDependencyRules:
+  ignoreMissing:
+    - '@ownclouders/web-*'
+    - 'web-*'
+
+# Transitive pins that close Dependabot alerts. Keep in sync with the alert list.
+overrides:
+  '@babel/core': ^7.29.6
+  '@casl/ability': ^6.7.5
+  '@hono/node-server': ^1.19.13
+  '@modelcontextprotocol/sdk': ^1.26.0
+  axios: ^1.16.0
+  esbuild: ^0.25.0
+  fast-uri: ^3.1.2
+  flatted: ^3.4.2
+  follow-redirects: ^1.16.0
+  form-data: ^4.0.6
+  hono: ^4.12.25
+  js-yaml: ^4.2.0
+  lodash: ^4.18.0
+  lodash-es: ^4.18.0
+  minimatch: ^3.1.3
+  picomatch: ^2.3.2
+  postcss: ^8.5.10
+  qs: ^6.15.2
+  rollup: ^4.59.0
+  uuid: ^11.1.1
+  yaml: ^1.10.3
