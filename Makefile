@@ -6,19 +6,13 @@ COMPOSER_BIN := $(shell command -v composer 2> /dev/null)
 PNPM ?= npx --yes pnpm@10
 
 app_name=richdocuments
-project_dir=$(CURDIR)/../$(app_name)
 doc_files=README.md
 src_dirs=appinfo assets css img js l10n lib templates
 src_files=admin.php settings.php
 all_src=$(src_dirs) $(src_files) $(doc_files)
 build_dir=$(CURDIR)/build
 dist_dir=$(build_dir)/dist
-sign_dir=$(build_dir)/sign
-appstore_dir=$(build_dir)/appstore
-source_dir=$(build_dir)/source
-package_name=$(app_name)
 cert_dir=$(HOME)/.owncloud/certificates
-occ=$(CURDIR)/../core/occ
 
 # composer
 composer_deps=vendor
@@ -26,37 +20,6 @@ acceptance_test_deps=vendor-bin/behat/vendor
 
 # node
 nodejs_deps=node_modules
-
-appstore:
-	mkdir -p $(sign_dir)
-	rsync -a \
-	--exclude=.git \
-	--exclude=.phan \
-	--exclude=build \
-	--exclude=.drone.star \
-	--exclude=.gitignore \
-	--exclude=.php_cs.cache \
-	--exclude=.php_cs.dist \
-	--exclude=.scrutinizer.yml \
-	--exclude=CONTRIBUTING.md \
-	--exclude=composer.json \
-	--exclude=composer.lock \
-	--exclude=l10n/.gitkeep \
-	--exclude=l10n/.tx \
-	--exclude=l10n/no-php \
-	--exclude=Makefile \
-	--exclude=nbproject \
-	--exclude=screenshots \
-	--exclude=phpcs.xml \
-	--exclude=phpstan.neon \
-	--exclude=phpunit*xml \
-	--exclude=tests \
-	--exclude=vendor/bin \
-	--exclude=vendor-bin \
-	$(project_dir) $(sign_dir)
-	@echo "Signing…"
-	$(occ) integrity:sign-app --privateKey=$(cert_dir)/$(app_name).key --certificate=$(cert_dir)/$(app_name).crt --path=$(sign_dir)/$(app_name)
-	tar -czf $(build_dir)/$(app_name).tar.gz -C $(sign_dir) $(app_name)
 
 # signing
 occ=$(CURDIR)/../../occ
@@ -97,7 +60,7 @@ $(nodejs_deps): package.json pnpm-lock.yaml
 #
 # dist
 #
-$(dist_dir)/$(app_name): $(composer_deps) $(bower_deps)
+$(dist_dir)/$(app_name): $(composer_deps)
 	rm -Rf $@; mkdir -p $@
 	cp -R $(all_src) $@
 	rm -Rf $@/l10n/.gitkeep
@@ -124,7 +87,7 @@ clean-build:
 
 .PHONY: clean-deps
 clean-deps:
-	rm -Rf $(nodejs_deps) $(bower_deps)
+	rm -Rf $(nodejs_deps)
 	rm -Rf vendor
 	rm -Rf vendor-bin/**/vendor vendor-bin/**/composer.lock
 
