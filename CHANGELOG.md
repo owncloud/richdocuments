@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
+## [4.2.4] - 2026-09-22
+
+### Security
+
+- [621](https://github.com/owncloud/richdocuments/pull/621) - Only navigate to a validated absolute http(s) return URL when the editor is closed, and restrict the origin WOPI post messages are exchanged with
+
+### Fixed
+
+- [633](https://github.com/owncloud/richdocuments/pull/633) - Restore the pnpm overrides dropped from the lockfile
+- [632](https://github.com/owncloud/richdocuments/pull/632) - Move pnpm settings to pnpm-workspace.yaml, which pnpm 11 and later still read, and reinstate the transitive pins
+- [625](https://github.com/owncloud/richdocuments/pull/625) - Bring the dependency tree to parity with master, closing all 84 advisories
+
+### Changed
+
+- [638](https://github.com/owncloud/richdocuments/pull/638) - Bump the minor-and-patch group with 3 updates
+- [635](https://github.com/owncloud/richdocuments/pull/635) - Drop the appstore make target in favour of dist
+- [630](https://github.com/owncloud/richdocuments/pull/630) - Add a JavaScript unit test harness for the classic frontend
+- [629](https://github.com/owncloud/richdocuments/pull/629) - Bump vue from 3.5.40 to 3.5.42
+- [627](https://github.com/owncloud/richdocuments/pull/627) - Bump bamarni/composer-bin-plugin from 1.8.2 to 1.9.1
+
 ## [4.2.3] - 2026-05-18
 
 ### Security
