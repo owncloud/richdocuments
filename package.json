@@ -24,7 +24,7 @@
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-sinon": "^1.0.4",
     "prettier": "3.9.8",
-    "sinon": "^19.0.5",
+    "sinon": "^22.1.0",
     "typescript": "6.0.3",
     "vite": "^6.4.3",
     "vue": "3.5.43"
