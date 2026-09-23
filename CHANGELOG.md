@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
+## [4.3.1] - 2026-09-22
+
+### Security
+
+- [620](https://github.com/owncloud/richdocuments/pull/620) - Only navigate to a validated absolute http(s) return URL when the editor is closed, and restrict the origin WOPI post messages are exchanged with
+
+### Fixed
+
+- [631](https://github.com/owncloud/richdocuments/pull/631) - Move pnpm settings out of package.json into pnpm-workspace.yaml, which pnpm 11 and later still read, so the transitive pins keep applying
+- [624](https://github.com/owncloud/richdocuments/pull/624) - Regenerate the pnpm lockfile and bump eslint, closing all open dependency alerts
+
+### Changed
+
+- [636](https://github.com/owncloud/richdocuments/pull/636) - Bump the minor-and-patch group with 3 updates
+- [634](https://github.com/owncloud/richdocuments/pull/634) - Drop the appstore make target in favour of dist
+- [628](https://github.com/owncloud/richdocuments/pull/628) - Bump vue from 3.5.40 to 3.5.42
+- [626](https://github.com/owncloud/richdocuments/pull/626) - Give the 4.2 maintenance branch Dependabot coverage
+- [623](https://github.com/owncloud/richdocuments/pull/623) - Add a JavaScript unit test harness for the classic frontend
+- [618](https://github.com/owncloud/richdocuments/pull/618) - Update translations from Transifex
+- [617](https://github.com/owncloud/richdocuments/pull/617) - Scan the distribution tree for known vulnerabilities
+- [616](https://github.com/owncloud/richdocuments/pull/616) - Add a signed release workflow
+- [615](https://github.com/owncloud/richdocuments/pull/615) - Bump prettier from 3.9.5 to 3.9.6
+- [601](https://github.com/owncloud/richdocuments/pull/601) - Community health files: README, AGENTS.md, CODE_OF_CONDUCT, SECURITY and SUPPORT
+
+## [4.3.0] - 2026-07-20
+
+### Added
+
+- [573](https://github.com/owncloud/richdocuments/pull/573) - Support ownCloud 11
+- [579](https://github.com/owncloud/richdocuments/pull/579) - PHP 8 support
+- [586](https://github.com/owncloud/richdocuments/pull/586) - Translation sync workflow
+
+### Security
+
+- [599](https://github.com/owncloud/richdocuments/pull/599) - Fix SSRF in federation endpoint: validate remote server against richdocuments.federation_allowlist system config
+
+### Fixed
+
+- [605](https://github.com/owncloud/richdocuments/pull/605) - Resolve all 78 open Dependabot alerts
+- [574](https://github.com/owncloud/richdocuments/pull/574) - doctrine/dbal 3 compatibility, including deprecation fixes
+- [590](https://github.com/owncloud/richdocuments/pull/590) - Grant contents:read permission for the translation-sync caller
+
+### Changed
+
+- [613](https://github.com/owncloud/richdocuments/pull/613) - Add code-signing challenge for G2 certificate enrollment
+- [592](https://github.com/owncloud/richdocuments/pull/592) - Move acceptance tests to GitHub workflows
+- [588](https://github.com/owncloud/richdocuments/pull/588) - Use the reusable build workflow for make dist
+- [585](https://github.com/owncloud/richdocuments/pull/585) - Add a lint PR title workflow
+- [603](https://github.com/owncloud/richdocuments/pull/603) - Bump behat acceptance test dependencies
+- [604](https://github.com/owncloud/richdocuments/pull/604) - Add CODEOWNERS, managed by owncloud/admin
+- [594](https://github.com/owncloud/richdocuments/pull/594) - Move Dependabot to a weekly Sunday schedule
+- [566](https://github.com/owncloud/richdocuments/pull/566) - Configure Dependabot for Composer and npm
+
+## [4.2.3] - 2026-05-18
+
+### Security
+
+- [599](https://github.com/owncloud/richdocuments/pull/599) - Fix SSRF in federation endpoint: validate remote server against richdocuments.federation_allowlist system config
+
 ## [4.2.2] - 2025-11-19
 
 ### Fixed
