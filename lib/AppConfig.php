@@ -29,6 +29,11 @@ class AppConfig {
 		'zotero' => 'false',
 		'watermark_text' => '',
 		'test_server_groups' => '',
+		'edit_groups' => '',
+		'wopi_url' => '',
+		'test_wopi_url' => '',
+		'doc_format' => '',
+		'menu_option' => '',
 		'canonical_webroot' => '',
 	];
 
