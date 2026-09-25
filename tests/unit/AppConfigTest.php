@@ -50,6 +50,32 @@ class AppConfigTest extends TestCase {
 		$this->assertEquals(true, $enterpriseEdition);
 	}
 
+	public function stringSettingProvider() {
+		return [
+			['edit_groups'],
+			['wopi_url'],
+			['test_wopi_url'],
+			['doc_format'],
+			['menu_option'],
+		];
+	}
+
+	/**
+	 * Settings holding a string must default to an empty string, never to null,
+	 * so that consumers passing them to string functions do not run into the
+	 * PHP 8.1 deprecation of null arguments.
+	 *
+	 * @dataProvider stringSettingProvider
+	 */
+	public function testStringSettingDefaultsToEmptyString($key) {
+		$this->config->expects($this->once())
+			->method('getAppValue')
+			->with('richdocuments', $key, $this->identicalTo(''))
+			->willReturn('');
+
+		$this->assertSame('', $this->appConfig->getAppValue($key));
+	}
+
 	public function enterpriseFeaturesEnabledProvider() {
 		return [
 			[true, 'false', true],
