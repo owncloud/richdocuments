@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
+## [Unreleased]
+
+### Fixed
+
+- [645](https://github.com/owncloud/richdocuments/pull/645) - Give the remaining app config settings an empty-string default, so opening a document no longer logs a PHP deprecation on every open
+
 ## [4.3.1] - 2026-09-22
 
 ### Security
@@ -209,7 +215,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [2.4.0] - 2020-07-30
 
 
-[Unreleased]: https://github.com/owncloud/richdocuments/compare/v4.2.0...master
+[Unreleased]: https://github.com/owncloud/richdocuments/compare/v4.3.1...master
 [4.2.0]: https://github.com/owncloud/richdocuments/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/owncloud/richdocuments/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/owncloud/richdocuments/compare/v3.0.1...v4.0.0
