@@ -216,14 +216,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 
 [Unreleased]: https://github.com/owncloud/richdocuments/compare/v4.3.1...master
+[4.3.1]: https://github.com/owncloud/richdocuments/compare/v4.3.0...v4.3.1
+[4.3.0]: https://github.com/owncloud/richdocuments/compare/v4.2.2...v4.3.0
+[4.2.3]: https://github.com/owncloud/richdocuments/compare/v4.2.2...v4.2.3
+[4.2.2]: https://github.com/owncloud/richdocuments/compare/v4.2.1...v4.2.2
+[4.2.1]: https://github.com/owncloud/richdocuments/compare/v4.2.0...v4.2.1
 [4.2.0]: https://github.com/owncloud/richdocuments/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/owncloud/richdocuments/compare/v4.0.0...v4.1.0
-[4.0.0]: https://github.com/owncloud/richdocuments/compare/v3.0.1...v4.0.0
-[3.0.1]: https://github.com/owncloud/richdocuments/compare/v3.0.0...v3.0.1
+[4.0.0]: https://github.com/owncloud/richdocuments/compare/v3.0.0...v4.0.0
 [3.0.0]: https://github.com/owncloud/richdocuments/compare/v2.7.0...v3.0.0
 [2.7.0]: https://github.com/owncloud/richdocuments/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/owncloud/richdocuments/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/owncloud/richdocuments/compare/v2.4.1...v2.5.0
 [2.4.1]: https://github.com/owncloud/richdocuments/compare/v2.4.0...v2.4.1
-[2.4.0]: https://github.com/owncloud/richdocuments/compare/v2.2.0...v2.4.0
+[2.4.0]: https://github.com/owncloud/richdocuments/releases/tag/v2.4.0
 
