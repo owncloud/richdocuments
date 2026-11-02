@@ -7,9 +7,31 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [4.3.2] - 2026-11-02
+
 ### Fixed
 
 - [645](https://github.com/owncloud/richdocuments/pull/645) - Give the remaining app config settings an empty-string default, so opening a document no longer logs a PHP deprecation on every open
+
+### Changed
+
+- [669](https://github.com/owncloud/richdocuments/pull/669) - Bump vite from 6.4.4 to 6.4.5
+- [668](https://github.com/owncloud/richdocuments/pull/668) - Bump qs from 6.16.0 to 6.17.1
+- [667](https://github.com/owncloud/richdocuments/pull/667) - Bump follow-redirects from 1.16.1 to 1.16.2
+- [666](https://github.com/owncloud/richdocuments/pull/666) - Remove roave/security-advisories
+- [665](https://github.com/owncloud/richdocuments/pull/665) - Update translations from Transifex
+- [664](https://github.com/owncloud/richdocuments/pull/664) - Add a zizmor workflow audit
+- [663](https://github.com/owncloud/richdocuments/pull/663) - Bump undici from 7.29.1 to 7.30.1
+- [661](https://github.com/owncloud/richdocuments/pull/661) - Bump the minor-and-patch group with 4 updates
+- [660](https://github.com/owncloud/richdocuments/pull/660) - Bump vite from 6.4.3 to 6.4.4
+- [659](https://github.com/owncloud/richdocuments/pull/659) - Bump follow-redirects from 1.16.0 to 1.16.1
+- [657](https://github.com/owncloud/richdocuments/pull/657) - Bump the minor-and-patch group with 3 updates
+- [656](https://github.com/owncloud/richdocuments/pull/656) - Set a Dependabot cooldown for github-actions
+- [655](https://github.com/owncloud/richdocuments/pull/655) - Bump source-map-js from 1.2.1 to 1.2.2
+- [651](https://github.com/owncloud/richdocuments/pull/651) - Bump @types/node from 26.6.3 to 26.6.4
+- [649](https://github.com/owncloud/richdocuments/pull/649) - Bump @types/node from 26.6.2 to 26.6.3
+- [647](https://github.com/owncloud/richdocuments/pull/647) - Bump the minor-and-patch group with 2 updates
+- [646](https://github.com/owncloud/richdocuments/pull/646) - Repair the changelog compare links
 
 ## [4.3.1] - 2026-09-22
 
@@ -215,7 +237,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [2.4.0] - 2020-07-30
 
 
-[Unreleased]: https://github.com/owncloud/richdocuments/compare/v4.3.1...master
+[Unreleased]: https://github.com/owncloud/richdocuments/compare/v4.3.2...master
+[4.3.2]: https://github.com/owncloud/richdocuments/compare/v4.3.1...v4.3.2
 [4.3.1]: https://github.com/owncloud/richdocuments/compare/v4.3.0...v4.3.1
 [4.3.0]: https://github.com/owncloud/richdocuments/compare/v4.2.3...v4.3.0
 [4.2.3]: https://github.com/owncloud/richdocuments/compare/v4.2.2...v4.2.3
