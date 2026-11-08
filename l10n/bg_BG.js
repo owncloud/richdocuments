@@ -1,7 +1,7 @@
 OC.L10N.register(
     "richdocuments",
     {
-    "Failed to load the document, please contact your administrator." : "Неуспешно зареждане на документа, моля, свържете се с вашия администратор.",
+    "Failed to load the document, please contact your administrator." : "Неуспешно зареждане на документа, моля свържете се с вашия администратор.",
     "Failed to load documents." : "Неуспешно зареждане на документите.",
     "No documents were found. Upload or create a document to get started!" : "Не бяха намерени никакви документи. Качете или създайте документ, за да започнете!",
     " File uploaded successfully" : "Качването на файла е успешно",
