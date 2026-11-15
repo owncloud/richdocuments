@@ -5,7 +5,7 @@ OC.L10N.register(
     "Failed to load documents." : "Неуспешно зареждане на документите.",
     "No documents were found. Upload or create a document to get started!" : "Не бяха намерени никакви документи. Качете или създайте документ, за да започнете!",
     " File uploaded successfully" : "Качването на файла е успешно",
-    " File upload failed" : "Качването на файл е неуспешно",
+    " File upload failed" : "Качването на файла е неуспешно",
     "Latest revision" : "Последна редакция",
     "Just now" : "Точно сега",
     "Cannot load document revisions" : "Неуспешно зареждане на ревизиите на документа",
